@@ -1,0 +1,16 @@
+<sect1 id="zend.xmlrpc.introduction">
+    <title>Inleiding</title>
+    <para>
+        Inleiding
+    </para>
+
+    <example>
+        <title>Voorbeeld</title>
+        <programlisting role="php"><![CDATA[
+Source Code
+]]>   </programlisting>
+    </example>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

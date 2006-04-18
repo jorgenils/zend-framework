@@ -1,0 +1,35 @@
+<sect1 id="zend.mime.introduction">
+    <title>Inleiding</title>
+    <para>
+        <code>Zend_Mime</code> is een hulpklasse voor het afhandelen van multipart MIME berichten. Ze wordt gebruikt
+		door <link linkend="zend.mail"><code>Zend_Mail</code></link>, en kan gebruilt worden door toepassingen die 
+		MIME ondersteuning nodig hebben.
+    </para>
+    <para>
+        <code>Zend_Mime</code> verstrekt een set eenvoudige methodes om met MIME te werken:
+        <itemizedlist>
+            <listitem>
+                <code>boundary()</code>: Geeft de MIME boundary string terug.
+            </listitem>
+            <listitem>
+                <code>boundaryLine()</code>: Geeft de gehele MIME boundary regel terug.
+            </listitem>
+            <listitem>
+                <code>encodeBase64()</code>: Encodeerd een string met base64.
+            </listitem>
+            <listitem>
+                <code>encodeQuotedPrintable()</code>: Encodeert een string met het quoted-printable mechanisme.
+            </listitem>
+            <listitem>
+                <code>isPrintable()</code>: Geeft TRUE terug indien de gegeven string geen onafdrukbare tekens bevat, 
+				anders FALSE.
+            </listitem>
+            <listitem>
+                <code>mimeEnd()</code>: Geeft de gehele MIME einde boundary line terug.
+            </listitem>
+        </itemizedlist>
+    </para>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

@@ -1,0 +1,23 @@
+Priority 1 :
+
+- end of unit tests :
+	=> Frontends are missing
+	
+- bug fixes :)
+
+- end of Sqlite backend
+
+- "Page" frontend (sort of "jpcache")
+	=> to cache a whole page
+	=> automatic cache id
+	=> "HTTP not modified" header
+	[...] (Mislav is working on this)
+
+- work on the logging feature (which is not terminated)
+
+- EXAMPLES.txt file
+
+
+Priority 2 :
+
+- complete documentation (zend format)

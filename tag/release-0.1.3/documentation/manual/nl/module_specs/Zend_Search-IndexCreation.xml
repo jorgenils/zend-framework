@@ -1,0 +1,101 @@
+<sect1 id="zend.search.index-creation">
+	<title>Indexen Bouwen</title>
+
+	<sect2 id="zend.search.index-creation.creating">
+        <title>Een Nieuwe Index Maken</title>
+
+        <para>
+		    De mogelijkheid om nieuwe indexen te maken en ze up te daten is geïmplementeerd in de Zend_Search_Lucene 
+			module en Java Lucene.
+            Je kan beide mogelijkheden gebruiken.
+        </para>
+
+        <para>
+			De volgende PHP code listing geeft een voorbeeld van hoe een bestand
+			kan worden geïndexeerd door de Zend_Search_Lucene indexing API te gebruiken:
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+// Het tweede argument naar TRUE zetten maakt een nieuwe index
+$index = new Zend_Search_Lucene('/data/mijn-index', true);
+
+$doc = new Zend_Search_Lucene_Document();
+
+// Het dokument URL opslaan om het in het zoekresultaat te identifiëren.
+$doc->addField(Zend_Search_Lucene_Field::Text('url', $docUrl));
+
+// Dokumentinhoud indexeren
+$doc->addField(Zend_Search_Lucene_Field::UnStored('inhoud', $docContent));
+
+// Een dokument aan de index toevoegen.
+$index->addDocument($doc);
+
+// De veranderingen naar de index schrijven.
+$index->commit();
+?>]]></programlisting>
+
+        <para>
+		    Nieuw toegevoegde dokumenten kunnen na de commit operatie van de index worden
+			bekomen.
+        </para>
+        <para>
+            <code>Zend_Search_Lucene::commit()</code> wordt automatisch opgeroepen een het einde
+			van de script uitvoering en vòòr elke zoekopdracht.
+        </para>
+        <para>
+			Elke oproep van commit() genereert een nieuw index segment. Het moet dus zo weinig als
+			mogelijk worden opgeroepen. Aan de andere kant is het commiten van grote hoeveelheden
+			dokumenten een enkele stap heel geheugengulzig.
+        </para>
+        <para>
+		    Automatisch segment management optimizatie is onderdeel van de toekomstige Zend_Search_Lucene 
+			verbeteringen.
+        </para>
+    </sect2>
+
+    <sect2 id="zend.search.index-creation.updating">
+        <title>Index Updaten</title>
+
+        <para>
+			Dezelfde procedure wordt gebruikt om een bestaande index up te daten. Het enige verschil is dat de index
+			zou moeten worden geopend zonder tweede parameter:
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+// Een bestaande index openen
+$index = new Zend_Search_Lucene('/data/mijn-index');
+
+$doc = new Zend_Search_Lucene_Document();
+
+// Het dokument URL opslaan om het in het zoekresultaat te identifiëren.
+$doc->addField(Zend_Search_Lucene_Field::Text('url', $docUrl));
+
+// Dokumentinhoud indexeren
+$doc->addField(Zend_Search_Lucene_Field::UnStored('inhoud', $docContent));
+
+// Een dokument aan de index toevoegen.
+$index->addDocument($doc);
+
+// De veranderingen naar de index schrijven.
+$index->commit();
+?>]]></programlisting>
+
+        <para>
+			Elke oproep (impliciet of expliciet) aan commit() genereert een nieuw index segment.
+        </para>
+        <para>
+			Zend_Search_Lucene managed segmenten niet automatisch. Je moet dus rekening houden met segmentgroottes.
+			Een grrot segment is meer optimaal, maar heeft meer gehuegen nodig tijdens zijn kreatie.
+        </para>
+        <para>
+			Lucene Java en Luke (Lucene Index Toolbox - <ulink url="http://www.getopt.org/luke/">http://www.getopt.org/luke/</ulink>)
+			kunnen worden geruikt om indexes te optimizeren met deze versie van Zend_Search_Lucene.
+        </para>
+    </sect2>
+</sect1>
+
+<!--
+vim:se ts=4 sw=4 et:
+-->
