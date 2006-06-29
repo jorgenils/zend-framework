@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sect1 id="zend.service.flickr">
+  <title>Zend_Service_Flickr</title>
+
+  <sect2 id="zend.service.flickr.introduction">
+    <title>Introdução às Pesquisas Flickr</title>
+
+    <para><code>Zend_Service_Flickr</code> é uma simples API para usar o
+    Flickr REST Web Service. Para poder usar os Flickr web services, você deve
+    possuir uma API key. Para obter uma chave e maiores informações sobre o
+    Flickr REST Web Service, visite a <ulink
+    url="http://www.flickr.com/services/api/">Flickr API
+    Documentation</ulink>.</para>
+
+    <para>No exemplo seguinte, nós usamos o método <code>tagSearch()</code>
+    para pesquisar por fotos que tenham o valor "php" nas tags.</para>
+
+    <example>
+      <title>Simples pesquisa por fotos Flickr</title>
+
+      <programlisting role="php">&lt;?php
+require_once 'Zend/Service/Flickr.php';
+
+$flickr = new Zend_Service_Flickr('MY_API_KEY');
+
+$results = $flickr-&gt;tagSearch("php");
+
+foreach ($results as $result) {
+    echo $result-&gt;title . '&lt;br /&gt;';
+}
+?&gt;       </programlisting>
+    </example>
+
+    <note>
+       
+
+      <code>tagSearch()</code>
+
+       aceita um array de opções como segundo parâmetro opcional. 
+    </note>
+  </sect2>
+
+  <sect2 id="zend.service.flickr.finding-users">
+    <title>Localizando Usuários Flickr</title>
+
+    <para><code>Zend_Service_Flickr</code> fornece três caminhos variados para
+    obter informações sobre usuários Flickr:</para>
+
+    <itemizedlist>
+      <listitem>
+         
+
+        <code>userSearch()</code>
+
+        : Aceita uma string de busca com tags delimitadas por espaços e um array de opções como segundo parâmetro opcional, retornando um objeto 
+
+        <code>Zend_Service_Flickr_ResultSet</code>
+
+        . 
+      </listitem>
+
+      <listitem>
+         
+
+        <code>getIdByUsername()</code>
+
+        : Retorna um user ID associado ao nome de usuário informado. 
+      </listitem>
+
+      <listitem>
+         
+
+        <code>getIdByEmail()</code>
+
+        : Retorna um user ID associado ao endereço de email informado. 
+      </listitem>
+    </itemizedlist>
+
+    <example>
+      <title>Localizando um usuário Flickr pelo endereço de E-Mail </title>
+
+      <para>Neste exemplo, nós temos um endereço de email de um usuário do
+      Flickr, e usamos o método <code>userSearch()</code> para recuperar
+      informações do usuário:</para>
+
+      <programlisting role="php">&lt;?php
+require_once 'Zend/Service/Flickr.php';
+
+$flickr = new Zend_Service_Flickr('MY_API_KEY');
+
+$results = $flickr-&gt;userSearch($userEmail);
+
+foreach ($results as $result) {
+    echo $result-&gt;title . '&lt;br /&gt;';
+}
+?&gt;       </programlisting>
+    </example>
+  </sect2>
+
+  <sect2 id="zend.service.flickr.getimagedetails">
+     
+
+    <title>Recuperando Detalhes de Imagens Flickr Image Details</title>
+
+     
+
+    <code>Zend_Service_Flickr</code>
+
+     torna fácil e rápida a recuperação de detalhes de imagens baseada em um dado "image ID". Basta usar o método 
+
+    <code>getImageDetails()</code>
+
+    , como mostrado no exemplo seguinte: 
+
+    <example>
+      <title>Recuperando Flickr Image Details</title>
+
+      <para>Desde que você conheça o Flickr image ID, recuperar informações
+      sobre a imagem é tarefa simples:</para>
+
+      <programlisting role="php">&lt;?php
+require_once 'Zend/Service/Flickr.php';
+
+$flickr = new Zend_Service_Flickr('MY_API_KEY');
+
+$image = $flickr-&gt;getImageDetails($imageId);
+
+echo "Image ID $imageId is $image-&gt;width x $image-&gt;height pixels.&lt;br /&gt;\n";
+echo "&lt;a href=\"$image-&gt;clickUri\"&gt;Click for Image&lt;/a&gt;\n";
+?&gt;       </programlisting>
+    </example>
+
+     
+  </sect2>
+
+      &module_specs.Zend_Service_Flickr_Classes;
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
