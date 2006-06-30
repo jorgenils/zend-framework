@@ -1,0 +1,180 @@
+<sect1 id="zend.controller.getting-started">
+	<title>Erste Schritte</title>
+	
+	<sect2 id="zend.controller.getting-started.introduction">
+		<title>Einführung</title>
+		<para>
+			Das <code>Zend_Controller</code> System wurde im Sinne der Erweiterungsmöglichkeiten 
+			entwickelt, entweder durch Erstellen von Subklassen, welche die bestehenden Klassen 
+			erweitern, oder durch Erstellen neuer Klassen, welche die Interfaces 
+			<code>Zend_Controller_Router_Interface</code> und 
+			<code>Zend_Controller_Dispatcher_Interface</code> implementieren.
+		</para>
+	</sect2>
+	
+	<sect2 id="zend.controller.getting-started.server-configuration">
+		<title>Server Konfiguration</title>
+		<para>
+			Zend_Controller wurde entwickelt, um moderne Website mit sauberen URIs (wenige oder gar
+			keine Abfrage Parameter) zu unterstützen. Deshalb benötigt die vorgeschlagene 
+			Konfiguration für den Webserver eine Unterstützung in Form von URI Rewriting, um alle 
+			Anfragen auf eine einzelne Datei ("index.php") umzuleiten, die lediglich 
+			<code>Zend_Controller_Front</code> lädt. Auf dem Apache Webserver wird dies durch das 
+			optionale Modul mod_rewrite erledigt.
+		</para>
+
+		<para>
+            Der erste Schritt beim Konfigurieren des Servers ist, mod_rewrite erfolgreich zu 
+            installieren und zu aktivieren. Der nächste Schritt ist das Anlegen zweier Dateien 
+            im Hauptverzeichnis: .htaccess und index.php. Die .htaccess Datei wird von Apache 
+            verwendet und muss eine Regel für mod_rewrite enthalten, um alle Anfragen auf die 
+            index.php Datei umzuleiten. Für Entwicklungszwecke ist es oft am einfachsten, eine 
+            Regel für mod_rewrite zu schreiben, welche alle Anfragen auf index.php umleitet mit 
+            Ausnahme von bestimmten Dateiendungen. Hier ist ein Beispiel einer solchen Datei:
+
+			<programlisting role="php"><![CDATA[
+RewriteEngine on
+RewriteRule !\.(js|ico|gif|jpg|png|css)$ index.php
+]]></programlisting>
+
+			Im obigen Beispiel werden alle Anfragen, die keine der genannten Dateiendungen 
+			enthalten, an index.php weitergeleitet. Dies ist nützlich für die Entwicklung, 
+			allerdings sollten diese Regeln in der Produktionsumgebung so geändert werden, dass 
+			stattdessen Verzeichnise ausgeschlossen werden. 
+		</para>
+	</sect2>
+	
+	<sect2 id="zend.controller.getting-started.bootstrap">
+		<title>Ladedatei</title>
+		
+		<para>
+		    Nach dem Aufsetzen der .htaccess Datei wird eine neue Datei mit Namen 
+		    <code>index.php</code> erstellt. Dies ist eine Ladedatei (englisch bootstrap file).
+		    Der Zweck der index.php Datei ist nur, Zend_Controller_Front zu laden, dessen Datei
+		    idealerweise außerhalb des Hauptverzeichnisses liegt.
+		</para>
+
+		<note>	
+			Die Ladedatei sollte die einzige PHP Datei sein, die im Hauptverzeichnis abgelegt ist.
+		</note>
+
+		<para>
+		    Aus Sicherheitsgründen empfiehlt Zend sehr stark, keine PHP Dateien in Verzeichnissen
+		    abzulegen, die vom Webserver aus erreichbar sind (solche, die unterhalb des 
+		    Hauptverzeichnis liegen). Während dies nicht in jeder Umgebung möglich ist, z.B. beim
+		    Shared Hosting, sollte dies als optimales Verfahren (best practice) betrachtet und 
+		    befolgt werden, wenn immer es möglich ist. 
+		</para>
+
+		<para>
+		    Erstelle eine Ladedatei <code>index.php</code> im Hauptverzeichnis, um 
+		    Zend_Controller_Front zu laden:
+
+			<programlisting role="php"><![CDATA[<?php
+				
+require_once 'Zend/Controller/Front.php';
+
+Zend_Controller_Front::run('/path/to/your/controllers');
+
+?>]]></programlisting>
+
+			Siehe den nächsten Abschnitt bezüglich der Pfadangaben <code>/path/to/your/controllers</code>.
+            
+            Wie in der <code>README.txt</code> Datei angewiesen, sollte das Verzeichnis der Zend 
+            Framework Bibliothek im <code>include_path</code> enthalten sein. Wenn dies nicht in 
+            der <code>php.ini</code> Datei gesetzt wird, kann in der <code>index.php</code> Datei 
+            die Funktion <code>set_include_path()</code> vor der Anweisung <code>require_once()</code> 
+            aufgerufen werden. 
+		</para>
+
+		<note>
+		    Zur Zeit werden Lösungen untersucht, die keine Installation von mod_rewrite erfordern.
+		    Wir beabsichtigen, eine Konfiguration für System mit und ohne mod_rewrite Möglichkeiten 
+		    vorzuschlagen. Außerdem beachte bitte, dass das System nicht speziell an Apache oder 
+		    mod_rewrite gebunden ist. Jeder Webserver mit ähnlichen Umleitungsmöglichkeiten sollte
+		    ausreichen.
+		</note>
+	</sect2>	
+		
+	<sect2 id="zend.controller.getting-started.directory-structure">
+		<title>Verzeichnisstruktur</title>
+		
+		<para>
+		    Für Websites, die auf dem Zend Framework aufsetzen, wird die Verwendung einer gemeinsamen 
+		    Verzeichnisstruktur empfohlen. Während dies nicht in jedem Fall möglich ist, sollte es
+		    in vielen, vielleicht in den meisten Fällen so sein. Die Entscheidung, diese 
+		    Struktur zu übernehmen, macht deinen Code für jemanden leichter verständlich, der mit 
+		    den Konventionen des Zend Frameworks vertraut ist.  
+		</para>
+		
+		<para>
+		    Die vorgeschlagene Verzeichnisstruktur besteht aus dem Verzeichnis für Bibliotheken
+		    (von Zend oder anderen) und dem Verzeichnis für die Applikation. 
+
+			<programlisting role="php"><![CDATA[
+/application
+  /models
+  /views
+  /controllers
+/document_root
+  /images
+  /styles
+  .htaccess
+  index.php
+/library
+  /Zend
+]]></programlisting>
+		</para>
+		
+		<note>
+		    Dieser Abschnitt ist noch nicht fertig. Er ist in Bearbeitung und unterliegt laufenden 
+		    Änderungen.
+		</note>
+	</sect2>	
+		
+	<sect2 id="zend.controller.overview.indexcontroller">
+		<title>IndexController</title>
+
+		<para>
+		    Jede Website muss einen Controller mit Namen <code>IndexController</code> definieren.
+		    Dies ist der Controller, der aufgerufen wird, wenn kein Controller in der URI 
+		    angegeben ist, wie z.B. in dieser URI:
+
+			<programlisting role="php"><![CDATA[
+http://framework.zend.com/
+]]></programlisting>
+		</para>
+
+		<para>
+		    Die <code>IndexController</code> Klasse muss in einer Datei mit dem Namen 
+		    <code>IndexController.php</code> abgelegt werden und diese Datei muss im Controller
+		    Verzeichnis abgelegt werden. Der <code>IndexController</code> muss 
+		    <code>Zend_Controller_Action</code> erweitern. Hier ist ein Beispiel für einen 
+		    <code>IndexController</code>:
+
+			<programlisting role="php"><![CDATA[<?php
+				
+require_once 'Zend/Controller/Action.php';
+
+class IndexController extends Zend_Controller_Action 
+{
+	public function indexAction()
+	{
+		echo 'Hello from IndexController';
+	}
+
+	public function noRouteAction()
+	{
+		$this->_redirect('/');
+	}
+}
+
+?>]]></programlisting>
+			
+			<note>
+		    Dieser Abschnitt ist noch nicht fertig. Er ist in Bearbeitung und unterliegt laufenden 
+		    Änderungen.
+			</note>			
+		</para>
+	</sect2>			
+</sect1>

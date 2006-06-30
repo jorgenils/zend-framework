@@ -1,0 +1,96 @@
+<sect1 id="zend.service.flickr">
+    <title>Zend_Service_Flickr</title>
+    <sect2 id="zend.service.flickr.introduction">
+        <title>Introduction à la recherche sur Flickr</title>
+        <para>
+            <code>Zend_Service_Flickr</code> est une API simple pour utiliser le service Wev REST de Flick. Pour 
+            pouvoir utiliser lew services Web Flickr, vous devez avoir une clé d'utilisation de l'API. Pour obtenir
+            une telle clé, et pour plus d'information sur le service Web REST de Flickr, veuillez vous référrez à la
+            <ulink url="http://www.flickr.com/services/api/">documentation de l'API Flickr</ulink>.            
+        </para>
+        <para>
+            Dans l'exemple suivant, nous allons utiliser la méthode <code>tagSearch()</code> pour rechercher des photos
+            ayant &quot;php&quot; dans les tags.
+        </para>
+        <example>
+            <title>Simple recherche de photos sur Flickr</title>
+            <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Service/Flickr.php';
+
+$flickr = new Zend_Service_Flickr('MA_CLE_API');
+
+$results = $flickr->tagSearch("php");
+
+foreach ($results as $result) {
+    echo $result->title . '<br />';
+}
+?>]]>       </programlisting>
+        </example>
+        <note>
+            <code>tagSearch()</code> accepte un tableau d'options comme second paramètre optionnel.
+        </note>
+    </sect2>
+    <sect2 id="zend.service.flickr.finding-users">
+        <title>Trouver des utilisateurs Flickr</title>
+        <para>
+            <code>Zend_Service_Flickr</code>fournit 3 façons différentes de récupérer des informations sur les 
+            utilisateurs.
+        </para>
+        <itemizedlist>
+            <listitem>
+                <code>userSearch()</code>: Accepte une chaîne de caractère de balise délimitée par des espaces, et
+                un tableau d'options en second paramère optionnel. Elle retourne un objet <code>Zend_Service_Flickr_ResultSet</code>.
+            </listitem>
+            <listitem>
+                <code>getIdByUsername()</code>: Retourne l'identifiant utilisateur, correspondant à son nom d'utilisateur.
+            </listitem>
+            <listitem>
+                <code>getIdByEmail()</code>: Retourne l'identifiant utilisateur correspondant à l'adresse email donnée.
+            </listitem>
+        </itemizedlist>
+        <example>
+            <title>Trouver un utilisateur Flickr par son adresse email</title>
+            <para>
+                Dans cet exemple, nous havons une adresse email d'un utilisateur Flickr, et nous récupérons ses informations
+                utilisateurs en utilisant la méthode <code>userSearch()</code> :
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Service/Flickr.php';
+
+$flickr = new Zend_Service_Flickr('MA_CLE_API');
+
+$results = $flickr->userSearch($userEmail);
+
+foreach ($results as $result) {
+    echo $result->title . '<br />';
+}
+?>]]>       </programlisting>
+        </example>
+    </sect2>
+    <sect2 id="zend.service.flickr.getimagedetails">
+        <title>Récupérer les détails d'une image</title>
+        <code>Zend_Service_Flickr</code> permet de récupérer facilement et rapidement, les détails d'une image 
+        grâce à son ID. Utilisez simplement la méthode <code>getImageDetails()</code>, comme dans l'exemple suivant :
+        <example>
+            <title>Récupérer les détails d'une image</title>
+            <para>
+                Une fois que vous avez l'identifiant de l'image Flickr, il est simple de retrouver les informations
+                qui lui sont associées :
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Service/Flickr.php';
+
+$flickr = new Zend_Service_Flickr('MA_CLE_API');
+
+$image = $flickr->getImageDetails($imageId);
+
+echo "ID de l'image : $imageId, taille : $image->width x $image->height pixels.<br />\n";
+echo "<a href=\"$image->clickUri\">Clicker pour l'image</a>\n";
+?>]]>       </programlisting>
+        </example>
+    </sect2>
+    &module_specs.Zend_Service_Flickr_Classes;
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
