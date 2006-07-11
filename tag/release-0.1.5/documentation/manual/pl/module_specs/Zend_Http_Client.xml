@@ -1,0 +1,166 @@
+<sect1 id="zend.http.client">
+    <title>Zend_Http_Client</title>
+
+    <sect2 id="zend.http.client.introduction">
+        <title>Wprowadzenie</title>
+        <para>
+            <code>Zend_Http_Client</code> dostarcza prosty interfejs, za pomocą
+            ktorego można wykonywać żądania HTTP. <code>Zend_Http_Client</code> 
+            może wykonywać żądania GET, POST, PUT oraz DELETE.
+        </para>
+        <note>
+            <code>Zend_Http_Client</code> domyślnie podąża za 5 przekierowaniami
+            HTTP. Aby zmienić te zachowanie, przekaż maksymalną ilość dozwolonych
+            przekierowań jako parametr do metody <code>get()</code>.
+        </note>
+        <para>
+            <example>
+                <title>Wykonanie prostego żądania GET</title>
+                <programlisting role="php"><![CDATA[<?php
+    require_once 'Zend/Http/Client.php';
+    try {
+        $http = new Zend_Http_Client('http://example.org');
+        $response = $http->get();
+        if ($response->isSuccessful()) {
+            echo $response->getBody();
+        } else {
+            echo '<p>Wystąpił błąd</p>';
+        }
+    } catch (Zend_Http_Client_Exception $e) {
+        echo '<p>Wystąpił błąd (' .$e->getMessage(). ')</p>';
+    }
+    ?>]]></programlisting>
+            </example>
+        </para>
+    </sect2>
+    <sect2 id="zend.http.client.basic-get-requests">
+        <title>Proste żądanie GET z określonymi nagłówkami HTTP</title>
+        <para>
+            Konstruktor <code>Zend_Http_Client</code> tworzy instancję <code>Zend_Http_Client</code> 
+            służącą do wysyłania żądań HTTP.
+        </para>
+        <para>
+            Kiedy używamy <code>Zend_Http_Client</code> na pojedynczym adresie URL, 
+            w większości przypadków można przekazać adres URL i odpowiednie nagłówki 
+            do <emphasis>konstruktora</emphasis>, jak w poniższym przykładzie:
+        </para>
+        <example>
+            <title>Tworzenie prostego klienta Zend_Http_Client</title>
+            <programlisting role="php"><![CDATA[<?php
+    require_once 'Zend/Http/Client.php';
+
+    // Określamy adres URL oraz pojedynczy nagłówek
+    $http = new Zend_Http_Client('http://example.org', 'Accept: text/html');
+    ?>]]>       </programlisting>
+        </example>
+        <para />
+        <example>
+            <title>Wysyłanie wielu nagłówków</title>
+            <programlisting role="php"><![CDATA[<?php
+    require_once 'Zend/Http/Client.php';
+
+    // Określamy adres URL oraz nagłówki
+    $http = new Zend_Http_Client('http://example.org',
+                            array('Accept: text/html', 'Accept-Language: en-us,en;q=0.5'));
+    ?>]]>       </programlisting>
+        </example>
+        <para>
+            Jeśli chcesz użyć <code>Zend_Http_Client</code> aby wysyłać żądania 
+            do <emphasis>wielu</emphasis> adresów URL, zobacz
+            <xref linkend="zend.http.client.requesting-multiple-domains" />
+        </para>
+    </sect2>
+    <sect2 id="zend.http.client.requesting-multiple-domains">
+        <title>Żądania do wielu domen</title>
+        <para>
+            <code>Zend_Http_Client</code> umożliwia wykonywanie żądań do wielu
+            domen przez ustawianie adresu URL za pomocą metody 
+            <code>Zend_Http_Client::setUri()</code>.
+        </para>
+        <note>
+            <para>Można to wykorzystać na przykład wtedy, gdy chcemy wykonać
+            żądania do wielu kanałów RSS.</para>
+        </note>
+        <example>
+            <title>Wykonywanie żądań do wielu domen</title>
+            <programlisting role="php"><![CDATA[<?php
+    require_once 'Zend/Http/Client.php';
+
+    // Tworzymy instancję klienta HTTP
+    $http = new Zend_Http_Client();
+
+    // Ustawiamy adres URI na główny kanał RSS serwisu Slashdot
+    $http->setUri('http://rss.slashdot.org/Slashdot/slashdot');
+
+    // Odbieramy RSS
+    $slashdot = $http->get();
+
+    // Ustawiamy adres na kanał RSS serwisu BBC
+    $http->setUri('http://newsrss.bbc.co.uk/rss/newsonline_world_edition/technology/rss.xml');
+
+    // Odbieramy RSS
+    $bbc = $http->get();
+    ?>]]>   </programlisting>
+        </example>
+    </sect2>
+    <sect2 id="zend.http.client.settimeout">
+        <title>Zmiana timeoutu HTTP</title>
+        <para>
+            Metoda <code>Zend_Http_Client::setTimeout()</code> pozwala na zmianę 
+            wartości timeoutu dla połączeń HTTP w sekundach.
+        </para>
+        <note>
+            <para>Domyślny timeout to 10 sekund.</para>
+        </note>
+    </sect2>
+    <sect2 id="zend.http.client.setheaders">
+        <title>Dynamiczne ustawianie nagłówków HTTP</title>
+        <para>
+            Używając metody <code>Zend_Http_Client::setHeaders()</code> możesz 
+            przekazać <emphasis>tablicę</emphasis> nagłówków.
+        </para>
+        <important>
+            <para>
+                Nagłówki muszą mieć taki format:
+                <option><code>Nagłówek: wartość</code></option>
+            </para>
+        </important>
+    </sect2>
+    <sect2 id="zend.http.client.making-other-requests">
+        <title>Wykonywanie żądań HTTP POST, PUT, oraz DELETE</title>
+        <para>
+            Wykonywanie żądań HTTP POST, PUT, oraz DELETE jest obsługiwane przez <code>Zend_Http_Client</code> 
+            za pomocą trzech metod: <code>post()</code>, <code>put()</code>, oraz <code>delete()</code>. Metody
+            <code>post()</code> oraz <code>put()</code> przyjmują pojedynczy parametr, <code>$data</code>,
+            w którym powinien być umieszczony łańcuch znaków zawierający odpowiednio zakodowane dane:
+            <emphasis><code>nazwa=wartosc&amp;foo=bar</code></emphasis>. Metoda <code>delete()</code> nie
+            przyjmuje żadnych parametrów.
+        </para>
+        <example>
+            <title>Wysyłanie danych POST za pomocą Zend_Http_Client</title>
+            <programlisting role="php"><![CDATA[<?php
+    require_once 'Zend/Http/Client.php';
+
+    // Tworzymy instancję klienta HTTP
+    $http = new Zend_Http_Client();
+
+    // Ustawiamy adres URI
+    $http->setUri('http://example.org/post/processor');
+
+    // Zapisujemy określone wartości zmiennych GET jako dane HTTP POST
+    $postData = 'foo=' . urlencode($_GET['foo']) . '&bar=' . urlencode($_GET['bar']);
+
+    // Wykonujemy żądanie HTTP POST i zapisujemy odpowiedź
+    $httpResponse = $http->post($postData);
+    ?>]]>   </programlisting>
+            <para>
+                 Wykonywanie żądań PUT wygląda tak samo jak powyższy przykład 
+                 wykonywania żądań POST; jedyną różnicą jest wywołanie metody 
+                <code>put()</code> zamiast <code>post()</code>.
+            </para>
+        </example>
+    </sect2>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

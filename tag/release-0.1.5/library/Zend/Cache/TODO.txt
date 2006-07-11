@@ -1,0 +1,12 @@
+Priority 1 :
+
+- end of "Page" frontend (clone of "jpcache")
+	=> introduce conditionnal HTTP requests (304 Not Modified...)
+
+
+Priority 2 :
+
+- unit testing for Page, frontend and APC/Memcached backend (seems to be difficult)
+- an integrated cache for Zend_Controler ?
+- an integrated cache for Zend XMLRPC ?
+- improve logging feature with debug support (only warnings are implemented now)
