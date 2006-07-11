@@ -1,0 +1,70 @@
+<sect1 id="zend.json.introduction">
+    <title>Introdução</title>
+    <para>
+        <code>Zend_Json</code> provê métodos convenientes para serialiazação 
+		do PHP nativo para JSON e a descodificação JSON para PHP nativo. Para mais 
+		informações sobre JSON, <ulink url="http://www.json.org/">visite o site do 
+		projeto JSON</ulink>.
+    </para>
+    <para>
+        JSON, notação do objeto javascript, pode ser usado para o intercâmbio de 
+		dados leves entre o javascript e outras linguagens. Desde que o JSON pode
+		ser diretamente executada em Javascript, é um formato ideal para usar com 
+		interfaces Web 2.0; é uma alternativa mais simples do que usar XML para 
+		relações com AJAX.
+    </para>
+</sect1>
+
+<sect1 id="zend.json.basics">
+    <title>Uso básico</title>
+    <para>
+		O uso do <code>Zend_Json</code> envolve usar os dois métodos públicos 
+		estáticos disponíveis: <code>Zend_Json::encode()</code> e
+        <code>Zend_Json::decode()</code>.
+        <programlisting role="php"><![CDATA[<?php
+// Recupera um valor:
+$phpNative = Zend_Json::decode($encodedValue);
+
+// Codifica para retornar ao cliente:
+$json = Zend_Json::encode($phpNative);
+?>]]></programlisting>
+    </para>
+</sect1>
+
+<sect1 id="zend.json.objects">
+    <title>Objetos JSON</title>
+    <para>
+        Quando codificamos objetos PHP como JSON, todas as propriedades públicas 
+		desse objeto estarão codificadas em um objeto JSON.
+    </para>
+	<para>
+		Descodificar objetos JSON traz uma ligeria dificuldade, entretanto, desde          
+		que os objetos do Javascript correspondam o mais próximo de uma matriz 
+		associativa do PHP. Alguns sugerem que um identificador da classe deve 
+		ser passado, e um exemplo do objeto dessa classe deve ser criado e 
+		populado com os pares chave/valor do objeto JSON; outros pensam que isto
+		poderia gerar um risco substancial da segurança. 
+	</para>
+    <para>
+        Por padrão, <code>Zend_Json</code> irá descodificar objetos JSON como 
+		matriz associativas. Entretanto, se você deseja que o retorne um objeto, 
+		você pode especificar isto:
+        <programlisting role="php"><![CDATA[<?php
+// Descodifique objetos como objetos
+$phpNative = Zend_Json::decode($encodedValue, Zend_Json::TYPE_OBJECT);
+?>]]></programlisting>
+		Todos os objetos descodificados assim são retornados como objetos de 
+		<code>StdClass</code> com as propriedades que correspondem aos pares 
+		chave/valor na notação de JSON. 
+    </para>
+	<para>
+		A recomendação do Zend Framework é que o desenvolvedor deve decidir-se 
+		como descodificar objetos JSON. Se um objeto de um tipo especificado 
+		for criado, pode ser criado no código do desenvolvedor e ser populado com 
+		os valores descodificados usando <code>Zend_Json</code>. 
+	</para>
+</sect1>
+        
+<!--
+vim:se ts=4 sw=4 et:
+-->

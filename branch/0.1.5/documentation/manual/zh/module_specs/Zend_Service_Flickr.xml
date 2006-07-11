@@ -1,0 +1,94 @@
+<sect1 id="zend.service.flickr">
+    <title>Zend_Service_Flickr</title>
+    <sect2 id="zend.service.flickr.introduction">
+        <title>对Flickr搜索的介绍</title>
+        <para>
+            <code>Zend_Service_Flickr</code> i是一组用来使用Flickr REST Web Service 的简单API. 
+			为了可以使用Flickr web services, 你必须拥有 API key. 获取key或需要Flickr REST Web Service更多详细信息, 请访问
+            <ulink url="http://www.flickr.com/services/api/">Flickr API Documentation</ulink>.
+        </para>
+        <para>
+            在下面的例子中, 我们使用 <code>tagSearch()</code>  方法来搜索tag中有 "php"的照片
+            .
+        </para>
+        <example>
+            <title>简单的 Flickr 照片搜索</title>
+            <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Service/Flickr.php';
+
+$flickr = new Zend_Service_Flickr('MY_API_KEY');
+
+$results = $flickr->tagSearch("php");
+
+foreach ($results as $result) {
+    echo $result->title . '<br />';
+}
+?>]]>       </programlisting>
+        </example>
+        <note>
+            <code>tagSearch()</code> 可以接受第二个(可选的)参数提供更多选项.
+        </note>
+    </sect2>
+    <sect2 id="zend.service.flickr.finding-users">
+        <title>查找 Flickr 用户</title>
+        <para>
+            <code>Zend_Service_Flickr</code>  提供三种不同的方法来得到 Flickr的用户信息:
+        </para>
+        <itemizedlist>
+            <listitem>
+                <code>userSearch()</code>: 接受一个以空格来作为分隔符的(由tag构成)查询字符串，用数组的方式(可选)来指定搜索选项, 返回一个
+				 <code>Zend_Service_Flickr_ResultSet</code>
+                对象.
+            </listitem>
+            <listitem>
+                <code>getIdByUsername()</code>: 以字符串的格式返回与给定用户名关联的用户 ID
+            </listitem>
+            <listitem>
+                <code>getIdByEmail()</code>: 以字符串的格式返回与给定email地址关联的用户 ID
+            </listitem>
+        </itemizedlist>
+        <example>
+            <title>用email地址来查找Flickr用户</title>
+            <para>
+                在这个例子中, 我们有一个Flickr用户的e-mail 地址, 并用 
+                 <code>userSearch()</code> 方法获得用户的信息:
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Service/Flickr.php';
+
+$flickr = new Zend_Service_Flickr('MY_API_KEY');
+
+$results = $flickr->userSearch($userEmail);
+
+foreach ($results as $result) {
+    echo $result->title . '<br />';
+}
+?>]]>       </programlisting>
+        </example>
+    </sect2>
+    <sect2 id="zend.service.flickr.getimagedetails">
+        <title>获得 Flickr 图像详细资料</title>
+        <code>Zend_Service_Flickr</code>使我们可以使用给定的图像id来非常方便快捷的得到图像的详细信息,使用<code>getImageDetails()</code>
+		方法, 如下面的例子:
+        <example>
+            <title>获得 Flickr 图像详细资料</title>
+            <para>
+                一旦你有一个Flickr 图像的ID,获得它的详细信息将是小事一桩:
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Service/Flickr.php';
+
+$flickr = new Zend_Service_Flickr('MY_API_KEY');
+
+$image = $flickr->getImageDetails($imageId);
+
+echo "Image ID $imageId is $image->width x $image->height pixels.<br />\n";
+echo "<a href=\"$image->clickUri\">Click for Image</a>\n";
+?>]]>       </programlisting>
+        </example>
+    </sect2>
+    &module_specs.Zend_Service_Flickr_Classes;
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
