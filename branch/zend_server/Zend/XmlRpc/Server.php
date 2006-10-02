@@ -64,6 +64,11 @@ require_once 'Zend/XmlRpc/Value.php';
 require_once 'Zend/Server/Reflection.php';
 
 /**
+ * Zend_Server_Reflection_Function_Abstract
+ */
+require_once 'Zend/Server/Reflection/Function/Abstract.php';
+
+/**
  * Specifically grab the Zend_Server_Reflection_Method for manually setting up 
  * system.* methods and handling callbacks in {@link loadFunctions()}.
  */
@@ -115,7 +120,7 @@ require_once 'Zend/Server/Reflection/Method.php';
 class Zend_XmlRpc_Server
 {
     /**
-     * Array of dispatchable methods
+     * Array of dispatchables
      * @var array
      */
     protected $_methods = array();
@@ -125,6 +130,12 @@ class Zend_XmlRpc_Server
      * @var string 
      */
     protected $_responseClass = 'Zend_XmlRpc_Response_Http';
+
+    /**
+     * Dispatch table of name => method pairs
+     * @var array 
+     */
+    protected $_table = array();
 
     /**
      * Constructor
@@ -151,6 +162,51 @@ class Zend_XmlRpc_Server
             $reflection->system = true;
             $this->_methods[$methodName] = $reflection;
         }
+
+        $this->_buildDispatchTable();
+    }
+
+    /**
+     * Re/Build the dispatch table
+     *
+     * The dispatch table consists of a an array of method name => 
+     * Zend_Server_Reflection_Function_Abstract pairs
+     * 
+     * @return void
+     */
+    protected function _buildDispatchTable()
+    {
+        $table      = array();
+        foreach ($this->_methods as $dispatchable) {
+            if ($dispatchable instanceof Zend_Server_Reflection_Function_Abstract) {
+                // function/method call
+                $ns   = $dispatchable->getNamespace();
+                $name = $dispatchable->getName();
+                $name = empty($ns) ? $name : $ns . '.' . $name;
+
+                if (isset($table[$name])) {
+                    throw new Zend_XmlRpc_Server_Exception('Duplicate method registered: ' . $name);
+                }
+                $table[$name] = $dispatchable;
+                continue;
+            }
+
+            if ($dispatchable instanceof Zend_Server_Reflection_Class) {
+                foreach ($dispatchable->getMethods() as $method) {
+                    $ns = $dispatchable->getNamespace();
+                    $name = $dispatchable->getName();
+                    $name = empty($ns) ? $name : $ns . '.' . $name;
+
+                    if (isset($table[$name])) {
+                        throw new Zend_XmlRpc_Server_Exception('Duplicate method registered: ' . $name);
+                    }
+                    $table[$name] = $dispatchable;
+                    continue;
+                }
+            }
+        }
+
+        $this->_table = $table;
     }
 
     /**
@@ -171,8 +227,8 @@ class Zend_XmlRpc_Server
      */
     public function addFunction($function, $namespace = '') 
     {
-        if (!is_callable($function)) {
-            throw new Zend_XmlRpc_Server_Exception('Unable to attach function or callback; not callable', 611);
+        if (!is_string($function) && !is_array($function)) {
+            throw new Zend_XmlRpc_Server_Exception('Unable to attach function; invalid', 611);
         }
 
         $argv = null;
@@ -181,13 +237,17 @@ class Zend_XmlRpc_Server
             $argv = array_slice($argv, 2);
         }
 
-        if (is_string($function)) {
-            $this->_methods = array_merge($this->_methods, Zend_Server_Reflection::reflectFunction($function, $argv, $namespace));
-        } else {
-            $methodName = empty($namespace) ? $function[1] : $namespace . '.' . $function[1];
-            $method = new Zend_Server_Reflection_Method(new ReflectionMethod($function[0], $function[1]), $methodName);
-            $this->_methods = array_merge($this->_methods, array($method));
+        if (is_array($function)) {
+            foreach ($function as $func) {
+                $args = null === $argv ? array() : $argv;
+                array_unshift($args, $namespace);
+                array_unshift($args, $func);
+                call_user_func_array(array($this, 'addFunction'), $args);
+            }
         }
+
+        $this->_methods[] = Zend_Server_Reflection::reflectFunction($function, $argv, $namespace);
+        $this->_buildDispatchTable();
     }
 
     /**
@@ -207,12 +267,18 @@ class Zend_XmlRpc_Server
         }
 
         foreach ($array as $key => $value) {
-            if (!$value instanceof Zend_Server_Reflection_Method) {
+            if (!$value instanceof Zend_Server_Reflection_Function_Abstract
+                && !$value instanceof Zend_Server_Reflection_Class) 
+            {
                 throw new Zend_XmlRpc_Server_Exception('One or more method records are corrupt or otherwise unusable', 613);
             }
         }
 
-        $this->_methods = array_merge($this->_methods, $array);
+        foreach ($array as $dispatchable) {
+            $this->_methods[] = $dispatchable;
+        }
+
+        $this->_buildDispatchTable();
     }
 
     /**
@@ -256,7 +322,8 @@ class Zend_XmlRpc_Server
             $argv = array_slice($argv, 3);
         }
 
-        $this->_methods = array_merge($this->_methods, Zend_Server_Reflection::reflectClass($class, $argv, $namespace));
+        $this->_methods[] = Zend_Server_Reflection::reflectClass($class, $argv, $namespace);
+        $this->_buildDispatchTable();
     }
 
     /**
@@ -290,48 +357,47 @@ class Zend_XmlRpc_Server
         $method = $request->getMethod();
 
         // Check for valid method
-        if (!isset($this->_methods[$method])) {
+        if (!isset($this->_table[$method])) {
             throw new Zend_XmlRpc_Server_Exception('Method does not exist', 620);
         }
 
-        $info     = $this->_methods[$method];
+        $info     = $this->_table[$method];
         $params   = $request->getParams();
         $argv     = $info->getInvokeArguments();
         if (0 < count($argv)) {
             $args = array_merge($params, $argv);
         }
-        switch ($info->getCallbackType()) {
-            case 'function':
-                return $info->invokeArgs($args);
-            case 'method':
-                // System methods
-                if ($info->system) {
-                    $return = $info->invokeArgs($this, $args);
-                    break;
-                }
 
-                // Get class
-                $class = $info->getDeclaringClass()->getName();
-
-                if ('static' == $info->isStatic()) {
-                    // for some reason, invokeArgs() does not work the same as 
-                    // invoke(), and expects the first argument to be an object. 
-                    // So, using a callback if the method is static.
-                    $return = call_user_func_array(array($class, $info->getFunctionName()), $args);
-                    break;
-                }
-
-                // Object methods
-                try {
-                    $object = $info->getDeclaringClass()->newInstance();
-                } catch (Exception $e) {
-                    throw new Zend_XmlRpc_Server_Exception('Error instantiating class ' . $class . ' to invoke method ' . $info->getName(), 621);
-                }
-
-                $return = $info->invokeArgs($object, $args);
-            default:
-                throw new Zend_XmlRpc_Server_Exception('Method missing implementation', 622);
+        if ($info instanceof Zend_Server_Reflection_Function) {
+            return $info->invokeArgs($args);
+        } elseif ($info instanceof Zend_Server_Reflection_Method) {
+            // System methods
+            if ($info->system) {
+                $return = $info->invokeArgs($this, $args);
                 break;
+            }
+
+            // Get class
+            $class = $info->getDeclaringClass()->getName();
+
+            if ('static' == $info->isStatic()) {
+                // for some reason, invokeArgs() does not work the same as 
+                // invoke(), and expects the first argument to be an object. 
+                // So, using a callback if the method is static.
+                $return = call_user_func_array(array($class, $info->getFunctionName()), $args);
+                break;
+            }
+
+            // Object methods
+            try {
+                $object = $info->getDeclaringClass()->newInstance();
+            } catch (Exception $e) {
+                throw new Zend_XmlRpc_Server_Exception('Error instantiating class ' . $class . ' to invoke method ' . $info->getName(), 621);
+            }
+
+            $return = $info->invokeArgs($object, $args);
+        } else {
+            throw new Zend_XmlRpc_Server_Exception('Method missing implementation', 622);
         }
 
         $response = new ReflectionClass($this->_responseClass);
@@ -387,8 +453,8 @@ class Zend_XmlRpc_Server
     /**
      * Returns a list of registered methods
      *
-     * Returns an associative array of method name => 
-     * Zend_Server_Reflection_Method objects.
+     * Returns an array of dispatchables (Zend_Server_Reflection_Function, 
+     * _Method, and _Class items).
      * 
      * @return array
      */
@@ -406,7 +472,7 @@ class Zend_XmlRpc_Server
      */
     public function listMethods()
     {
-        return array_keys($this->_methods);
+        return array_keys($this->_table);
     }
 
     /**
@@ -417,11 +483,11 @@ class Zend_XmlRpc_Server
      */
     public function methodHelp($method)
     {
-        if (!isset($this->_methods[$method])) {
+        if (!isset($this->_table[$method])) {
             throw new Zend_Server_Exception('Method "' . $method . '"does not exist', 640);
         }
 
-        return $this->_methods[$method]->getDescription();
+        return $this->_table[$method]->getDescription();
     }
 
     /**
@@ -432,10 +498,10 @@ class Zend_XmlRpc_Server
      */
     public function methodSignature($method)
     {
-        if (!isset($this->_methods[$method])) {
+        if (!isset($this->_table[$method])) {
             throw new Zend_Server_Exception('Method "' . $method . '"does not exist', 640);
         }
-        $prototypes = $this->_methods[$method]->getPrototypes();
+        $prototypes = $this->_table[$method]->getPrototypes();
 
         $signatures = array();
         foreach ($prototypes as $prototype) {
