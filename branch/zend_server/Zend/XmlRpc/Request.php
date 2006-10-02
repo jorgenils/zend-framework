@@ -253,7 +253,7 @@ class Zend_XmlRpc_Request
             $value = $param['value'];
             $type  = isset($param['type']) ? $param['type'] : null;
 
-            $params = Zend_XmlRpc_Value::getXmlRpcValue($value, $type);
+            $params = Zend_XmlRpc_Value::getXmlRpcValue($value);
         }
 
         return $params;

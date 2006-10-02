@@ -40,11 +40,13 @@ class Zend_Server_Reflection_Method extends Zend_Server_Reflection_Function_Abst
         $this->_classReflection = $class;
         $this->_reflection      = $r;
 
+        $classNamespace = $class->getNamespace();
+
         // Determine namespace
-        if (null !== $namespace) {
+        if (!empty($namespace)) {
             $this->setNamespace($namespace);
-        } elseif (null !== $class->getNamespace()) {
-            $this->setNamespace($class->getNamespace());
+        } elseif (!empty($classNamespace)) {
+            $this->setNamespace($classNamespace);
         }
 
         // Determine arguments

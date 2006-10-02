@@ -70,7 +70,7 @@ class Zend_Server_Reflection_Class
 
             if ($method->isPublic()) {
                 // Get signatures and description
-                $this->_methods[] = new Zend_Server_Reflection_Method($this, $method, $namespace, $argv);
+                $this->_methods[] = new Zend_Server_Reflection_Method($this, $method, $this->getNamespace(), $argv);
             }
         }
     }

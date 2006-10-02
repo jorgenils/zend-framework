@@ -156,11 +156,12 @@ class Zend_XmlRpc_Server
             'methodSignature',
             'multicall'
         );
+
+        $class = new Zend_Server_Reflection_Class(new ReflectionObject($this));
         foreach ($system as $method) {
-            $methodName = 'system.' . $method;
-            $reflection = new Zend_Server_Reflection_Method(new ReflectionMethod($this, $method), $methodName);
+            $reflection = new Zend_Server_Reflection_Method($class, new ReflectionMethod($this, $method), 'system');
             $reflection->system = true;
-            $this->_methods[$methodName] = $reflection;
+            $this->_methods[] = $reflection;
         }
 
         $this->_buildDispatchTable();
@@ -193,14 +194,14 @@ class Zend_XmlRpc_Server
 
             if ($dispatchable instanceof Zend_Server_Reflection_Class) {
                 foreach ($dispatchable->getMethods() as $method) {
-                    $ns = $dispatchable->getNamespace();
-                    $name = $dispatchable->getName();
+                    $ns   = $method->getNamespace();
+                    $name = $method->getName();
                     $name = empty($ns) ? $name : $ns . '.' . $name;
 
                     if (isset($table[$name])) {
                         throw new Zend_XmlRpc_Server_Exception('Duplicate method registered: ' . $name);
                     }
-                    $table[$name] = $dispatchable;
+                    $table[$name] = $method;
                     continue;
                 }
             }
@@ -365,18 +366,15 @@ class Zend_XmlRpc_Server
         $params   = $request->getParams();
         $argv     = $info->getInvokeArguments();
         if (0 < count($argv)) {
-            $args = array_merge($params, $argv);
+            $params = array_merge($params, $argv);
         }
 
         if ($info instanceof Zend_Server_Reflection_Function) {
-            return $info->invokeArgs($args);
-        } elseif ($info instanceof Zend_Server_Reflection_Method) {
+            return $info->invokeArgs($params);
+        } elseif (($info instanceof Zend_Server_Reflection_Method) && $info->system) {
             // System methods
-            if ($info->system) {
-                $return = $info->invokeArgs($this, $args);
-                break;
-            }
-
+            $return = $info->invokeArgs($this, $params);
+        } elseif ($info instanceof Zend_Server_Reflection_Method) {
             // Get class
             $class = $info->getDeclaringClass()->getName();
 
@@ -385,17 +383,16 @@ class Zend_XmlRpc_Server
                 // invoke(), and expects the first argument to be an object. 
                 // So, using a callback if the method is static.
                 $return = call_user_func_array(array($class, $info->getFunctionName()), $args);
-                break;
-            }
+            } else {
+                // Object methods
+                try {
+                    $object = $info->getDeclaringClass()->newInstance();
+                } catch (Exception $e) {
+                    throw new Zend_XmlRpc_Server_Exception('Error instantiating class ' . $class . ' to invoke method ' . $info->getName(), 621);
+                }
 
-            // Object methods
-            try {
-                $object = $info->getDeclaringClass()->newInstance();
-            } catch (Exception $e) {
-                throw new Zend_XmlRpc_Server_Exception('Error instantiating class ' . $class . ' to invoke method ' . $info->getName(), 621);
+                $return = $info->invokeArgs($object, $params);
             }
-
-            $return = $info->invokeArgs($object, $args);
         } else {
             throw new Zend_XmlRpc_Server_Exception('Method missing implementation', 622);
         }
