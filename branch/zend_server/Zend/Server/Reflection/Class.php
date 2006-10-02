@@ -35,6 +35,12 @@ class Zend_Server_Reflection_Class
     protected $_methods = array();
 
     /**
+     * Namespace
+     * @var string 
+     */
+    protected $_namespace = null;
+
+    /**
      * ReflectionClass object
      * @var ReflectionClass
      */
@@ -51,9 +57,10 @@ class Zend_Server_Reflection_Class
      * @param mixed $argv 
      * @return void
      */
-    public function __construct(ReflectionClass $reflection, $namespace = '', $argv = false)
+    public function __construct(ReflectionClass $reflection, $namespace = null, $argv = false)
     {
         $this->_reflection = $reflection;
+        $this->setNamespace($namespace);
 
         foreach ($reflection->getMethods() as $method) {
             // Don't aggregate magic methods
@@ -63,20 +70,9 @@ class Zend_Server_Reflection_Class
 
             if ($method->isPublic()) {
                 // Get signatures and description
-                $this->_methods[] = new Zend_Server_Reflection_Method($method, $namespace, $argv);
+                $this->_methods[] = new Zend_Server_Reflection_Method($this, $method, $namespace, $argv);
             }
         }
-    }
-
-    /**
-     * Return array of dispatchable {@link Zend_Server_Reflection_Method}s.
-     * 
-     * @access public
-     * @return array
-     */
-    public function getMethods()
-    {
-        return $this->_methods;
     }
 
     /**
@@ -125,5 +121,58 @@ class Zend_Server_Reflection_Class
     public function __set($key, $value)
     {
         $this->_config[$key] = $value;
+    }
+
+    /**
+     * Return array of dispatchable {@link Zend_Server_Reflection_Method}s.
+     * 
+     * @access public
+     * @return array
+     */
+    public function getMethods()
+    {
+        return $this->_methods;
+    }
+
+    /**
+     * Get namespace for this class
+     * 
+     * @return string
+     */
+    public function getNamespace()
+    {
+        return $this->_namespace;
+    }
+
+    /**
+     * Set namespace for this class
+     * 
+     * @param string $namespace
+     * @return void
+     */
+    public function setNamespace($namespace)
+    {
+        if (null === $namespace) {
+            return;
+        }
+
+        if (!is_string($namespace) || !preg_match('/[a-z0-9_\.]+/i', $namespace)) {
+            throw new Zend_Server_Reflection_Exception('Invalid namespace');
+        }
+
+        $this->_namespace = $namespace;
+    }
+
+    /**
+     * Wakeup from serialization
+     * 
+     * Reflection needs explicit instantiation to work correctly. Re-instantiate 
+     * reflection object on wakeup.
+     * 
+     * @return void
+     */
+    public function __wakeup()
+    {
+        $this->_reflection = new ReflectionClass($this->getName());
     }
 }

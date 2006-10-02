@@ -5,9 +5,14 @@
 require_once 'Zend/Server/Reflection/Exception.php';
 
 /**
- * Zend_Server_Reflection_Method
+ * Zend_Server_Reflection_Function
  */
-require_once 'Zend/Server/Reflection/Method.php';
+require_once 'Zend/Server/Reflection/Function.php';
+
+/**
+ * Zend_Server_Reflection_Class
+ */
+require_once 'Zend/Server/Reflection/Class.php';
 
 /**
  * Reflection for determining method signatures to use with server classes
@@ -21,11 +26,10 @@ class Zend_Server_Reflection
     /**
      * Perform class reflection to create dispatch signatures
      *
-     * Creates dispatch prototypes for the public methods of a class or object. 
-     * Each is keyed using the method name, prefixed with the namespace (if 
-     * provided), and is a {@link Zend_Server_Reflection_Method} object.
+     * Creates a {@link Zend_Server_Reflection_Class} object for the class or 
+     * object provided.
      *
-     * If extra arguments should be passed to the dispatchable method, these may 
+     * If extra arguments should be passed to dispatchable methods, these may 
      * be provided as an array to $argv.
      * 
      * @param string|object $class Class name or object
@@ -33,7 +37,7 @@ class Zend_Server_Reflection
      * @param string $namespace Optional namespace with which to prefix the 
      * method name (used for the signature key). Primarily to avoid collisions, 
      * also for XmlRpc namespacing
-     * @return array Array of Zend_Server_Reflection_Methods
+     * @return Zend_Server_Reflection_Class
      * @throws Zend_Server_Reflection_Exception
      */
     public static function reflectClass($class, $argv = false, $namespace = '')
@@ -50,38 +54,14 @@ class Zend_Server_Reflection
             throw new Zend_Server_Reflection_Exception('Invalid argv argument passed to reflectClass');
         }
 
-        $dispatchers = array();
-        $dispatch    = array();
-        $className   = $reflection->getName();
-        foreach ($reflection->getMethods() as $method) {
-            // Don't aggregate magic methods
-            if (0 === strpos($method->getName(), '__')) {
-                continue;
-            }
-
-            if ($method->isPublic()) {
-                $methodName = $method->getName();
-
-                // Skip magic methods
-                if ('__' == substr($methodName, 0, 2)) {
-                    continue;
-                }
-
-                // Get signatures and description
-                $dispatchMethod = empty($namespace) ? $methodName : $namespace . '.' . $methodName;
-                $dispatchers[$dispatchMethod] =  new Zend_Server_Reflection_Method($method, $dispatchMethod, $argv);
-            }
-        }
-
-        return $dispatchers;
+        return new Zend_Server_Reflection_Class($reflection, $namespace, $argv);
     }
 
     /**
      * Perform function reflection to create dispatch signatures
      *
-     * Creates dispatch prototypes for a function. It is returned as an array 
-     * with a key using the method name, prefixed with the namespace (if 
-     * provided), and is a {@link Zend_Server_Reflection_Method} object.
+     * Creates dispatch prototypes for a function. It returns a 
+     * {@link Zend_Server_Reflection_Function} object.
      *
      * If extra arguments should be passed to the dispatchable function, these 
      * may be provided as an array to $argv.
@@ -91,7 +71,7 @@ class Zend_Server_Reflection
      * @param string $namespace Optional namespace with which to prefix the 
      * function name (used for the signature key). Primarily to avoid 
      * collisions, also for XmlRpc namespacing
-     * @return array Array with a single Zend_Server_Reflection_Method
+     * @return Zend_Server_Reflection_Function 
      * @throws Zend_Server_Reflection_Exception
      */
     public static function reflectFunction($function, $argv = false, $namespace = '')
@@ -105,9 +85,6 @@ class Zend_Server_Reflection
             throw new Zend_Server_Reflection_Exception('Invalid argv argument passed to reflectClass');
         }
 
-        $dispatchMethod = empty($namespace) ? $function : $namespace . '.' . $function;
-        $dispatch = new Zend_Server_Reflection_Method(new ReflectionFunction($function), $dispatchMethod, $argv);
-
-        return array($dispatchMethod => $dispatch);
+        return new Zend_Server_Reflection_Function(new ReflectionFunction($function), $namespace, $argv);
     }
 }
