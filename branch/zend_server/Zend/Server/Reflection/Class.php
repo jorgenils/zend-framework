@@ -152,7 +152,8 @@ class Zend_Server_Reflection_Class
      */
     public function setNamespace($namespace)
     {
-        if (null === $namespace) {
+        if (empty($namespace)) {
+            $this->_namespace = '';
             return;
         }
 

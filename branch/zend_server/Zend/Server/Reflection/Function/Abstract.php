@@ -382,6 +382,11 @@ abstract class Zend_Server_Reflection_Function_Abstract
      */
     public function setNamespace($namespace)
     {
+        if (empty($namespace)) {
+            $this->_namespace = '';
+            return;
+        }
+
         if (!is_string($namespace) || !preg_match('/[a-z0-9_\.]+/i', $namespace)) {
             throw new Zend_Server_Reflection_Exception('Invalid namespace');
         }
