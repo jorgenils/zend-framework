@@ -5,6 +5,11 @@
 require_once 'Zend/Server/Reflection/Exception.php';
 
 /**
+ * Zend_Server_Reflection_ReturnValue
+ */
+require_once 'Zend/Server/Reflection/ReturnValue.php';
+
+/**
  * Zend_Server_Reflection_Parameter
  */
 require_once 'Zend/Server/Reflection/Parameter.php';
@@ -23,15 +28,12 @@ class Zend_Server_Reflection_Prototype
     /**
      * Constructor
      * 
-     * @param string $return 
+     * @param Zend_Server_Reflection_ReturnValue $return 
      * @param array $params 
      * @return void
      */
-    public function __construct($return = 'void', $params = null)
+    public function __construct(Zend_Server_Reflection_ReturnValue $return, $params = null)
     {
-        if (!is_string($return) && (null !== $return)) {
-            throw new Zend_Server_Reflection_Exception('Invalid return type');
-        }
         $this->_return = $return;
 
         if (!is_array($params) && (null !== $params)) {
@@ -53,6 +55,17 @@ class Zend_Server_Reflection_Prototype
      * @return string
      */
     public function getReturnType()
+    {
+        return $this->_return->getType();
+    }
+
+    /**
+     * Retrieve the return value object
+     * 
+     * @access public
+     * @return Zend_Server_Reflection_ReturnValue
+     */
+    public function getReturnValue()
     {
         return $this->_return;
     }

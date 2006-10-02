@@ -80,6 +80,8 @@ abstract class Zend_Server_Reflection_Function_Abstract
     protected $_prototypes = array();
 
     private $_return;
+    private $_returnDesc;
+    private $_paramDesc;
     private $_sigParams;
     private $_sigParamsDepth;
 
@@ -172,14 +174,18 @@ abstract class Zend_Server_Reflection_Function_Abstract
      * parameters types
      * 
      * @param array $return Array of return types
+     * @param string $returnDesc Return value description
      * @param array $params Array of arguments (each an array of types)
+     * @param array $paramDesc Array of parameter descriptions
      * @return array
      */
-    protected function _buildSignatures($return, $params)
+    protected function _buildSignatures($return, $returnDesc, $paramTypes, $paramDesc)
     {
         $this->_return         = $return;
-        $this->_sigParams      = $params;
-        $this->_sigParamsDepth = count($params);
+        $this->_returnDesc     = $returnDesc;
+        $this->_paramDesc      = $paramDesc;
+        $this->_sigParams      = $paramTypes;
+        $this->_sigParamsDepth = count($paramTypes);
         $signatureTrees        = $this->_buildTree();
         $signatures            = array();
 
@@ -205,10 +211,10 @@ abstract class Zend_Server_Reflection_Function_Abstract
         // Build prototypes
         $params = $this->_reflection->getParameters();
         foreach ($signatures as $signature) {
-            $return = array_shift($signature);
+            $return = new Zend_Server_Reflection_ReturnValue(array_shift($signature), $this->_returnDesc);
             $tmp    = array();
             foreach ($signature as $key => $type) {
-                $param = new Zend_Server_Reflection_Parameter($params[$key], $type);
+                $param = new Zend_Server_Reflection_Parameter($params[$key], $type, $this->_paramDesc[$key]);
                 $param->setPosition($key);
                 $tmp[] = $param;
             }
@@ -247,15 +253,32 @@ abstract class Zend_Server_Reflection_Function_Abstract
                 $helpText = trim($helpText);
             }
 
-            // Get return type(s)
+            // Get return type(s) and description
             $return = 'void';
-            if (preg_match('/@return ([^\s]*)\s/', $docBlock, $matches)) {
+            $returnDescription = '';
+            if (preg_match('/@return ([^\s]*)/', $docBlock, $matches)) {
                 $return = explode('|', $matches[1]);
+                if (preg_match('/@return [^\s]*\s+(.*?)(@|\*\/)/s', $docBlock, $matches))
+                {
+                    $value = $matches[1];
+                    $value = preg_replace('/\s?\* /m', '', $value);
+                    $value = preg_replace('/\s{2,}/', ' ', $value);
+                    $returnDesc = trim($value);
+                }
             }
 
-            // Get param types
+            // Get param types and description
             if (preg_match_all('/@param ([^ ]*) /', $docBlock, $matches)) {
                 $paramTypesTmp = $matches[1];
+                if (preg_match_all('/@param [^\s]*\s+(\$[^ ]*)\s+(.*?)(@|\*\/)/s', $docBlock, $matches))
+                {
+                    $paramDesc = $matches[2];
+                    foreach ($paramDesc as $key => $value) {
+                        $value = preg_replace('/\s?\* /m', '', $value);
+                        $value = preg_replace('/\s{2,}/', ' ', $value);
+                        $paramDesc[$key] = trim($value);
+                    }
+                }
             }
         } else {
             $helpText = $function->getName();
@@ -270,7 +293,25 @@ abstract class Zend_Server_Reflection_Function_Abstract
             $paramTypesTmp = array_fill(0, $paramCount, 'mixed');
         } elseif (!isset($paramTypesTmp)) {
             $paramTypesTmp = array();
+        } elseif (count($paramTypesTmp) < $paramCount) {
+            $start = $paramCount - count($paramTypesTmp);
+            for ($i = $start; $i < $paramCount; ++$i) {
+                $paramTypesTmp[$i] = 'mixed';
+            }
         }
+
+        // Get all param descriptions as arrays
+        if (!isset($paramDesc) && (0 < $paramCount)) {
+            $paramDesc = array_fill(0, $paramCount, '');
+        } elseif (!isset($paramDesc)) {
+            $paramDesc = array();
+        } elseif (count($paramDesc) < $paramCount) {
+            $start = $paramCount - count($paramDesc);
+            for ($i = $start; $i < $paramCount; ++$i) {
+                $paramDesc[$i] = '';
+            }
+        }
+
 
         $paramTypes = array();
         foreach ($paramTypesTmp as $i => $param) {
@@ -281,7 +322,7 @@ abstract class Zend_Server_Reflection_Function_Abstract
             $paramTypes[] = $tmp;
         }
 
-        $this->_buildSignatures($return, $paramTypes);
+        $this->_buildSignatures($return, $returnDesc, $paramTypes, $paramDesc);
     }
 
 
