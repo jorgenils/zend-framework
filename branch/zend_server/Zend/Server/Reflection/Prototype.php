@@ -40,9 +40,11 @@ class Zend_Server_Reflection_Prototype
             throw new Zend_Server_Reflection_Exception('Invalid parameters');
         }
 
-        foreach ($params as $param) {
-            if (!$param instanceof Zend_Server_Reflection_Parameter) {
-                throw new Zend_Server_Reflection_Exception('One or more params are invalid');
+        if (is_array($params)) {
+            foreach ($params as $param) {
+                if (!$param instanceof Zend_Server_Reflection_Parameter) {
+                    throw new Zend_Server_Reflection_Exception('One or more params are invalid');
+                }
             }
         }
 

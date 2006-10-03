@@ -462,9 +462,9 @@ abstract class Zend_Server_Reflection_Function_Abstract
     {
         if ($this->_reflection instanceof ReflectionMethod) {
             $class = new ReflectionClass($this->_class);
-            $this->_reflection = new ReflectionMethod($class->newInstance(), $this->getFunctionName());
+            $this->_reflection = new ReflectionMethod($class->newInstance(), $this->getName());
         } else {
-            $this->_reflection = new ReflectionFunction($this->getFunctionName());
+            $this->_reflection = new ReflectionFunction($this->getName());
         }
     }
 }
