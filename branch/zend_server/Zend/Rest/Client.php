@@ -36,6 +36,11 @@ require_once 'Zend/Rest/Client/Result.php';
 require_once 'Zend/Rest/Client/Exception.php';
 
 /**
+ * Zend_Uri
+ */
+require_once 'Zend/Uri.php';
+
+/**
  * @category   Zend
  * @package    Zend_Rest
  * @subpackage Client
