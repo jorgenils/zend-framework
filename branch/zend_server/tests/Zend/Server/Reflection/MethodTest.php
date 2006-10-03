@@ -3,36 +3,26 @@ require_once 'Zend/Server/Reflection/Method.php';
 require_once 'PHPUnit2/Framework/TestCase.php';
 require_once 'PHPUnit2/Framework/IncompleteTestError.php';
 
+require_once 'Zend/Server/Reflection.php';
+
 /**
  * Test case for Zend_Server_Reflection_Method
  *
- * @package ortus
- * @version $Id:$
+ * @package Zend_Server
+ * @subpackage UnitTests
+ * @version $Id$
  */
 class Zend_Server_Reflection_MethodTest extends PHPUnit2_Framework_TestCase 
 {
-    /**
-     * Zend_Server_Reflection_Method object
-     * @var Zend_Server_Reflection_Method
-     */
-    protected $_obj;
+    protected $_classRaw;
+    protected $_class;
+    protected $_method;
 
-    /**
-     * Setup environment
-     */
-    public function setUp() 
+    protected function setUp()
     {
-        // You may need to change this to:
-        // $this->_obj = Zend_Server_Reflection_Method::getInstance();
-        // $this->_obj = new Zend_Server_Reflection_Method();
-    }
-
-    /**
-     * Teardown environment
-     */
-    public function tearDown() 
-    {
-        unset($this->_obj);
+        $this->_classRaw = new ReflectionClass('Zend_Server_Reflection');
+        $this->_method   = $this->_classRaw->getMethod('reflectClass');
+        $this->_class    = new Zend_Server_Reflection_Class($this->_classRaw);
     }
 
     /**
@@ -50,8 +40,12 @@ class Zend_Server_Reflection_MethodTest extends PHPUnit2_Framework_TestCase
      */
     public function test__construct()
     {
-        // Remove this line once the test has been written
-        throw new PHPUnit2_Framework_IncompleteTestError('not implemented');
+        $r = new Zend_Server_Reflection_Method($this->_class, $this->_method);
+        $this->assertTrue($r instanceof Zend_Server_Reflection_Method);
+        $this->assertTrue($r instanceof Zend_Server_Reflection_Function_Abstract);
+
+        $r = new Zend_Server_Reflection_Method($this->_class, $this->_method, 'namespace');
+        $this->assertEquals('namespace', $r->getNamespace());
     }
 
     /**
@@ -63,8 +57,12 @@ class Zend_Server_Reflection_MethodTest extends PHPUnit2_Framework_TestCase
      */
     public function testGetDeclaringClass()
     {
-        // Remove this line once the test has been written
-        throw new PHPUnit2_Framework_IncompleteTestError('not implemented');
+        $r = new Zend_Server_Reflection_Method($this->_class, $this->_method);
+
+        $class = $r->getDeclaringClass();
+
+        $this->assertTrue($class instanceof Zend_Server_Reflection_Class);
+        $this->assertTrue($this->_class === $class);
     }
 
     /**
@@ -76,8 +74,14 @@ class Zend_Server_Reflection_MethodTest extends PHPUnit2_Framework_TestCase
      */
     public function test__wakeup()
     {
-        // Remove this line once the test has been written
-        throw new PHPUnit2_Framework_IncompleteTestError('not implemented');
+        $r = new Zend_Server_Reflection_Method($this->_class, $this->_method);
+        $s = serialize($r);
+        $u = unserialize($s);
+
+        $this->assertTrue($u instanceof Zend_Server_Reflection_Method);
+        $this->assertTrue($u instanceof Zend_Server_Reflection_Function_Abstract);
+        $this->assertEquals($r->getName(), $u->getName());
+        $this->assertEquals($r->getDeclaringClass()->getName(), $u->getDeclaringClass()->getName());
     }
 
 
