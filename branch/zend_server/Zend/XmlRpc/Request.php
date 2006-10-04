@@ -204,14 +204,18 @@ class Zend_XmlRpc_Request
         // Check for parameters
         if (!empty($xml->params)) {
             $argv = array();
-            $e    = false;
             foreach ($xml->params->children() as $param) {
                 if (! $param->value instanceof SimpleXMLElement) {
                     $this->_fault = new Zend_XmlRpc_Fault(633);
                     return false;
                 }
 
-                $argv[] = Zend_XmlRpc_Value::getXmlRpcValue($param->value, Zend_XmlRpc_Value::XML_STRING)->getValue();
+                try {
+                    $argv[] = Zend_XmlRpc_Value::getXmlRpcValue($param->value, Zend_XmlRpc_Value::XML_STRING)->getValue();
+                } catch (Exception $e) {
+                    $this->_fault = new Zend_XmlRpc_Fault(636);
+                    return false;
+                }
             }
 
            $this->_params = $argv;
@@ -253,7 +257,7 @@ class Zend_XmlRpc_Request
             $value = $param['value'];
             $type  = isset($param['type']) ? $param['type'] : null;
 
-            $params = Zend_XmlRpc_Value::getXmlRpcValue($value);
+            $params[] = Zend_XmlRpc_Value::getXmlRpcValue($value);
         }
 
         return $params;
@@ -266,17 +270,17 @@ class Zend_XmlRpc_Request
      */
     public function __toString()
     {
-        $params = $this->_getXmlRpcParams();
+        $args   = $this->_getXmlRpcParams();
         $method = $this->getMethod();
 
         $dom = new DOMDocument('1.0', 'UTF-8');
         $mCall = $dom->appendChild($dom->createElement('methodCall'));
         $mName = $mCall->appendChild($dom->createElement('methodName', $method));
 
-        if (is_array($params) && count($params)) {
+        if (is_array($args) && count($args)) {
             $params = $mCall->appendChild($dom->createElement('params'));
 
-            foreach ($params as $param) {
+            foreach ($args as $arg) {
                 /* @var $param Zend_XmlRpc_Value */
                 $param = $params->appendChild($dom->createElement('param'));
                 $param->appendChild($dom->importNode($arg->getAsDOM(), 1));

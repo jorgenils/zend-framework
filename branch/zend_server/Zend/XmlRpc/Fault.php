@@ -81,6 +81,7 @@ class Zend_XmlRpc_Fault
         633 => 'Param must contain a value',
         634 => 'Invalid method name',
         635 => 'Invalid XML provided to request',
+        636 => 'Error creating xmlrpc value',
 
         // 640 - 649 system.* errors
         640 => 'Method does not exist',
