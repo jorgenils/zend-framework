@@ -238,16 +238,14 @@ class Zend_XmlRpc_Server
             $argv = array_slice($argv, 2);
         }
 
-        if (is_array($function)) {
-            foreach ($function as $func) {
-                $args = null === $argv ? array() : $argv;
-                array_unshift($args, $namespace);
-                array_unshift($args, $func);
-                call_user_func_array(array($this, 'addFunction'), $args);
+        $function = (array) $function;
+        foreach ($function as $func) {
+            if (!is_string($func) || !function_exists($func)) {
+                throw new Zend_XmlRpc_Server_Exception('Unable to attach function; invalid', 611);
             }
+            $this->_methods[] = Zend_Server_Reflection::reflectFunction($func, $argv, $namespace);
         }
 
-        $this->_methods[] = Zend_Server_Reflection::reflectFunction($function, $argv, $namespace);
         $this->_buildDispatchTable();
     }
 
@@ -272,6 +270,10 @@ class Zend_XmlRpc_Server
                 && !$value instanceof Zend_Server_Reflection_Class) 
             {
                 throw new Zend_XmlRpc_Server_Exception('One or more method records are corrupt or otherwise unusable', 613);
+            }
+
+            if ($value->system) {
+                unset($array[$key]);
             }
         }
 
@@ -359,7 +361,7 @@ class Zend_XmlRpc_Server
 
         // Check for valid method
         if (!isset($this->_table[$method])) {
-            throw new Zend_XmlRpc_Server_Exception('Method does not exist', 620);
+            throw new Zend_XmlRpc_Server_Exception('Method "' . $method . '" does not exist', 620);
         }
 
         $info     = $this->_table[$method];
@@ -457,7 +459,18 @@ class Zend_XmlRpc_Server
      */
     public function getFunctions()
     {
-        return $this->_methods;
+        $return = array();
+        foreach ($this->_methods as $method) {
+            if ($method instanceof Zend_Server_Reflection_Class
+                && ($method->system)) 
+            {
+                continue;
+            }
+
+            $return[] = $method;
+        }
+
+        return $return;
     }
 
     /**
@@ -552,10 +565,10 @@ class Zend_XmlRpc_Server
             if (!$fault) {
                 try {
                     $request = new Zend_XmlRpc_Request();
-                    $request->setMethod = $method['methodName'];
-                    $request->setParams = $method['params'];
+                    $request->setMethod($method['methodName']);
+                    $request->setParams($method['params']);
                     $response = $this->_handle($request);
-                    $responses[] = array($response->getReturnValue());
+                    $responses[] = $response->getReturnValue();
                 } catch (Exception $e) {
                     $fault = $this->fault($e);
                 }

@@ -16,13 +16,6 @@ class Zend_XmlRpc_Server_FaultTest extends PHPUnit2_Framework_TestCase
 {
     /**
      * Zend_XmlRpc_Server_Fault::getInstance() test
-     *
-     * Call statically 
-     *
-     * Expects:
-     * - e: 
-     * 
-     * Returns: Zend_XmlRpc_Server_Fault 
      */
     public function testGetInstance()
     {
@@ -34,13 +27,6 @@ class Zend_XmlRpc_Server_FaultTest extends PHPUnit2_Framework_TestCase
 
     /**
      * Zend_XmlRpc_Server_Fault::attachFaultException() test
-     *
-     * Call statically 
-     *
-     * Expects:
-     * - classes: 
-     * 
-     * Returns: void 
      */
     public function testAttachFaultException()
     {
@@ -68,13 +54,6 @@ class Zend_XmlRpc_Server_FaultTest extends PHPUnit2_Framework_TestCase
 
     /**
      * Zend_XmlRpc_Server_Fault::detachFaultException() test
-     *
-     * Call statically 
-     *
-     * Expects:
-     * - classes: 
-     * 
-     * Returns: void 
      */
     public function testDetachFaultException()
     {
@@ -112,13 +91,6 @@ class Zend_XmlRpc_Server_FaultTest extends PHPUnit2_Framework_TestCase
 
     /**
      * Zend_XmlRpc_Server_Fault::attachObserver() test
-     *
-     * Call statically 
-     *
-     * Expects:
-     * - class: 
-     * 
-     * Returns: boolean 
      */
     public function testAttachObserver()
     {
@@ -138,13 +110,6 @@ class Zend_XmlRpc_Server_FaultTest extends PHPUnit2_Framework_TestCase
 
     /**
      * Zend_XmlRpc_Server_Fault::detachObserver() test
-     *
-     * Call statically 
-     *
-     * Expects:
-     * - class: 
-     * 
-     * Returns: boolean 
      */
     public function testDetachObserver()
     {
@@ -162,10 +127,6 @@ class Zend_XmlRpc_Server_FaultTest extends PHPUnit2_Framework_TestCase
 
     /**
      * getCode() test
-     *
-     * Call as method call 
-     *
-     * Returns: int 
      */
     public function testGetCode()
     {
@@ -177,10 +138,6 @@ class Zend_XmlRpc_Server_FaultTest extends PHPUnit2_Framework_TestCase
 
     /**
      * getMessage() test
-     *
-     * Call as method call 
-     *
-     * Returns: string 
      */
     public function testGetMessage()
     {
@@ -192,10 +149,6 @@ class Zend_XmlRpc_Server_FaultTest extends PHPUnit2_Framework_TestCase
 
     /**
      * __toString() test
-     *
-     * Call as method call 
-     *
-     * Returns: string 
      */
     public function test__toString()
     {

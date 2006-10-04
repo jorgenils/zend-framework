@@ -7,7 +7,8 @@ require_once 'PHPUnit2/Framework/IncompleteTestError.php';
 /**
  * Test case for Zend_XmlRpc_Server_Cache
  *
- * @package ortus
+ * @package Zend_XmlRpc
+ * @subpackage UnitTests
  * @version $Id$
  */
 class Zend_XmlRpc_Server_CacheTest extends PHPUnit2_Framework_TestCase 
@@ -19,9 +20,8 @@ class Zend_XmlRpc_Server_CacheTest extends PHPUnit2_Framework_TestCase
     protected $_server;
 
     /**
-     * Description
+     * Local file for caching
      * @var string 
-     * @access private
      */
     protected $_file;
 
@@ -67,13 +67,6 @@ class Zend_XmlRpc_Server_CacheTest extends PHPUnit2_Framework_TestCase
 
     /**
      * Zend_XmlRpc_Server_Cache::delete() test
-     *
-     * Call statically 
-     *
-     * Expects:
-     * - filename: 
-     * 
-     * Returns: boolean 
      */
     public function testDelete()
     {
