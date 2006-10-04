@@ -3,38 +3,17 @@ require_once 'Zend/Server/Reflection/Class.php';
 require_once 'PHPUnit2/Framework/TestCase.php';
 require_once 'PHPUnit2/Framework/IncompleteTestError.php';
 
+require_once 'Zend/Server/Reflection.php';
+
 /**
  * Test case for Zend_Server_Reflection_Class
  *
- * @package ortus
- * @version $Id:$
+ * @package Zend_Server
+ * @subpackage UnitTests
+ * @version $Id$
  */
 class Zend_Server_Reflection_ClassTest extends PHPUnit2_Framework_TestCase 
 {
-    /**
-     * Zend_Server_Reflection_Class object
-     * @var Zend_Server_Reflection_Class
-     */
-    protected $_obj;
-
-    /**
-     * Setup environment
-     */
-    public function setUp() 
-    {
-        // You may need to change this to:
-        // $this->_obj = Zend_Server_Reflection_Class::getInstance();
-        // $this->_obj = new Zend_Server_Reflection_Class();
-    }
-
-    /**
-     * Teardown environment
-     */
-    public function tearDown() 
-    {
-        unset($this->_obj);
-    }
-
     /**
      * __construct() test
      *
@@ -49,8 +28,18 @@ class Zend_Server_Reflection_ClassTest extends PHPUnit2_Framework_TestCase
      */
     public function test__construct()
     {
-        // Remove this line once the test has been written
-        throw new PHPUnit2_Framework_IncompleteTestError('not implemented');
+        $r = new Zend_Server_Reflection_Class(new ReflectionClass('Zend_Server_Reflection'));
+        $this->assertTrue($r instanceof Zend_Server_Reflection_Class);
+        $this->assertEquals('', $r->getNamespace());
+
+        $methods = $r->getMethods();
+        $this->assertTrue(is_array($methods));
+        foreach ($methods as $m) {
+            $this->assertTrue($m instanceof Zend_Server_Reflection_Method);
+        }
+
+        $r = new Zend_Server_Reflection_Class(new ReflectionClass('Zend_Server_Reflection'), 'namespace');
+        $this->assertEquals('namespace', $r->getNamespace());
     }
 
     /**
@@ -66,41 +55,19 @@ class Zend_Server_Reflection_ClassTest extends PHPUnit2_Framework_TestCase
      */
     public function test__call()
     {
-        // Remove this line once the test has been written
-        throw new PHPUnit2_Framework_IncompleteTestError('not implemented');
+        $r = new Zend_Server_Reflection_Class(new ReflectionClass('Zend_Server_Reflection'));
+        $this->assertTrue(is_string($r->getName()));
+        $this->assertEquals('Zend_Server_Reflection', $r->getName());
     }
 
     /**
-     * __get() test
-     *
-     * Call as method call 
-     *
-     * Expects:
-     * - key: 
-     * 
-     * Returns: mixed 
+     * test __get/set
      */
-    public function test__get()
+    public function testGetSet()
     {
-        // Remove this line once the test has been written
-        throw new PHPUnit2_Framework_IncompleteTestError('not implemented');
-    }
-
-    /**
-     * __set() test
-     *
-     * Call as method call 
-     *
-     * Expects:
-     * - key: 
-     * - value: 
-     * 
-     * Returns: void 
-     */
-    public function test__set()
-    {
-        // Remove this line once the test has been written
-        throw new PHPUnit2_Framework_IncompleteTestError('not implemented');
+        $r = new Zend_Server_Reflection_Class(new ReflectionClass('Zend_Server_Reflection'));
+        $r->system = true;
+        $this->assertTrue($r->system);
     }
 
     /**
@@ -112,37 +79,24 @@ class Zend_Server_Reflection_ClassTest extends PHPUnit2_Framework_TestCase
      */
     public function testGetMethods()
     {
-        // Remove this line once the test has been written
-        throw new PHPUnit2_Framework_IncompleteTestError('not implemented');
+        $r = new Zend_Server_Reflection_Class(new ReflectionClass('Zend_Server_Reflection'));
+
+        $methods = $r->getMethods();
+        $this->assertTrue(is_array($methods));
+        foreach ($methods as $m) {
+            $this->assertTrue($m instanceof Zend_Server_Reflection_Method);
+        }
     }
 
     /**
-     * getNamespace() test
-     *
-     * Call as method call 
-     *
-     * Returns: string 
+     * namespace test
      */
     public function testGetNamespace()
     {
-        // Remove this line once the test has been written
-        throw new PHPUnit2_Framework_IncompleteTestError('not implemented');
-    }
-
-    /**
-     * setNamespace() test
-     *
-     * Call as method call 
-     *
-     * Expects:
-     * - namespace: 
-     * 
-     * Returns: void 
-     */
-    public function testSetNamespace()
-    {
-        // Remove this line once the test has been written
-        throw new PHPUnit2_Framework_IncompleteTestError('not implemented');
+        $r = new Zend_Server_Reflection_Class(new ReflectionClass('Zend_Server_Reflection'));
+        $this->assertEquals('', $r->getNamespace());
+        $r->setNamespace('namespace');
+        $this->assertEquals('namespace', $r->getNamespace());
     }
 
     /**
@@ -154,9 +108,16 @@ class Zend_Server_Reflection_ClassTest extends PHPUnit2_Framework_TestCase
      */
     public function test__wakeup()
     {
-        // Remove this line once the test has been written
-        throw new PHPUnit2_Framework_IncompleteTestError('not implemented');
+        $r = new Zend_Server_Reflection_Class(new ReflectionClass('Zend_Server_Reflection'));
+        $s = serialize($r);
+        $u = unserialize($s);
+
+        $this->assertTrue($u instanceof Zend_Server_Reflection_Class);
+        $this->assertEquals('', $u->getNamespace());
+        $this->assertEquals($r->getName(), $u->getName());
+        $rMethods = $r->getMethods();
+        $uMethods = $r->getMethods();
+
+        $this->assertEquals(count($rMethods), count($uMethods));
     }
-
-
 }
