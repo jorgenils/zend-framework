@@ -179,19 +179,24 @@ class Zend_XmlRpc_Fault
         }
 
         // Check for fault
-        if (empty($xml->fault)) {
+        if (!$xml->fault) {
             // Not a fault
             return false;
         }
 
-        $struct = $xml->fault->struct;
+        if (!$xml->fault->value->struct) {
+            // not a proper fault
+            throw new Zend_XmlRpc_Exception('Invalid fault structure', 500);
+        }
+
+        $struct = $xml->fault->value->struct;
         foreach ($struct->member as $member) {
             if ('faultCode' == (string) $member->name) {
                 $code = (int) $member->value->int;
                 continue;
             }
             if ('faultString' == (string) $member->name) {
-                $message = (int) $member->value->string;
+                $message = (string) $member->value->string;
                 continue;
             }
         }
@@ -254,7 +259,7 @@ class Zend_XmlRpc_Fault
         $dom  = new DOMDocument('1.0', 'ISO-8859-1');
         $r    = $dom->appendChild($dom->createElement('methodResponse'));
         $f    = $r->appendChild($dom->createElement('fault'));
-        $f->appendChild($dom->importNode($value->getAsDOM(), true));
+        $f->appendChild($dom->importNode($value->getAsDOM(), 1));
 
         return $dom->saveXML();
     }
