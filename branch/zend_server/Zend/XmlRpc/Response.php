@@ -84,7 +84,7 @@ class Zend_XmlRpc_Response
      */
     protected function _getXmlRpcReturn()
     {
-        return Zend_XmlRpc_Value::getXmlRpcValue($this->_return, $this->_type);
+        return Zend_XmlRpc_Value::getXmlRpcValue($this->_return);
     }
 
     /**
@@ -139,13 +139,15 @@ class Zend_XmlRpc_Response
         }
 
         try {
-            $value = Zend_XmlRpc_Value::getXmlRpcValue($xml->params->param->value, Zend_XmlRpc_Value::XML_STRING);
+            $valueXml = $xml->params->param->value->asXML();
+            $valueXml = preg_replace('/<\?xml version=.*?\?>/i', '', $valueXml);
+            $value = Zend_XmlRpc_Value::getXmlRpcValue(trim($valueXml), Zend_XmlRpc_Value::XML_STRING);
         } catch (Zend_XmlRpc_Value_Exception $e) {
             $this->_fault = new Zend_XmlRpc_Fault(653);
             return false;
         }
 
-        $this->setReturnValue($value);
+        $this->setReturnValue($value->getValue());
         return true;
     }
 
