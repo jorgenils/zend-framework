@@ -254,12 +254,14 @@ class Zend_XmlRpc_Fault
             'faultString' => $this->getMessage()
         );
         $value = Zend_XmlRpc_Value::getXmlRpcValue($faultStruct);
+        $valueDOM = new DOMDocument('1.0', 'UTF-8');
+        $valueDOM->loadXML($value->getAsXML());
 
         // Build response XML
         $dom  = new DOMDocument('1.0', 'ISO-8859-1');
         $r    = $dom->appendChild($dom->createElement('methodResponse'));
         $f    = $r->appendChild($dom->createElement('fault'));
-        $f->appendChild($dom->importNode($value->getAsDOM(), 1));
+        $f->appendChild($dom->importNode($valueDOM->documentElement, 1));
 
         return $dom->saveXML();
     }

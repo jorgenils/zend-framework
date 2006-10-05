@@ -281,9 +281,12 @@ class Zend_XmlRpc_Request
             $params = $mCall->appendChild($dom->createElement('params'));
 
             foreach ($args as $arg) {
-                /* @var $param Zend_XmlRpc_Value */
+                /* @var $arg Zend_XmlRpc_Value */
+                $argDOM = new DOMDocument('1.0', 'UTF-8');
+                $argDOM->loadXML($arg->getAsXML());
+
                 $param = $params->appendChild($dom->createElement('param'));
-                $param->appendChild($dom->importNode($arg->getAsDOM(), 1));
+                $param->appendChild($dom->importNode($argDOM->documentElement, 1));
             }
         }
 

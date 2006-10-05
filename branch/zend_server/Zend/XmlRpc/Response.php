@@ -159,13 +159,15 @@ class Zend_XmlRpc_Response
     public function __toString()
     {
         $value = $this->_getXmlRpcReturn();
+        $valueDOM = new DOMDocument('1.0', 'UTF-8');
+        $valueDOM->loadXML($value->getAsXML());
 
         $dom      = new DOMDocument('1.0', 'UTF-8');
         $response = $dom->appendChild($dom->createElement('methodResponse'));
         $params   = $response->appendChild($dom->createElement('params'));
         $param    = $params->appendChild($dom->createElement('param'));
 
-        $param->appendChild($dom->importNode($value->getAsDOM(), true));
+        $param->appendChild($dom->importNode($valueDOM->documentElement, true));
 
         return $dom->saveXML();
     }

@@ -14,7 +14,7 @@ require_once 'Zend/XmlRpc/Request.php';
  * @package Zend_XmlRpc
  * @version $Id$
  */
-class Zend_XmlRpc_Request_Stdin
+class Zend_XmlRpc_Request_Stdin extends Zend_XmlRpc_Request
 {
     /**
      * Raw XML as received via request
