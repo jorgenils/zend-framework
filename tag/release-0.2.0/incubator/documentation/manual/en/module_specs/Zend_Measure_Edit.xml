@@ -1,0 +1,260 @@
+<sect1 id="zend.measure.edit">
+    <title>Manipulating measurements</title>
+    <para>
+        Naturally, in- and output of measurements is not enough - it is equally important to be able to manipulate them.
+        This can be done using the following methods.
+    </para>
+    <para>
+        <link linkend="zend.measure.edit.convert"><code>Convert</code></link>
+    </para>
+    <para>
+        <link linkend="zend.measure.edit.add"><code>Add and subtract</code></link>
+    </para>
+    <para>
+        <link linkend="zend.measure.edit.equal"><code>Compare</code></link>
+    </para>
+    <para>
+        <link linkend="zend.measure.edit.compare"><code>Calculate differences</code></link>
+    </para>
+    <para>
+        <link linkend="zend.measure.edit.changevalue"><code>Manually change values</code></link>
+    </para>
+    <para>
+        <link linkend="zend.measure.edit.changetype"><code>Manually change types</code></link>
+    </para>
+    <sect2 id="zend.measure.edit.convert">
+        <title>Convert</title>
+        <para>
+            Probably the most important feature is the conversion into different units of measurement.
+            The conversion of a unit can be done any number of times using the method <code>convertTo()</code>.
+        </para>
+        <para>
+            <note>
+                Units of measurement can only be converted to other units of the same type.
+            </note>
+            Therefore, it is not possible to convert (e.g.) a length into a weight.
+        </para>
+        <example>
+            <title>Convert</title>
+            <programlisting role="php"><![CDATA[<?php
+require_once 'Zend.php';
+Zend::loadClass('Zend_Measure');
+Zend::loadClass('Zend_Measure_Weight');
+Zend::loadClass('Zend_Locale');
+
+$locale = new Zend_Locale('de');
+
+$mystring = "1.234.567,89";
+$unit = new Zend_Measure($mystring,Zend_Measure_Weight::POUND,$locale);
+
+print "Kilo:".$unit->convertTo(Zend_Measure_Weight::KILOGRAM);
+print "Ton:".$unit->convertTo(Zend_Measure_Weight::TON);
+?>]]></programlisting>
+        </example>
+    </sect2>
+    <sect2 id="zend.measure.edit.add">
+        <title>Add and subtract</title>
+        <para>
+            Measurements can be added together using <code>add()</code> and subtracted using <code>sub()</code>.
+        </para>
+        <para>
+            <example>
+                <title>Adding units</title>
+                <programlisting role="php"><![CDATA[<?php
+require_once 'Zend.php';
+Zend::loadClass('Zend_Measure');
+Zend::loadClass('Zend_Measure_Length');
+
+// Define objects
+$unit = new Zend_Measure(200,Zend_Measure_Length::CENTIMETER);
+$unit2 = new Zend_Measure(1,Zend_Measure_Length::METER);
+
+// Add $unit2 to $unit 
+$sum = $unit->add($unit2);
+
+echo $sum;
+?>]]></programlisting>
+            </example>
+            <note>
+                Each addition will create a new object for the result.
+            </note>
+            <note>
+                The new object will be of the same type as the originating object.
+            </note>
+            <note>
+                Adding one object to another will automatically convert it to the
+                correct unit. It is not neccessary to call <link linkend="zend.measure.edit.convert"><code>convertTo()</code></link>
+                before adding different units.
+            </note>
+        </para>
+        <para>
+            <example>
+                <title>Subtract</title>
+                <para>
+                    Subtraction of measurements works just like addition.
+                </para>
+                <programlisting role="php"><![CDATA[<?php
+require_once 'Zend.php';
+Zend::loadClass('Zend_Measure');
+Zend::loadClass('Zend_Measure_Length');
+
+// Define objects
+$unit = new Zend_Measure(200,Zend_Measure_Length::CENTIMETER);
+$unit2 = new Zend_Measure(1,Zend_Measure_Length::METER);
+
+// Subtract $unit2 from $unit
+$sum = $unit->sub($unit2);
+
+echo $sum;
+?>]]></programlisting>
+            </example>
+        </para>
+    </sect2>
+    <sect2 id="zend.measure.edit.equal">
+        <title>Compare</title>
+        <para>
+            Of course, measurements can also be compared.
+        </para>
+        <para>
+            <example>
+                <title>Different measurements</title>
+                <programlisting role="php"><![CDATA[<?php
+require_once 'Zend.php';
+Zend::loadClass('Zend_Measure');
+Zend::loadClass('Zend_Measure_Length');
+
+// Define measurements
+$unit = new Zend_Measure(100,Zend_Measure_Length::CENTIMETER);
+$unit2 = new Zend_Measure(1,Zend_Measure_Length::METER);
+
+if ($unit->equals($unit2)) {
+    print "Both measurements are identical";
+} else {
+    print "These are different measurements";
+}
+?>]]></programlisting>
+            </example>
+            <example>
+                <title>Identical measurements</title>
+                <programlisting role="php"><![CDATA[<?php
+require_once 'Zend.php';
+Zend::loadClass('Zend_Measure');
+Zend::loadClass('Zend_Measure_Length');
+
+// Define measurements
+$unit = new Zend_Measure(100,Zend_Measure_Length::CENTIMETER);
+$unit2 = new Zend_Measure(1,Zend_Measure_Length::METER);
+
+$unit2->setType(Zend_Measure_Length::CENTIMETER);
+
+if ($unit->equals($unit2)) {
+    print "Both measurements are identical";
+} else {
+    print "These are different measurements";
+}
+?>]]></programlisting>
+            </example>
+            <note>
+                <code>equals()</code> will return <code>TRUE</code> only if both the value
+                and the unit of measure are identical.
+            </note>
+        </para>
+    </sect2>
+    <sect2 id="zend.measure.edit.compare">
+        <title>Calculate differences</title>
+        <para>
+            To determine if a measurement is less or greater than another, you can use the
+            <code>compare()</code> method. It will return the difference between two objects
+            as an integer value.
+        </para>
+        <para>
+            Identical measurements will return 0. Lesser ones will return a negative, greater ones 
+            a positive value.
+        </para>
+        <para>
+            <example>
+                <title>Difference</title>
+                <programlisting role="php"><![CDATA[<?php
+require_once 'Zend.php';
+Zend::loadClass('Zend_Measure');
+Zend::loadClass('Zend_Measure_Length');
+
+$unit = new Zend_Measure(100,Zend_Measure_Length::CENTIMETER);
+$unit2 = new Zend_Measure(1,Zend_Measure_Length::METER);
+$unit3 = new Zend_Measure(1.2,Zend_Measure_Length::METER);
+
+print "Equal:".$unit2->compare($unit);
+print "Greater:".$unit2->compare($unit3);
+print "Lesser:".$unit3->compare($unit2);
+?>]]></programlisting>
+            </example>
+        </para>
+    </sect2>
+    <sect2 id="zend.measure.edit.changevalue">
+        <title>Manually change values</title>
+        <para>
+            Every now and then you might need to change the value of a measurement by hand.
+            This is what the method <code>setValue()</code> is for.
+        </para>
+        <para>
+            <code>setValue()</code> will overwrite the current value and accepts the same parameters
+            like when creating the object instance.
+        </para>
+        <para>
+            <example>
+                <title>Changing a value</title>
+                <programlisting role="php"><![CDATA[<?php
+require_once 'Zend.php';
+Zend::loadClass('Zend_Measure');
+Zend::loadClass('Zend_Measure_Length');
+Zend::loadClass('Zend_Locale');
+
+$locale = new Zend_Locale('de_AT');
+
+$unit = new Zend_Measure(1,Zend_Measure_Length::METER);
+
+$unit->setValue(1.2);
+echo $unit;
+
+$unit->setValue(1.2,Zend_Measure_Length::KILOMETER);
+echo $unit;
+
+$unit->setValue("1.234,56",Zend_Measure_Length::MILLIMETER,$locale);
+echo $unit;
+?>]]></programlisting>
+            </example>
+        </para>
+    </sect2>
+    <sect2 id="zend.measure.edit.changetype">
+        <title>Manually change types</title>
+        <para>
+            Just like the value, you can also change the type of a measurement without
+            altering its value. This can be done using the method <code>setType()</code>.
+        </para>
+        <para>
+            <code>setType()</code> will not change the current value.
+        </para>
+        <para>
+            <example>
+                <title>Changing the type</title>
+                <programlisting role="php"><![CDATA[<?php
+require_once 'Zend.php';
+Zend::loadClass('Zend_Measure');
+Zend::loadClass('Zend_Measure_Length');
+
+$unit = new Zend_Measure(1,Zend_Measure_Length::METER);
+
+// output: 1 m
+echo $unit;
+
+// output: 1 km
+$unit->setType(Zend_Measure_Length::KILOMETER);
+echo $unit;
+?>]]></programlisting>
+            </example>
+        </para>
+    </sect2>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

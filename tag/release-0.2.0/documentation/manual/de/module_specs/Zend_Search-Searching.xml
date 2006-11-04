@@ -1,0 +1,200 @@
+<sect1 id="zend.search.searching">
+	<title>Einen Index durchsuchen</title>
+
+	<sect2 id="zend.search.searching.query-parser">
+		<title>Abfrage erstellen</title>
+
+        <para>
+            Es gibt zwei Arten, den Index zu durchsuchen. Die erste Methode verwendet den 
+            Query Parser, um eine Abfrage aus einem String zu erstellen. Die zweite ist die
+            Möglichkeit, eigene Abfragen mithilfe der Zend_Search_Lucene Programmierschnittstelle
+            (API) zu erstellen.
+        </para>
+
+        <para>
+            Vor der Verwendung des bereitgestellten Query Parsers, beachte bitte folgendes:
+
+            <orderedlist>
+                <listitem>
+                    Wenn du deine Abfragestrings programmseitig erstellst und dann durch den Query 
+                    Parser verarbeiten lässt, solltest du ernsthaft darüber nachdenken, deine 
+                    Abfragen direct mit der Programmierschnittstelle (API) für Abfragen zu erstellen.
+                    In anderen Worten, der Query Parser wurde für von Menschen eingegebene Texte 
+                    und nicht für von Programmen erstellte Texte entwickelt.
+                </listitem>
+                <listitem>
+                    Nicht in einzelne Tokens aufgeteilte Felder werden am besten direkt zu der 
+                    Abfrage und nicht über den Query Parser hinzugefügt. Wenn die Feldwerte durch 
+                    die Anwendung programmseitig erstellt werden, dann sollte dies für 
+                    Abfrageklauseln dieses Felds ebenfalls geschehen. Ein Analysator, welche der 
+                    Query Parser verwendet, wurde entwickelt, um von Menschen eingegebenen Text in
+                    Begriffe zu konvertieren. Durch Programme erstellte Werte wie Datumsangaben,
+                    Schlüsselwörter, usw. sollten durchweg durch Programme erstellt werden.
+                </listitem>
+                <listitem>
+                    In einem Abfrageformular sollten generelle Textfelder den Query Parser 
+                    verwenden. Alle anderen, wie z.B. Datumsbereiche, Schlüsselwörter, usw. werden
+                    besser direkt durch die Programmierschnittstelle (API) der Abfrage hinzugefügt. Ein
+                    Feld mit einem begrenzten Wertebereich, das durch ein Pulldown-Menü spezifiziert
+                    wird, sollte nicht einem Abfragestring hinzugefügt werden, der anschließend 
+                    wieder geparst wird, sondern eher als eine TermQuery Klausel hinzugefügt werden.
+                </listitem>
+            </orderedlist>
+
+        </para>
+
+        <para>
+            Beide Arten verwenden die selbe Methode der Programmierschnittstelle (API), um den Index
+            zu durchsuchen:
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+require_once('Zend/Search/Lucene.php');
+
+$index = new Zend_Search_Lucene('/data/my_index');
+
+$index->find($query);
+
+?>]]></programlisting>
+
+        <para>
+            Die <code>Zend_Search_Lucene::find()</code> Methode ermittelt den Eingabetyp automatisch
+            und verwendet den Query Parser, um ein entsprechendes Zend_Search_Lucene_Search_Query 
+            Objekt aus dem String zu erstellen.
+        </para>
+
+        <para>
+            Es ist wichtig zu beachten, dass <code>find()</code> die Groß- und Kleinschreibung 
+            beachtet. Standardmäßig normalisiert LuceneIndexCreation.jar alle Dokumente in 
+            Kleinschrift. Dies kann mithilfe einer Kommandozeilen Weiche abgestellt werden (gebe 
+            LuceneIndexCreation.jar ohne Argumente für eine Hilfe ein). Die Schreibweise des Textes, 
+            der an <code>find()</code> übergeben wird, muss mit dem des Index übereinstimmen. Wenn
+            der Index in Kleinschrift normalisiert wurde, müssen alle Texte, die an 
+            <code>find()</code> übergeben werden, mittels <code>strtolower()</code> verkleinert 
+            werden. Andernfalls würde es keine Überstimmungen geben.
+        </para>
+	</sect2>
+
+	<sect2 id="zend.search.searching.results">
+		<title>Suchergebnisse</title>
+        <para>
+            Das Suchergebnis ist ein Array mit Zend_Search_Lucene_Search_QueryHit Objekten. Jedes
+            davon hat zwei Eigenschaften: <code>$hit->document</code> ist eine Dokumentnummer 
+            innerhalb des Index und <code>$hit->score</code> ist ein Punktwert für den Treffer im
+            Suchergebnis. Das Ergebnis wird anhand der Punktwerte sortiert (beste Treffer kommen
+            zuerst)
+        </para>
+
+        <para>
+            Das Zend_Search_Lucene_Search_QueryHit Objekt beinhaltet zudem jedes Feld des 
+            Zend_Search_Lucene_Document, das gefunden wurde, als Eigenschaft des Treffers. In 
+            diesem Beispiel, wird ein Treffer zurückgegeben und das entsprechende Dokument hat
+            zwei Felder: Titel und Autor.
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+require_once('Zend/Search/Lucene.php');
+
+$index = new Zend_Search_Lucene('/data/my_index');
+
+$hits = $index->find($query);
+
+foreach ($hits as $hit) {
+    echo $hit->score;
+    echo $hit->title;
+    echo $hit->author;
+}
+
+?>]]></programlisting>
+
+        <para>
+            Optional kann das originale Zend_Search_Lucene_Document Objekt vom 
+            Zend_Search_Lucene_Search_QueryHit Objekt zurückgegeben werden.
+            
+            Du kannst gespeicherte Teile des Dokuments durch Verwendung der <code>getDocument()</code>
+            Methode des Indexobjektes zurückerhalten und diese dann durch die 
+            <code>getFieldValue()</code> Methode abfragen:
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+require_once('Zend/Search/Lucene.php');
+
+$index = new Zend_Search_Lucene('/data/my_index');
+
+$hits = $index->find($query);
+foreach ($hits as $hit) {
+    // gebe das Zend_Search_Lucene_Document Objekt für diesen Treffer zurück
+    echo $document = $hit->getDocument();
+
+    // gebe ein Zend_Search_Lucene_Field Objekt vom Zend_Search_Lucene_Document zurück
+    echo $document->getField('title');
+
+    // gebe den Stringwert des Zend_Search_Lucene_Field Objekts zurück
+    echo $document->getFieldValue('title');
+
+    // das gleiche wie getFieldValue()
+    echo $document->title;
+}
+
+?>]]></programlisting>
+        
+        <para>
+            Die Felder, die in einem Zend_Search_Lucene_Document Objekt verfügbar sind, werden beim
+            Indizieren festgelegt. Die Dokumentenfelder werden durch die Indizieranwendung 
+            (z.B. LuceneIndexCreation.jar) im Dokument entweder nur indiziert oder indiziert und 
+            gespeichert. 
+        </para>
+
+        <para>
+            Beachte, dass die Dokumentidentität ('path' in unserem Beispiel) auch im Index 
+            gespeichert wird und von ihm zurückgewonnen werden muß.
+        </para>
+
+	</sect2>
+
+
+	<sect2 id="zend.search.searching.results-scoring">
+		<title>Ergebnisgewichtung</title>
+        <para>
+            Zend_Search_Lucene verwendet die selben Gewichtungsalgorithmen wie Java Lucene. Die
+            Suchergebnisse werden nach einem Punktwert sortiert. Treffer mit höherem Punktwert
+            kommen zuerst, und Dokumente mit höherem Punktwert passen auf die Abfrage besser als 
+            solche mit niedrigerem Punktwert.
+            
+        </para>
+
+        <para>
+            Grob gesagt, haben die Suchergebnisse einen höheren Punktwert, welche den gesuchten 
+            Begriff oder die gesuchte Phrase häufiger enthalten.
+            
+        </para>
+
+        <para>
+            Der Punktwert kann über die <code>score</code> Eigenschaft des Treffers ermittelt werden:
+        </para>
+        <programlisting role="php"><![CDATA[<?php
+$hits = $index->find($query);
+
+foreach ($hits as $hit) {
+    echo $hit->id;
+    echo $hit->score;
+}
+
+?>]]></programlisting>
+
+        <para>
+            Die Zend_Search_Lucene_Search_Similarity Klasse wird verwendet, um den Punktwert zu 
+            berechnen. Beachte den <link linkend="zend.search.extending.scoring">Erweiterbarkeit. 
+            Algorithmen für Punktwertermittlung</link> Abschnitt für weitere Details.
+        </para>
+
+	</sect2>
+
+</sect1>
+
+<!--
+vim:se ts=4 sw=4 et:
+-->

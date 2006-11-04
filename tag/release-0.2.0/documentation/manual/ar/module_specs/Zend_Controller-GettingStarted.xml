@@ -1,0 +1,188 @@
+<sect1 id="zend.controller.getting-started">
+	<title>البداية</title>
+	
+	<sect2 id="zend.controller.getting-started.introduction">
+		<title>مقدمة</title>
+    		<para>
+                تم بناء <code>Zend_Controller</code> و فى اعتبارنا ان يكون قابل للتمدد بسهولة, سواء عن طريق إن شاء 
+                subclasses ترث من الـ class الموجودة او إنشاء classes جديدة تعتمد على الـ interfaces المسمى 
+                <code>Zend_Controller_Router_Interface</code> و 
+                <code>Zend_Controller_Dispatcher_Interface</code>.
+		</para>
+	</sect2>
+	
+	<sect2 id="zend.controller.getting-started.server-configuration">
+		<title>إعدادات السيرفر</title>
+		<para>
+            تم بناء Zend_Controller ليدعم المواقع الجديدة بميزة الـ URIs النظيفة 
+            <footnote>
+                <para>
+                الـ URIs النظيفة : مثلا عنوان مثل 
+                <code><![CDATA[
+                http://www.site.com/index.php?q=cat&id=45
+                 ]]></code> 
+                 لا يعتبر نظيف , و لكن هذا يعتبر نظيف <code>
+                http://www.site.come/cat/45 
+                </code> , و هذا يعطى نفس قيمة الأول .
+                </para>
+            </footnote> 
+            , و هذا يحتاج الى ان تكون هذه الأعدادت مدعومة فى الـ webserver الخاص بك, اى يجب ان تتوفر خاصية 
+            اعادة كتابة الـ URIs لكى تتمكن من اعادة توجيه كل الطلبات فى موقعك الى ملف واحد , و هنا نحن نسميه "index.php" 
+            , و الذى بدوره سيكون  
+            <footnote id="bootstrap" >
+                <para>
+                منطقة بداية تشغيل برنامج
+                </para>
+            </footnote>bootstrap 
+            و سيشغل <code>Zend_Controller_Front</code>. 
+            على سيرفرات الـ Apache هذا يتم التحكم به من خلال module اختيارى اسمه mod_rewrite.
+		</para>
+
+		<para>
+			الخطوة الأولى لإعداد السيرفر هى النجاح فى تركيب و تشغيل mod_rewrite. الخطوة التالية هى وضع ملفين فى 
+            الـ  
+            <footnote id="document-root">
+                <para>
+                document root او المجلد الجزرى هو المجلد الرئيسى فى موقعك حيث يتمكن المستخدم من الوصول إليه بمجرد كتابة 
+                إسم الموقع فقط.
+                </para>
+            </footnote>document root 
+             و هما : htaccess. و ملف index.php . 
+            ملف htaccess. يتم استخدامه من قبل Apache و يجب ان يحتوى على  اوامر mod_rewrite لتقوم بإعادة تحويل 
+            كل الطلبات الى index.php . 
+            لأسباب تنتمى إلى عملية التطوير , يكن من الأسهل كتابة امر mod_rewrite يقوم بتحويل كل الطلبات الى index.php 
+            ما عدا التى تحتوى امتداد ملفات معينة , و هنا مثال لملف htaccess. مماثل :
+        </para>
+        <programlisting role="php"><![CDATA[
+RewriteEngine on
+RewriteRule !\.(js|ico|gif|jpg|png|css)$ index.php
+]]></programlisting>
+        <para>
+            فى المثال , كل الطلبات التى لا تحتوى اى من امتدادات الملفات المذكورة فى الأعلى , سيتم تحويلها الى index.php . 
+            هذا مفيد فى اثناء عملية التطوير, بينما فى مرحلة الإنتاج  يجب ان يتم كتابة اوامر اعادة التوجيه بحيث يتم 
+            إستثناء مجلدات معينة و ليس  امتدادات ملفات.
+		</para>
+	</sect2>
+	
+	<sect2 id="zend.controller.getting-started.bootstrap">
+		<title>ملف الـ Bootstrap</title>
+		
+		<para>
+            بعد الإنتهاء من ملف htaccess. , قم بإنشاء ملف جديد اسمه <code>index.php</code> , 
+            السبب من إنشاء index.php هو ان يكون  
+            <footnoteref linkend="bootstrap" />bootstrap 
+            لـ Zend_Controller_Front , و الذى يجب ان يكون خارج الـ  
+            <footnoteref linkend="document-root" />document root.
+		</para>
+
+		<note>	
+			ملف الـ bootstrap يجب ان يكون ملف الـ PHP الوحيد المحفوظ فى الـ document root.			
+		</note>
+
+		<para>
+            لأسباب امنية, ينصح إطار عمل Zend بأن لا يتم وضع اى ملف PHP فى مجلدات يمكن الوصول إليها من خلال الـ 
+            webserver (اى المجلدات فى document root) . بالرغم من أن هذا لا يمكن تنفيذه فى بعض الحالات, مثل فى سيرفرات 
+            الأستضافة المتشاركة, يجب ان تعتبر هذا من العادات الجيدة و التى يجب ان تعتمد عليها كلما امكن.  
+		</para>
+
+		<para>
+			قم بإنشاء ملف الـ bootstrap المسمى index.php و ضعه فى الـ document root ليقوم بتشغيل 
+            Zend_Controller_Front :
+
+        </para>
+        <programlisting role="php"><![CDATA[<?php
+				
+require_once 'Zend/Controller/Front.php';
+
+Zend_Controller_Front::run('/path/to/your/controllers');
+
+?>]]></programlisting>
+        <para>
+			إقرأ الجزء القادم بالنسبة الى <code>path/to/your/controllers/</code>.
+
+			كما هو موضح فى ملف <code>README.txt</code>, المجلد الذى يحتوى مكتبة إطار عمل Zend يجب 
+            ان يكون فى الـ <code>include_path</code>. إذا لم تقم بعمل هذا فى ملف php.ini , يمكنك أستخدام 
+            <code>()set_include_path</code> فى بداية الملف قبل <code>()require_once</code>.
+		</para>
+
+		<note>
+            فى هذا الوقت, نحن نقوم بالبحث عن حل لا يتطلب توافر mod_rewrite . ربما سنقوم بتوفير اعدادات للأنظمة التى تعمل 
+            مع او بدون امكانيات الـ mod_rewrite . ايضا يرجى ملاحظة ان هذا النظام ليس مرتبط بـ Apache و mod_rewrite 
+            تحديداً, و لكن اى webserver  لديه هذه القدرة على اعادة التوجيه يجب ان يفى بالغرض.
+		</note>
+	</sect2>	
+		
+	<sect2 id="zend.controller.getting-started.directory-structure">
+		<title>هيكلة المجلدات</title>
+		
+		<para>
+			ينصح فى المواقع التى تعتمد على إطار عمل Zend ان تتشارك جميعها فى هيكلة موحدة لمجلداتها , ربما هذا لا يمكن 
+            تطبيقه فى بعض الحالات و لكن يفضل ان تطبقه فى اغلب او كل تطبيقاتك , فعند اختياراك ان تلتزم بهذه الهيكلة 
+            سيكن من السهل فهم الكود من قبل اى شخص يألف بنية إطار عمل Zend .
+		</para>
+		
+		<para>	
+            بنية المجلدات المقترحة تتكون من مجلدين اساسيين , مجلد اسمه library ( سيحتوى المكتبات الخاصة بـ Zend و غيرها) و 
+             المجلد الثانى يسمى application .
+		</para>
+        <programlisting role="php"><![CDATA[
+/application
+  /models
+  /views
+  /controllers
+/document_root
+  /images
+  /styles
+  .htaccess
+  index.php
+/library
+  /Zend
+]]></programlisting>
+		
+		<note>
+			هذا القسم لم ينتهى بعد و مازال تحت البناء و يمكن ان يتغير محتواه فى اى وقت.
+		</note>
+	</sect2>	
+		
+	<sect2 id="zend.controller.overview.indexcontroller">
+		<title>IndexController</title>
+
+		<para>
+			كل تطبيق يجب ان يوفر controller بإسم <code>IndexController</code>. هذا هو الـ controller الذى سيتم 
+            الوصول إليه عندما لا يتم تحديد controller معين فى الـ URI, مثال على URI مماثل يمكن ان نراه هنا:
+        </para>
+        <programlisting role="php"><![CDATA[
+http://framework.zend.com/
+]]></programlisting>
+
+		<para>
+            الـ class المسمى <code>IndexController</code> يجب ان يتم حفظه فى ملف بإسم 
+            <code>IndexController.php</code>, و هذا الملف يجب ان يوضع فى مجلد الـ controllers .
+            يجب ان يرث <code>IndexController</code> من <code>Zend_Controller_Action</code> , 
+            و هنا مثال على إنشاء <code>IndexController</code> :
+
+        </para>
+        <programlisting role="php"><![CDATA[<?php
+				
+require_once 'Zend/Controller/Action.php';
+
+class IndexController extends Zend_Controller_Action 
+{
+	public function indexAction()
+	{
+		echo 'Hello from IndexController';
+	}
+
+	public function noRouteAction()
+	{
+		$this->_redirect('/');
+	}
+}
+
+?>]]></programlisting>
+			
+		<note>
+			هذا القسم لم ينتهى بعد و مازال تحت البناء و يمكن ان يتغير محتواه فى اى وقت.
+		</note>
+	</sect2>			
+</sect1>

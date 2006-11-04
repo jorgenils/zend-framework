@@ -1,0 +1,101 @@
+<sect1 id="zend.service.yahoo">
+    <title>Zend_Service_Yahoo</title>
+    <sect2 id="zend.service.yahoo.introduction">
+        <title>简介</title>
+        <para>
+            <code>Zend_Service_Yahoo</code> 是一个实现多个Yahoo! REST 接口的API.
+            <code>Zend_Service_Yahoo</code> 允许你使用Yahoo! 网页搜索, Yahoo! 新闻, 
+			Yahoo! 本地(Local), Yahoo! 图片. 为了使用 Yahoo! REST API,
+			你必须拥有一个 Yahoo! Application ID. 要获得它, 请访问
+            <ulink url="http://api.search.yahoo.com/webservices/register_application">Application ID Request Form</ulink>.
+        </para>
+    </sect2>
+    <sect2 id="zend.service.yahoo.websearch">
+        <title>用Yahoo!来搜索网页</title>
+        <para>
+            <code>Zend_Service_Yahoo</code> 允许你用
+            <code>webSearch()</code> 方法来进行Yahoo! 网页搜索, 它接受一个查询字符串作为参数 ，
+			用一个可选的数组传递搜索选项. 更多的细节和搜索选项的信息, 请访问
+            <ulink url="http://developer.yahoo.net/search/web/V1/webSearch.html">Yahoo! Web Search
+            Documentation</ulink>.  <code>webSearch()</code> 方法返回一个
+            <code>Zend_Service_Yahoo_WebResultSet</code> 对象.
+        </para>
+        <example>
+            <title>用Yahoo!来搜索网页</title>
+            <programlisting><![CDATA[<?php
+require_once 'Zend/Service/Yahoo.php';
+$yahoo = new Zend_Service_Yahoo("YAHOO_APPLICATION_ID");
+$results = $yahoo->webSearch('PHP');
+foreach ($results as $result) {
+    echo $result->Title .'<br />';
+}
+?>]]>       </programlisting>
+        </example>
+    </sect2>
+    <sect2 id="zend.service.yahoo.imagesearch">
+        <title> 用Yahoo!来查找图片</title>
+        <para>
+            你可以使用<code>Zend_Service_Yahoo</code>的 <code>imageSearch()</code>
+            方法来在Yahoo上搜索图片。  。 它接受一个查询字符串作为参数 ，用一个可选的数组传递搜索选项, 就像
+            <link linkend="zend.service.yahoo.websearch"><code>webSearch()</code> method</link>. 
+			更多的细节和搜索选项的信息, 请访问 
+            <ulink url="http://developer.yahoo.net/search/image/V1/imageSearch.html">Yahoo! Image Search
+            Documentation</ulink>.
+        </para>
+        <example>
+            <title>用Yahoo!来查找图片</title>
+            <programlisting><![CDATA[<?php
+require_once 'Zend/Service/Yahoo.php';
+$yahoo = new Zend_Service_Yahoo("YAHOO_APPLICATION_ID");
+$results = $yahoo->imageSearch('PHP');
+foreach ($results as $result) {
+    echo $result->Title .'<br />';
+}
+?>]]>       </programlisting>
+        </example>
+    </sect2>
+    <sect2 id="zend.service.yahoo.localsearch">
+        <title>Finding Local Businesses and Services with Yahoo!</title>
+        <para>
+            You can search for local businesses and services with Yahoo! by using the <code>localSearch()</code> method.
+            For full details, please see the
+            <ulink url="http://developer.yahoo.net/search/local/V1/localSearch.html">Yahoo! Local Search
+            Documentation</ulink>.
+        </para>
+        <example>
+            <title>用Yahoo!查找本地商务和服务信息</title>
+            <programlisting><![CDATA[<?php
+require_once 'Zend/Service/Yahoo.php';
+$yahoo = new Zend_Service_Yahoo("YAHOO_APPLICATION_ID");
+$results = $yahoo->localSearch('Apple Computers', array('zip' => '95014'));
+foreach ($results as $result) {
+    echo $result->Title .'<br />';
+}
+?>]]>       </programlisting>
+        </example>
+    </sect2>
+    <sect2 id="zend.service.yahoo.newssearch">
+        <title>搜索Yahoo! 新闻</title>
+        <para>
+            搜索Yahoo! 新闻非常简单; 使用  <code>newsSearch()</code> 方法, 
+			如下面的例子. 更多的细节和搜索选项的信息, 请访问
+            <ulink url="http://developer.yahoo.net/search/news/V1/newsSearch.html">Yahoo! News Search
+            Documentation</ulink>.
+        </para>
+        <example>
+            <title>搜索Yahoo! 新闻</title>
+            <programlisting><![CDATA[<?php
+require_once 'Zend/Service/Yahoo.php';
+$yahoo = new Zend_Service_Yahoo("YAHOO_APPLICATION_ID");
+$results = $yahoo->newsSearch('PHP');
+foreach ($results as $result) {
+    echo $result->Title .'<br />';
+}
+?>]]>       </programlisting>
+        </example>
+    </sect2>
+    &module_specs.Zend_Service_Yahoo_Classes;
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

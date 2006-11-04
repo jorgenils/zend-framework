@@ -1,0 +1,245 @@
+<sect1 id="zend.controller.subclassing">
+	<title>Subclassing</title>
+	
+	<sect2 id="zend.controller.subclassing.introduction">
+		<title>Einführung</title>
+		<para>
+			Das <code>Zend_Controller</code> System wurde im Sinne der Erweiterungsmöglichkeiten 
+			entwickelt, entweder durch Erstellen von Subklassen, welche die bestehenden Klassen 
+			erweitern, oder durch Erstellen neuer Klassen, welche die Interfaces 
+			<code>Zend_Controller_Router_Interface</code> und 
+			<code>Zend_Controller_Dispatcher_Interface</code> implementieren.
+		</para>
+		
+		<para>
+			Mögliche Gründe für die Implementierung eines neuen Routers oder Dispatchers könnten 
+			sein:
+						
+			<itemizedlist>
+				<listitem>
+					<para>
+					    Das vorhandene System zum URI Routing ist nicht verwendbar, wenn es in eine 
+					    bestehende Website integriert werden soll, die eigene Konventionen für das 
+					    Routing verwendet, die nicht mit dem vom Zend Framework bereit gestellten 
+					    Routing Mechanismus übereinstimmen.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+					    Du benötigt das Routing für etwas völlig anderes. Die 
+					    <code>Zend_Controller_Router</code> Klasse arbeitet nur mit URIs. Es ist 
+					    möglich und wahrscheinlich, dass Du das MVC Entwurfsmuster für die 
+					    Entwicklung eines anderen Programmtyps verwenden möchtest, z.B. für eine
+					    Konsolenanwendung. Im Fall einer Konsolenanwendung könnte ein 
+					    maßgeschneiderter Router die Kommandozeilenparameter für das Routing 
+					    verwenden.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+					    Der vom <code>Zend_Controller_Dispatcher</code> bereitgestellte Mechanismus 
+					    ist nicht verwendbar. Die vorgegebene Konfiguration setzt die Konvention 
+					    voraus, dass Controller Klassen und Aktionen die Methoden dieser Klassen 
+					    sind. Allerdings gibt es hierfür auch viele andere Strategien. Ein Beispiel 
+					    wäre, dass Controller Verzeichnisse und Aktionen Dateien in diesen 
+					    Verzeichnissen sind.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+					    Du möchtest zusätzliche Möglichkeiten bereitstellen, die von allen 
+					    Controllern geerbt werden sollen. Zum Beispiel wird <code>Zend_View</code>
+					    standardmäßig nicht von <code>Zend_Controller_Action</code> integriert. 
+					    Stattdessen könntest Du deinen eigenen Controller hierfür erweitern und 
+					    durch die Verwendung müssen die bereitgestellten 
+					    <code>Zend_Controller_Router</code> oder 
+					    <code>Zend_Controller_Dispatcher</code> nicht geändert werden.
+					</para>
+				</listitem>
+			</itemizedlist>
+			
+			Bitte sei vorsichtig beim Überschreiben wesentlicher Teile des System, besonders beim
+			Dispatcher! Einer der Vorteile des <code>Zend_Controller</code> ist, dass er einfache
+			Konventionen für den Aufbau von Applikationen einführt. Wenn zuviel dieses 
+			vorgegebenen Verhaltens geändert wird, gehen einige dieser Vorteile verloren. Allerdings
+			gibt es viele verschiedene Anforderungen und eine Lösung kann nicht alle erfüllen. 
+			Deshalb wird die Freiheit geboten, wenn sie benötigt wird. 
+		</para>
+	</sect2>
+	
+	<sect2 id="zend.controller.subclassing.conventions">
+		<title>Konventionen</title>
+		
+		<para>
+		    Beim Erweitern von Zend_Controller Klassen befolge bitte diese Konventionen für das 
+		    Bezeichnen und Ablegen von Dateien. Dadurch wird sichergestellt, dass andere 
+		    Programmierer, die mit dem Zend Framework vertraut sind, dein Projekt leichter 
+		    verstehen können. 
+		</para>
+		
+		<sect3 id="zend.controller.subclassing.prefix">
+			<title>Präfix</title>
+				
+			<para>
+			    Klassen, die im Zend Framework enthalten sind, befolgen die Konvention, dass jeder 
+			    Klasse ein "Zend_" vorangestellt wird. Dies ist der Präfix. Wir empfehlen, dass Du
+			    alle deine Klassen in ähnlicher Weise bezeichnest. Wenn dein Firmennamen z.B. 
+			    Widget, Inc. ist, könnte das Präfix "Widget_" heißen.
+			</para>
+		</sect3>
+		
+		<sect3 id="zend.controller.directory.layout">
+			<title>Verzeichnisstruktur</title>
+			
+			<para>
+				Die <code>Zend_Controller</code> Klassen sind im Bibliotheksverzeichnis wie folgt
+				abgelegt::
+			</para>
+
+    <programlisting role="php"><![CDATA[
+/library
+  /Zend
+    /Controller
+      Action.php
+      Dispatcher.php
+      Router.php
+]]></programlisting>			
+				
+			<para>
+				Wenn du die <code>Zend_Controller</code> erweiterst, wird empfohlen, dass die neuen
+				Klassen in der gleichen Struktur unterhalb deines Präfix abgelegt werde. Dies macht 
+				es einfacher, sie zu finden, wenn sich jemand in dem Lernprozess befindet, bei dem 
+				er sich einen Überblick über dein Projekt beschafft. 
+			</para>
+			
+			<para>
+			    Zum Beispiel könnte ein Projekt von Widget, Inc., das nur einen kundenspezifischen
+			    Router implementiert, so aussehen:
+			</para>
+				
+<programlisting role="php"><![CDATA[
+/library
+  /Zend
+  /Widget
+    /Controller
+      Router.php
+      README.txt
+]]></programlisting>			
+				
+			<para>
+				Beachte an diesem Beispiel, dass das <code>Widget/Controller/</code> Verzeichnis 
+				das <code>Zend/Controller/</code> Verzeichnis widerspiegelt, wo immer es möglich 
+				ist. In diesem Fall wird die Klasse <code>Widget_Controller_Router</code> 
+				bereitgestellt, die entweder eine Subklasse für 
+				<code>Zend_Controller_Router</code> oder ein Ersatz ist, bei dem  
+				<code>Zend_Controller_Router_Interface</code> implementiert wird. 
+			</para>
+			
+			<para>
+			    Beachte außerdem, dass in dem obigen Beispiel eine <code>README.txt</code> Datei im
+			    <code>Widget/Controller/</code> Verzeichnis abgelegt worden ist. Zend möchte dich
+			    ermuntern, deine Projekte durch Bereitstellung von separaten Tests und 
+			    Dokumentation für Kunden zu dokumentieren. Wir empfehlen dir, eine einfache 
+			    <code>README.txt</code> Datei genau in diesem Verzeichnis zu platzieren, um kurz 
+			    deine Änderungen und deren Funktionsweise zu erklären. 
+			</para>
+		</sect3>
+	</sect2>
+	
+	<sect2 id="zend.controller.router.interface">
+		<title>Router Interface</title>
+		
+		<para>
+			Das Interface <code>Zend_Controller_Router_Interface</code> stellt die Definition
+			für eine einzige Methode bereit:
+		</para>
+
+			<programlisting role="php"><![CDATA[<?php
+				
+  /**				
+   * @param  Zend_Controller_Dispatcher_Interface
+   * @throws Zend_Controller_Router_Exception
+   * @return Zend_Controller_Dispatcher_Token|boolean
+   */
+  public function route(Zend_Controller_Dispatcher_Interface $dispatcher);
+
+?>]]></programlisting>
+			
+		<para>
+			Das Routing findet nur einmal statt, wenn die Anfrage das erste Mal vom System erhalten
+			wird. Der Zweck des Routers ist es, einen <code>Zend_Controller_Dispatch_Token</code> 
+			zu generieren, der den aufzurufenden Controller und die Aktion dieses Controllers
+			angibt. Dieser Token wird dann an den Dispatcher übergeben. Wenn es nicht möglich
+			ist, die Route in einem Token abzubilden (unsinnige Route), sollte der boolesche Wert 
+			<code>FALSE</code> zurückgegeben werden. 
+		</para>
+		
+		<para>
+		    Einige Router können dynamische Elemente verarbeiten und benötigen ein Verfahren, um zu 
+		    ermitteln, ob der erstellte Token überhaupt ausführbar ist, bevor sie ihn zurückgeben.
+		    Aus diesem Grund erhält der Router vom Dispatcher als einziges Argument an seine 
+		    <code>route()</code> Methode einen Objekt-Handle. Um dies zu testen, stellt der 
+		    Dispatcher eine Methode <code>isDispatchable()</code> bereit. 
+		</para>
+	</sect2>
+	
+	<sect2 id="zend.controller.dispatcher.interface">
+		<title>Dispatcher Interface</title>
+		
+		<para>
+			<code>Zend_Controller_Front</code> ruft zuerst den Router auf, um den ersten Dispatch
+			Token zu erhalten, den er wiederum an den Dispatcher weiterleitet. Der Dispatcher führt
+			die Aktion aus (instanziiert den Controller und ruft die Aktion auf) und gibt dann 
+			entweder den booleschen Wert <code>FALSE</code> oder einen neuen Dispatch Token zurück.
+		</para>
+		
+		<para>
+		    <code>Zend_Controller_Front</code> ruft wiederholt den Dispatcher auf, bis kein 
+		    Dispatch Token mehr zürückgegeben wird. Dies nennt sich die Dispatcher Schleife. Sie 
+		    erlaubt, dass Aktionen sequentiell abgearbeitet werden können, bis alle Arbeiten
+		    erledigt sind. 
+		</para>
+		
+		<para>
+		    Das Interface <code>Zend_Controller_Dispatcher_Interface</code> stellt Definitionen
+		    für zwei Methoden bereit:
+		</para>
+			
+			<programlisting role="php"><![CDATA[<?php
+				
+/**
+ * @param  Zend_Controller_Dispatcher_Token $route
+ * @return boolean
+ */
+public function isDispatchable(Zend_Controller_Dispatcher_Token $route);
+
+?>]]></programlisting>
+
+		<para>
+			<code>isDispatchable()</code> prüft, ob ein Dispatcher Token ausführbar ist. Falls ja, wird
+			<code>TRUE</code> zurückgegeben, andernfalls wird <code>FALSE</code> zurückgegeben. Die
+			Definition, was ausführbar ist, bleibt der Klasse vorbehalten, die das Interface 
+			implementiert. Im Falle des vorgegebenen Implementation vom 
+			<code>Zend_Controller_Dispatcher</code> bedeutet dies, dass die Controller Datei existiert,
+			die Klasse in der Datei vorhanden ist und die Aktionsmethode innerhalb dieser Klasse 
+			vorhanden ist.
+		</para>
+		
+		<programlisting role="php"><![CDATA[<?php
+			
+/**
+ * @param  Zend_Controller_Dispatcher_Token $route
+ * @return Zend_Controller_Dispatcher_Token|boolean
+ */
+public function dispatch(Zend_Controller_Dispatcher_Token $route);
+
+?>]]></programlisting>
+		
+		<para>
+			In <code>dispatch()</code> wird die Arbeit erledigt. Diese Methode muß die Aktion des
+			Controllers ausführen. Sie muss entweder einen Dispatch Token oder den den booleschen Wert 
+			<code>FALSE</code> zurückgeben, um aufzuzeigen, dass keine weitere Arbeit zu erledigen ist.
+		</para>
+	</sect2>
+		
+</sect1>

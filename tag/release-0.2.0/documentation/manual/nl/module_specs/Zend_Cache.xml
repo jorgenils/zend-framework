@@ -1,0 +1,953 @@
+<sect1 id="zend.cache.introduction">
+    <title>Inleiding</title>
+    <para>
+        <code>Zend_Cache</code> verstrekt een standaard functie om eender welke data te "cachen".
+    </para>
+    <para>
+      Caching in het Zend Framework word door frontends uitgevoerd, terwijl cache records door backend
+      adapters worden opgeslagen (<code>File</code>, <code>Sqlite</code>, <code>Memcache</code>...) via
+      een flexibel systeem van IDs en tags. Het gebruik van deze tags laat toe eenvoudig bepaalde
+      record types te verwijderen (bijvoorbeeld: "verwijder alle cache records gemarkeerd met een
+      bepaalde tag").
+    </para>
+    <para>
+        De kern van de <code>Zend_Cache_Core</code> module is standaard, flexibel en configurabel.
+        Er bestaan echter cache frontends voor specifieke doeleinden die <code>Zend_Cache_Core</code>
+        uitbreiden: <code>Output</code>, <code>File</code>, <code>Function</code> en <code>Class</code>.
+    </para>
+    <example>
+        <title>Een frontend verkrijgen met <code>Zend_Cache::factory()</code></title>
+        <para>
+            <code>Zend_Cache::factory()</code> instantieert juiste objecten en bindt ze samen.
+            In dit eerste voorbeeld zullen we <code>Core</code> frontend gebruiken, samen met
+            <code>File</code> backend.
+        </para>
+        <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Cache.php';
+
+$frontendOptions = array(
+   'lifeTime' => 7200, // cache levensduur van 2 uur
+   'automaticSerialization' => true
+);
+
+$backendOptions = array(
+    'cacheDir' => './tmp/' // Directory waar we de cache bestanden wegschrijven
+);
+
+// verkrijgen van een Zend_Cache_Core object
+$cache = Zend_Cache::factory('Core', 'File', $frontendOptions, $backendOptions);
+
+?>]]></programlisting>
+       <para>
+            Nu we een frontend hebben kunnen we eender welk type data cachen (we activeerden serialisatie).
+            We kunnen bijvoorbeeld het resultaat van een zeer "dure" database query cachen. Nadat het
+            in de cache is opgeslagen, is het zelfs niet meer nodig een verbinding met de database te maken;
+            records worden uit de cache gehaald en gedeserialiseerd.
+        </para>
+        <programlisting role="php"><![CDATA[<?php
+
+// $cache die in het vorige voorbeeld werd geïnitialiseerd
+
+// nagaan of de cache reeds bestaat:
+if(!$result = $cache->get('myresult')) {
+
+    // geen cache; verbind met de database
+    
+    $db = Zend_Db::factory( [...] );
+    
+    $result = $db->fetchAll('SELECT * FROM enorme_tabel');
+    
+    $cache->save($result, 'mijnresultaat');
+    
+} else {
+
+    // cache bestaat! laat het weten
+    echo "Dit komt uit de cache!\n\n";
+    
+}
+
+print_r($result);
+
+?>]]></programlisting>
+    </example>
+    <example>
+        <title>Output cachen met de <code>Zend_Cache</code> output frontend</title>
+        <para>
+            We markeren secties waarin we output willen cachen door er een beetje conditionele
+            logica aan toe te voegen. We zetten de sectie tussen <code>start()</code> en <code>end()</code>
+            methodes (dit wordt geïllustreerd in het eerste voorbeeld en is de voornaamste strategie
+            voor het cachen).
+        </para>
+        <para>
+            Tussen de twee methodes output je je data zoals gewoonlijk - alle output zal worden gecached als
+            de uitvoering de <code>end()</code> methode tegenkomt. Bij de volgende uitvoering zal de hele 
+            sectie worden overgeslagen ten voordele van het verkrijgen van de data uit de cache (zolang de
+            cache record geldig is).
+        </para>
+        <programlisting role="php"><![CDATA[<?php
+
+$frontendOptions = array(
+   'lifeTime' => 30,                  // cache levensduur van een halve minuut
+   'automaticSerialization' => false  // dit is sowieso standaard
+);
+
+$backendOptions = array('cacheDir' => './tmp/');
+
+$cache = Zend_Cache::factory('Output', 'File', $frontendOptions, $backendOptions);
+
+// we geven een unieke id door aan de start() methode
+if(!$cache->start('mijnpagina')) {
+    // output zoals gewoonlijk:
+    
+    echo 'Hallo wereld! ';
+    echo 'Dit is gecached ('.time().') ';
+    
+    $cache->end(); // de output wordt opgeslagen en naar de browser gestuurd
+}
+
+echo 'Dit word nooit gecached ('.time().').';
+
+?>]]>   </programlisting>
+       <para>
+           Merk op dat we het resultaat van <code>time()</code> tweemaal weergeven; dit is iets dynamisch
+           om het voorbeeld te toetsen. Probeer het voorbeeld verschillende malen uit te voeren; je zal
+           merken dat het eerste nummer niet verandert, terwijl het tweede verandert naargelang de tijd
+           vordert. Dit komt omdat het eerste nummer samen met de andere output in de cache werd opgeslaan.
+           Na een halve minuut (we hebben de levensduur op 30 seconden gezet) moeten de nummers opnieuw
+           gelijk zijn omdat de cache record niet meer geldig is -- voor hij opnieuw word gecached. Je
+           zou dit in je browser of console moeten proberen.
+       </para>
+    </example>
+    <note><para>
+        Als je <code>Zend_Cache</code> gebruikt, let dan op de belangrijke cache id (doorgegeven aan 
+        <code>save()</code> en <code>start()</code>. Die moet uniek zijn voor elk deel data die je wil
+        cachen, anders kunnen cache records die niets met elkaar te maken hebben elkaar uitwissen of,
+        erger nog, afgebeeld worden in plaats van de ander.
+    </para></note>
+</sect1>
+
+
+<sect1 id="zend.cache.theory">
+    <title>De theorie van het cachencaching</title>
+    <para>
+        Er zijn drie belangrijke concepten in Zend_Cache. Een is de unieke identifier (een string) die wordt gebruikt om cache records te identificeren. De tweede is de <code>'lifeTime'</code> parameter zoals gezien in de voorbeelden; het definieert hoe lang de cache als 'vers' wordt beschouwd. Het derde belangrijke concept is voorwaardelijke uitvoering zodat delen van de code compleet overgeslagen kunnen worden, waardoor de performance wordt verbeterd. De belangrijkste frontend functie (bijv. <code>Zend_Cache_Core::get()</code> is altijd ontworpen om false terug te geven wanneer er geen waarde in de cache aanwezig is wanneer dat logisch is voor de aard van de frontend. Dat staat eindgebruikers toe om delen van de code te 'wrappen' die ze willen cachen (en dus overslaan) in <code>if(){...}</code> statements waarbij de voorwaarde een Zend_Cache methode is. Aan het einde van deze blokken moet je wel opslaan wat je hebt gegenereerd (bijvoorbeeld <code>Zend_Cache_Core::save()</code>).
+    </para>
+    <note><para>
+        Het ontwerp van de voorwaardelijke uitvoer van de gemaakte code is niet noodzakelijk in sommige frontends (bijvoorbeeld <code>Function</code>) wanneer de logica aan de frontend is geimplementeerd.
+    </para></note>
+    <note><para>
+        'Cache hit' is een term voor een voorwaarde waarbij een cache record wordt gevonden, valide is en 'vers' (in andere woorden, niet verlopen) is. 'Cache miss' is al het andere. Wanneer een cache miss voorkomt moet je je data genereren zoals normaal and cachen. Wanneer je een cache hit hebt, daarentegen, haalt de backend automatisch de record uit de cache.
+    </para></note>
+    <sect2 id="zend.cache.factory">
+        <title>De <code>Zend_Cache</code> factory methode</title>
+        <para>
+            Een goede manier om een bruikbare instantie van een <code>Zend_Cache</code> frontend te bouwen wordt gegeven in het volgende voorbeeld:
+        </para>
+        <programlisting role="php"><![CDATA[<?php
+        
+# We "laden" de Zend_Cache factory.
+require 'Zend/Cache.php'; 
+
+# we kiezen een backend (bijvoorbeeld 'File' of 'Sqlite'...)
+$backendName = '[...]';
+
+# We kiezen een frontend (bijvoorbeeld 'Core', 'Output', 'Page'...)
+$frontendName = '[...]';
+
+# We zetten een array met opties voor de gekozen frontend
+$frontendOptions = array([...]);
+
+# We zetten een array met opties voor de gekozen backend
+$backendOptions = array([...]);
+
+# We maken de goede instantie.
+# (natuurlijk zijn de laatste twee argumenten optioneel)
+$cache = Zend_Cache::factory($frontendName, $backendName, $frontendOptions, $backendOptions);
+
+?>]]></programlisting> 
+        <para>
+            In het volgende voorbeeld zullen we uitgaan dat de <code>$cache</code> variabele een valide, geinstantieerde frontend bevat zoals getoond en dat je begrijpt hoe je parameters naar je backends kan doorgeven.
+        </para>
+        <note><para>
+            Gebruikt altijd <code>Zend_Cache::factory()</code> om frontend instanties te krijgen. Zelf frontends en backends instantieren zal niet zoals verwacht werken.
+        </para></note>
+    </sect2>
+    
+    <sect2 id="zend.cache.tags">
+        <title>Records taggen</title>
+        <para>
+            Tags zijn een manier om je cache records te categoriseren. Wanneer je een cache opslaat met de <code>save()</code> methode, kan je een array zetten met tags voor deze record. Vervolgens heb je de mogelijkheid om alle cache records met een bepaalde tag of met bepaalde tags op te schonen:
+        </para>
+        <programlisting role="php"><![CDATA[<?php
+             
+$cache->save($veel_data, 'mijnUniekeID', array('tagA', 'tagB', 'tagC'));
+            
+?>]]></programlisting>
+    </sect2>
+    <sect2 id="zend.cache.clean">
+        <title>Opschonen van de cache</title>
+        <para>
+            Om een specifieke cache id te verwijderen/invalideren kan je de <code>remove()</code> methode gebruiken:
+        </para>
+        <programlisting role="php"><![CDATA[<?php 
+             
+$cache->remove('idOmTeVerwijderen');
+            
+?>]]></programlisting>            
+        <para>
+            Om verschillende cache ids in een operatie te verwijderen/invalideren kan je de <code>clean()</code> methode gebruiken. Bijvoorbeeld om alle cache records te verwijderen:
+        </para>
+        <programlisting role="php"><![CDATA[<?php 
+
+// Schoon alle cache records op
+$cache->clean(Zend_Cache::CLEANING_MODE_ALL);
+
+// Schoon alleen verlopen records op
+$cache->clean(Zend_Cache::CLEANING_MODE_OLD);
+            
+?>]]>   </programlisting>
+        <para>   
+            Als je cache records wil verwijderen die aan tags 'tagA' en 'tagC' voldoen:
+        </para>
+        <programlisting role="php"><![CDATA[<?php 
+             
+$cache->clean(Zend_Cache::CLEANING_MODE_MATCHING_TAG, array('tagA', 'tagC'));
+            
+?>]]>       </programlisting>
+        <para>
+            Beschikbare opschoon modes zijn: <code>CLEANING_MODE_ALL</code>, <code>CLEANING_MODE_OLD</code>,
+            <code>CLEANING_MODE_MATCHING_TAG</code> en <code>CLEANING_MODE_NOT_MATCHING_TAG</code>. De laatsten zijn, zoals hun namen doen vermoeden, gecombineerd met een array van tags voor de opschoonoperatie.
+        </para>
+    </sect2>
+</sect1>
+
+<sect1 id="zend.cache.frontends">
+    <title>Zend_Cache frontends</title>
+    
+    <sect2 id="zend.cache.core">
+        <title>Zend_Cache_Core</title>
+        <sect3 id="zend.cache.core.introduction">
+            <title>Introductie</title>
+            <para>
+                <code>Zend_Cache_Core</code> is een speciale frontend omdat het de kern van de module is. Het is een generieke cache frontend en wordt uitgebreid door andere classes.
+            </para>
+            <note><para>
+                Alle frontends erven van <code>Zend_Cache_Core</code> zodat zijn methodes en opties (zoals hieronder beschreven) ook beschikbaar zijn in andere frontends, dus ze zullen hier niet worden gedocumenteerd.
+            </para></note>
+        </sect3>
+        <sect3 id="zend.cache.core.options">
+            <title>Beschikbare opties</title>
+            <para>
+                Deze opties worden doorgegeven aan de factory methode zoals hierboven gedemonstreerd.
+            </para>
+            <table>
+                <title>Beschikbare opties</title>
+                <tgroup cols="4">
+                     <thead>
+                          <row>
+                            <entry>Optie</entry>
+                            <entry>Data Type</entry>
+                            <entry>Standaard Waarde</entry>
+                            <entry>Omschrijving</entry>
+                        </row>
+                     </thead>
+                     <tbody>
+                          <row>
+                              <entry><code>caching</code></entry>
+                              <entry><code>boolean</code></entry>
+                              <entry><code>true</code></entry>
+                              <entry>
+                                  zet de caching aan of uit (kan handig zijn om te debuggen)
+                              </entry>
+                          </row>
+                          <row>
+                              <entry><code>lifeTime</code></entry>
+                              <entry><code>int</code></entry>
+                              <entry><code>3600</code></entry>
+                              <entry>
+                                Levensduur van de cache (in seconden), wanneer de waarde <code>null</code> is, blijft de cache altijd geldig.
+                              </entry>
+                          </row>
+                          <row>
+                              <entry><code>logging</code></entry>
+                              <entry><code>boolean</code></entry>
+                              <entry><code>false</code></entry>
+                              <entry>
+                                Wanneer dit op true staat, wordt logging via <code>Zend_Log</code> aangezet (maar wordt het systeem trager)
+                              </entry>
+                          </row>
+                          <row>
+                              <entry><code>writeControl</code></entry>
+                              <entry><code>boolean</code></entry>
+                              <entry><code>true</code></entry>
+                              <entry>
+                                Zet schrijfcontrole aan (de cache wordt direct na schrijven gelezen om corrupte records te herkennen), door writeControl aan te zetten zal de cache iets trager wegschrijven maar het lezen wordt niet trager (het kan sommige corrupte cache bestanden herkennen maar is geen perfecte controle) 
+                              </entry>
+                          </row>
+                          <row>
+                              <entry><code>automaticSerialization</code></entry>
+                              <entry><code>boolean</code></entry>
+                              <entry><code>false</code></entry>
+                              <entry>
+                                Zet de automatische serialisatie aan of uit, dit kan worden gebruikt om direct informatie op te slaan dat geen string is (maar het is trager)
+                              </entry>
+                          </row>
+                          <row>
+                              <entry><code>automaticCleaningFactor</code></entry>
+                              <entry><code>int</code></entry>
+                              <entry><code>0</code></entry>
+                              <entry>
+                                Stel het automatische opschoonsysteem in (garbage collector): 0 betekent geen automatische opschoning, 1 betekent systematisch cache opschonen en x &gt; 1 betekent willekeurig opschonen 1 keer per x schrijf operaties.
+                              </entry>
+                          </row>
+                      </tbody>
+                  </tgroup>
+              </table>
+        </sect3>
+        
+        <sect3 id="zend.cache.core.examples">
+            <title>Voorbeelden</title>
+            <para>
+                Een voorbeeld wordt gegeven aan het begin van de handleiding.
+            </para>
+            <para>
+                Wanneer je alleen strings in de cache wil opslaan (want met "automaticSerialization" is het mogelijk ook sommige booleans op te slaan), kan je een compactere constructie gebruiken:
+            </para>
+            <programlisting role="php"><![CDATA[<?php  
+             
+// we gaan er vanuit dat je $cache al hebt
+
+$id = 'mijnGroteLoop'; // cache id van "wat we willen cachen"
+
+if (!($data = $cache->get($id))) {
+    // cache miss
+    
+    $data = '';
+    for ($i = 0; $i < 10000; $i++) {
+        $data = $data . $i;
+    }
+    
+    $cache->save($data);
+    
+} 
+
+// [...] doe iets met $data (echo het, stuur het door enz.)
+             
+?>]]>       </programlisting> 
+            <para>
+                Als je meerdere blokken of data instanties wilt cachen, is het idee hetzelfde:
+            </para>
+            <programlisting role="php"><![CDATA[<?php  
+             
+// Zorg ervoor dat je unieke identifiers hebt:
+$id1 = 'foo';
+$id2 = 'bar';
+
+// blok 1
+if (!($data = $cache->get($id1))) {
+    // cache miss
+    
+    $data = '';
+    for ($i=0;$i<10000;$i++) {
+        $data = $data . $i;
+    }
+    
+    $cache->save($data);
+    
+} 
+echo($data);
+
+// Dit wordt niet door de cache beinvloed
+echo('NOOIT GECACHED! ');
+
+// blok 2
+if (!($data = $cache->get($id2))) {
+    // cache miss
+    
+    $data = '';
+    for ($i=0;$i<10000;$i++) {
+        $data = $data . '!';
+    }
+    
+    $cache->save($data);
+    
+} 
+echo($data);
+
+?>]]>       </programlisting>
+        </sect3>   
+    </sect2>
+    
+    <sect2 id="zend.cache.frontend.output">
+        <title>Zend_Cache_Frontend_Output</title>
+        <sect3 id="zend.cache.frontend.output.introduction">
+            <title>Introduction</title>
+            <para>
+                <code>Zend_Cache_Frontend_Output</code> is an output-capturing frontend. It utilizes
+                output buffering in PHP to capture everything between its <code>start()</code> and
+                <code>end()</code> methods.
+            </para>
+        </sect3>
+        <sect3 id="zend.cache.frontend.output.options">
+            <title>Available options</title>
+            <para>
+                This frontend doesn't have any specific options other than those of
+                <code>Zend_Cache_Core</code>.
+            </para>
+        </sect3>
+        
+        <sect3 id="zend.cache.frontend.output.examples">
+            <title>Examples</title>
+            <para>
+                An example is given in the manual at the very beginning. Here it is with minor changes:
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+
+// if it is a cache miss, output buffering is triggered
+if(!$cache->start('mypage')):
+
+// output everything as usual
+echo 'Hello world! ';
+echo 'This is cached ('.time().') ';
+
+$cache->end(); // output buffering ends
+endif;
+
+echo 'This is never cached ('.time().').';
+
+?>]]>       </programlisting>
+            <para>
+                Using this form it is fairly easy to set up output caching in your already working project
+                with little or no code refactoring.
+            </para>
+        </sect3>   
+    </sect2>
+    
+    <sect2 id="zend.cache.frontend.function">
+        <title>Zend_Cache_Frontend_Function</title>
+        <sect3 id="zend.cache.frontend.function.introduction">
+            <title>Introduction</title>
+            <para>
+                <code>Zend_Cache_Frontend_Function</code> caches the results of function calls. It has
+                a single main method named <code>call()</code> which takes a function name and parameters
+                for the call in an array.
+            </para>
+        </sect3>
+        <sect3 id="zend.cache.frontend.function.options">
+            <title>Available options</title>
+            <table>
+                <title>Available options</title>
+                <tgroup cols="4">
+                     <thead>
+                          <row>
+                            <entry>Option</entry>
+                            <entry>Data Type</entry>
+                            <entry>Default Value</entry>
+                            <entry>Description</entry>
+                        </row>
+                     </thead>
+                     <tbody>
+                          <row>
+                              <entry><code>cacheByDefault</code></entry>
+                              <entry><code>boolean</code></entry>
+                              <entry><code>true</code></entry>
+                              <entry>
+                                  if true, function calls will be cached by default                
+                              </entry>
+                         </row>
+                         <row>
+                              <entry><code>cachedFunctions</code></entry>
+                              <entry><code>array</code></entry>
+                              <entry></entry>
+                              <entry>
+                                  function names which will always be cached               
+                              </entry>
+                         </row>
+                         <row>
+                              <entry><code>nonCachedFunctions</code></entry>
+                              <entry><code>array</code></entry>
+                              <entry></entry>
+                              <entry>
+                                  function names which must never be cached               
+                              </entry>
+                         </row>
+                      </tbody>
+                  </tgroup>
+              </table>
+        </sect3>
+        
+        <sect3 id="zend.cache.frontend.function.examples">
+            <title>Examples</title>
+            <para>
+                Using the <code>call()</code> function is the same as using
+                <code>call_user_func_array()</code> in PHP:
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+
+$cache->call('veryExpensiveFunc', $params);
+
+# $params is an array
+# for example to call (with caching) veryExpensiveFunc(1, 'foo', 'bar'), you will use
+# $cache->call('veryExpensiveFunc', array(1, 'foo', 'bar'))
+
+?>]]>       </programlisting>
+            <para>
+                <code>Zend_Cache_Frontend_Function</code> is smart enough to cache both the
+                return value of the function and its internal output.
+            </para>
+            <note><para>
+                You can pass any builtin or user defined function with the exception of
+                <code>array()</code>, <code>echo()</code>, <code>empty()</code>, <code>eval()</code>,
+                <code>exit()</code>, <code>isset()</code>, <code>list()</code>, <code>print()</code>
+                and <code>unset()</code>. 
+            </para></note>
+        </sect3>   
+    </sect2>
+    
+    <sect2 id="zend.cache.frontend.class">
+        <title>Zend_Cache_Frontend_Class</title>
+        <sect3 id="zend.cache.frontend.class.introduction">
+            <title>Introduction</title>
+            <para>
+                <code>Zend_Cache_Frontend_Class</code> is different from <code>Zend_Cache_Frontend_Function</code>
+                because it allows caching of object and static method calls.
+            </para>
+        </sect3>
+        <sect3 id="zend.cache.frontend.class.options">
+            <title>Available options</title>
+            <table>
+                <title>Available options</title>
+                <tgroup cols="4">
+                     <thead>
+                          <row>
+                            <entry>Option</entry>
+                            <entry>Data Type</entry>
+                            <entry>Default Value</entry>
+                            <entry>Description</entry>
+                        </row>
+                     </thead>
+                     <tbody>
+                          <row>
+                              <entry><code>cachedEntity</code> (required)</entry>
+                              <entry><code>mixed</code></entry>
+                              <entry></entry>
+                              <entry>
+                                  if set to a class name, we will cache an abstract class and will use
+                                  only static calls; if set to an object, we will cache this object methods             
+                              </entry>
+                         </row>
+                         <row>
+                              <entry><code>cacheByDefault</code></entry>
+                              <entry><code>boolean</code></entry>
+                              <entry><code>true</code></entry>
+                              <entry>
+                                  if true, calls will be cached by default                
+                              </entry>
+                         </row>
+                         <row>
+                              <entry><code>cachedMethods</code></entry>
+                              <entry><code>array</code></entry>
+                              <entry></entry>
+                              <entry>
+                                  method names which will always be cached               
+                              </entry>
+                         </row>
+                         <row>
+                              <entry><code>nonCachedMethods</code></entry>
+                              <entry><code>array</code></entry>
+                              <entry></entry>
+                              <entry>
+                                  method names which must never be cached               
+                              </entry>
+                         </row>
+                      </tbody>
+                  </tgroup>
+              </table>
+        </sect3>
+        
+        <sect3 id="zend.cache.frontend.class.examples">
+            <title>Examples</title>
+            <para>
+                For example, to cache static calls :
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+
+class test {
+   
+    # Static method
+    public static function foobar($param1, $param2) {
+        echo "foobar_output($param1, $param2)";
+        return "foobar_return($param1, $param2)";   
+    }
+
+}
+
+// [...]
+$frontendOptions = array(
+    'cachedEntity' => 'test' // The name of the class
+);
+// [...]
+
+# The cached call
+$res = $cache->foobar('1', '2');
+
+?>]]>       </programlisting>
+            <para>
+                To cache classic method calls :
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+
+class test {
+   
+    private $_string = 'hello !';
+      
+    public function foobar2($param1, $param2) {
+        echo($this->_string);
+        echo "foobar2_output($param1, $param2)";
+        return "foobar2_return($param1, $param2)";   
+    }
+
+}
+
+// [...]
+$frontendOptions = array(
+    'cachedEntity' => new test() // An instance of the class
+);
+// [...]
+
+# The cached call
+$res = $cache->foobar2('1', '2');
+
+?>]]>       </programlisting>
+        </sect3>   
+    </sect2>
+    
+    <sect2 id="zend.cache.frontends.file">
+        <title>Zend_Cache_Frontend_File</title>
+        <sect3 id="zend.cache.frontends.file.introduction">
+            <title>Introduction</title>
+            <para>
+                <code>Zend_Cache_Frontend_File</code> is a frontend driven by the 
+                modification time of a "master file". It's really interesting for examples
+                in configuration or templates issues.
+            </para>
+            <para> 
+            	For instance, you have an XML configuration file which is parsed by a function 
+            	which returns a "config object" (like with <code>Zend_Config</code>). With
+            	<code>Zend_Cache_Frontend_File</code>, you can store the "config object" into
+            	cache (to avoid the parsing of the XML config file at each time) but with a
+            	sort of strong dependency on the "master file". So, if the XML config file
+            	is modified, the cache is immediatly invalidated.
+            </para>
+        </sect3>
+        <sect3 id="zend.cache.frontends.file.options">
+            <title>Available options</title>
+            <table>
+                <title>Available options</title>
+                <tgroup cols="4">
+                     <thead>
+                          <row>
+                            <entry>Option</entry>
+                            <entry>Data Type</entry>
+                            <entry>Default Value</entry>
+                            <entry>Description</entry>
+                        </row>
+                     </thead>
+                     <tbody>
+                          <row>
+                              <entry><code>masterFile (mandatory)</code></entry>
+                              <entry><code>string</code></entry>
+                              <entry><code></code></entry>
+                              <entry>
+                                  the complete path and name of the master file                 
+                              </entry>
+                         </row>
+                      </tbody>
+                  </tgroup>
+              </table>
+        </sect3>   
+        <sect3 id="zend.cache.frontends.file.examples">
+            <title>Examples</title>
+            <para>
+                Use of this frontend is the same than of <code>Zend_Cache_Core</code>. There
+                is no need of a specific example - the only thing to do is to 
+                define the <code>masterFile</code> when using the factory.
+            </para>
+        </sect3>
+    </sect2>
+    
+    <sect2 id="zend.cache.frontends.page">
+    	<title>Zend_Cache_Frontend_Page</title>
+    	<sect3 id="zend.cache.frontends.page.introduction">
+        	<title>Introduction</title>
+        	<para>
+	            <code>Zend_Cache_Frontend_Page</code> is like <code>Zend_Cache_Frontend_Output</code>
+	            but designed for a complete page. It's impossible to use <code>Zend_Cache_Frontend_Page</code>
+	            for caching only a single block.
+	        </para>
+	        <para>
+	        	On the other hand, the "cache id" is calculated automatically with
+	        	<code>$_SERVER['REQUEST_URI']</code> and (depending on options) 
+	        	<code>$_GET</code>, <code>$_POST</code>, <code>$_SESSION</code>, <code>$_COOKIE</code>, <code>$_FILES</code>.
+	        	More over, you have only one method to call (<code>start()</code>) because the
+	        	<code>end()</code> call is fully automatic when the page is ended.
+	        </para>
+	        <para>
+	        	For the moment, it's not implemented but we plan to add a HTTP conditional system
+	        	to save bandwith (the system will send a HTTP 304 Not Modified if the cache is hit
+	        	and if the browser has already the good version).
+	        </para>
+	        <note><para>
+                Zend_Cache_Frontend_Page is really "alpha stuff" and is meant to be improved further down the road.
+	        </para></note>
+    	</sect3>
+    	<sect3 id="zend.cache.frontends.page.options">
+	        <title>Available options (for this frontend in Zend_Cache factory)</title>
+	        <table>
+	            <title>Available options</title>
+	            <tgroup cols="4">
+	                 <thead>
+	                      <row>
+	                        <entry>Option</entry>
+	                        <entry>Data Type</entry>
+	                        <entry>Default Value</entry>
+	                        <entry>Description</entry>
+	                    </row>
+	                 </thead>
+	                 <tbody>
+	                 	   <row>
+	                          <entry><code>httpConditional</code></entry>
+	                          <entry><code>boolean</code></entry>
+	                          <entry><code>false</code></entry>
+	                          <entry>
+	                              use the httpConditional system (not implemented for the moment)                 
+	                          </entry>
+	                     </row>
+	                     <row>
+	                          <entry><code>cacheWith{Get,Post,Session,Files,Cookie}Variables</code></entry>
+	                          <entry><code>boolean</code></entry>
+	                          <entry><code>false</code></entry>
+	                          <entry>
+	                                if true,  cache is still on even if there are some variables in the corresponding superglobal array ;
+	                                if false,  cache is off if there are some variables in the corresponding superglobal array             
+	                          </entry>
+	                     </row>
+	                     <row>
+	                          <entry><code>makeIdWith{Get,Post,Session,Files,Cookie}Variables</code></entry>
+	                          <entry><code>boolean</code></entry>
+	                          <entry><code>true</code></entry>
+	                          <entry>
+	                                if true, we have to use the content of the corresponding superglobal array to make a cache id
+	                                if false, the cache id won't be dependent of the content of the corresponding superglobal array
+	                          </entry>
+	                     </row>
+	                  </tbody>
+	              </tgroup>
+	          </table>
+	    </sect3>   
+    	<sect3 id="zend.cache.frontends.page.examples">
+        	<title>Examples</title>
+	        <para>
+	            Use of Zend_Cache_Frontend_Page is really trivial :
+	        </para>
+            <programlisting role="php"><![CDATA[<?php
+	           
+// [...] // require, configuration and factory
+	
+$cache->start();
+# if the cache is hit, the result is sent to the browser and the script stop here
+	
+// rest of the page ...
+	
+?>]]>       </programlisting>
+    	</sect3>
+	</sect2>
+    
+</sect1>
+
+<sect1 id="zend.cache.backends">
+    <title>Zend_Cache backends</title>
+    
+    <sect2 id="zend.cache.backends.file">
+        <title>Zend_Cache_Backend_File</title>
+        <para>
+            This backends stores cache records into files (in a choosen directory). 
+        </para>
+        <para>
+            Available options are :
+        </para>          
+        <table>
+            <title>Available options</title>
+            <tgroup cols="4">
+                 <thead>
+                      <row>
+                        <entry>Option</entry>
+                        <entry>Data Type</entry>
+                        <entry>Default Value</entry>
+                        <entry>Description</entry>
+                    </row>
+                 </thead>
+                 <tbody>
+                      <row>
+                          <entry><code>cacheDir</code></entry>
+                          <entry><code>string</code></entry>
+                          <entry><code>'/tmp/'</code></entry>
+                          <entry>
+                              Directory where to store cache files    
+                          </entry>
+                      </row>
+                      <row>
+                          <entry><code>fileLocking</code></entry>
+                          <entry><code>boolean</code></entry>
+                          <entry><code>true</code></entry>
+                          <entry>
+                            Enable / disable fileLocking : Can avoid cache corruption under 
+                            bad circumstances but it doesn't help on multithread webservers 
+                            or on NFS filesystems...
+                          </entry>
+                      </row>
+                      <row>
+                          <entry><code>readControl</code></entry>
+                          <entry><code>boolean</code></entry>
+                          <entry><code>true</code></entry>
+                          <entry>
+                            Enable / disable read control : if enabled, a control key is 
+                            embeded in the cache file and this key is compared with the 
+                            one calculated after the reading.        
+                          </entry>
+                      </row>
+                      <row>
+                          <entry><code>readControlType</code></entry>
+                          <entry><code>string</code></entry>
+                          <entry><code>'crc32'</code></entry>
+                          <entry>
+                            Type of read control (only if read control is enabled). Available values are :
+                            'md5' (best but slowest), 'crc32' (lightly less safe but faster, better choice),
+                            'strlen' for a length only test (fastest).
+                        </entry>
+                      </row>
+                      <row>
+                          <entry><code>hashedDirectoryLevel</code></entry>
+                          <entry><code>int</code></entry>
+                          <entry><code>0</code></entry>
+                          <entry>
+                            Hashed directory structure level :     0 means "no hashed directory 
+                             structure", 1 means "one level of directory", 2 means "two levels"... 
+                             This option can speed up the cache only when you have many thousands of 
+                             cache files. Only specific benchs can help you to choose the perfect 
+                             value for you. Maybe, 1 or 2 is a good start.
+                          </entry>
+                      </row>
+                      <row>
+                          <entry><code>hashedDirectoryUmask</code></entry>
+                          <entry><code>int</code></entry>
+                          <entry><code>0700</code></entry>
+                          <entry>
+                              Umask for the hashed directory structure
+                        </entry>
+                      </row>
+                  </tbody>
+              </tgroup>
+          </table>
+    </sect2>
+    <sect2 id="zend.cache.backends.sqlite">
+        <title>Zend_Cache_Backend_Sqlite</title>
+        <para>
+            This backends stores cache records into a SQLite database.
+        </para>
+        <para>
+            Available options are :
+        </para>
+        <table>
+            <title>Available options</title>
+            <tgroup cols="4">
+                 <thead>
+                      <row>
+                           <entry>Option</entry>
+                        <entry>Data Type</entry>
+                        <entry>Default Value</entry>
+                        <entry>Description</entry>
+                    </row>
+                 </thead>
+                 <tbody>
+                      <row>
+                          <entry><code>cacheDBCompletePath (mandatory)</code></entry>
+                          <entry><code>string</code></entry>
+                          <entry><code>null</code></entry>
+                          <entry>
+                              The complete path (filename included) of the SQLite database
+                          </entry>
+                      </row>
+                  </tbody>
+              </tgroup>
+          </table>
+    </sect2>
+    <sect2 id="zend.cache.backends.memcached">
+        <title>Zend_Cache_Backend_Memcached</title>
+        <para>
+            This backends stores cache records into a memcached server. <ulink url="http://www.danga.com/memcached/">memcached</ulink>
+            is a high-performance, distributed memory object caching system. To use this backend, 
+            you need a memcached daemon and <ulink url="http://pecl.php.net/package/memcache">the memcache PECL extension</ulink>.
+        </para>
+        <para>
+        	Be careful : with this backend, "tags" are not supported for the moment as 
+        	the "doNotTestCacheValidity=true" argument.
+        </para>
+        <para>
+            Available options are :
+        </para>
+        <table>
+            <title>Available options</title>
+            <tgroup cols="4">
+                 <thead>
+                      <row>
+                        <entry>Option</entry>
+                        <entry>Data Type</entry>
+                        <entry>Default Value</entry>
+                        <entry>Description</entry>
+                    </row>
+                 </thead>
+                 <tbody>
+                      <row>
+                          <entry><code>servers</code></entry>
+                          <entry><code>array</code></entry>
+                          <entry><code>array(array('host' => 'localhost','port' => 11211, 'persistent' => true))</code></entry>
+                          <entry>
+                              An array of memcached servers ; each memcached server is described by an associative array :
+                              'host' => (string) : the name of the memcached server, 
+                              'port' => (int) : the port of the memcached server, 
+                              'persistent' => (bool) : use or not persistent connections to this memcached server
+                          </entry>
+                      </row>
+                      <row>
+                          <entry><code>compression</code></entry>
+                          <entry><code>boolean</code></entry>
+                          <entry><code>flase</code></entry>
+                          <entry>
+                             true if you want to use on-the-fly compression
+                          </entry>
+                      </row>
+                  </tbody>
+              </tgroup>
+          </table>
+    </sect2>
+    <sect2 id="zend.cache.backends.apc">
+        <title>Zend_Cache_Backend_APC</title>
+        <para>
+            This backends stores cache records in shared memory through 
+            the <ulink url="http://pecl.php.net/package/APC">APC</ulink> (Alternative PHP Cache) extension
+            (which is of course need for using this backend).
+        </para>
+        <para>
+        	Be careful : with this backend, "tags" are not supported for the moment as 
+        	the "doNotTestCacheValidity=true" argument.
+        </para>
+        <para>
+            There is no option for this backend.
+        </para>
+    </sect2>
+</sect1> 
+  
+<!--
+vim:se ts=4 sw=4 et:
+-->
