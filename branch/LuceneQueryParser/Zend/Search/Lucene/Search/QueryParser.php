@@ -39,6 +39,9 @@ require_once 'Zend/Search/Lucene/Search/Query/Boolean.php';
 require_once 'Zend/Search/Lucene/Search/Query/Phrase.php';
 
 
+/** Zend_Search_Lucene_FSM */
+require_once 'Zend/Search/Lucene/FSM.php';
+
 /** Zend_Search_Lucene_Exception */
 require_once 'Zend/Search/Lucene/Exception.php';
 
@@ -50,8 +53,37 @@ require_once 'Zend/Search/Lucene/Exception.php';
  * @copyright  Copyright (c) 2006 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Search_Lucene_Search_QueryParser
+class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
 {
+    /**
+     * Parser instance
+     *
+     * @var Zend_Search_Lucene_Search_QueryParser
+     */
+    static private $_instance = null;
+/*
+    const COLON       = 4;
+    const PLUS        = 2;
+    const MINUS       = 3;
+    const TILDE       = 5;
+    const LEFT_SQUARE_BRACKET  = 1;
+    const RIGHT_SQUARE_BRACKET = 1;
+    const LEFT_CURLY_BRACKET
+    const RIGHT_CURLY_BRACKET
+    const CARET
+
+    const ASCII_DIGIT = 6;
+    const POINT       = 7;
+    const OPENBRACKET = 8;
+*/
+
+    public function __construct()
+    {
+    }
+
+
+
+
 
     /**
      * Parses a query string, returning a Zend_Search_Lucene_Search_Query
@@ -61,6 +93,10 @@ class Zend_Search_Lucene_Search_QueryParser
      */
     static public function parse($strQuery)
     {
+        if (self::$_instance === null) {
+            self::$_instance = new Zend_Search_Lucene_Search_QueryParser();
+        }
+
         $tokens = new Zend_Search_Lucene_Search_QueryTokenizer($strQuery);
 
         // Empty query
