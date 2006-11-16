@@ -20,9 +20,6 @@
  */
 
 
-/** Zend_Search_Lucene_Search_QueryTokenizer */
-require_once 'Zend/Search/Lucene/Search/QueryTokenizer.php';
-
 /** Zend_Search_Lucene_Index_Term */
 require_once 'Zend/Search/Lucene/Index/Term.php';
 
@@ -39,11 +36,18 @@ require_once 'Zend/Search/Lucene/Search/Query/Boolean.php';
 require_once 'Zend/Search/Lucene/Search/Query/Phrase.php';
 
 
+/** Zend_Search_Lucene_Search_QueryLexer */
+require_once 'Zend/Search/Lucene/Search/QueryLexer.php';
+
+
 /** Zend_Search_Lucene_FSM */
 require_once 'Zend/Search/Lucene/FSM.php';
 
 /** Zend_Search_Lucene_Exception */
 require_once 'Zend/Search/Lucene/Exception.php';
+
+/** Zend_Search_Lucene_Search_QueryParserException */
+require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
 
 
 /**
@@ -61,35 +65,43 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
      * @var Zend_Search_Lucene_Search_QueryParser
      */
     static private $_instance = null;
-/*
-    const COLON       = 4;
-    const PLUS        = 2;
-    const MINUS       = 3;
-    const TILDE       = 5;
-    const LEFT_SQUARE_BRACKET  = 1;
-    const RIGHT_SQUARE_BRACKET = 1;
-    const LEFT_CURLY_BRACKET
-    const RIGHT_CURLY_BRACKET
-    const CARET
 
-    const ASCII_DIGIT = 6;
-    const POINT       = 7;
-    const OPENBRACKET = 8;
-*/
 
+    /**
+     * Query lexer
+     *
+     * @var Zend_Search_Lucene_Search_QueryLexer
+     */
+    private $_lexer;
+
+
+    /**
+     * Tokens list
+     * Array of Zend_Search_Lucene_Search_QueryToken objects
+     *
+     * @var array
+     */
+    private $_tokens;
+
+
+    /**
+     * Parser constructor
+     */
     public function __construct()
     {
+        parent::__construct();
+
+        $this->_lexer = new Zend_Search_Lucene_Search_QueryLexer();
     }
 
 
 
-
-
     /**
-     * Parses a query string, returning a Zend_Search_Lucene_Search_Query
+     * Parses a query string
      *
      * @param string $strQuery
      * @return Zend_Search_Lucene_Search_Query
+     * @throws Zend_Search_Lucene_Search_QueryParserException
      */
     static public function parse($strQuery)
     {
@@ -97,84 +109,18 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
             self::$_instance = new Zend_Search_Lucene_Search_QueryParser();
         }
 
-        $tokens = new Zend_Search_Lucene_Search_QueryTokenizer($strQuery);
+        self::$_instance->_tokens = self::$_instance->_lexer->tokenize($strQuery);
 
         // Empty query
-        if (!$tokens->count()) {
-            throw new Zend_Search_Lucene_Exception('Syntax error: query string cannot be empty.');
-        }
-
-        // Term query
-        if ($tokens->count() == 1) {
-            if ($tokens->current()->type == Zend_Search_Lucene_Search_QueryToken::TOKTYPE_WORD) {
-                return new Zend_Search_Lucene_Search_Query_Term(new Zend_Search_Lucene_Index_Term($tokens->current()->text, 'contents'));
-            } else {
-                throw new Zend_Search_Lucene_Exception('Syntax error: query string must contain at least one word.');
-            }
+        if (count(self::$_instance->_tokens) == 0) {
+            throw new Zend_Search_Lucene_Search_QueryParserException('Syntax error: query string cannot be empty.');
         }
 
 
-        /**
-         * MultiTerm Query
-         *
-         * Process each token that was returned by the tokenizer.
-         */
-        $terms = array();
-        $signs = array();
-        $prevToken = null;
-        $openBrackets = 0;
-        $field = 'contents';
-        foreach ($tokens as $token) {
-            switch ($token->type) {
-                case Zend_Search_Lucene_Search_QueryToken::TOKTYPE_WORD:
-                    $terms[] = new Zend_Search_Lucene_Index_Term($token->text, $field);
-                    $field = 'contents';
-                    if ($prevToken !== null &&
-                        $prevToken->type == Zend_Search_Lucene_Search_QueryToken::TOKTYPE_SIGN) {
-                            if ($prevToken->text == "+") {
-                                $signs[] = true;
-                            } else {
-                                $signs[] = false;
-                            }
-                    } else {
-                        $signs[] = null;
-                    }
-                    break;
-                case Zend_Search_Lucene_Search_QueryToken::TOKTYPE_SIGN:
-                    if ($prevToken !== null &&
-                        $prevToken->type == Zend_Search_Lucene_Search_QueryToken::TOKTYPE_SIGN) {
-                            throw new Zend_Search_Lucene_Exception('Syntax error: sign operator must be followed by a word.');
-                    }
-                    break;
-                case Zend_Search_Lucene_Search_QueryToken::TOKTYPE_FIELD:
-                    $field = $token->text;
-                    // let previous token to be signed as next $prevToken
-                    $token = $prevToken;
-                    break;
-                case Zend_Search_Lucene_Search_QueryToken::TOKTYPE_BRACKET:
-                    $token->text=='(' ? $openBrackets++ : $openBrackets--;
-            }
-            $prevToken = $token;
-        }
+        // test output
+        return self::$_instance->_tokens;
 
-        // Finish up parsing: check the last token in the query for an opening sign or parenthesis.
-        if ($prevToken->type == Zend_Search_Lucene_Search_QueryToken::TOKTYPE_SIGN) {
-            throw new Zend_Search_Lucene_Exception('Syntax Error: sign operator must be followed by a word.');
-        }
-
-        // Finish up parsing: check that every opening bracket has a matching closing bracket.
-        if ($openBrackets != 0) {
-            throw new Zend_Search_Lucene_Exception('Syntax Error: mismatched parentheses, every opening must have closing.');
-        }
-
-        switch (count($terms)) {
-            case 0:
-                throw new Zend_Search_Lucene_Exception('Syntax error: bad term count.');
-            case 1:
-                return new Zend_Search_Lucene_Search_Query_Term($terms[0],$signs[0] !== false);
-            default:
-                return new Zend_Search_Lucene_Search_Query_MultiTerm($terms,$signs);
-        }
+        // ...
     }
 
 }

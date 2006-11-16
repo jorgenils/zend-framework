@@ -24,10 +24,13 @@
 require_once 'Zend/Search/Lucene/FSM.php';
 
 /** Zend_Search_Lucene_Search_QueryParser */
-require_once 'Zend/Search/Lucene/Search/Queryparser.php';
+require_once 'Zend/Search/Lucene/Search/QueryToken.php';
 
 /** Zend_Search_Lucene_Exception */
 require_once 'Zend/Search/Lucene/Exception.php';
+
+/** Zend_Search_Lucene_Search_QueryParserException */
+require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
 
 
 /**
@@ -61,10 +64,11 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
     const IN_ASCII_DIGIT     = 6;
     const IN_CHAR            = 7;
 
-    const QUERY_WHITE_SPACE_CHARS  = " \n\r\t";
-    const QUERY_SPECIAL_CHARS      = '+-:()[]{}!|&';
-    const QUERY_MODIFIER_CHARS     = '~^';
-    const QUERY_ASCIIDIGITS_CHARS  = '0123456789';
+    const QUERY_WHITE_SPACE_CHARS      = " \n\r\t";
+    const QUERY_SPECIAL_CHARS          = '+-:()[]{}!|&';
+    const QUERY_DOUBLECHARLEXEME_CHARS = '|&';
+    const QUERY_LEXEMEMODIFIER_CHARS   = '~^';
+    const QUERY_ASCIIDIGITS_CHARS      = '0123456789';
 
     /**
      * List of recognized lexemes
@@ -74,19 +78,19 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
     private $_lexemes;
 
     /**
-     * Current position within a query
+     * Query string
+     *
+     * @var string
+     */
+    private $_queryString;
+
+    /**
+     * Current position within a query string
      * Used to create appropriate error messages
      *
      * @var integer
      */
-    private $_currentCharIndex;
-
-    /**
-     * Current char
-     *
-     * @var string
-     */
-    private $_currentChar;
+    private $_queryStringPosition;
 
     /**
      * Recognized part of current lexeme
@@ -117,7 +121,7 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
                                    self::IN_CHAR));
 
 
-        $lexModifierErrorAction       = new Zend_Search_Lucene_FSMAction($this, 'lexModifierErrException');
+        $lexemeModifierErrorAction    = new Zend_Search_Lucene_FSMAction($this, 'lexModifierErrException');
         $lexemeModifier2ErrorAction   = new Zend_Search_Lucene_FSMAction($this, 'lexModifier2ErrException');
         $quoteWithinLexemeErrorAction = new Zend_Search_Lucene_FSMAction($this, 'quoteWithinLexemeErrException');
         $wrongNumberErrorAction       = new Zend_Search_Lucene_FSMAction($this, 'wrongNumberErrException');
@@ -137,7 +141,7 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
                                array(self::ST_SYNT_LEXEME,   self::IN_SPECIAL_CHAR,    self::ST_SYNT_LEXEME),
 
                                // IN_LEXEME_MODIFIER   not allowed
-                               array(self::ST_SYNT_LEXEME, self::IN_LEXEME_MODIFIER, self::ST_ERROR, $lexModifierErrorAction),
+                               array(self::ST_SYNT_LEXEME,   self::IN_LEXEME_MODIFIER, self::ST_ERROR, $lexemeModifierErrorAction),
 
                                array(self::ST_SYNT_LEXEME,   self::IN_ESCAPE_CHAR,     self::ST_ESCAPED_CHAR),
                                array(self::ST_SYNT_LEXEME,   self::IN_QUOTE,           self::ST_QUOTED_LEXEME),
@@ -151,7 +155,7 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
                                array(self::ST_LEXEME,        self::IN_ESCAPE_CHAR,     self::ST_ESCAPED_CHAR),
 
                                // IN_QUOTE     not allowed
-                               array(self::ST_SYNT_LEXEME, self::IN_QUOTE, self::ST_ERROR, $quoteWithinLexemeErrorAction),
+                               array(self::ST_LEXEME,        self::IN_QUOTE,           self::ST_ERROR, $quoteWithinLexemeErrorAction),
 
                                array(self::ST_LEXEME,        self::IN_DECIMAL_POINT,   self::ST_LEXEME),
                                array(self::ST_LEXEME,        self::IN_ASCII_DIGIT,     self::ST_LEXEME),
@@ -188,58 +192,58 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
                                array(self::ST_LEXEME_MODIFIER, self::IN_SPECIAL_CHAR,    self::ST_SYNT_LEXEME),
 
                                // IN_LEXEME_MODIFIER   not allowed
-                               array(self::ST_LEXEME_MODIFIER, self::IN_LEXEME_MODIFIER, self::ST_ERROR, $lexModifierErrorAction),
+                               array(self::ST_LEXEME_MODIFIER, self::IN_LEXEME_MODIFIER, self::ST_ERROR, $lexemeModifierErrorAction),
 
                                // IN_ESCAPE_CHAR       not allowed
-                               array(self::ST_LEXEME_MODIFIER, self::IN_ESCAPE_CHAR, self::ST_ERROR, $lexemeModifier2ErrorAction),
+                               array(self::ST_LEXEME_MODIFIER, self::IN_ESCAPE_CHAR,     self::ST_ERROR, $lexemeModifier2ErrorAction),
 
                                // IN_QUOTE             not allowed
-                               array(self::ST_LEXEME_MODIFIER, self::IN_QUOTE, self::ST_ERROR, $lexemeModifier2ErrorAction),
+                               array(self::ST_LEXEME_MODIFIER, self::IN_QUOTE,           self::ST_ERROR, $lexemeModifier2ErrorAction),
 
 
                                array(self::ST_LEXEME_MODIFIER, self::IN_DECIMAL_POINT,   self::ST_MANTISSA),
                                array(self::ST_LEXEME_MODIFIER, self::IN_ASCII_DIGIT,     self::ST_NUMBER),
 
                                // IN_CHAR              not allowed
-                               array(self::ST_LEXEME_MODIFIER, self::IN_CHAR, self::ST_ERROR, $lexemeModifier2ErrorAction),
+                               array(self::ST_LEXEME_MODIFIER, self::IN_CHAR,            self::ST_ERROR, $lexemeModifier2ErrorAction),
                              ));
-        $this->addRules(array( array(self::ST_NUMBER,        self::IN_WHITE_SPACE,     self::ST_WHITE_SPACE),
-                               array(self::ST_NUMBER,        self::IN_SPECIAL_CHAR,    self::ST_SYNT_LEXEME),
+        $this->addRules(array( array(self::ST_NUMBER, self::IN_WHITE_SPACE,     self::ST_WHITE_SPACE),
+                               array(self::ST_NUMBER, self::IN_SPECIAL_CHAR,    self::ST_SYNT_LEXEME),
 
                                // IN_LEXEME_MODIFIER   not allowed
-                               array(self::ST_NUMBER, self::IN_LEXEME_MODIFIER, self::ST_ERROR, $lexModifierErrorAction),
+                               array(self::ST_NUMBER, self::IN_LEXEME_MODIFIER, self::ST_ERROR, $lexemeModifierErrorAction),
 
                                // IN_ESCAPE_CHAR       not allowed
-                               array(self::ST_NUMBER, self::IN_ESCAPE_CHAR, self::ST_ERROR, $wrongNumberErrorAction),
+                               array(self::ST_NUMBER, self::IN_ESCAPE_CHAR,     self::ST_ERROR, $wrongNumberErrorAction),
 
                                // IN_QUOTE             not allowed
-                               array(self::ST_NUMBER, self::IN_QUOTE, self::ST_ERROR, $wrongNumberErrorAction),
+                               array(self::ST_NUMBER, self::IN_QUOTE,           self::ST_ERROR, $wrongNumberErrorAction),
 
-                               array(self::ST_NUMBER,        self::IN_DECIMAL_POINT,  self::ST_MANTISSA),
-                               array(self::ST_NUMBER,        self::IN_ASCII_DIGIT,    self::ST_NUMBER),
+                               array(self::ST_NUMBER, self::IN_DECIMAL_POINT,   self::ST_MANTISSA),
+                               array(self::ST_NUMBER, self::IN_ASCII_DIGIT,     self::ST_NUMBER),
 
                                // IN_CHAR              not allowed
-                               array(self::ST_NUMBER, self::IN_CHAR, self::ST_ERROR, $wrongNumberErrorAction),
+                               array(self::ST_NUMBER, self::IN_CHAR,            self::ST_ERROR, $wrongNumberErrorAction),
                              ));
-        $this->addRules(array( array(self::ST_MANTISSA,      self::IN_WHITE_SPACE,    self::ST_WHITE_SPACE),
-                               array(self::ST_MANTISSA,      self::IN_SPECIAL_CHAR,   self::ST_SYNT_LEXEME),
+        $this->addRules(array( array(self::ST_MANTISSA, self::IN_WHITE_SPACE,     self::ST_WHITE_SPACE),
+                               array(self::ST_MANTISSA, self::IN_SPECIAL_CHAR,    self::ST_SYNT_LEXEME),
 
                                // IN_LEXEME_MODIFIER   not allowed
-                               array(self::ST_MANTISSA, self::IN_LEXEME_MODIFIER, self::ST_ERROR, $lexModifierErrorAction),
+                               array(self::ST_MANTISSA, self::IN_LEXEME_MODIFIER, self::ST_ERROR, $lexemeModifierErrorAction),
 
                                // IN_ESCAPE_CHAR       not allowed
-                               array(self::ST_MANTISSA, self::IN_ESCAPE_CHAR, self::ST_ERROR, $wrongNumberErrorAction),
+                               array(self::ST_MANTISSA, self::IN_ESCAPE_CHAR,     self::ST_ERROR, $wrongNumberErrorAction),
 
                                // IN_QUOTE             not allowed
-                               array(self::ST_MANTISSA, self::IN_QUOTE, self::ST_ERROR, $wrongNumberErrorAction),
+                               array(self::ST_MANTISSA, self::IN_QUOTE,           self::ST_ERROR, $wrongNumberErrorAction),
 
                                // IN_DECIMAL_POINT     not allowed
-                               array(self::ST_MANTISSA, self::IN_DECIMAL_POINT, self::ST_ERROR, $wrongNumberErrorAction),
+                               array(self::ST_MANTISSA, self::IN_DECIMAL_POINT,   self::ST_ERROR, $wrongNumberErrorAction),
 
-                               array(self::ST_MANTISSA,      self::IN_ASCII_DIGIT,    self::ST_MANTISSA),
+                               array(self::ST_MANTISSA, self::IN_ASCII_DIGIT,     self::ST_MANTISSA),
 
                                // IN_CHAR              not allowed
-                               array(self::ST_MANTISSA, self::IN_CHAR, self::ST_ERROR, $wrongNumberErrorAction),
+                               array(self::ST_MANTISSA, self::IN_CHAR,            self::ST_ERROR, $wrongNumberErrorAction),
                              ));
 
 
@@ -307,14 +311,14 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
      */
     private function _translateInput($char)
     {
-              if (strpos(self::QUERY_WHITE_SPACE_CHARS, $char) !== false) { return self::IN_WHITE_SPACE;
-        } elseif (strpos(self::QUERY_SPECIAL_CHARS,     $char) !== false) { return self::IN_SPECIAL_CHAR;
-        } elseif (strpos(self::QUERY_MODIFIER_CHARS,    $char) !== false) { return self::IN_LEXEME_MODIFIER;
-        } elseif (strpos(self::QUERY_ASCIIDIGITS_CHARS, $char) !== false) { return self::IN_ASCII_DIGIT;
-        } elseif ($char === '"')                                          { return self::IN_QUOTE;
-        } elseif ($char === '.')                                          { return self::IN_DECIMAL_POINT;
-        } elseif ($char === '\\')                                         { return self::IN_ESCAPE_CHAR;
-        } else                                                            { return self::IN_CHAR;
+        if        (strpos(self::QUERY_WHITE_SPACE_CHARS,    $char) !== false) { return self::IN_WHITE_SPACE;
+        } else if (strpos(self::QUERY_SPECIAL_CHARS,        $char) !== false) { return self::IN_SPECIAL_CHAR;
+        } else if (strpos(self::QUERY_LEXEMEMODIFIER_CHARS, $char) !== false) { return self::IN_LEXEME_MODIFIER;
+        } else if (strpos(self::QUERY_ASCIIDIGITS_CHARS,    $char) !== false) { return self::IN_ASCII_DIGIT;
+        } else if ($char === '"' )                                            { return self::IN_QUOTE;
+        } else if ($char === '.' )                                            { return self::IN_DECIMAL_POINT;
+        } else if ($char === '\\')                                            { return self::IN_ESCAPE_CHAR;
+        } else                                                                { return self::IN_CHAR;
         }
     }
 
@@ -324,25 +328,27 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
      *
      * @param string $inputString
      * @return array
-     * @throws Zend_Search_Lucene_Exception
+     * @throws Zend_Search_Lucene_Search_QueryParserException
      */
     public function tokenize($inputString)
     {
         $this->_lexemes = array();
-        $this->_currentLexeme = '';
+        $this->_queryString = $inputString;
         $this->reset();
 
-        for ($count = 0; $count < strlen($inputString); $count++) {
-            $this->_currentCharIndex = $count;
-            $this->_currentChar      = $inputString[$count];
-            $this->process($this->_translateInput($this->_currentChar));
+        for ($this->_queryStringPosition = 0;
+             $this->_queryStringPosition < strlen($inputString);
+             $this->_queryStringPosition++) {
+            $this->process($this->_translateInput($inputString[$this->_queryStringPosition]));
         }
 
         $this->process(self::IN_WHITE_SPACE);
 
         if ($this->getState() != self::ST_WHITE_SPACE) {
-            throw new Zend_Search_Lucene_Exception('Unexpected end of query');
+            throw new Zend_Search_Lucene_Search_QueryParserException('Unexpected end of query');
         }
+
+        $this->_queryString = null;
 
         return $this->_lexemes;
     }
@@ -357,10 +363,31 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
 
     /**
      * Add query syntax lexeme
+     *
+     * @throws Zend_Search_Lucene_Search_QueryParserException
      */
     public function addQuerySyntaxLexeme()
     {
-        $this->_lexemes[] = $this->_currentChar;
+        $lexeme = $this->_queryString[$this->_queryStringPosition];
+
+        // Process two char lexemes
+        if (strpos(self::QUERY_DOUBLECHARLEXEME_CHARS, $lexeme) !== false) {
+            // increase current position in a query string
+            $this->_queryStringPosition++;
+
+            // check,
+            if ($this->_queryStringPosition == strlen($this->_queryString)  ||
+                $this->_queryString[$this->_queryStringPosition] != $lexeme) {
+                    throw new Zend_Search_Lucene_Search_QueryParserException('Two chars lexeme expected' . $this->_positionMsg());
+                }
+
+            // duplicate character
+            $lexeme .= $lexeme;
+        }
+
+        $this->_lexemes[] = new Zend_Search_Lucene_Search_QueryToken(
+                                    Zend_Search_Lucene_Search_QueryToken::TC_SYNTAX_ELEMENT,
+                                    $lexeme);
     }
 
     /**
@@ -368,7 +395,9 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
      */
     public function addLexemeModifier()
     {
-        $this->_lexemes[] = $this->_currentChar;
+        $this->_lexemes[] = new Zend_Search_Lucene_Search_QueryToken(
+                                    Zend_Search_Lucene_Search_QueryToken::TC_SYNTAX_ELEMENT,
+                                    $this->_queryString[$this->_queryStringPosition]);
     }
 
 
@@ -377,7 +406,10 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
      */
     public function addLexeme()
     {
-        $this->_lexemes[] = $this->_currentLexeme;
+        $this->_lexemes[] = new Zend_Search_Lucene_Search_QueryToken(
+                                    Zend_Search_Lucene_Search_QueryToken::TC_WORD,
+                                    $this->_currentLexeme);
+
         $this->_currentLexeme = '';
     }
 
@@ -386,7 +418,10 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
      */
     public function addQuotedLexeme()
     {
-        $this->_lexemes[] = $this->_currentLexeme;
+        $this->_lexemes[] = new Zend_Search_Lucene_Search_QueryToken(
+                                    Zend_Search_Lucene_Search_QueryToken::TC_PHRASE,
+                                    $this->_currentLexeme);
+
         $this->_currentLexeme = '';
     }
 
@@ -395,7 +430,9 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
      */
     public function addNumberLexeme()
     {
-        $this->_lexemes[] = $this->_currentLexeme;
+        $this->_lexemes[] = new Zend_Search_Lucene_Search_QueryToken(
+                                    Zend_Search_Lucene_Search_QueryToken::TC_NUMBER,
+                                    $this->_currentLexeme);
         $this->_currentLexeme = '';
     }
 
@@ -404,7 +441,7 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
      */
     public function addLexemeChar()
     {
-        $this->_currentLexeme .= $this->_currentChar;
+        $this->_currentLexeme .= $this->_queryString[$this->_queryStringPosition];
     }
 
 
@@ -424,19 +461,19 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
      *********************************************************************/
     public function lexModifierErrException()
     {
-        throw new Zend_Search_Lucene_Exception('Lexeme modifier character must follow a lexeme. ' . $this->_positionMsg());
+        throw new Zend_Search_Lucene_Search_QueryParserException('Lexeme modifier character must follow a lexeme. ' . $this->_positionMsg());
     }
     public function lexModifier2ErrException()
     {
-        throw new Zend_Search_Lucene_Exception('Lexeme modifier character can be followed only by number, white space or query syntax element. ' . $this->_positionMsg());
+        throw new Zend_Search_Lucene_Search_QueryParserException('Lexeme modifier character can be followed only by number, white space or query syntax element. ' . $this->_positionMsg());
     }
     public function quoteWithinLexemeErrException()
     {
-        throw new Zend_Search_Lucene_Exception('Quote within lexeme must be escaped by \'\\\' char. ' . $this->_positionMsg());
+        throw new Zend_Search_Lucene_Search_QueryParserException('Quote within lexeme must be escaped by \'\\\' char. ' . $this->_positionMsg());
     }
     public function wrongNumberErrException()
     {
-        throw new Zend_Search_Lucene_Exception('Wrong number syntax.' . $this->_positionMsg());
+        throw new Zend_Search_Lucene_Search_QueryParserException('Wrong number syntax.' . $this->_positionMsg());
     }
 }
 
