@@ -378,16 +378,28 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
             // check,
             if ($this->_queryStringPosition == strlen($this->_queryString)  ||
                 $this->_queryString[$this->_queryStringPosition] != $lexeme) {
-                    throw new Zend_Search_Lucene_Search_QueryParserException('Two chars lexeme expected' . $this->_positionMsg());
+                    throw new Zend_Search_Lucene_Search_QueryParserException('Two chars lexeme expected. ' . $this->_positionMsg());
                 }
 
             // duplicate character
             $lexeme .= $lexeme;
         }
 
-        $this->_lexemes[] = new Zend_Search_Lucene_Search_QueryToken(
-                                    Zend_Search_Lucene_Search_QueryToken::TC_SYNTAX_ELEMENT,
-                                    $lexeme);
+        $token = new Zend_Search_Lucene_Search_QueryToken(
+                                Zend_Search_Lucene_Search_QueryToken::TC_SYNTAX_ELEMENT,
+                                $lexeme);
+
+        // Skip this lexeme if it's a field indicator ':' and treat previous as 'field' instead of 'word'
+        if ($token->type == Zend_Search_Lucene_Search_QueryToken::TT_FIELD_INDICATOR) {
+            $token = array_pop($this->_lexemes);
+            if ($token === null  ||  $token->type != Zend_Search_Lucene_Search_QueryToken::TT_WORD) {
+                throw new Zend_Search_Lucene_Search_QueryParserException('Field mark \':\' must follow field name. ' . $this->_positionMsg());
+            }
+
+            $token->type = Zend_Search_Lucene_Search_QueryToken::TT_FIELD;
+        }
+
+        $this->_lexemes[] = $token;
     }
 
     /**

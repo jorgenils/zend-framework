@@ -39,6 +39,9 @@ require_once 'Zend/Search/Lucene/Search/Query/Phrase.php';
 /** Zend_Search_Lucene_Search_QueryLexer */
 require_once 'Zend/Search/Lucene/Search/QueryLexer.php';
 
+/** Zend_Search_Lucene_Search_QueryParserContext */
+require_once 'Zend/Search/Lucene/Search/QueryParserContext.php';
+
 
 /** Zend_Search_Lucene_FSM */
 require_once 'Zend/Search/Lucene/FSM.php';
@@ -74,7 +77,6 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
      */
     private $_lexer;
 
-
     /**
      * Tokens list
      * Array of Zend_Search_Lucene_Search_QueryToken objects
@@ -82,6 +84,26 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
      * @var array
      */
     private $_tokens;
+
+    /**
+     * Current query parser context
+     *
+     * @var Zend_Search_Lucene_Search_QueryParserContext
+     */
+    private $_context;
+
+    /**
+     * Context stack
+     *
+     * @var array
+     */
+    private $_contextStack;
+
+
+    /** Query parser State Machine states */
+    const ST_WHITE_SPACE     = 0;
+    const ST_FIELD_QUALIFIER = 1;
+    const ST_ERROR           = 9;
 
 
     /**
@@ -92,8 +114,10 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
         parent::__construct();
 
         $this->_lexer = new Zend_Search_Lucene_Search_QueryLexer();
-    }
 
+        parent::__construct( Zend_Search_Lucene_Search_QueryToken::getTypes(),
+                             array());
+    }
 
 
     /**
