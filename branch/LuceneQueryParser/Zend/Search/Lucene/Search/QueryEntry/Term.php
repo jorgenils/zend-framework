@@ -40,12 +40,14 @@ require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
  * @copyright  Copyright (c) 2006 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-abstract class Zend_Search_Lucene_Search_QueryEntry
+class Zend_Search_Lucene_Search_QueryEntry_Term extends Zend_Search_Lucene_Search_QueryEntry
 {
     /**
      * Boost query entry
      *
      * @param unknown_type $boostFactor
      */
-    abstract function boost($boostFactor = null);
+    function boost($boostFactor = null)
+    {
+    }
 }

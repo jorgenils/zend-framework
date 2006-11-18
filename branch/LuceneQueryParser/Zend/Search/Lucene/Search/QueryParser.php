@@ -101,9 +101,30 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
 
 
     /** Query parser State Machine states */
-    const ST_WHITE_SPACE     = 0;
-    const ST_FIELD_QUALIFIER = 1;
-    const ST_ERROR           = 9;
+    const ST_WHITE_SPACE             = 0;   // Wait for next query element (term, phrase or subquery)
+    const ST_BOOLEAN_OPERATOR        = 1;   // AND, OR or NOT operators
+    const ST_PRESENCE_SIGN           = 2;   // '+' or '-' signs (required or prohibited operators)
+    const ST_FIELD_QUALIFIER         = 3;   // Default search field qualifier for next query element
+                                            // Ex. 'title:Zend', 'title:"Zend Framework"' or
+                                            // 'title:("Zend Framework" OR release OR contents:MVC)'
+    const ST_WORD                    = 4;   // Search term
+    const ST_PHRASE                  = 5;   // Search phrase
+    const ST_MODIFIER                = 6;   // Term/phrase modifiers - '~' or '^'
+    const ST_MODIFIER_PARAMETER      = 7;   // Modifiers parameter. It's a number, which defines
+                                            // similarity for fuzzy search queries,
+                                            // word distance for proximity search queries
+                                            // or boost factor
+    const ST_CLOSEDINT_RQ_START      = 8;   // Range query start (closed interval) - '['
+    const ST_CLOSEDINT_RQ_FIRST_TERM = 9;   // First term in '[term1 to term2]' construction
+    const ST_CLOSEDINT_RQ_TO_TERM    = 10;  // 'TO' lexeme in '[term1 to term2]' construction
+    const ST_CLOSEDINT_RQ_LAST_TERM  = 11;  // Second term in '[term1 to term2]' construction
+    const ST_CLOSEDINT_RQ_END        = 12;  // Range query end (closed interval) - ']'
+    const ST_OPENEDINT_RQ_START      = 13;  // Range query start (opened interval) - '{'
+    const ST_OPENEDINT_RQ_FIRST_TERM = 14;  // First term in '{term1 to term2}' construction
+    const ST_OPENEDINT_RQ_TO_TERM    = 15;  // 'TO' lexeme in '{term1 to term2}' construction
+    const ST_OPENEDINT_RQ_LAST_TERM  = 16;  // Second term in '{term1 to term2}' construction
+    const ST_OPENEDINT_RQ_END        = 17;  // Range query end (opened interval) - '}'
+    const ST_ERROR                   = 18;  // Error state
 
 
     /**
@@ -111,12 +132,29 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
      */
     public function __construct()
     {
-        parent::__construct();
+        parent::__construct(array(self::ST_WHITE_SPACE,
+                                  self::ST_BOOLEAN_OPERATOR,
+                                  self::ST_PRESENCE_SIGN,
+                                  self::ST_FIELD_QUALIFIER,
+                                  self::ST_WORD,
+                                  self::ST_PHRASE,
+                                  self::ST_MODIFIER,
+                                  self::ST_MODIFIER_PARAMETER,
+                                  self::ST_CLOSEDINT_RQ_START,
+                                  self::ST_CLOSEDINT_RQ_FIRST_TERM,
+                                  self::ST_CLOSEDINT_RQ_TO_TERM,
+                                  self::ST_CLOSEDINT_RQ_LAST_TERM,
+                                  self::ST_CLOSEDINT_RQ_END,
+                                  self::ST_OPENEDINT_RQ_START,
+                                  self::ST_OPENEDINT_RQ_FIRST_TERM,
+                                  self::ST_OPENEDINT_RQ_TO_TERM,
+                                  self::ST_OPENEDINT_RQ_LAST_TERM,
+                                  self::ST_OPENEDINT_RQ_END,
+                                  self::ST_ERROR
+                                 ),
+                            Zend_Search_Lucene_Search_QueryToken::getTypes());
 
         $this->_lexer = new Zend_Search_Lucene_Search_QueryLexer();
-
-        parent::__construct( Zend_Search_Lucene_Search_QueryToken::getTypes(),
-                             array());
     }
 
 
