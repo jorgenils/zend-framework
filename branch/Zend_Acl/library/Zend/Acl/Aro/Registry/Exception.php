@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Zend Framework
  *
@@ -22,9 +21,9 @@
 
 
 /**
- * Zend_Acl_Aro_Interface
+ * Zend_Acl_Exception
  */
-require_once 'Zend/Acl/Aro/Interface.php';
+require_once 'Zend/Acl/Exception.php';
 
 
 /**
@@ -33,34 +32,5 @@ require_once 'Zend/Acl/Aro/Interface.php';
  * @copyright  Copyright (c) 2006 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Acl_Aro implements Zend_Acl_Aro_Interface
-{
-    /**
-     * Unique id of ARO
-     *
-     * @var string
-     */
-    protected $_id;
-
-    /**
-     * Sets the ARO identifier
-     *
-     * @param  string $id
-     * @return void
-     */
-    public function __construct($id)
-    {
-        $this->_id = (string) $id;
-    }
-
-    /**
-     * Defined by Zend_Acl_Aro_Interface; returns the ARO identifier
-     *
-     * @return string
-     */
-    public function getId()
-    {
-        return $this->_id;
-    }
-
-}
+class Zend_Acl_Aro_Registry_Exception extends Zend_Acl_Exception
+{}
