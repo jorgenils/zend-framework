@@ -23,20 +23,11 @@
 /** Zend_Search_Lucene_Index_Term */
 require_once 'Zend/Search/Lucene/Index/Term.php';
 
-/** Zend_Search_Lucene_Search_Query_Term */
-require_once 'Zend/Search/Lucene/Search/Query/Term.php';
-
-/** Zend_Search_Lucene_Search_Query_MultiTerm */
-require_once 'Zend/Search/Lucene/Search/Query/MultiTerm.php';
-
-/** Zend_Search_Lucene_Search_Query_Boolean */
-require_once 'Zend/Search/Lucene/Search/Query/Boolean.php';
-
-/** Zend_Search_Lucene_Search_Query_Phrase */
-require_once 'Zend/Search/Lucene/Search/Query/Phrase.php';
-
 /** Zend_Search_Lucene_Exception */
 require_once 'Zend/Search/Lucene/Exception.php';
+
+/** Zend_Search_Lucene_Search_QueryEntry */
+require_once 'Zend/Search/Lucene/Search/QueryEntry.php';
 
 /** Zend_Search_Lucene_Search_QueryParserException */
 require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
@@ -49,37 +40,12 @@ require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
  * @copyright  Copyright (c) 2006 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Search_Lucene_Search_QueryParserContext
+abstract class Zend_Search_Lucene_Search_QueryEntry
 {
-    public $query;
-
-
     /**
-     * Query entries
-     * Each entry may be term, phrase or subquery
+     * Boost query entry
      *
-     * @var unknown_type
+     * @param unknown_type $boostFactor
      */
-    public $entries = array();
-
-
-    public function __construct()
-    {
-    }
-
-
-    public function addEntry()
-    {
-
-    }
-
-    /**
-     * Set boost factor to the entry
-     *
-     */
-    public function boostEntry()
-    {
-    }
-
-
+    abstract function boost($boostFactor = null);
 }

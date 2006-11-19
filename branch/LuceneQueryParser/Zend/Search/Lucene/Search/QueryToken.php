@@ -111,14 +111,22 @@ class Zend_Search_Lucene_Search_QueryToken
      */
     public $text;
 
+    /**
+     * Token position within query.
+     *
+     * @var integer
+     */
+    public $position;
+
 
     /**
      * IndexReader constructor needs token type and token text as a parameters.
      *
      * @param integer $tokenCategory
      * @param string  $tokText
+     * @param integer $position
      */
-    public function __construct($tokenCategory, $tokenText)
+    public function __construct($tokenCategory, $tokenText, $position)
     {
         $this->text = $tokenText;
 

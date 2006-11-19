@@ -379,7 +379,8 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
 
         $token = new Zend_Search_Lucene_Search_QueryToken(
                                 Zend_Search_Lucene_Search_QueryToken::TC_SYNTAX_ELEMENT,
-                                $lexeme);
+                                $lexeme,
+                                $this->_queryStringPosition);
 
         // Skip this lexeme if it's a field indicator ':' and treat previous as 'field' instead of 'word'
         if ($token->type == Zend_Search_Lucene_Search_QueryToken::TT_FIELD_INDICATOR) {
@@ -401,7 +402,8 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
     {
         $this->_lexemes[] = new Zend_Search_Lucene_Search_QueryToken(
                                     Zend_Search_Lucene_Search_QueryToken::TC_SYNTAX_ELEMENT,
-                                    $this->_queryString[$this->_queryStringPosition]);
+                                    $this->_queryString[$this->_queryStringPosition],
+                                    $this->_queryStringPosition);
     }
 
 
@@ -412,7 +414,8 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
     {
         $this->_lexemes[] = new Zend_Search_Lucene_Search_QueryToken(
                                     Zend_Search_Lucene_Search_QueryToken::TC_WORD,
-                                    $this->_currentLexeme);
+                                    $this->_currentLexeme,
+                                    $this->_queryStringPosition - 1);
 
         $this->_currentLexeme = '';
     }
@@ -424,7 +427,8 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
     {
         $this->_lexemes[] = new Zend_Search_Lucene_Search_QueryToken(
                                     Zend_Search_Lucene_Search_QueryToken::TC_PHRASE,
-                                    $this->_currentLexeme);
+                                    $this->_currentLexeme,
+                                    $this->_queryStringPosition);
 
         $this->_currentLexeme = '';
     }
@@ -436,7 +440,8 @@ class Zend_Search_Lucene_Search_QueryLexer extends Zend_Search_Lucene_FSM
     {
         $this->_lexemes[] = new Zend_Search_Lucene_Search_QueryToken(
                                     Zend_Search_Lucene_Search_QueryToken::TC_NUMBER,
-                                    $this->_currentLexeme);
+                                    $this->_currentLexeme,
+                                    $this->_queryStringPosition - 1);
         $this->_currentLexeme = '';
     }
 
