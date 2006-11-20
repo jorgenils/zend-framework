@@ -93,17 +93,7 @@ class Zend_Acl
      *
      * @var Zend_Acl_Aro_Registry
      */
-    protected $_aroRegistry;
-
-    /**
-     * Initializes ARO registry
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->_aroRegistry = new Zend_Acl_Aro_Registry();
-    }
+    protected $_aroRegistry = null;
 
     /**
      * Retrieve reference to ACO via 'path' property
@@ -139,8 +129,10 @@ class Zend_Acl
     }
 
     /**
-     * Sets the ARO registry to use for this ACL. If $aroRegistry is null,
-     * then the ARO registry is replaced with a new and empty registry.
+     * Sets the ARO registry to use for this ACL
+     *
+     * If $aroRegistry is null, then the ARO registry is replaced with a new
+     * and empty default ARO registry.
      *
      * @param  Zend_Acl_Aro_Registry $aroRegistry
      * @return Zend_Acl Provides a fluent interface
@@ -155,12 +147,18 @@ class Zend_Acl
     }
 
     /**
-     * Returns the ARO registry for this ACL.
+     * Returns the ARO registry for this ACL
+     *
+     * If no ARO registry has been created yet, a new default ARO registry
+     * is created and returned.
      *
      * @return Zend_Acl_Aro_Registry
      */
     public function getAroRegistry()
     {
+        if (null === $this->_aroRegistry) {
+            $this->_aroRegistry = new Zend_Acl_Aro_Registry();
+        }
         return $this->_aroRegistry;
     }
 
