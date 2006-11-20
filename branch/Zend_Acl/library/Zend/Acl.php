@@ -22,9 +22,9 @@
 
 
 /**
- * Zend_Acl_Aco
+ * Zend_Acl_Aco_Interface
  */
-require_once 'Zend/Acl/Aco.php';
+require_once 'Zend/Acl/Aco/Interface.php';
 
 
 /**
@@ -51,7 +51,7 @@ require_once 'Zend/Acl/Permission.php';
  * @copyright  Copyright (c) 2006 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Acl extends Zend_Acl_Aco
+class Zend_Acl
 {
     /**
      * Default group id
@@ -103,6 +103,39 @@ class Zend_Acl extends Zend_Acl_Aco
     public function __construct()
     {
         $this->_aroRegistry = new Zend_Acl_Aro_Registry();
+    }
+
+    /**
+     * Retrieve reference to ACO via 'path' property
+     *
+     * If the path exists then return a reference to it, otherwise return a
+     * reference to self. This means that permissions can be implied for a path
+     * rather than explicitly set (they infer an inherited permission).
+     *
+     * @param  string $path
+     * @return Zend_Acl_Aco Provides a fluent interface
+     */
+    public function __get($path)
+    {
+        if (isset($this->_children[$path])) {
+            return $this->_children[$path];
+        } else {
+            return $this->_addPath($path);
+        }
+    }
+
+    /**
+     * Create path
+     *
+     * Add a new path to this ACL.
+     *
+     * @param  string   $path
+     * @param  Zend_Acl $value
+     * @return void
+     */
+    public function __set($path, Zend_Acl $value)
+    {
+        $this->_children[$path] = $value;
     }
 
     /**

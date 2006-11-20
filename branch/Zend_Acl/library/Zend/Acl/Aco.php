@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Zend Framework
  *
@@ -21,9 +22,9 @@
 
 
 /**
- * Zend_Acl_Exception
+ * Zend_Acl_Aco_Interface
  */
-require_once 'Zend/Acl/Exception.php';
+require_once 'Zend/Acl/Aco/Interface.php';
 
 
 /**
@@ -32,5 +33,34 @@ require_once 'Zend/Acl/Exception.php';
  * @copyright  Copyright (c) 2006 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Acl_Aro_Exception extends Zend_Acl_Exception
-{}
+class Zend_Acl_Aco implements Zend_Acl_Aco_Interface
+{
+    /**
+     * Unique id of ACO
+     *
+     * @var string
+     */
+    protected $_id;
+
+    /**
+     * Sets the ACO identifier
+     *
+     * @param  string $id
+     * @return void
+     */
+    public function __construct($id)
+    {
+        $this->_id = (string) $id;
+    }
+
+    /**
+     * Defined by Zend_Acl_Aco_Interface; returns the ACO identifier
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        return $this->_id;
+    }
+
+}
