@@ -43,11 +43,19 @@ require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
 class Zend_Search_Lucene_Search_QueryEntry_Term extends Zend_Search_Lucene_Search_QueryEntry
 {
     /**
-     * Boost query entry
+     * Term value
      *
-     * @param unknown_type $boostFactor
+     * @var Zend_Search_Lucene_Index_Term
      */
-    function boost($boostFactor = null)
+    private $_term;
+
+    /**
+     * Object constractor
+     *
+     * @param Zend_Search_Lucene_Index_Term $term
+     */
+    public function __construct(Zend_Search_Lucene_Index_Term $term)
     {
+        $this->_term = $term;
     }
 }

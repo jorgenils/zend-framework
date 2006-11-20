@@ -128,7 +128,8 @@ class Zend_Search_Lucene_Search_QueryToken
      */
     public function __construct($tokenCategory, $tokenText, $position)
     {
-        $this->text = $tokenText;
+        $this->text     = $tokenText;
+        $this->position = $position + 1; // Start from 1
 
         switch ($tokenCategory) {
             case self::TC_WORD:

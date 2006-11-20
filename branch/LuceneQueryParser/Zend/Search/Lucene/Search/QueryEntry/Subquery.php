@@ -42,12 +42,4 @@ require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
  */
 class Zend_Search_Lucene_Search_QueryEntry_Subquery extends Zend_Search_Lucene_Search_QueryEntry
 {
-    /**
-     * Boost query entry
-     *
-     * @param unknown_type $boostFactor
-     */
-    function boost($boostFactor = null)
-    {
-    }
 }

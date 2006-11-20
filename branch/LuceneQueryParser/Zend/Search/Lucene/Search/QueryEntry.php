@@ -43,9 +43,19 @@ require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
 abstract class Zend_Search_Lucene_Search_QueryEntry
 {
     /**
+     * Query entry boost factor
+     *
+     * @var float
+     */
+    protected $_boost = 1.0;
+
+    /**
      * Boost query entry
      *
-     * @param unknown_type $boostFactor
+     * @param float $boostFactor
      */
-    abstract function boost($boostFactor = null);
+    function boost($boostFactor)
+    {
+        $this->_boost *= $boostFactor;
+    }
 }
