@@ -67,8 +67,8 @@ class Zend_Acl_Aro_Registry
      * these - mixing string identifiers and objects is ok - to indicate the AROs
      * from which the newly added ARO will inherit.
      *
-     * @param  Zend_Acl_Aro_Interface $aro
-     * @param  string|array           $inherits
+     * @param  Zend_Acl_Aro_Interface              $aro
+     * @param  Zend_Acl_Aro_Interface|string|array $inherits
      * @throws Zend_Acl_Aro_Registry_Exception
      * @return self Provides a fluent interface
      */
@@ -114,15 +114,23 @@ class Zend_Acl_Aro_Registry
     }
 
     /**
-     * Returns the ARO identified by $aroId
+     * Returns the identified ARO
      *
-     * @param  string $aro
+     * The $aro parameter can either be an ARO or an ARO identifier.
+     *
+     * @param  Zend_Acl_Aro_Interface|string $aro
      * @throws Zend_Acl_Aro_Registry_Exception
      * @return Zend_Acl_Aro_Interface
      */
-    public function get($aroId)
+    public function get($aro)
     {
-        if (!$this->has($aroId)) {
+        if ($aro instanceof Zend_Acl_Aro_Interface) {
+            $aroId = $aro->getId();
+        } else {
+            $aroId = $aro;
+        }
+
+        if (!$this->has($aro)) {
             throw new Zend_Acl_Aro_Registry_Exception("ARO '$aroId' not found");
         }
 
@@ -130,31 +138,81 @@ class Zend_Acl_Aro_Registry
     }
 
     /**
-     * Returns true if and only if an ARO identified by $aroId is in the registry
+     * Returns true if and only if the ARO exists in the registry
      *
-     * @param  string $aroId
+     * The $aro parameter can either be an ARO or an ARO identifier.
+     *
+     * @param  Zend_Acl_Aro_Interface|string $aro
      * @return boolean
      */
-    public function has($aroId)
+    public function has($aro)
     {
+        if ($aro instanceof Zend_Acl_Aro_Interface) {
+            $aroId = $aro->getId();
+        } else {
+            $aroId = $aro;
+        }
+
         return isset($this->_aros[$aroId]);
     }
 
     /**
-     * Removes the ARO identified by $aroId from the registry
+     * Returns true if and only if $aro inherits from $inherit
      *
-     * @param  string $aroId
+     * Both parameters may be either an ARO or an ARO identifier. If
+     * $checkAncestry is false, then $aro must inherit directly from
+     * $inherit in order to return true. By default, this method looks
+     * through the entire inheritance DAG to determine whether $aro
+     * inherits from $inherit through other AROs.
+     *
+     * @param  Zend_Acl_Aro_Interface|string $aro
+     * @param  Zend_Acl_Aro_Interface|string $inherit
+     * @param  boolean                       $checkAncestry
      * @throws Zend_Acl_Aro_Registry_Exception
-     * @return self Provides a fluent interface
+     * @return boolean
      */
-    public function remove($aroId)
+    public function inherits($aro, $inherit, $checkAncestry = true)
     {
         try {
-            $aro = $this->get($aroId);
+            $aro     = $this->get($aro);
+            $inherit = $this->get($inherit);
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             throw $e;
         }
 
+        $inherits = isset($this->_aros[$aro->getId()]['inherits'][$inherit->getId()]);
+
+        if ($inherits || $checkAncestry == false) {
+            return $inherits;
+        }
+
+        foreach ($this->_aros[$aro->getId()]['inherits'] as $inheritedId => $inherited) {
+            if ($this->inherits($inherited, $inherit)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Removes the ARO from the registry
+     *
+     * The $aro parameter can either be an ARO or an ARO identifier.
+     *
+     * @param  Zend_Acl_Aro_Interface|string $aro
+     * @throws Zend_Acl_Aro_Registry_Exception
+     * @return self Provides a fluent interface
+     */
+    public function remove($aro)
+    {
+        try {
+            $aro = $this->get($aro);
+        } catch (Zend_Acl_Aro_Registry_Exception $e) {
+            throw $e;
+        }
+
+        $aroId = $aro->getId();
         foreach ($this->_aros[$aroId]['inheritedBy'] as $inheritId => $inherit) {
             unset($this->_aros[$inheritId]['inherits'][$aroId]);
         }

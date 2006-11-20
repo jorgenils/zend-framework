@@ -101,6 +101,8 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
                                ->get($aroGuest->getId());
             $this->assertTrue($aroGuest === $aro);
             $this->assertTrue($aroGuest === $aroRegistry->guest);
+            $aro = $aroRegistry->get($aroGuest);
+            $this->assertTrue($aroGuest === $aro);
         } catch (Exception $e) {
             $this->fail('Unexpected exception: ' . $e->getMessage());
         }
@@ -109,6 +111,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     /**
      * Ensures that basic removal of a single ARO works
      *
+     * @return void
      */
     public function testARORegistryRemoveOne()
     {
@@ -117,11 +120,40 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
             $aroRegistry = $this->_acl->getAroRegistry();
             $aroRegistry->removeAll()
                         ->add($aroGuest)
-                        ->remove($aroGuest->getId());
+                        ->remove($aroGuest);
         } catch (Exception $e) {
             $this->fail('Unexpected exception: ' . $e->getMessage());
         }
-        $this->assertTrue(!$aroRegistry->has($aroGuest->getId()));
+        $this->assertFalse($aroRegistry->has($aroGuest));
+    }
+
+    /**
+     * Tests basic ARO inheritance
+     *
+     * @return void
+     */
+    public function testARORegistryInherits()
+    {
+        try {
+            $aroGuest  = new Zend_Acl_Aro('guest');
+            $aroMember = new Zend_Acl_Aro('member');
+            $aroEditor = new Zend_Acl_Aro('editor');
+            $aroRegistry = $this->_acl->getAroRegistry();
+            $aroRegistry->removeAll()
+                        ->add($aroGuest)
+                        ->add($aroMember, $aroGuest->getId())
+                        ->add($aroEditor, $aroMember);
+            $this->assertTrue($aroRegistry->inherits($aroMember, $aroGuest, false));
+            $this->assertTrue($aroRegistry->inherits($aroEditor, $aroMember, false));
+            $this->assertTrue($aroRegistry->inherits($aroEditor, $aroGuest));
+            $this->assertFalse($aroRegistry->inherits($aroGuest, $aroMember));
+            $this->assertFalse($aroRegistry->inherits($aroMember, $aroEditor));
+            $this->assertFalse($aroRegistry->inherits($aroGuest, $aroEditor));
+            $aroRegistry->remove($aroMember);
+            $this->assertFalse($aroRegistry->inherits($aroEditor, $aroGuest));
+        } catch (Exception $e) {
+            $this->fail('Unexpected exception: ' . $e->getMessage());
+        }
     }
 
     /**
