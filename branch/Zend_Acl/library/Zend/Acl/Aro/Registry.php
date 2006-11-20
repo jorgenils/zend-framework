@@ -42,11 +42,6 @@ require_once 'Zend/Acl/Aro/Registry/Exception.php';
 class Zend_Acl_Aro_Registry
 {
     /**
-     * Default identifier for the root ARO, from which all other AROs inherit
-     */
-    const ARO_ROOT_ID_DEFAULT = '_default';
-
-    /**
      * Internal ARO registry data storage
      *
      * @var array
@@ -79,9 +74,41 @@ class Zend_Acl_Aro_Registry
      */
     public function add(Zend_Acl_Aro_Interface $aro, $inherits = null)
     {
-        /**
-         * @todo implementation; needs to add "default" ARO if one does not already exist
-         */
+        $aroId = $aro->getId();
+
+        if ($this->has($aroId)) {
+            throw new Zend_Acl_Aro_Registry_Exception("ARO id '$aroId' already exists in the registry");
+        }
+
+        $inheritsAros = array();
+
+        if (null !== $inherits) {
+            if (!is_array($inherits)) {
+                $inherits = array($inherits);
+            }
+            foreach ($inherits as $inherit) {
+                try {
+                    if ($inherit instanceof Zend_Acl_Aro_Interface) {
+                        $aroInheritId = $inherit->getId();
+                        $aroInherit   = $this->get($aroInheritId);
+                    } else {
+                        $aroInheritId = $inherit;
+                        $aroInherit   = $this->get($aroInheritId);
+                    }
+                } catch (Zend_Acl_Aro_Registry_Exception $e) {
+                    throw new Zend_Acl_Aro_Registry_Exception("Inherited ARO id '$aroInheritId' does not "
+                                                            . 'exist in the registry');
+                }
+                $inheritsAros[$aroInheritId] = $aroInherit;
+                $this->_aros[$aroInheritId]['inheritedBy'][$aroId] = $aro;
+            }
+        }
+
+        $this->_aros[$aroId] = array(
+            'instance'    => $aro,
+            'inherits'    => $inheritsAros,
+            'inheritedBy' => array()
+            );
 
         return $this;
     }
@@ -99,7 +126,7 @@ class Zend_Acl_Aro_Registry
             throw new Zend_Acl_Aro_Registry_Exception("ARO '$aroId' not found");
         }
 
-        return $this->_aros[$aroId];
+        return $this->_aros[$aroId]['instance'];
     }
 
     /**
@@ -128,9 +155,11 @@ class Zend_Acl_Aro_Registry
             throw $e;
         }
 
-        /**
-         * @todo implementation
-         */
+        foreach ($this->_aros[$aroId]['inheritedBy'] as $inheritId => $inherit) {
+            unset($this->_aros[$inheritId]['inherits'][$aroId]);
+        }
+
+        unset($this->_aros[$aroId]);
 
         return $this;
     }
@@ -142,9 +171,7 @@ class Zend_Acl_Aro_Registry
      */
     public function removeAll()
     {
-        /**
-         * @todo implementation
-         */
+        $this->_aros = array();
 
         return $this;
     }

@@ -87,6 +87,44 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Ensures that basic addition and retrieval of a single ARO works
+     *
+     * @return void
+     */
+    public function testARORegistryAddAndGetOne()
+    {
+        try {
+            $aroGuest = new Zend_Acl_Aro('guest');
+            $aroRegistry = $this->_acl->getAroRegistry();
+            $aro = $aroRegistry->removeAll()
+                               ->add($aroGuest)
+                               ->get($aroGuest->getId());
+            $this->assertTrue($aroGuest === $aro);
+            $this->assertTrue($aroGuest === $aroRegistry->guest);
+        } catch (Exception $e) {
+            $this->fail('Unexpected exception: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Ensures that basic removal of a single ARO works
+     *
+     */
+    public function testARORegistryRemoveOne()
+    {
+        try {
+            $aroGuest = new Zend_Acl_Aro('guest');
+            $aroRegistry = $this->_acl->getAroRegistry();
+            $aroRegistry->removeAll()
+                        ->add($aroGuest)
+                        ->remove($aroGuest->getId());
+        } catch (Exception $e) {
+            $this->fail('Unexpected exception: ' . $e->getMessage());
+        }
+        $this->assertTrue(!$aroRegistry->has($aroGuest->getId()));
+    }
+
+    /**
      * Ensures that the same ARO cannot be registered more than once to the registry
      *
      * @return void
@@ -95,17 +133,40 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     {
         try {
             $aroGuest = new Zend_Acl_Aro('guest');
-            $this->_acl->getAroRegistry()->add($aroGuest);
-            $this->_acl->getAroRegistry()->add($aroGuest);
+            $this->_acl->getAroRegistry()->removeAll()
+                                         ->add($aroGuest)
+                                         ->add($aroGuest);
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
-            /**
-             * @todo ensure $e has the correct exception message
-             */
+            $this->assertContains('already exists', $e->getMessage());
+            return;
         } catch (Exception $e) {
             $this->fail('Unexpected exception: ' . $e->getMessage());
         }
 
         $this->fail('Expected exception not thrown upon adding same ARO twice');
+    }
+
+    /**
+     * Ensures that two AROs having the same ID cannot be registered
+     *
+     * @return void
+     */
+    public function testARORegistryDuplicateId()
+    {
+        try {
+            $aroGuest1 = new Zend_Acl_Aro('guest');
+            $aroGuest2 = new Zend_Acl_Aro('guest');
+            $this->_acl->getAroRegistry()->removeAll()
+                                         ->add($aroGuest1)
+                                         ->add($aroGuest2);
+        } catch (Zend_Acl_Aro_Registry_Exception $e) {
+            $this->assertContains('already exists', $e->getMessage());
+            return;
+        } catch (Exception $e) {
+            $this->fail('Unexpected exception: ' . $e->getMessage());
+        }
+
+        $this->fail('Expected exception not thrown upon adding two AROs with same ID');
     }
 
     public function testCMSExample()
