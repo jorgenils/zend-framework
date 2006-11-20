@@ -77,13 +77,29 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Ensures that the ARO registry is returned properly
+     * Ensures that the ARO registry is created automatically only once
      *
      * @return void
      */
-    public function testGetARORegistry()
+    public function testGetARORegistryAuto()
     {
-        $this->assertTrue($this->_acl->getAroRegistry() instanceof Zend_Acl_Aro_Registry);
+        $acl = new Zend_Acl();
+        $aroRegistry1 = $acl->getAroRegistry();
+        $this->assertTrue($aroRegistry1 instanceof Zend_Acl_Aro_Registry);
+        $aroRegistry2 = $acl->getAroRegistry();
+        $this->assertTrue($aroRegistry1 === $aroRegistry2);
+    }
+
+    /**
+     * Tests setting the ARO registry
+     *
+     * @return void
+     */
+    public function testSetARORegistry()
+    {
+        $aroRegistry = new Zend_Acl_Aro_Registry();
+        $this->_acl->setAroRegistry($aroRegistry);
+        $this->assertTrue($aroRegistry === $this->_acl->getAroRegistry());
     }
 
     /**
@@ -369,15 +385,6 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         self::assertTrue($acl->news->latest->valid('marketing', 'publish'));
         self::assertTrue($acl->news->latest->valid('marketing', 'edit'));
         self::assertTrue($acl->news->latest->valid('marketing'));
-
-        // Create second Zend_Acl instance
-        $acl2 = new Zend_Acl();
-
-        // Fetch a new ARO registry
-        $aro2 = $acl2->getAroRegistry();
-
-        // Ensure registries are unique instances
-        self::assertTrue($aro !== $aro2);
 
     }
 
