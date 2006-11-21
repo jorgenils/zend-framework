@@ -42,4 +42,14 @@ require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
  */
 class Zend_Search_Lucene_Search_QueryEntry_Subquery extends Zend_Search_Lucene_Search_QueryEntry
 {
+    /**
+     * Process modifier ('~')
+     *
+     * @throws Zend_Search_Lucene_Search_QueryParserException
+     */
+    public function processFuzzyProximityModifier()
+    {
+        throw new Zend_Search_Lucene_Search_QueryParserException('\'~\' sign must follow term or phrase');
+    }
+
 }

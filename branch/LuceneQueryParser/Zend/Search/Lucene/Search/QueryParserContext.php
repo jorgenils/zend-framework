@@ -19,6 +19,9 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+/** Zend_Search_Lucene_FSM */
+require_once 'Zend/Search/Lucene/FSM.php';
+
 
 /** Zend_Search_Lucene_Index_Term */
 require_once 'Zend/Search/Lucene/Index/Term.php';
@@ -114,7 +117,7 @@ class Zend_Search_Lucene_Search_QueryParserContext
      *
      * @param string|null $defaultField
      */
-    public function __construct($defaultField)
+    public function __construct($defaultField = null)
     {
         $this->_defaultField = $defaultField;
     }
@@ -185,7 +188,7 @@ class Zend_Search_Lucene_Search_QueryParserContext
      *
      * @throws Zend_Search_Lucene_Search_QueryParserException
      */
-    public function processFuzzyProximityModifier()
+    public function processFuzzyProximityModifier($parameter = null)
     {
         // Check, that modifier has came just after word or phrase
         if ($this->_nextEntryField !== null  ||  $this->_nextEntrySign !== null) {
@@ -199,15 +202,33 @@ class Zend_Search_Lucene_Search_QueryParserContext
             throw new Zend_Search_Lucene_Search_QueryParserException('\'~\' modifier must follow word or phrase.');
         }
 
-        $lastEntry->processFuzzyProximityModifier()
+        $lastEntry->processFuzzyProximityModifier($parameter);
+
+        $this->_entries[] = $lastEntry;
     }
 
     /**
      * Set boost factor to the entry
      *
+     * @param float $boostFactor
      */
-    public function boostEntry()
+    public function boost($boostFactor)
     {
+        // Check, that modifier has came just after word or phrase
+        if ($this->_nextEntryField !== null  ||  $this->_nextEntrySign !== null) {
+            throw new Zend_Search_Lucene_Search_QueryParserException('\'^\' modifier must follow word, phrase or subquery.');
+        }
+
+        $lastEntry = array_pop($this->_entries);
+
+        if (!$lastEntry instanceof Zend_Search_Lucene_Search_QueryEntry) {
+            // there are no entries or last entry is boolean operator
+            throw new Zend_Search_Lucene_Search_QueryParserException('\'^\' modifier must follow word, phrase or subquery.');
+        }
+
+        $lastEntry->boost($parameter);
+
+        $this->_entries[] = $lastEntry;
     }
 
     /**
@@ -215,7 +236,7 @@ class Zend_Search_Lucene_Search_QueryParserContext
      *
      * @return Zend_Search_Lucene_Search_Query
      */
-    public function query()
+    public function getQuery()
     {
     }
 }

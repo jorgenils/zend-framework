@@ -50,6 +50,21 @@ class Zend_Search_Lucene_Search_QueryEntry_Term extends Zend_Search_Lucene_Searc
     private $_term;
 
     /**
+     * Fuzzy search query
+     *
+     * @var boolean
+     */
+    private $_fuzzyQuery = false;
+
+    /**
+     * Similarity
+     *
+     * @var float
+     */
+    private $_similarity = 1.;
+
+
+    /**
      * Object constractor
      *
      * @param Zend_Search_Lucene_Index_Term $term
@@ -57,5 +72,21 @@ class Zend_Search_Lucene_Search_QueryEntry_Term extends Zend_Search_Lucene_Searc
     public function __construct(Zend_Search_Lucene_Index_Term $term)
     {
         $this->_term = $term;
+    }
+
+    /**
+     * Process modifier ('~')
+     *
+     * @param mixed $parameter
+     */
+    public function processFuzzyProximityModifier($parameter)
+    {
+        $this->_fuzzyQuery = true;
+
+        if ($parameter !== null) {
+            $this->_similarity = $parameter;
+        } else {
+            $this->_similarity = 0.5;
+        }
     }
 }

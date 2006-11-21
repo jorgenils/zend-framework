@@ -86,11 +86,20 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
     private $_tokens;
 
     /**
-     * Current token Id
+     * Current token
      *
      * @var integer|string
      */
     private $_currentToken;
+
+    /**
+     * Last token
+     *
+     * It can be processed within FSM states, but this addirional state simplifies FSM
+     *
+     * @var Zend_Search_Lucene_Search_QueryToken
+     */
+    private $_lastToken = null;
 
     /**
      * Current query parser context
@@ -105,6 +114,7 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
      * @var array
      */
     private $_contextStack;
+
 
 
     /** Query parser State Machine states */
@@ -171,11 +181,14 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
 
 
 
-        $addTermEntryAction   = new Zend_Search_Lucene_FSMAction($this, 'addTermEntry');
-        $addPhraseEntryAction = new Zend_Search_Lucene_FSMAction($this, 'addPhraseEntry');
-        $setFieldAction       = new Zend_Search_Lucene_FSMAction($this, 'setField');
-        $setSignAction        = new Zend_Search_Lucene_FSMAction($this, 'setSign');
-        $setFuzzyProxAction   = new Zend_Search_Lucene_FSMAction($this, 'processFuzzyProximityModifier');
+        $addTermEntryAction             = new Zend_Search_Lucene_FSMAction($this, 'addTermEntry');
+        $addPhraseEntryAction           = new Zend_Search_Lucene_FSMAction($this, 'addPhraseEntry');
+        $setFieldAction                 = new Zend_Search_Lucene_FSMAction($this, 'setField');
+        $setSignAction                  = new Zend_Search_Lucene_FSMAction($this, 'setSign');
+        $setFuzzyProxAction             = new Zend_Search_Lucene_FSMAction($this, 'processFuzzyProximityModifier');
+        $processModifierParameterAction = new Zend_Search_Lucene_FSMAction($this, 'processModifierParameter');
+        $subqueryStartAction            = new Zend_Search_Lucene_FSMAction($this, 'subqueryStart');
+        $subqueryEndAction              = new Zend_Search_Lucene_FSMAction($this, 'subqueryEnd');
 
 
         $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_WORD,            $addTermEntryAction);
@@ -183,7 +196,8 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
         $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_FIELD,           $setFieldAction);
         $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_REQUIRED,        $setSignAction);
         $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_PROHIBITED,      $setSignAction);
-        $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_FUZZY_PROX_MARK, $setSignAction);
+        $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_FUZZY_PROX_MARK, $setFuzzyProxAction);
+        $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_NUMBER,          $processModifierParameterAction);
 
 
         $this->_lexer = new Zend_Search_Lucene_Search_QueryLexer();
@@ -203,7 +217,10 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
             self::$_instance = new Zend_Search_Lucene_Search_QueryParser();
         }
 
-        self::$_instance->_tokens = self::$_instance->_lexer->tokenize($strQuery);
+        self::$_instance->_lastToken    = null;
+        self::$_instance->_context      = new Zend_Search_Lucene_Search_QueryParserContext();
+        self::$_instance->_contextStack = array();
+        self::$_instance->_tokens       = self::$_instance->_lexer->tokenize($strQuery);
 
         // Empty query
         if (count(self::$_instance->_tokens) == 0) {
@@ -211,10 +228,12 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
         }
 
 
-        foreach (self::$_instance->_tokens as $tokId => $token) {
+        foreach (self::$_instance->_tokens as $token) {
             try {
-                self::$_instance->_currentToken = $tokId;
+                self::$_instance->_currentToken = $token;
                 self::$_instance->process($token->type);
+
+                self::$_instance->_lastToken = $token;
             } catch (Exception $e) {
                 if (strpos($e->getMessage(), 'There is no any rule for') !== false) {
                     throw new Zend_Search_Lucene_Search_QueryParserException( 'Syntax error at char position ' . $token->position . '.' );
@@ -240,8 +259,7 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
      */
     public function addTermEntry()
     {
-        $term = new Zend_Search_Lucene_Index_Term($this->_tokens[$this->_currentToken]->text,
-                                                  $this->_context->getField());
+        $term = new Zend_Search_Lucene_Index_Term($this->_currentToken->text, $this->_context->getField());
 
         $this->_context->addEntry(new Zend_Search_Lucene_Search_QueryEntry_Term($term));
     }
@@ -251,7 +269,7 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
      */
     public function addPhraseEntry()
     {
-        $text = $this->_tokens[$this->_currentToken]->text;
+        $this->_currentToken->text;
         $this->_context->addEntry(new Zend_Search_Lucene_Search_QueryEntry_Term($text, $this->_context->getField()));
     }
 
@@ -260,7 +278,7 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
      */
     public function setField()
     {
-        $fieldName = $this->_tokens[$this->_currentToken]->text;
+        $fieldName = $this->_currentToken->text;
         $this->_context->setNextEntryField($fieldName);
     }
 
@@ -269,7 +287,7 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
      */
     public function setSign()
     {
-        $sign = $this->_tokens[$this->_currentToken]->type;
+        $this->_currentToken->type;
         $this->_context->setNextEntrySign($fieldName);
     }
 
@@ -282,5 +300,54 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
         $this->_context->processFuzzyProximityModifier($fieldName);
     }
 
+    /**
+     * Process modifier parameter
+     *
+     * @throws Zend_Search_Lucene_Search_QueryParserException
+     */
+    public function processModifierParameter()
+    {
+        if ($this->_lastToken === null) {
+            throw new Zend_Search_Lucene_Search_QueryParserException('Lexeme modifier parameter must follow lexeme modifier. Char position ' . $token->position . '.' );
+        }
+
+        switch ($this->_lastToken->type) {
+            case Zend_Search_Lucene_Search_QueryToken::TT_FUZZY_PROX_MARK:
+                $this->_context->processFuzzyProximityModifier($this->_currentToken->text);
+                break;
+
+            case Zend_Search_Lucene_Search_QueryToken::TT_BOOSTING_MARK:
+                $this->_context->boost($this->_currentToken->text);
+                break;
+
+            default:
+                throw new Zend_Search_Lucene_Search_QueryParserException('Lexeme modifier parameter must follow lexeme modifier. Char position ' . $token->position . '.' );
+        }
+    }
+
+
+    /**
+     * Start subquery
+     */
+    public function subqueryStart()
+    {
+        $this->_contextStack[] = $this->_context;
+        $this->_context        = new Zend_Search_Lucene_Search_QueryParserContext($this->_context->getField());
+    }
+
+    /**
+     * End subquery
+     */
+    public function subqueryEnd()
+    {
+        if (count($this->_contextStack) == 0) {
+            throw new Zend_Search_Lucene_Search_QueryParserException('Syntax Error: mismatched parentheses, every opening must have closing. Char position ' . $token->position . '.' );
+        }
+
+        $query          = $this->_context->getQuery();
+        $this->_context = array_pop($this->_contextStack);
+
+        $this->_context->addEntry(new Zend_Search_Lucene_Search_QueryEntry_Subquery($query));
+    }
 }
 

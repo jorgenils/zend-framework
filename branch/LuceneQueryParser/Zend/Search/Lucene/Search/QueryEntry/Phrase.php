@@ -49,6 +49,20 @@ class Zend_Search_Lucene_Search_QueryEntry_Phrase extends Zend_Search_Lucene_Sea
      */
     private $_phrase;
 
+    /**
+     * Proximity phrase query
+     *
+     * @var boolean
+     */
+    private $_proximityQuery = false;
+
+    /**
+     * Words distance, used for proximiti queries
+     *
+     * @var integer
+     */
+    private $_wordsDistance = 0;
+
 
     /**
      * Object constractor
@@ -59,4 +73,19 @@ class Zend_Search_Lucene_Search_QueryEntry_Phrase extends Zend_Search_Lucene_Sea
     {
         $this->_phrase = $phrase;
     }
+
+    /**
+     * Process modifier ('~')
+     *
+     * @param mixed $parameter
+     */
+    public function processFuzzyProximityModifier($parameter)
+    {
+        $this->_proximityQuery = true;
+
+        if ($parameter !== null) {
+            $this->_wordsDistance = $parameter;
+        }
+    }
+
 }

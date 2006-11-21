@@ -49,13 +49,23 @@ abstract class Zend_Search_Lucene_Search_QueryEntry
      */
     protected $_boost = 1.0;
 
+
+    /**
+     * Process modifier ('~')
+     *
+     * @param mixed $parameter
+     */
+    abstract public function processFuzzyProximityModifier($parameter = null);
+
     /**
      * Boost query entry
      *
      * @param float $boostFactor
      */
-    function boost($boostFactor)
+    public function boost($boostFactor)
     {
         $this->_boost *= $boostFactor;
     }
+
+
 }
