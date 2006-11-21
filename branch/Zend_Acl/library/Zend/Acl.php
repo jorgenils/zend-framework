@@ -22,6 +22,12 @@
 
 
 /**
+ * Zend
+ */
+require_once 'Zend.php';
+
+
+/**
  * Zend_Acl_Aco_Interface
  */
 require_once 'Zend/Acl/Aco/Interface.php';
@@ -34,18 +40,6 @@ require_once 'Zend/Acl/Aro/Registry.php';
 
 
 /**
- * Zend_Acl_Exception
- */
-require_once 'Zend/Acl/Exception.php';
-
-
-/**
- * Zend_Acl_Permission
- */
-require_once 'Zend/Acl/Permission.php';
-
-
-/**
  * @category   Zend
  * @package    Zend_Acl
  * @copyright  Copyright (c) 2006 Zend Technologies USA Inc. (http://www.zend.com)
@@ -54,41 +48,6 @@ require_once 'Zend/Acl/Permission.php';
 class Zend_Acl
 {
     /**
-     * Default group id
-     */
-    const ARO_DEFAULT = '_default';
-
-    /**
-     * Default delimiter for paths
-     */
-    const PATH_DELIMITER = '/';
-
-    /**
-     * Magic catch-all keyword
-     */
-    const ACO_CATCHALL = '__ALL__';
-
-    /**
-     * Default permission in case of final neutral result
-     */
-    const PERM_DEFAULT = false;
-
-    /**
-     * Modes for adding permissions to a permission container
-     */
-    const MODE_SET    = 1;
-    const MODE_ADD    = 2;
-    const MODE_REMOVE = 3;
-    const MODE_UNSET  = 4;
-
-    /**
-     * Permissions for this ACO.
-     *
-     * @var Zend_Acl_Permission
-     */
-    protected $_perm = null;
-
-    /**
      * ARO registry
      *
      * @var Zend_Acl_Aro_Registry
@@ -96,36 +55,26 @@ class Zend_Acl
     protected $_aroRegistry = null;
 
     /**
-     * Retrieve reference to ACO via 'path' property
+     * ACO tree
      *
-     * If the path exists then return a reference to it, otherwise return a
-     * reference to self. This means that permissions can be implied for a path
-     * rather than explicitly set (they infer an inherited permission).
-     *
-     * @param  string $path
-     * @return Zend_Acl_Aco Provides a fluent interface
+     * @var array
      */
-    public function __get($path)
-    {
-        if (isset($this->_children[$path])) {
-            return $this->_children[$path];
-        } else {
-            return $this->_addPath($path);
-        }
-    }
+    protected $_acos = array();
 
     /**
-     * Create path
+     * Returns the ARO registry for this ACL
      *
-     * Add a new path to this ACL.
+     * If no ARO registry has been created yet, a new default ARO registry
+     * is created and returned.
      *
-     * @param  string   $path
-     * @param  Zend_Acl $value
-     * @return void
+     * @return Zend_Acl_Aro_Registry
      */
-    public function __set($path, Zend_Acl $value)
+    public function getAroRegistry()
     {
-        $this->_children[$path] = $value;
+        if (null === $this->_aroRegistry) {
+            $this->_aroRegistry = new Zend_Acl_Aro_Registry();
+        }
+        return $this->_aroRegistry;
     }
 
     /**
@@ -147,428 +96,136 @@ class Zend_Acl
     }
 
     /**
-     * Returns the ARO registry for this ACL
+     * Adds an ACO having an identifier unique to the ACL
      *
-     * If no ARO registry has been created yet, a new default ARO registry
-     * is created and returned.
+     * The $parent parameter may be a reference to, or the string identifier for,
+     * the existing ACO from which the newly added ACO will inherit.
      *
-     * @return Zend_Acl_Aro_Registry
-     */
-    public function getAroRegistry()
-    {
-        if (null === $this->_aroRegistry) {
-            $this->_aroRegistry = new Zend_Acl_Aro_Registry();
-        }
-        return $this->_aroRegistry;
-    }
-
-    /**
-     * Sets allow permissions to the ACL
-     *
-     * Each parameter can be a string or a numeric array of values to allow
-     * assignment to many parameters at once. The $path can use a forward slash
-     * delimeter to indicate a nested relative path
-     *
-     * @param  mixed $aro
-     * @param  mixed $value
-     * @param  mixed $path
-     * @return Zend_Acl Provides a fluent interface
-     */
-    public function allow($aro = Zend_Acl::ARO_DEFAULT, $value = null, $path = null)
-    {
-        return $this->_setPermission('allow', $value, $aro, $path, Zend_Acl::MODE_ADD);
-    }
-
-    /**
-     * Sets deny permissions to the ACL
-     *
-     * @param  mixed $aro
-     * @param  mixed $value
-     * @param  mixed $path
-     * @return Zend_Acl Provides a fluent interface
-     */
-    public function deny($aro = Zend_Acl::ARO_DEFAULT, $value = null, $path = null)
-    {
-        return $this->_setPermission('deny', $value, $aro, $path, Zend_Acl::MODE_ADD);
-    }
-
-    /**
-     * Removes allow permissions from the ACL
-     *
-     * Removes explicit allow permissions from the ACL whilst retaining existing
-     * values. If no $value is passed, all explicit permissions are removed.
-     *
-     * @param  mixed $aro
-     * @param  mixed $value
-     * @param  mixed $path
-     * @return Zend_Acl Provides a fluent interface
-     */
-    public function removeAllow($aro = Zend_Acl::ARO_DEFAULT,
-                                $value = Zend_Acl::ACO_CATCHALL,
-                                $path = Zend_Acl::PATH_DEFAULT)
-    {
-        return $this->_setPermission('allow', $value, $aro, $path, Zend_Acl::MODE_REMOVE);
-    }
-
-    /**
-     * Removes deny permissions from the ACL
-     *
-     * @param  mixed $aro
-     * @param  mixed $value
-     * @param  mixed $path
-     * @return Zend_Acl Provides a fluent interface
-     */
-    public function removeDeny($aro = Zend_Acl::ARO_DEFAULT,
-                               $value = Zend_Acl::ACO_CATCHALL,
-                               $path = Zend_Acl::PATH_DEFAULT)
-    {
-        return $this->_setPermission('deny', $value, $aro, $path, Zend_Acl::MODE_REMOVE);
-    }
-
-    /**
-     * Returns allow permissions for the current ACL
-     *
-     * @return Zend_Acl_Permission Provides a fluent interface
-     */
-    public function getAllow()
-    {
-        return $this->_getPermission()->getPermissions('allow');
-    }
-
-    /**
-     * Returns deny permissions for the current ACL
-     *
-     * @param  mixed $path
-     * @return Zend_Acl_Permission Provides a fluent interface
-     */
-    public function getDeny()
-    {
-        return $this->_getPermission()->getPermissions('deny');
-    }
-
-    /**
-     * Removes an ACL node
-     *
-     * If a path is provided and exists, it will be destroyed. If no path is
-     * provided then the current ACL will instead be removed from its parent
-     * (if the current ACL is not root)
-     *
-     * @param  string $path
+     * @param  Zend_Acl_Aco_Interface              $aco
+     * @param  Zend_Acl_Aco_Interface|string       $parent
      * @throws Zend_Acl_Exception
-     * @return void
+     * @return self Provides a fluent interface
      */
-    public function remove($path = null)
+    public function add(Zend_Acl_Aco_Interface $aco, $parent = null)
     {
-        if (null === $path) {
-            if (!$this->_isRoot()) {
-                return $this->getParent()->remove($this->getPath());
-            } else {
-                throw new Zend_Acl_Exception('Cannot remove root node');
+        $acoId = $aco->getId();
+
+        if ($this->has($acoId)) {
+            Zend::loadClass('Zend_Acl_Exception');
+            throw new Zend_Acl_Exception("ACO id '$acoId' already exists in the ACL");
+        }
+
+        $acoParent = null;
+
+        if (null !== $parent) {
+            Zend::loadClass('Zend_Acl_Exception');
+            try {
+                if ($parent instanceof Zend_Acl_Aco_Interface) {
+                    $acoParentId = $parent->getId();
+                } else {
+                    $acoParentId = $parent;
+                }
+                $acoParent = $this->get($acoParentId);
+            } catch (Zend_Acl_Exception $e) {
+                throw new Zend_Acl_Exception("Parent ACO id '$acoParentId' does not exist");
             }
-        }
-        if (isset($this->_children[$path])) {
-            unset($this->_children[$path]);
-        } else {
-            throw new Zend_Acl_Exception("Path '$path' does not exist");
-        }
-    }
-
-    /**
-     * Removes an ARO from current node and all children
-     *
-     * @param  mixed $aro
-     * @param  mixed $context
-     * @param  mixed $path
-     * @return void
-     */
-    public function removeAro($aro, $context = Zend_Acl::ACO_CATCHALL, $path = null)
-    {
-        $root = $this->_findPath($this, $path);
-
-        $aro = $this->_parseAro($aro);
-        foreach ($this->getChildren() as $aco) {
-            $aco->removeAro($aro, $context);
+            $this->_acos[$acoParentId]['children'][$acoId] = $aco;
         }
 
-        $root->_getPermission()->setValues('allow', $context, $aro, Zend_Acl::MODE_UNSET);
-        $root->_getPermission()->setValues('deny', $context, $aro, Zend_Acl::MODE_UNSET);
-    }
-
-    /**
-     * Test permissions for a path
-     *
-     * Retrieve permissions for an ACO based on the ARO, current context
-     * and an optional path. The optional path parameter allows for a top-down
-     * search from a root - if not supplied, then this instance is used as a
-     * target. A 'null' context will return true if no explicit permissions
-     * are set to 'deny' for the specified group on the target ACO.
-     *
-     * @param  string $id
-     * @param  string $context
-     * @param  string $path
-     * @throws Zend_Acl_Exception
-     * @return boolean
-     */
-    public function valid($aro = Zend_Acl::ARO_DEFAULT, $context = null, $path = null)
-    {
-        $root = $this->_findPath($this, $path);
-
-        if (is_array($aro)) {
-            throw new Zend_Acl_Exception('Cannot determine permissions for multiple AROs');
-        } else {
-            $aro = current($this->_parseAro($aro));
-        }
-
-        return $this->_valid($root, $aro, $context);
-    }
-
-    /**
-     * Returns the ACL's parent object or null if there is no parent.
-     *
-     * @return Zend_Acl|null
-     */
-    public function getParent()
-    {
-        return $this->_parent;
-    }
-
-    /**
-     * Returns the ACL's child nodes
-     *
-     * @return array
-     */
-    public function getChildren()
-    {
-        return $this->_children;
-    }
-
-    /**
-     * Returns the ACL's path
-     *
-     * @return string
-     */
-    public function getPath()
-    {
-        return $this->_path;
-    }
-
-    /**
-     * Returns an array of AROs that can access the ACL
-     *
-     * This function will determine which AROs - from either a list of AROs or
-     * the entire ARO registry - have access to the current ARO.
-     *
-     * AROs can be supplied either an an ARO object, an array of ARO objects,
-     * a string id or an array of string ids. If the ARO parameter is left empty
-     * then the ARO registry is used to return all members.
-     *
-     * To allow fine-grain control, a specific context can also be used to
-     * validate the AROs
-     *
-     * An array of ARO objects is returned upon success or empty
-     *
-     * @param  mixed  $aro
-     * @param  string $context
-     * @return array
-     */
-    public function getValidAro($context = null, $aro = null)
-    {
-        $valid = array();
-
-        if (null === $aro) {
-            $aro = $this->getAroRegistry()->toArray();
-        }
-
-        foreach ($this->_parseAro($aro) as $member) {
-            if ($this->valid($member->getId(), $context)) {
-                $valid[$member->getId()] = $member;
-            }
-        }
-
-        return $valid;
-    }
-
-    /**
-     * Removes an ARO from current node and all children
-     *
-     * @param  Zend_Acl $root
-     * @param  mixed    $aro
-     * @param  mixed    $context
-     * @return boolean
-     */
-    protected function _valid($root, $aro, $context)
-    {
-        $score = 0;
-        $score += $root->_getPermission()->score('allow', $aro, $context);
-        $score -= $root->_getPermission()->score('deny', $aro, $context);
-
-        if ($score < 0) {
-            return false;
-        } elseif ($score > 0) {
-            return true;
-        }
-
-        // Keep working back to root if ACL has a parent
-        if (!$root->_isRoot()) {
-            return $this->_valid($root->getParent(), $aro, $context);
-        }
-
-        // Return a 'catchall' permission as a last resort
-        return self::PERM_DEFAULT;
-    }
-
-    /**
-     * Adds permissions to one or more permission containers
-     *
-     * This method is responsible for passing contexts and groups to each
-     * individual permissions container for processing. The $mode determines
-     * if those contexts are to be set, added or removed
-     *
-     * @param  mixed $acl
-     * @param  mixed $value
-     * @param  mixed $aro
-     * @param  mixed $path
-     * @param  mixed $mode
-     * @return Zend_Acl Provides a fluent interface
-     */
-    protected function _setPermission($acl, $value, $aro, $path,
-                                      $mode = Zend_Acl::MODE_SET)
-    {
-        $aro = $this->_parseAro($aro);
-
-        if (!$this->_isRoot()) {
-            $this->_getPermission()->setValues($acl, $value, $aro, $mode);
-            $acl = $this;
-            while (!$acl->_isRoot()) {
-                $path = $acl->getPath();
-                $parent = $acl->getParent();
-                $parent->$path = $acl;
-                $acl = $parent;
-            }
-        } else {
-            if (!is_array($path)) {
-                $path = array($path);
-            }
-            foreach ($path as $container) {
-                $this->_createPath($container)->_getPermission()->setValues($acl, $value, $aro, $mode);
-            }
-        }
+        $this->_acos[$acoId] = array(
+            'instance' => $aco,
+            'parent'   => $acoParent,
+            'children' => array()
+            );
 
         return $this;
     }
 
     /**
-     * Retrieves permissions for a container. If permissions do not already
-     * exist, an empty permission set is created automatically.
+     * Returns the identified ACO
      *
-     * @return Zend_Acl_Permission
+     * The $aco parameter can either be an ACO or an ACO identifier.
+     *
+     * @param  Zend_Acl_Aco_Interface|string $aco
+     * @throws Zend_Acl_Exception
+     * @return Zend_Acl_Aco_Interface
      */
-    protected function _getPermission()
+    public function get($aco)
     {
-        if (null === $this->_perm) {
-            $this->_perm = new Zend_Acl_Permission();
+        if ($aco instanceof Zend_Acl_Aco_Interface) {
+            $acoId = $aco->getId();
+        } else {
+            $acoId = $aco;
         }
-        return $this->_perm;
+
+        if (!$this->has($aco)) {
+            Zend::loadClass('Zend_Acl_Exception');
+            throw new Zend_Acl_Exception("ACO '$acoId' not found");
+        }
+
+        return $this->_acos[$acoId]['instance'];
     }
 
     /**
-     * Retrieves an array of ARO objects for the selected id
+     * Returns true if and only if the ACO exists in the ACL
      *
-     * @param  string $id ARO identifier
-     * @return array
-     */
-    protected function _parseAro($id)
-    {
-        $aro = array();
-        if (!is_array($id)) {
-            $id = array($id);
-        }
-        foreach ($id as $member) {
-            if (!($member instanceof Zend_Acl_Aro)) {
-                $member = $this->getAroRegistry()->find($member);
-            }
-            $aro[] = $member;
-        }
-        return $aro;
-    }
-
-    /**
-     * Creates child paths from current ACO to destination ACO
+     * The $aco parameter can either be an ACO or an ACO identifier.
      *
-     * $path uses a forward slash to denote a nested path (@see setAllow()).
-     * If the target path does not exist, a new empty ACL is created.
-     *
-     * @param  string $path
-     * @return Zend_Acl
-     */
-    protected function _createPath($path)
-    {
-        $root = $this;
-        if (null !== $path && $path !== '_default') {
-            $path = explode(Zend_Acl::PATH_DELIMITER, $path);
-            foreach ($path as $key) {
-                $root->{$key} = $this->{$key};
-                $root = $root->{$key};
-            }
-        }
-        return $root;
-    }
-
-    /**
-     * Creates new 'virtual' ACLs to target (nonexistent) path
-     *
-     * @param  mixed $path
-     * @return Zend_Acl
-     */
-    protected function _addPath($path)
-    {
-        return new self($this, $path);
-    }
-
-    /**
-     * Expand a path to retrieve target node
-     *
-     * @param  Zend_Acl $root
-     * @param  mixed    $path
-     * @return Zend_Acl
-     */
-    protected function _findPath(Zend_Acl $root, $path)
-    {
-        if (null !== $path) {
-            // cascade down to retrieve final path
-            if (!is_array($path)) {
-                $delimiter = self::PATH_DELIMITER;
-                $path = explode($delimiter, trim("{$path}", $delimiter));
-            }
-            foreach ($path as $container) {
-                $root = $root->{$container};
-            }
-        }
-        return $root;
-    }
-
-    /**
-     * Determines if the current ACL is root
-     *
+     * @param  Zend_Acl_Aco_Interface|string $aco
      * @return boolean
      */
-    protected function _isRoot()
+    public function has($aco)
     {
-        return null === $this->_parent;
+        if ($aco instanceof Zend_Acl_Aco_Interface) {
+            $acoId = $aco->getId();
+        } else {
+            $acoId = $aco;
+        }
+
+        return isset($this->_acos[$acoId]);
     }
 
     /**
-     * Returns the root ACO node of the ACL.
+     * Returns true if and only if $aco inherits from $inherit
      *
-     * @return Zend_Acl
+     * Both parameters may be either an ACO or an ACO identifier. If
+     * $onlyParent is true, then $aco must inherit directly from
+     * $inherit in order to return true. By default, this method looks
+     * through the entire inheritance tree to determine whether $aco
+     * inherits from $inherit through its ancestor ACOs.
+     *
+     * @param  Zend_Acl_Aco_Interface|string $aco
+     * @param  Zend_Acl_Aco_Interface|string $inherit
+     * @param  boolean                       $onlyParent
+     * @throws Zend_Acl_Aco_Registry_Exception
+     * @return boolean
      */
-    protected function _getRoot()
+    public function inherits($aco, $inherit, $onlyParent = false)
     {
-        $current = $this;
-        while (!$current->_isRoot()) {
-            $current = $current->getParent();
+        Zend::loadClass('Zend_Acl_Exception');
+
+        try {
+            $acoId     = $this->get($aco)->getId();
+            $inheritId = $this->get($inherit)->getId();
+        } catch (Zend_Acl_Exception $e) {
+            throw $e;
         }
-        return $current;
+
+        $inherits = (null !== $this->_acos[$acoId]['parent']
+                     && $inheritId === ($parentId = key($this->_acos[$acoId]['parent'])));
+
+        if ($inherits || $onlyParent) {
+            return $inherits;
+        }
+
+        while (null !== $this->_acos[$parentId]['parent']) {
+            $parentId = key($this->_acos[$parentId]['parent']);
+            if ($inheritId === $parentId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

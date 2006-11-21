@@ -168,20 +168,20 @@ class Zend_Acl_Aro_Registry
         Zend::loadClass('Zend_Acl_Aro_Registry_Exception');
 
         try {
-            $aro     = $this->get($aro);
-            $inherit = $this->get($inherit);
+            $aroId     = $this->get($aro)->getId();
+            $inheritId = $this->get($inherit)->getId();
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             throw $e;
         }
 
-        $inherits = isset($this->_aros[$aro->getId()]['parents'][$inherit->getId()]);
+        $inherits = isset($this->_aros[$aroId]['parents'][$inheritId]);
 
         if ($inherits || $onlyParents) {
             return $inherits;
         }
 
-        foreach ($this->_aros[$aro->getId()]['parents'] as $parentId => $parent) {
-            if ($this->inherits($parent, $inherit)) {
+        foreach ($this->_aros[$aroId]['parents'] as $parentId => $parent) {
+            if ($this->inherits($parentId, $inheritId)) {
                 return true;
             }
         }
