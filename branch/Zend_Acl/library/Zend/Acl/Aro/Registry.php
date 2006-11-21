@@ -22,15 +22,15 @@
 
 
 /**
- * Zend_Acl_Aro_Interface
+ * Zend
  */
-require_once 'Zend/Acl/Aro/Interface.php';
+require_once 'Zend.php';
 
 
 /**
- * Zend_Acl_Aro_Registry_Exception
+ * Zend_Acl_Aro_Interface
  */
-require_once 'Zend/Acl/Aro/Registry/Exception.php';
+require_once 'Zend/Acl/Aro/Interface.php';
 
 
 /**
@@ -66,6 +66,7 @@ class Zend_Acl_Aro_Registry
         $aroId = $aro->getId();
 
         if ($this->has($aroId)) {
+            Zend::loadClass('Zend_Acl_Aro_Registry_Exception');
             throw new Zend_Acl_Aro_Registry_Exception("ARO id '$aroId' already exists in the registry");
         }
 
@@ -74,6 +75,9 @@ class Zend_Acl_Aro_Registry
         if (null !== $parents) {
             if (!is_array($parents)) {
                 $parents = array($parents);
+            }
+            if (count($parents) > 0) {
+                Zend::loadClass('Zend_Acl_Aro_Registry_Exception');
             }
             foreach ($parents as $parent) {
                 try {
@@ -118,6 +122,7 @@ class Zend_Acl_Aro_Registry
         }
 
         if (!$this->has($aro)) {
+            Zend::loadClass('Zend_Acl_Aro_Registry_Exception');
             throw new Zend_Acl_Aro_Registry_Exception("ARO '$aroId' not found");
         }
 
@@ -160,6 +165,8 @@ class Zend_Acl_Aro_Registry
      */
     public function inherits($aro, $inherit, $onlyParents = false)
     {
+        Zend::loadClass('Zend_Acl_Aro_Registry_Exception');
+
         try {
             $aro     = $this->get($aro);
             $inherit = $this->get($inherit);
@@ -193,6 +200,8 @@ class Zend_Acl_Aro_Registry
      */
     public function remove($aro)
     {
+        Zend::loadClass('Zend_Acl_Aro_Registry_Exception');
+
         try {
             $aro = $this->get($aro);
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
