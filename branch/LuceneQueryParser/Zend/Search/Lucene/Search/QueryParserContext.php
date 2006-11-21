@@ -26,6 +26,9 @@ require_once 'Zend/Search/Lucene/FSM.php';
 /** Zend_Search_Lucene_Index_Term */
 require_once 'Zend/Search/Lucene/Index/Term.php';
 
+/** Zend_Search_Lucene_Search_QueryToken */
+require_once 'Zend/Search/Lucene/Search/QueryToken.php';
+
 /** Zend_Search_Lucene_Search_Query_Term */
 require_once 'Zend/Search/Lucene/Search/Query/Term.php';
 
@@ -167,8 +170,9 @@ class Zend_Search_Lucene_Search_QueryParserContext
 
 
     /**
+     * Add entry to a query
      *
-     *
+     * @param Zend_Search_Lucene_Search_QueryEntry $entry
      */
     public function addEntry(Zend_Search_Lucene_Search_QueryEntry $entry)
     {
@@ -229,6 +233,22 @@ class Zend_Search_Lucene_Search_QueryParserContext
         $lastEntry->boost($parameter);
 
         $this->_entries[] = $lastEntry;
+    }
+
+    /**
+     * Process logical operator
+     *
+     * @param integer $operator
+     */
+    public function addLogicalOperator($operator)
+    {
+        if ($this->_mode === self::GM_SIGNS) {
+            throw new Zend_Search_Lucene_Search_QueryParserException('It\'s not allowed to mix boolean and signs styles in the same subquery.');
+        }
+
+        $this->_mode = self::GM_BOOLEAN;
+
+        $this->_entries[] = $operator;
     }
 
     /**

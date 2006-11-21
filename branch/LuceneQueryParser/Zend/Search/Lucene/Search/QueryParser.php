@@ -102,6 +102,13 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
     private $_lastToken = null;
 
     /**
+     * Range query first term
+     *
+     * @var string
+     */
+    private $_rqFirstTerm = null;
+
+    /**
      * Current query parser context
      *
      * @var Zend_Search_Lucene_Search_QueryParserContext
@@ -189,6 +196,11 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
         $processModifierParameterAction = new Zend_Search_Lucene_FSMAction($this, 'processModifierParameter');
         $subqueryStartAction            = new Zend_Search_Lucene_FSMAction($this, 'subqueryStart');
         $subqueryEndAction              = new Zend_Search_Lucene_FSMAction($this, 'subqueryEnd');
+        $logicalOperatorAction          = new Zend_Search_Lucene_FSMAction($this, 'logicalOperator');
+        $openedRQFirstTermAction        = new Zend_Search_Lucene_FSMAction($this, 'openedRQFirstTerm');
+        $openedRQSecondTermAction       = new Zend_Search_Lucene_FSMAction($this, 'openedRQSecondTerm');
+        $closedRQFirstTermAction        = new Zend_Search_Lucene_FSMAction($this, 'closedRQFirstTerm');
+        $closedRQSecondTermAction       = new Zend_Search_Lucene_FSMAction($this, 'closedRQSecondTerm');
 
 
         $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_WORD,            $addTermEntryAction);
@@ -198,6 +210,10 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
         $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_PROHIBITED,      $setSignAction);
         $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_FUZZY_PROX_MARK, $setFuzzyProxAction);
         $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_NUMBER,          $processModifierParameterAction);
+        $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_AND_LEXEME,      $logicalOperatorAction);
+        $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_OR_LEXEME,       $logicalOperatorAction);
+        $this->addInputAction(self::ST_COMMON_QUERY_ELEMENT, Zend_Search_Lucene_Search_QueryToken::TT_NOT_LEXEME,      $logicalOperatorAction);
+
 
 
         $this->_lexer = new Zend_Search_Lucene_Search_QueryLexer();
@@ -348,6 +364,60 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
         $this->_context = array_pop($this->_contextStack);
 
         $this->_context->addEntry(new Zend_Search_Lucene_Search_QueryEntry_Subquery($query));
+    }
+
+    /**
+     * Process logical operator
+     */
+    public function logicalOperator()
+    {
+        $this->_context->addLogicalOperator($this->_currentToken->type);
+    }
+
+    /**
+     * Process first range query term (opened interval)
+     */
+    public function openedRQFirstTerm()
+    {
+        $this->_rqFirstTerm = $this->_currentToken->text;
+    }
+
+    /**
+     * Process last range query term (opened interval)
+     *
+     * @throws Zend_Search_Lucene_Search_QueryParserException
+     */
+    public function openedRQLastTerm()
+    {
+        $firstTerm = new Zend_Search_Lucene_Index_Term($this->_rqFirstTerm,        $this->_context->getField());
+        $lastTerm  = new Zend_Search_Lucene_Index_Term($this->_currentToken->text, $this->_context->getField());
+
+        throw new Zend_Search_Lucene_Search_QueryParserException('Range queries are not supported yet.');
+        // $query = new Zend_Search_Lucene_Search_Query_Range($firstTerm, $lastTerm, false);
+        // $this->_context->addentry($query);
+    }
+
+    /**
+     * Process first range query term (closed interval)
+     */
+    public function closedRQFirstTerm()
+    {
+        $this->_rqFirstTerm = $this->_currentToken->text;
+    }
+
+    /**
+     * Process last range query term (closed interval)
+     *
+     * @throws Zend_Search_Lucene_Search_QueryParserException
+     */
+    public function closedRQLastTerm()
+    {
+        $firstTerm = new Zend_Search_Lucene_Index_Term($this->_rqFirstTerm,        $this->_context->getField());
+        $lastTerm  = new Zend_Search_Lucene_Index_Term($this->_currentToken->text, $this->_context->getField());
+
+        throw new Zend_Search_Lucene_Search_QueryParserException('Range queries are not supported yet.');
+        // $query = new Zend_Search_Lucene_Search_Query_Range($firstTerm, $lastTerm, true);
+        // $this->_context->addentry($query);
     }
 }
 

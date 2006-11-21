@@ -89,4 +89,13 @@ class Zend_Search_Lucene_Search_QueryEntry_Term extends Zend_Search_Lucene_Searc
             $this->_similarity = 0.5;
         }
     }
+
+    /**
+     * Transform entry to a subquery
+     *
+     * @return Zend_Search_Lucene_Search_Query
+     */
+    public function getQuery()
+    {
+    }
 }

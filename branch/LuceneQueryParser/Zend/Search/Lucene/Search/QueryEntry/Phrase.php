@@ -88,4 +88,12 @@ class Zend_Search_Lucene_Search_QueryEntry_Phrase extends Zend_Search_Lucene_Sea
         }
     }
 
+    /**
+     * Transform entry to a subquery
+     *
+     * @return Zend_Search_Lucene_Search_Query
+     */
+    public function getQuery()
+    {
+    }
 }

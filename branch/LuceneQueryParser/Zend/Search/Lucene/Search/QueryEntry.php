@@ -57,6 +57,14 @@ abstract class Zend_Search_Lucene_Search_QueryEntry
      */
     abstract public function processFuzzyProximityModifier($parameter = null);
 
+
+    /**
+     * Transform entry to a subquery
+     *
+     * @return Zend_Search_Lucene_Search_Query
+     */
+    abstract public function getQuery();
+
     /**
      * Boost query entry
      *
