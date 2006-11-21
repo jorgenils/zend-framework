@@ -35,6 +35,12 @@ require_once 'Zend/Acl/Aco.php';
 
 
 /**
+ * Zend_Acl_Aro
+ */
+require_once 'Zend/Acl/Aro.php';
+
+
+/**
  * PHPUnit test case
  */
 require_once 'PHPUnit/Framework/TestCase.php';
@@ -50,14 +56,14 @@ require_once 'PHPUnit/Framework/TestCase.php';
 class Zend_AclTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * ACL object for this test case
+     * ACL object for each test method
      *
      * @var Zend_Acl
      */
     protected $_acl;
 
     /**
-     * Instantiates ACL object and creates internal reference to it
+     * Instantiates a new ACL object and creates internal reference to it for each test method
      *
      * @return void
      */
@@ -67,26 +73,15 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Removes internal reference to ACL object
-     *
-     * @return void
-     */
-    public function tearDown()
-    {
-        unset($this->_acl);
-    }
-
-    /**
      * Ensures that the ARO registry is created automatically only once
      *
      * @return void
      */
     public function testGetARORegistryAuto()
     {
-        $acl = new Zend_Acl();
-        $aroRegistry1 = $acl->getAroRegistry();
+        $aroRegistry1 = $this->_acl->getAroRegistry();
         $this->assertTrue($aroRegistry1 instanceof Zend_Acl_Aro_Registry);
-        $aroRegistry2 = $acl->getAroRegistry();
+        $aroRegistry2 = $this->_acl->getAroRegistry();
         $this->assertTrue($aroRegistry1 === $aroRegistry2);
     }
 
@@ -109,19 +104,13 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
      */
     public function testARORegistryAddAndGetOne()
     {
-        try {
-            $aroGuest = new Zend_Acl_Aro('guest');
-            $aroRegistry = $this->_acl->getAroRegistry();
-            $aro = $aroRegistry->removeAll()
-                               ->add($aroGuest)
-                               ->get($aroGuest->getId());
-            $this->assertTrue($aroGuest === $aro);
-            $this->assertTrue($aroGuest === $aroRegistry->guest);
-            $aro = $aroRegistry->get($aroGuest);
-            $this->assertTrue($aroGuest === $aro);
-        } catch (Exception $e) {
-            $this->fail('Unexpected exception: ' . $e->getMessage());
-        }
+        $aroGuest = new Zend_Acl_Aro('guest');
+        $aroRegistry = $this->_acl->getAroRegistry();
+        $aro = $aroRegistry->add($aroGuest)
+                           ->get($aroGuest->getId());
+        $this->assertTrue($aroGuest === $aro);
+        $aro = $aroRegistry->get($aroGuest);
+        $this->assertTrue($aroGuest === $aro);
     }
 
     /**
@@ -131,15 +120,10 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
      */
     public function testARORegistryRemoveOne()
     {
-        try {
-            $aroGuest = new Zend_Acl_Aro('guest');
-            $aroRegistry = $this->_acl->getAroRegistry();
-            $aroRegistry->removeAll()
-                        ->add($aroGuest)
-                        ->remove($aroGuest);
-        } catch (Exception $e) {
-            $this->fail('Unexpected exception: ' . $e->getMessage());
-        }
+        $aroGuest = new Zend_Acl_Aro('guest');
+        $aroRegistry = $this->_acl->getAroRegistry();
+        $aroRegistry->add($aroGuest)
+                    ->remove($aroGuest);
         $this->assertFalse($aroRegistry->has($aroGuest));
     }
 
@@ -150,26 +134,21 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
      */
     public function testARORegistryInherits()
     {
-        try {
-            $aroGuest  = new Zend_Acl_Aro('guest');
-            $aroMember = new Zend_Acl_Aro('member');
-            $aroEditor = new Zend_Acl_Aro('editor');
-            $aroRegistry = $this->_acl->getAroRegistry();
-            $aroRegistry->removeAll()
-                        ->add($aroGuest)
-                        ->add($aroMember, $aroGuest->getId())
-                        ->add($aroEditor, $aroMember);
-            $this->assertTrue($aroRegistry->inherits($aroMember, $aroGuest, false));
-            $this->assertTrue($aroRegistry->inherits($aroEditor, $aroMember, false));
-            $this->assertTrue($aroRegistry->inherits($aroEditor, $aroGuest));
-            $this->assertFalse($aroRegistry->inherits($aroGuest, $aroMember));
-            $this->assertFalse($aroRegistry->inherits($aroMember, $aroEditor));
-            $this->assertFalse($aroRegistry->inherits($aroGuest, $aroEditor));
-            $aroRegistry->remove($aroMember);
-            $this->assertFalse($aroRegistry->inherits($aroEditor, $aroGuest));
-        } catch (Exception $e) {
-            $this->fail('Unexpected exception: ' . $e->getMessage());
-        }
+        $aroGuest  = new Zend_Acl_Aro('guest');
+        $aroMember = new Zend_Acl_Aro('member');
+        $aroEditor = new Zend_Acl_Aro('editor');
+        $aroRegistry = $this->_acl->getAroRegistry();
+        $aroRegistry->add($aroGuest)
+                    ->add($aroMember, $aroGuest->getId())
+                    ->add($aroEditor, $aroMember);
+        $this->assertTrue($aroRegistry->inherits($aroMember, $aroGuest, true));
+        $this->assertTrue($aroRegistry->inherits($aroEditor, $aroMember, true));
+        $this->assertTrue($aroRegistry->inherits($aroEditor, $aroGuest));
+        $this->assertFalse($aroRegistry->inherits($aroGuest, $aroMember));
+        $this->assertFalse($aroRegistry->inherits($aroMember, $aroEditor));
+        $this->assertFalse($aroRegistry->inherits($aroGuest, $aroEditor));
+        $aroRegistry->remove($aroMember);
+        $this->assertFalse($aroRegistry->inherits($aroEditor, $aroGuest));
     }
 
     /**
@@ -181,17 +160,12 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     {
         try {
             $aroGuest = new Zend_Acl_Aro('guest');
-            $this->_acl->getAroRegistry()->removeAll()
-                                         ->add($aroGuest)
+            $this->_acl->getAroRegistry()->add($aroGuest)
                                          ->add($aroGuest);
+            $this->fail('Expected exception not thrown upon adding same ARO twice');
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             $this->assertContains('already exists', $e->getMessage());
-            return;
-        } catch (Exception $e) {
-            $this->fail('Unexpected exception: ' . $e->getMessage());
         }
-
-        $this->fail('Expected exception not thrown upon adding same ARO twice');
     }
 
     /**
@@ -204,17 +178,12 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         try {
             $aroGuest1 = new Zend_Acl_Aro('guest');
             $aroGuest2 = new Zend_Acl_Aro('guest');
-            $this->_acl->getAroRegistry()->removeAll()
-                                         ->add($aroGuest1)
+            $this->_acl->getAroRegistry()->add($aroGuest1)
                                          ->add($aroGuest2);
+            $this->fail('Expected exception not thrown upon adding two AROs with same ID');
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             $this->assertContains('already exists', $e->getMessage());
-            return;
-        } catch (Exception $e) {
-            $this->fail('Unexpected exception: ' . $e->getMessage());
         }
-
-        $this->fail('Expected exception not thrown upon adding two AROs with same ID');
     }
 
     public function testCMSExample()

@@ -49,30 +49,19 @@ class Zend_Acl_Aro_Registry
     protected $_aros = array();
 
     /**
-     * Public access to registered AROs
-     *
-     * @param  string $aroId
-     * @return Zend_Acl_Aro_Interface
-     */
-    public function __get($aroId)
-    {
-        return $this->get($aroId);
-    }
-
-    /**
      * Adds an ARO having an identifier unique to the registry
      *
-     * The $inherits parameter may be a reference to, or the string identifier for,
-     * an ARO existing in the registry, or $inherits may be passed as an array of
+     * The $parents parameter may be a reference to, or the string identifier for,
+     * an ARO existing in the registry, or $parents may be passed as an array of
      * these - mixing string identifiers and objects is ok - to indicate the AROs
-     * from which the newly added ARO will inherit.
+     * from which the newly added ARO will directly inherit.
      *
      * @param  Zend_Acl_Aro_Interface              $aro
-     * @param  Zend_Acl_Aro_Interface|string|array $inherits
+     * @param  Zend_Acl_Aro_Interface|string|array $parents
      * @throws Zend_Acl_Aro_Registry_Exception
      * @return self Provides a fluent interface
      */
-    public function add(Zend_Acl_Aro_Interface $aro, $inherits = null)
+    public function add(Zend_Acl_Aro_Interface $aro, $parents = null)
     {
         $aroId = $aro->getId();
 
@@ -80,34 +69,32 @@ class Zend_Acl_Aro_Registry
             throw new Zend_Acl_Aro_Registry_Exception("ARO id '$aroId' already exists in the registry");
         }
 
-        $inheritsAros = array();
+        $aroParents = array();
 
-        if (null !== $inherits) {
-            if (!is_array($inherits)) {
-                $inherits = array($inherits);
+        if (null !== $parents) {
+            if (!is_array($parents)) {
+                $parents = array($parents);
             }
-            foreach ($inherits as $inherit) {
+            foreach ($parents as $parent) {
                 try {
-                    if ($inherit instanceof Zend_Acl_Aro_Interface) {
-                        $aroInheritId = $inherit->getId();
-                        $aroInherit   = $this->get($aroInheritId);
+                    if ($parent instanceof Zend_Acl_Aro_Interface) {
+                        $aroParentId = $parent->getId();
                     } else {
-                        $aroInheritId = $inherit;
-                        $aroInherit   = $this->get($aroInheritId);
+                        $aroParentId = $parent;
                     }
+                    $aroParent = $this->get($aroParentId);
                 } catch (Zend_Acl_Aro_Registry_Exception $e) {
-                    throw new Zend_Acl_Aro_Registry_Exception("Inherited ARO id '$aroInheritId' does not "
-                                                            . 'exist in the registry');
+                    throw new Zend_Acl_Aro_Registry_Exception("Parent ARO id '$aroParentId' does not exist");
                 }
-                $inheritsAros[$aroInheritId] = $aroInherit;
-                $this->_aros[$aroInheritId]['inheritedBy'][$aroId] = $aro;
+                $aroParents[$aroParentId] = $aroParent;
+                $this->_aros[$aroParentId]['children'][$aroId] = $aro;
             }
         }
 
         $this->_aros[$aroId] = array(
-            'instance'    => $aro,
-            'inherits'    => $inheritsAros,
-            'inheritedBy' => array()
+            'instance' => $aro,
+            'parents'  => $aroParents,
+            'children' => array()
             );
 
         return $this;
@@ -160,18 +147,18 @@ class Zend_Acl_Aro_Registry
      * Returns true if and only if $aro inherits from $inherit
      *
      * Both parameters may be either an ARO or an ARO identifier. If
-     * $checkAncestry is false, then $aro must inherit directly from
+     * $onlyParents is true, then $aro must inherit directly from
      * $inherit in order to return true. By default, this method looks
      * through the entire inheritance DAG to determine whether $aro
-     * inherits from $inherit through other AROs.
+     * inherits from $inherit through its ancestor AROs.
      *
      * @param  Zend_Acl_Aro_Interface|string $aro
      * @param  Zend_Acl_Aro_Interface|string $inherit
-     * @param  boolean                       $checkAncestry
+     * @param  boolean                       $onlyParents
      * @throws Zend_Acl_Aro_Registry_Exception
      * @return boolean
      */
-    public function inherits($aro, $inherit, $checkAncestry = true)
+    public function inherits($aro, $inherit, $onlyParents = false)
     {
         try {
             $aro     = $this->get($aro);
@@ -180,14 +167,14 @@ class Zend_Acl_Aro_Registry
             throw $e;
         }
 
-        $inherits = isset($this->_aros[$aro->getId()]['inherits'][$inherit->getId()]);
+        $inherits = isset($this->_aros[$aro->getId()]['parents'][$inherit->getId()]);
 
-        if ($inherits || $checkAncestry == false) {
+        if ($inherits || $onlyParents) {
             return $inherits;
         }
 
-        foreach ($this->_aros[$aro->getId()]['inherits'] as $inheritedId => $inherited) {
-            if ($this->inherits($inherited, $inherit)) {
+        foreach ($this->_aros[$aro->getId()]['parents'] as $parentId => $parent) {
+            if ($this->inherits($parent, $inherit)) {
                 return true;
             }
         }
@@ -213,8 +200,11 @@ class Zend_Acl_Aro_Registry
         }
 
         $aroId = $aro->getId();
-        foreach ($this->_aros[$aroId]['inheritedBy'] as $inheritId => $inherit) {
-            unset($this->_aros[$inheritId]['inherits'][$aroId]);
+        foreach ($this->_aros[$aroId]['children'] as $childId => $child) {
+            unset($this->_aros[$childId]['parents'][$aroId]);
+        }
+        foreach ($this->_aros[$aroId]['parents'] as $parentId => $parent) {
+            unset($this->_aros[$parentId]['children'][$aroId]);
         }
 
         unset($this->_aros[$aroId]);
