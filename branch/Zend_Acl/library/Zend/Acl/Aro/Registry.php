@@ -66,8 +66,8 @@ class Zend_Acl_Aro_Registry
         $aroId = $aro->getId();
 
         if ($this->has($aroId)) {
-            Zend::loadClass('Zend_Acl_Aro_Registry_Exception');
-            throw new Zend_Acl_Aro_Registry_Exception("ARO id '$aroId' already exists in the registry");
+            throw Zend::exception('Zend_Acl_Aro_Registry_Exception',
+                                  "ARO id '$aroId' already exists in the registry");
         }
 
         $aroParents = array();
@@ -122,8 +122,8 @@ class Zend_Acl_Aro_Registry
         }
 
         if (!$this->has($aro)) {
-            Zend::loadClass('Zend_Acl_Aro_Registry_Exception');
-            throw new Zend_Acl_Aro_Registry_Exception("ARO '$aroId' not found");
+            throw Zend::exception('Zend_Acl_Aro_Registry_Exception',
+                                  "ARO '$aroId' not found");
         }
 
         return $this->_aros[$aroId]['instance'];

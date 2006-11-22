@@ -40,6 +40,12 @@ require_once 'Zend/Acl/Aro/Registry.php';
 
 
 /**
+ * Zend_Acl_Assert_Interface
+ */
+require_once 'Zend/Acl/Assert/Interface.php';
+
+
+/**
  * @category   Zend
  * @package    Zend_Acl
  * @copyright  Copyright (c) 2006 Zend Technologies USA Inc. (http://www.zend.com)
@@ -111,8 +117,8 @@ class Zend_Acl
         $acoId = $aco->getId();
 
         if ($this->has($acoId)) {
-            Zend::loadClass('Zend_Acl_Exception');
-            throw new Zend_Acl_Exception("ACO id '$acoId' already exists in the ACL");
+            throw Zend::exception('Zend_Acl_Exception',
+                                  "ACO id '$acoId' already exists in the ACL");
         }
 
         $acoParent = null;
@@ -159,8 +165,8 @@ class Zend_Acl
         }
 
         if (!$this->has($aco)) {
-            Zend::loadClass('Zend_Acl_Exception');
-            throw new Zend_Acl_Exception("ACO '$acoId' not found");
+            throw Zend::exception('Zend_Acl_Exception',
+                                  "ACO '$acoId' not found");
         }
 
         return $this->_acos[$acoId]['instance'];
@@ -226,6 +232,79 @@ class Zend_Acl
         }
 
         return false;
+    }
+
+    /**
+     * Adds an "allow" rule to the ACL
+     *
+     * This method provides the ACL with a rule that would allow one or more AROs access to
+     * [certain $privileges upon] the specified ACO(s). If $assert is provided, then its
+     * assert() method must return true in order for this rule to apply.
+     *
+     * The $aro and $aco parameters may be references to, or the string identifiers for,
+     * an existing ACO/ARO, or they may be passed as array of these - mixing string identifiers
+     * and objects is ok - to indicate the ACOs and AROs to which the rule will apply.
+     *
+     * The $privileges parameter may be used to further specify that the rule applies only
+     * to certain privileges on the ACO(s) in question. This may be specified to be a single
+     * privilege with a string, and multiple privileges may be specified as an array of strings.
+     *
+     * @param  Zend_Acl_Aro_Interface|string|array $aro
+     * @param  Zend_Acl_Aco_Interface|string|array $aco
+     * @param  string|array                        $privileges
+     * @param  Zend_Acl_Assert_Interface           $assert
+     * @return self Provides a fluent interface
+     */
+    public function allow($aro = null, $aco = null, $privileges = null, Zend_Acl_Assert_Interface $assert = null)
+    {
+        return $this->_addRule('allow', $aro, $aco, $privileges, $assert);
+    }
+
+    /**
+     * Adds a "deny" rule to the ACL
+     *
+     * This method provides the ACL with a rule that would deny one or more AROs access to
+     * [certain $privileges upon] the specified ACO(s). If $assert is provided, then its
+     * assert() method must return true in order for this rule to apply.
+     *
+     * The $aro and $aco parameters may be references to, or the string identifiers for,
+     * an existing ACO/ARO, or they may be passed as array of these - mixing string identifiers
+     * and objects is ok - to indicate the ACOs and AROs to which the rule will apply.
+     *
+     * The $privileges parameter may be used to further specify that the rule applies only
+     * to certain privileges on the ACO(s) in question. This may be specified to be a single
+     * privilege with a string, and multiple privileges may be specified as an array of strings.
+     *
+     * @param  Zend_Acl_Aro_Interface|string|array $aro
+     * @param  Zend_Acl_Aco_Interface|string|array $aco
+     * @param  string|array                        $privileges
+     * @param  Zend_Acl_Assert_Interface           $assert
+     * @return self Provides a fluent interface
+     */
+    public function deny($aro = null, $aco = null, $privileges = null, Zend_Acl_Assert_Interface $assert = null)
+    {
+        return $this->_addRule('deny', $aro, $aco, $privileges, $assert);
+    }
+
+    /**
+     * Adds an "allow" or "deny" rule to the ACL
+     *
+     * @param  integer                             $type
+     * @param  Zend_Acl_Aro_Interface|string|array $aro
+     * @param  Zend_Acl_Aco_Interface|string|array $aco
+     * @param  string|array                        $privileges
+     * @param  Zend_Acl_Assert_Interface           $assert
+     * @throws Zend_Acl_Exception
+     * @return self Provides a fluent interface
+     */
+    protected function _addRule($type, $aro = null, $aco = null, $privileges = null,
+                                Zend_Acl_Assert_Interface $assert = null)
+    {
+        /**
+         * @todo implementation
+         */
+
+        return $this;
     }
 
 }
