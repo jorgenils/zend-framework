@@ -116,6 +116,10 @@ class Zend_Search_Lucene_Search_QueryEntry_Term extends Zend_Search_Lucene_Searc
             throw new Zend_Search_Lucene_Search_QueryParserException('Fuzzy search is not supported yet.');
         }
 
+        if (strpos($this->_term, '?') !== false || strpos($this->_term, '*') !== false) {
+            throw new Zend_Search_Lucene_Search_QueryParserException('Wildcard queries are not supported yet.');
+        }
+
         $tokens = Zend_Search_Lucene_Analysis_Analyzer::getDefault()->tokenize($this->_term->text);
 
         if (count($tokens) == 0) {

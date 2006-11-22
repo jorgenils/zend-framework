@@ -266,8 +266,11 @@ class Zend_Search_Lucene_Search_QueryParser extends Zend_Search_Lucene_FSM
             }
         }
 
-        // test output
-        return self::$_instance->_tokens;
+        if (count(self::$_instance->_contextStack) != 0) {
+            throw new Zend_Search_Lucene_Search_QueryParserException('Syntax Error: mismatched parentheses, every opening must have closing.' );
+        }
+
+        return self::$_instance->_context->getQuery();
     }
 
 
