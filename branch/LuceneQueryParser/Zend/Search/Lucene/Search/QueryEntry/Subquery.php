@@ -62,9 +62,10 @@ class Zend_Search_Lucene_Search_QueryEntry_Subquery extends Zend_Search_Lucene_S
     /**
      * Process modifier ('~')
      *
+     * @param mixed $parameter
      * @throws Zend_Search_Lucene_Search_QueryParserException
      */
-    public function processFuzzyProximityModifier()
+    public function processFuzzyProximityModifier($parameter = null)
     {
         throw new Zend_Search_Lucene_Search_QueryParserException('\'~\' sign must follow term or phrase');
     }
@@ -77,8 +78,8 @@ class Zend_Search_Lucene_Search_QueryEntry_Subquery extends Zend_Search_Lucene_S
      */
     public function getQuery()
     {
-        $query->setBoost($this->_boost);
+        $this->_query->setBoost($this->_boost);
 
-        return $query;
+        return $this->_query;
     }
 }

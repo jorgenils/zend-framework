@@ -123,8 +123,8 @@ class Zend_Search_Lucene_Search_BooleanExpressionRecognizer extends Zend_Search_
 
                                array(self::ST_NOT_OPERATOR, self::IN_LITERAL,        self::ST_LITERAL),
 
-                               array(self::IN_AND_OPERATOR, self::IN_LITERAL,        self::ST_LITERAL),
-                               array(self::IN_AND_OPERATOR, self::IN_NOT_OPERATOR,   self::ST_NOT_OPERATOR),
+                               array(self::ST_AND_OPERATOR, self::IN_LITERAL,        self::ST_LITERAL),
+                               array(self::ST_AND_OPERATOR, self::IN_NOT_OPERATOR,   self::ST_NOT_OPERATOR),
 
                                array(self::ST_OR_OPERATOR,  self::IN_LITERAL,        self::ST_LITERAL),
                                array(self::ST_OR_OPERATOR,  self::IN_NOT_OPERATOR,   self::ST_NOT_OPERATOR),
@@ -195,6 +195,8 @@ class Zend_Search_Lucene_Search_BooleanExpressionRecognizer extends Zend_Search_
         if ($this->getState() != self::ST_LITERAL) {
             throw new Zend_Search_Lucene_Exception('Literal expected.');
         }
+
+        $this->_conjunctions[] = $this->_currentConjunction;
 
         return $this->_conjunctions;
     }

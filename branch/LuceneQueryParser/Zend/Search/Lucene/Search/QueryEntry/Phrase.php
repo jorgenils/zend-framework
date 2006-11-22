@@ -93,7 +93,7 @@ class Zend_Search_Lucene_Search_QueryEntry_Phrase extends Zend_Search_Lucene_Sea
      *
      * @param mixed $parameter
      */
-    public function processFuzzyProximityModifier($parameter)
+    public function processFuzzyProximityModifier($parameter = null)
     {
         $this->_proximityQuery = true;
 

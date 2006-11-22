@@ -93,7 +93,7 @@ class Zend_Search_Lucene_Search_QueryEntry_Term extends Zend_Search_Lucene_Searc
      *
      * @param mixed $parameter
      */
-    public function processFuzzyProximityModifier($parameter)
+    public function processFuzzyProximityModifier($parameter = null)
     {
         $this->_fuzzyQuery = true;
 
@@ -120,7 +120,7 @@ class Zend_Search_Lucene_Search_QueryEntry_Term extends Zend_Search_Lucene_Searc
             throw new Zend_Search_Lucene_Search_QueryParserException('Wildcard queries are not supported yet.');
         }
 
-        $tokens = Zend_Search_Lucene_Analysis_Analyzer::getDefault()->tokenize($this->_term->text);
+        $tokens = Zend_Search_Lucene_Analysis_Analyzer::getDefault()->tokenize($this->_term);
 
         if (count($tokens) == 0) {
             return new Zend_Search_Lucene_Search_Query_Empty();

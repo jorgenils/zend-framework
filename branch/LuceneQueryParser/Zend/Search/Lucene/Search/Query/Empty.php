@@ -58,5 +58,15 @@ class Zend_Search_Lucene_Search_Query_Empty extends Zend_Search_Lucene_Search_Qu
     {
         return 0;
     }
+
+    /**
+     * Print a query
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return '<EmptyQuery>';
+    }
 }
 

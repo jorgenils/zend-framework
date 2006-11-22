@@ -50,6 +50,8 @@ require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
 /** Zend_Search_Lucene_Search_BooleanExpressionRecognizer */
 require_once 'Zend/Search/Lucene/Search/BooleanExpressionRecognizer.php';
 
+/** Zend_Search_Lucene_Search_QueryEntry */
+require_once 'Zend/Search/Lucene/Search/QueryEntry.php';
 
 
 /**
@@ -264,13 +266,15 @@ class Zend_Search_Lucene_Search_QueryParserContext
      *
      * @return Zend_Search_Lucene_Search_Query
      */
-    public function signStyleExpressionQuery()
+    public function _signStyleExpressionQuery()
     {
         $query = new Zend_Search_Lucene_Search_Query_Boolean();
 
         foreach ($this->_entries as $entryId => $entry) {
             $query->addSubquery($entry->getQuery(), $this->_signs[$entryId]);
         }
+
+        return $query;
     }
 
 
@@ -281,7 +285,7 @@ class Zend_Search_Lucene_Search_QueryParserContext
      * @return Zend_Search_Lucene_Search_Query
      * @throws Zend_Search_Lucene
      */
-    public function booleanExpressionQuery()
+    private function _booleanExpressionQuery()
     {
         /**
          * We treat each level of an expression as a boolean expression in
@@ -346,7 +350,7 @@ class Zend_Search_Lucene_Search_QueryParserContext
         foreach ($conjuctions as  $conjuction) {
             // Check, if it's a one term conjuction
             if (count($conjuction) == 1) {
-                $subqueries[] = $conjuction[0]->getQuery();
+                $subqueries[] = $conjuction[0][0]->getQuery();
             } else {
                 $subquery = new Zend_Search_Lucene_Search_Query_Boolean();
 
@@ -371,7 +375,7 @@ class Zend_Search_Lucene_Search_QueryParserContext
 
         foreach ($subqueries as $subquery) {
             // Non-requirered entry/subquery
-            $query->addSubquery($subqueries);
+            $query->addSubquery($subquery);
         }
 
         return $query;
@@ -384,10 +388,10 @@ class Zend_Search_Lucene_Search_QueryParserContext
      */
     public function getQuery()
     {
-        if ($this->_mode == self::GM_BOOLEAN) {
-            return $this->booleanExpressionQuery();
+        if ($this->_mode === self::GM_BOOLEAN) {
+            return $this->_booleanExpressionQuery();
         } else {
-            return $this->signStyleExpressionQuery();
+            return $this->_signStyleExpressionQuery();
         }
     }
 }

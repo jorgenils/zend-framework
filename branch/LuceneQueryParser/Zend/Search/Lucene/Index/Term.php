@@ -54,10 +54,10 @@ class Zend_Search_Lucene_Index_Term
     /**
      * Object constructor
      */
-    public function __construct( $text, $field = 'contents' )
+    public function __construct($text, $field = null)
     {
-        $this->field = $field;
-        $this->text = $text;
+        $this->field = ($field !== null)? $field : 'contents';
+        $this->text  = $text;
     }
 
 
