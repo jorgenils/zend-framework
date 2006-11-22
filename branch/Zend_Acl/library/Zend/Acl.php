@@ -54,6 +54,26 @@ require_once 'Zend/Acl/Assert/Interface.php';
 class Zend_Acl
 {
     /**
+     * Rule type: allow
+     */
+    const TYPE_ALLOW = 'TYPE_ALLOW';
+
+    /**
+     * Rule type: deny
+     */
+    const TYPE_DENY  = 'TYPE_DENY';
+
+    /**
+     * Rule operation: add
+     */
+    const OP_ADD = 'OP_ADD';
+
+    /**
+     * Rule operation: remove
+     */
+    const OP_REMOVE = 'OP_REMOVE';
+
+    /**
      * ARO registry
      *
      * @var Zend_Acl_Aro_Registry
@@ -66,6 +86,16 @@ class Zend_Acl
      * @var array
      */
     protected $_acos = array();
+
+    /**
+     * Creates a whitelist implementation (deny everything to all) by default
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->deny();
+    }
 
     /**
      * Returns the ARO registry for this ACL
@@ -107,8 +137,8 @@ class Zend_Acl
      * The $parent parameter may be a reference to, or the string identifier for,
      * the existing ACO from which the newly added ACO will inherit.
      *
-     * @param  Zend_Acl_Aco_Interface              $aco
-     * @param  Zend_Acl_Aco_Interface|string       $parent
+     * @param  Zend_Acl_Aco_Interface        $aco
+     * @param  Zend_Acl_Aco_Interface|string $parent
      * @throws Zend_Acl_Exception
      * @return self Provides a fluent interface
      */
@@ -235,61 +265,141 @@ class Zend_Acl
     }
 
     /**
+     * Removes an ACO and all of its children
+     *
+     * The $aco parameter can either be an ACO or an ACO identifier.
+     *
+     * @param  Zend_Acl_Aco_Interface|string $aco
+     * @throws Zend_Acl_Exception
+     * @return self Provides a fluent interface
+     */
+    public function remove($aco)
+    {
+        Zend::loadClass('Zend_Acl_Exception');
+
+        try {
+            $acoId = $this->get($aco)->getId();
+        } catch (Zend_Acl_Exception $e) {
+            throw $e;
+        }
+
+        if (null !== $this->_acos[$acoId]['parent']) {
+            unset($this->_acos[$acoId]['parent']['children'][$acoId]);
+        }
+        foreach ($this->_acos[$acoId]['children'] as $childId => $child) {
+            $this->remove($childId);
+        }
+
+        unset($this->_acos[$acoId]);
+
+        return $this;
+    }
+
+    /**
+     * Removes all ACOs
+     *
+     * @return self Provides a fluent interface
+     */
+    public function removeAll()
+    {
+        $this->_acos = array();
+
+        return $this;
+    }
+
+    /**
      * Adds an "allow" rule to the ACL
-     *
-     * This method provides the ACL with a rule that would allow one or more AROs access to
-     * [certain $privileges upon] the specified ACO(s). If $assert is provided, then its
-     * assert() method must return true in order for this rule to apply.
-     *
-     * The $aro and $aco parameters may be references to, or the string identifiers for,
-     * an existing ACO/ARO, or they may be passed as array of these - mixing string identifiers
-     * and objects is ok - to indicate the ACOs and AROs to which the rule will apply.
-     *
-     * The $privileges parameter may be used to further specify that the rule applies only
-     * to certain privileges on the ACO(s) in question. This may be specified to be a single
-     * privilege with a string, and multiple privileges may be specified as an array of strings.
      *
      * @param  Zend_Acl_Aro_Interface|string|array $aro
      * @param  Zend_Acl_Aco_Interface|string|array $aco
      * @param  string|array                        $privileges
      * @param  Zend_Acl_Assert_Interface           $assert
+     * @uses   Zend_Acl::setRule()
      * @return self Provides a fluent interface
      */
     public function allow($aro = null, $aco = null, $privileges = null, Zend_Acl_Assert_Interface $assert = null)
     {
-        return $this->_addRule('allow', $aro, $aco, $privileges, $assert);
+        return $this->setRule(self::OP_ADD, self::TYPE_ALLOW, $aro, $aco, $privileges, $assert);
     }
 
     /**
      * Adds a "deny" rule to the ACL
      *
-     * This method provides the ACL with a rule that would deny one or more AROs access to
-     * [certain $privileges upon] the specified ACO(s). If $assert is provided, then its
-     * assert() method must return true in order for this rule to apply.
-     *
-     * The $aro and $aco parameters may be references to, or the string identifiers for,
-     * an existing ACO/ARO, or they may be passed as array of these - mixing string identifiers
-     * and objects is ok - to indicate the ACOs and AROs to which the rule will apply.
-     *
-     * The $privileges parameter may be used to further specify that the rule applies only
-     * to certain privileges on the ACO(s) in question. This may be specified to be a single
-     * privilege with a string, and multiple privileges may be specified as an array of strings.
-     *
      * @param  Zend_Acl_Aro_Interface|string|array $aro
      * @param  Zend_Acl_Aco_Interface|string|array $aco
      * @param  string|array                        $privileges
      * @param  Zend_Acl_Assert_Interface           $assert
+     * @uses   Zend_Acl::setRule()
      * @return self Provides a fluent interface
      */
     public function deny($aro = null, $aco = null, $privileges = null, Zend_Acl_Assert_Interface $assert = null)
     {
-        return $this->_addRule('deny', $aro, $aco, $privileges, $assert);
+        return $this->setRule(self::OP_ADD, self::TYPE_DENY, $aro, $aco, $privileges, $assert);
     }
 
     /**
-     * Adds an "allow" or "deny" rule to the ACL
+     * Removes "allow" permissions from the ACL
      *
-     * @param  integer                             $type
+     * @param  Zend_Acl_Aro_Interface|string|array $aro
+     * @param  Zend_Acl_Aco_Interface|string|array $aco
+     * @param  string|array                        $privileges
+     * @uses   Zend_Acl::setRule()
+     * @return self Provides a fluent interface
+     */
+    public function removeAllow($aro = null, $aco = null, $privileges = null)
+    {
+        return $this->setRule(self::OP_REMOVE, self::TYPE_ALLOW, $aro, $aco, $privileges);
+    }
+
+    /**
+     * Removes "deny" restrictions from the ACL
+     *
+     * @param  Zend_Acl_Aro_Interface|string|array $aro
+     * @param  Zend_Acl_Aco_Interface|string|array $aco
+     * @param  string|array                        $privileges
+     * @uses   Zend_Acl::setRule()
+     * @return self Provides a fluent interface
+     */
+    public function removeDeny($aro = null, $aco = null, $privileges = null)
+    {
+        return $this->setRule(self::OP_REMOVE, self::TYPE_DENY, $aro, $aco, $privileges);
+    }
+
+    /**
+     * Performs operations on ACL rules
+     *
+     * The $operation parameter may be either OP_ADD or OP_REMOVE, depending on whether the
+     * user wants to add or remove a rule, respectively:
+     *
+     * OP_ADD specifics:
+     *
+     *      A rule is added that would allow one or more AROs access to [certain $privileges
+     *      upon] the specified ACO(s).
+     *
+     *      If $assert is provided, then its assert() method must return true in order for
+     *      the rule to apply.
+     *
+     * OP_REMOVE specifics:
+     *
+     *      The $assert parameter is ignored.
+     *
+     *      The rule is removed only in the context of the given AROs, ACOs, and privileges.
+     *      Existing rules to which the remove operation does not apply would remain in the
+     *      ACL.
+     *
+     * The $type parameter may be either TYPE_ALLOW or TYPE_DENY, depending on whether the
+     * rule is intended to allow or deny permission, respectively.
+     *
+     * The $aro and $aco parameters may be references to, or the string identifiers for,
+     * existing ACOs/AROs, or they may be passed as arrays of these - mixing string identifiers
+     * and objects is ok - to indicate the ACOs and AROs to which the rule applies.
+     *
+     * The $privileges parameter may be used to further specify that the rule applies only
+     * to certain privileges upon the ACO(s) in question. This may be specified to be a single
+     * privilege with a string, and multiple privileges may be specified as an array of strings.
+     *
+     * @param  string                              $operation
+     * @param  string                              $type
      * @param  Zend_Acl_Aro_Interface|string|array $aro
      * @param  Zend_Acl_Aco_Interface|string|array $aco
      * @param  string|array                        $privileges
@@ -297,7 +407,7 @@ class Zend_Acl
      * @throws Zend_Acl_Exception
      * @return self Provides a fluent interface
      */
-    protected function _addRule($type, $aro = null, $aco = null, $privileges = null,
+    public function setRule($operation, $type, $aro = null, $aco = null, $privileges = null,
                                 Zend_Acl_Assert_Interface $assert = null)
     {
         /**
@@ -305,6 +415,24 @@ class Zend_Acl
          */
 
         return $this;
+    }
+
+    /**
+     * Returns true if and only if the ARO has access to the ACO
+     *
+     * If a $privilege is not provided, then this method returns false if the ARO is
+     * denied access to at least one privilege upon the ACO.
+     *
+     * @param  Zend_Acl_Aro_Interface|string $aro
+     * @param  Zend_Acl_Aco_Interface|string $aco
+     * @param  string                        $privilege
+     * @return boolean
+     */
+    public function isAllowed($aro, $aco, $privilege = null)
+    {
+        /**
+         * @todo implementation
+         */
     }
 
 }

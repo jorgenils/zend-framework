@@ -203,12 +203,11 @@ class Zend_Acl_Aro_Registry
         Zend::loadClass('Zend_Acl_Aro_Registry_Exception');
 
         try {
-            $aro = $this->get($aro);
+            $aroId = $this->get($aro)->getId();
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             throw $e;
         }
 
-        $aroId = $aro->getId();
         foreach ($this->_aros[$aroId]['children'] as $childId => $child) {
             unset($this->_aros[$childId]['parents'][$aroId]);
         }
