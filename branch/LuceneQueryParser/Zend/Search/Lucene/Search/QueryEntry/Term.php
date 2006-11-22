@@ -32,6 +32,10 @@ require_once 'Zend/Search/Lucene/Search/QueryEntry.php';
 /** Zend_Search_Lucene_Search_QueryParserException */
 require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
 
+/** Zend_Search_Lucene_Analysis_Analyzer */
+require_once 'Zend/Search/Lucene/Analysis/Analyzer.php';
+
+
 
 /**
  * @category   Zend
@@ -45,9 +49,17 @@ class Zend_Search_Lucene_Search_QueryEntry_Term extends Zend_Search_Lucene_Searc
     /**
      * Term value
      *
-     * @var Zend_Search_Lucene_Index_Term
+     * @var string
      */
     private $_term;
+
+    /**
+     * Field
+     *
+     * @var string|null
+     */
+    private $_field;
+
 
     /**
      * Fuzzy search query
@@ -67,11 +79,13 @@ class Zend_Search_Lucene_Search_QueryEntry_Term extends Zend_Search_Lucene_Searc
     /**
      * Object constractor
      *
-     * @param Zend_Search_Lucene_Index_Term $term
+     * @param string $term
+     * @param string $field
      */
-    public function __construct(Zend_Search_Lucene_Index_Term $term)
+    public function __construct($term, $field)
     {
-        $this->_term = $term;
+        $this->_term  = $term;
+        $this->_field = $field;
     }
 
     /**
@@ -94,8 +108,42 @@ class Zend_Search_Lucene_Search_QueryEntry_Term extends Zend_Search_Lucene_Searc
      * Transform entry to a subquery
      *
      * @return Zend_Search_Lucene_Search_Query
+     * @throws Zend_Search_Lucene_Search_QueryParserException
      */
     public function getQuery()
     {
+        if ($this->_fuzzyQuery) {
+            throw new Zend_Search_Lucene_Search_QueryParserException('Fuzzy search is not supported yet.');
+        }
+
+        $tokens = Zend_Search_Lucene_Analysis_Analyzer::getDefault()->tokenize($this->_term->text);
+
+        if (count($tokens) == 0) {
+            return new Zend_Search_Lucene_Search_Query_Empty();
+        }
+
+        if (count($tokens) == 1) {
+            $term  = new Zend_Search_Lucene_Index_Term($tokens[0]->getTermText(), $this->_field);
+            $query = new Zend_Search_Lucene_Search_Query_Term($term);
+            $query->setBoost($this->_boost);
+
+            return $query;
+        }
+
+        //It's not empty or one term query
+        $query = new Zend_Search_Lucene_Search_Query_MultiTerm();
+
+        /**
+         * @todo Process $token->getPositionIncrement() to support stemming, synonyms and other
+         * analizer design features
+         */
+        foreach ($tokens as $token) {
+            $term = new Zend_Search_Lucene_Index_Term($token->getTermText(), $this->_field);
+            $query->addTerm($term, true); // all subterms are required
+        }
+
+        $query->setBoost($this->_boost);
+
+        return $query;
     }
 }

@@ -73,7 +73,7 @@ class Zend_Search_Lucene_Search_Query_Phrase extends Zend_Search_Lucene_Search_Q
      *
      * The slop is zero by default, requiring exact matches.
      *
-     * @var unknown_type
+     * @var integer
      */
     private $_slop;
 

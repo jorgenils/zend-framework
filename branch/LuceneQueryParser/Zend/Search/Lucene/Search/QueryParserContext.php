@@ -47,6 +47,10 @@ require_once 'Zend/Search/Lucene/Exception.php';
 /** Zend_Search_Lucene_Search_QueryParserException */
 require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
 
+/** Zend_Search_Lucene_Search_BooleanExpressionRecognizer */
+require_once 'Zend/Search/Lucene/Search/BooleanExpressionRecognizer.php';
+
+
 
 /**
  * @category   Zend
@@ -151,7 +155,7 @@ class Zend_Search_Lucene_Search_QueryParserContext
      * Set sign for next entry
      *
      * @param integer $sign
-     * @throws Zend_Search_Lucene_Search_QueryParserException
+     * @throws Zend_Search_Lucene_Exception
      */
     public function setNextEntrySign($sign)
     {
@@ -165,6 +169,8 @@ class Zend_Search_Lucene_Search_QueryParserContext
             $this->_nextEntrySign = true;
         } else if ($sign == Zend_Search_Lucene_Search_QueryToken::TT_PROHIBITED) {
             $this->_nextEntrySign = false;
+        } else {
+            throw new Zend_Search_Lucene_Exception('Unrecognized sign type.');
         }
     }
 
@@ -230,7 +236,7 @@ class Zend_Search_Lucene_Search_QueryParserContext
             throw new Zend_Search_Lucene_Search_QueryParserException('\'^\' modifier must follow word, phrase or subquery.');
         }
 
-        $lastEntry->boost($parameter);
+        $lastEntry->boost($boostFactor);
 
         $this->_entries[] = $lastEntry;
     }
@@ -251,6 +257,126 @@ class Zend_Search_Lucene_Search_QueryParserContext
         $this->_entries[] = $operator;
     }
 
+
+    /**
+     * Generate 'signs style' query from the context
+     * '+term1 term2 -term3 +(<subquery1>) ...'
+     *
+     * @return Zend_Search_Lucene_Search_Query
+     */
+    public function signStyleExpressionQuery()
+    {
+        $query = new Zend_Search_Lucene_Search_Query_Boolean();
+
+        foreach ($this->_entries as $entryId => $entry) {
+            $query->addSubquery($entry->getQuery(), $this->_signs[$entryId]);
+        }
+    }
+
+
+    /**
+     * Generate 'boolean style' query from the context
+     * 'term1 and term2   or   term3 and (<subquery1>) and not (<subquery2>)'
+     *
+     * @return Zend_Search_Lucene_Search_Query
+     * @throws Zend_Search_Lucene
+     */
+    public function booleanExpressionQuery()
+    {
+        /**
+         * We treat each level of an expression as a boolean expression in
+         * a Disjunctive Normal Form
+         *
+         * AND operator has higher precedence than OR
+         *
+         * Thus logical query is a disjunction of one or more conjunctions of
+         * one or more query entries
+         */
+
+        $expressionRecognizer = new Zend_Search_Lucene_Search_BooleanExpressionRecognizer();
+
+        try {
+            foreach ($this->_entries as $entry) {
+                if ($entry instanceof Zend_Search_Lucene_Search_QueryEntry) {
+                    $expressionRecognizer->processLiteral($entry);
+                } else {
+                    switch ($entry) {
+                        case Zend_Search_Lucene_Search_QueryToken::TT_AND_LEXEME:
+                            $expressionRecognizer->processOperator(Zend_Search_Lucene_Search_BooleanExpressionRecognizer::IN_AND_OPERATOR);
+                            break;
+
+                        case Zend_Search_Lucene_Search_QueryToken::TT_OR_LEXEME:
+                            $expressionRecognizer->processOperator(Zend_Search_Lucene_Search_BooleanExpressionRecognizer::IN_OR_OPERATOR);
+                            break;
+
+                        case Zend_Search_Lucene_Search_QueryToken::TT_NOT_LEXEME:
+                            $expressionRecognizer->processOperator(Zend_Search_Lucene_Search_BooleanExpressionRecognizer::IN_NOT_OPERATOR);
+                            break;
+
+                        default:
+                            throw new Zend_Search_Lucene('Boolean expression error. Unknown operator type.');
+                    }
+                }
+            }
+
+            $conjuctions = $expressionRecognizer->finishExpression();
+        } catch (Zend_Search_Exception $e) {
+            throw new Zend_Search_Lucene_Search_QueryParserException('Boolean expression error. Error message: \'' .
+                                                                     $e->getMessage() . '\'.' );
+        }
+
+        // Remove 'only negative' conjunctions
+        foreach ($conjuctions as $conjuctionId => $conjuction) {
+            $nonNegativeEntryFound = false;
+
+            foreach ($conjuction as $conjuctionEntry) {
+                if ($conjuctionEntry[1]) {
+                    $nonNegativeEntryFound = true;
+                    break;
+                }
+            }
+
+            if (!$nonNegativeEntryFound) {
+            	unset($conjuctions[$conjuctionId]);
+            }
+        }
+
+
+        $subqueries = array();
+        foreach ($conjuctions as  $conjuction) {
+            // Check, if it's a one term conjuction
+            if (count($conjuction) == 1) {
+                $subqueries[] = $conjuction[0]->getQuery();
+            } else {
+                $subquery = new Zend_Search_Lucene_Search_Query_Boolean();
+
+                foreach ($conjuction as $conjuctionEntry) {
+                    $subquery->addSubquery($conjuctionEntry[0]->getQuery(), $conjuctionEntry[1]);
+                }
+
+                $subqueries[] = $subquery;
+            }
+        }
+
+        if (count($subqueries) == 0) {
+            return new Zend_Search_Lucene_Search_Query_Empty();
+        }
+
+        if (count($subqueries) == 1) {
+            return $subqueries[0];
+        }
+
+
+        $query = new Zend_Search_Lucene_Search_Query_Boolean();
+
+        foreach ($subqueries as $subquery) {
+            // Non-requirered entry/subquery
+            $query->addSubquery($subqueries);
+        }
+
+        return $query;
+    }
+
     /**
      * Generate query from current context
      *
@@ -258,5 +384,10 @@ class Zend_Search_Lucene_Search_QueryParserContext
      */
     public function getQuery()
     {
+        if ($this->_mode == self::GM_BOOLEAN) {
+            return $this->booleanExpressionQuery();
+        } else {
+            return $this->signStyleExpressionQuery();
+        }
     }
 }

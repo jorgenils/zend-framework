@@ -32,6 +32,10 @@ require_once 'Zend/Search/Lucene/Search/QueryEntry.php';
 /** Zend_Search_Lucene_Search_QueryParserException */
 require_once 'Zend/Search/Lucene/Search/QueryParserException.php';
 
+/** Zend_Search_Lucene_Analysis_Analyzer */
+require_once 'Zend/Search/Lucene/Analysis/Analyzer.php';
+
+
 
 /**
  * @category   Zend
@@ -48,6 +52,14 @@ class Zend_Search_Lucene_Search_QueryEntry_Phrase extends Zend_Search_Lucene_Sea
      * @var string
      */
     private $_phrase;
+
+    /**
+     * Field
+     *
+     * @var string|null
+     */
+    private $_field;
+
 
     /**
      * Proximity phrase query
@@ -68,10 +80,12 @@ class Zend_Search_Lucene_Search_QueryEntry_Phrase extends Zend_Search_Lucene_Sea
      * Object constractor
      *
      * @param string $phrase
+     * @param string $field
      */
-    public function __construct($phrase)
+    public function __construct($phrase, $field)
     {
         $this->_phrase = $phrase;
+        $this->_field  = $field;
     }
 
     /**
@@ -92,8 +106,37 @@ class Zend_Search_Lucene_Search_QueryEntry_Phrase extends Zend_Search_Lucene_Sea
      * Transform entry to a subquery
      *
      * @return Zend_Search_Lucene_Search_Query
+     * @throws Zend_Search_Lucene_Search_QueryParserException
      */
     public function getQuery()
     {
+        $tokens = Zend_Search_Lucene_Analysis_Analyzer::getDefault()->tokenize($this->_phrase->text);
+
+        if (count($tokens) == 0) {
+            return new Zend_Search_Lucene_Search_Query_Empty();
+        }
+
+        if (count($tokens) == 1) {
+            $term  = new Zend_Search_Lucene_Index_Term($tokens[0]->getTermText(), $this->_field);
+            $query = new Zend_Search_Lucene_Search_Query_Term($term);
+            $query->setBoost($this->_boost);
+
+            return $query;
+        }
+
+        //It's not empty or one term query
+        $query = new Zend_Search_Lucene_Search_Query_Phrase();
+        foreach ($tokens as $token) {
+            $term = new Zend_Search_Lucene_Index_Term($token->getTermText(), $this->_field);
+            $query->addTerm($term, true); // all subterms are required
+        }
+
+        if ($this->_proximityQuery) {
+            $query->setSlop($this->_wordsDistance);
+        }
+
+        $query->setBoost($this->_boost);
+
+        return $query;
     }
 }
