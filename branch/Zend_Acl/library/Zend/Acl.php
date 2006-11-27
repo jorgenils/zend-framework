@@ -144,7 +144,7 @@ class Zend_Acl
      */
     public function add(Zend_Acl_Aco_Interface $aco, $parent = null)
     {
-        $acoId = $aco->getId();
+        $acoId = $aco->getAcoId();
 
         if ($this->has($acoId)) {
             throw Zend::exception('Zend_Acl_Exception',
@@ -157,7 +157,7 @@ class Zend_Acl
             Zend::loadClass('Zend_Acl_Exception');
             try {
                 if ($parent instanceof Zend_Acl_Aco_Interface) {
-                    $acoParentId = $parent->getId();
+                    $acoParentId = $parent->getAcoId();
                 } else {
                     $acoParentId = $parent;
                 }
@@ -189,7 +189,7 @@ class Zend_Acl
     public function get($aco)
     {
         if ($aco instanceof Zend_Acl_Aco_Interface) {
-            $acoId = $aco->getId();
+            $acoId = $aco->getAcoId();
         } else {
             $acoId = $aco;
         }
@@ -213,7 +213,7 @@ class Zend_Acl
     public function has($aco)
     {
         if ($aco instanceof Zend_Acl_Aco_Interface) {
-            $acoId = $aco->getId();
+            $acoId = $aco->getAcoId();
         } else {
             $acoId = $aco;
         }
@@ -241,8 +241,8 @@ class Zend_Acl
         Zend::loadClass('Zend_Acl_Exception');
 
         try {
-            $acoId     = $this->get($aco)->getId();
-            $inheritId = $this->get($inherit)->getId();
+            $acoId     = $this->get($aco)->getAcoId();
+            $inheritId = $this->get($inherit)->getAcoId();
         } catch (Zend_Acl_Exception $e) {
             throw $e;
         }
@@ -278,7 +278,7 @@ class Zend_Acl
         Zend::loadClass('Zend_Acl_Exception');
 
         try {
-            $acoId = $this->get($aco)->getId();
+            $acoId = $this->get($aco)->getAcoId();
         } catch (Zend_Acl_Exception $e) {
             throw $e;
         }
@@ -408,7 +408,7 @@ class Zend_Acl
      * @return self Provides a fluent interface
      */
     public function setRule($operation, $type, $aro = null, $aco = null, $privileges = null,
-                                Zend_Acl_Assert_Interface $assert = null)
+                            Zend_Acl_Assert_Interface $assert = null)
     {
         /**
          * @todo implementation

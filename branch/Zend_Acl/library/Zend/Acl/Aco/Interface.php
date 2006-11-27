@@ -34,5 +34,5 @@ interface Zend_Acl_Aco_Interface
      *
      * @return string
      */
-    public function getId();
+    public function getAcoId();
 }

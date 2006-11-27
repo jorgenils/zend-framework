@@ -40,7 +40,7 @@ class Zend_Acl_Aro implements Zend_Acl_Aro_Interface
      *
      * @var string
      */
-    protected $_id;
+    protected $_aroId;
 
     /**
      * Sets the ARO identifier
@@ -48,9 +48,9 @@ class Zend_Acl_Aro implements Zend_Acl_Aro_Interface
      * @param  string $id
      * @return void
      */
-    public function __construct($id)
+    public function __construct($aroId)
     {
-        $this->_id = (string) $id;
+        $this->_aroId = (string) $aroId;
     }
 
     /**
@@ -58,9 +58,9 @@ class Zend_Acl_Aro implements Zend_Acl_Aro_Interface
      *
      * @return string
      */
-    public function getId()
+    public function getAroId()
     {
-        return $this->_id;
+        return $this->_aroId;
     }
 
 }

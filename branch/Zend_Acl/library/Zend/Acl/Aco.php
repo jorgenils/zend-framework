@@ -40,7 +40,7 @@ class Zend_Acl_Aco implements Zend_Acl_Aco_Interface
      *
      * @var string
      */
-    protected $_id;
+    protected $_acoId;
 
     /**
      * Sets the ACO identifier
@@ -48,9 +48,9 @@ class Zend_Acl_Aco implements Zend_Acl_Aco_Interface
      * @param  string $id
      * @return void
      */
-    public function __construct($id)
+    public function __construct($acoId)
     {
-        $this->_id = (string) $id;
+        $this->_acoId = (string) $acoId;
     }
 
     /**
@@ -58,9 +58,9 @@ class Zend_Acl_Aco implements Zend_Acl_Aco_Interface
      *
      * @return string
      */
-    public function getId()
+    public function getAcoId()
     {
-        return $this->_id;
+        return $this->_acoId;
     }
 
 }

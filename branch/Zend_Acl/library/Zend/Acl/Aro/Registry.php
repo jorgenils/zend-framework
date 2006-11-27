@@ -63,7 +63,7 @@ class Zend_Acl_Aro_Registry
      */
     public function add(Zend_Acl_Aro_Interface $aro, $parents = null)
     {
-        $aroId = $aro->getId();
+        $aroId = $aro->getAroId();
 
         if ($this->has($aroId)) {
             throw Zend::exception('Zend_Acl_Aro_Registry_Exception',
@@ -82,7 +82,7 @@ class Zend_Acl_Aro_Registry
             foreach ($parents as $parent) {
                 try {
                     if ($parent instanceof Zend_Acl_Aro_Interface) {
-                        $aroParentId = $parent->getId();
+                        $aroParentId = $parent->getAroId();
                     } else {
                         $aroParentId = $parent;
                     }
@@ -116,7 +116,7 @@ class Zend_Acl_Aro_Registry
     public function get($aro)
     {
         if ($aro instanceof Zend_Acl_Aro_Interface) {
-            $aroId = $aro->getId();
+            $aroId = $aro->getAroId();
         } else {
             $aroId = $aro;
         }
@@ -140,7 +140,7 @@ class Zend_Acl_Aro_Registry
     public function has($aro)
     {
         if ($aro instanceof Zend_Acl_Aro_Interface) {
-            $aroId = $aro->getId();
+            $aroId = $aro->getAroId();
         } else {
             $aroId = $aro;
         }
@@ -168,8 +168,8 @@ class Zend_Acl_Aro_Registry
         Zend::loadClass('Zend_Acl_Aro_Registry_Exception');
 
         try {
-            $aroId     = $this->get($aro)->getId();
-            $inheritId = $this->get($inherit)->getId();
+            $aroId     = $this->get($aro)->getAroId();
+            $inheritId = $this->get($inherit)->getAroId();
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             throw $e;
         }
@@ -203,7 +203,7 @@ class Zend_Acl_Aro_Registry
         Zend::loadClass('Zend_Acl_Aro_Registry_Exception');
 
         try {
-            $aroId = $this->get($aro)->getId();
+            $aroId = $this->get($aro)->getAroId();
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             throw $e;
         }

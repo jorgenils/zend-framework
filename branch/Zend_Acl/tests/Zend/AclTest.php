@@ -107,7 +107,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $aroGuest = new Zend_Acl_Aro('guest');
         $aroRegistry = $this->_acl->getAroRegistry();
         $aro = $aroRegistry->add($aroGuest)
-                           ->get($aroGuest->getId());
+                           ->get($aroGuest->getAroId());
         $this->assertTrue($aroGuest === $aro);
         $aro = $aroRegistry->get($aroGuest);
         $this->assertTrue($aroGuest === $aro);
@@ -139,7 +139,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $aroEditor = new Zend_Acl_Aro('editor');
         $aroRegistry = $this->_acl->getAroRegistry();
         $aroRegistry->add($aroGuest)
-                    ->add($aroMember, $aroGuest->getId())
+                    ->add($aroMember, $aroGuest->getAroId())
                     ->add($aroEditor, $aroMember);
         $this->assertTrue($aroRegistry->inherits($aroMember, $aroGuest, true));
         $this->assertTrue($aroRegistry->inherits($aroEditor, $aroMember, true));

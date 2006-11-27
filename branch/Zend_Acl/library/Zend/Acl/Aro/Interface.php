@@ -34,5 +34,5 @@ interface Zend_Acl_Aro_Interface
      *
      * @return string
      */
-    public function getId();
+    public function getAroId();
 }
