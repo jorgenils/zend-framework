@@ -255,6 +255,21 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->_acl->isAllowed(null, null, 'somePrivilege'));
     }
 
+    // test multiple privileges
+    public function testPrivileges()
+    {
+        $this->_acl->allow(null, null, array('p1', 'p2', 'p3'));
+        $this->assertTrue($this->_acl->isAllowed(null, null, 'p1'));
+        $this->assertTrue($this->_acl->isAllowed(null, null, 'p2'));
+        $this->assertTrue($this->_acl->isAllowed(null, null, 'p3'));
+        $this->assertFalse($this->_acl->isAllowed(null, null, 'p4'));
+        $this->_acl->deny(null, null, 'p1');
+        $this->assertFalse($this->_acl->isAllowed(null, null, 'p1'));
+        $this->_acl->deny(null, null, array('p2', 'p3'));
+        $this->assertFalse($this->_acl->isAllowed(null, null, 'p2'));
+        $this->assertFalse($this->_acl->isAllowed(null, null, 'p3'));
+    }
+
     public function testCMSExample()
     {
         $this->markTestSkipped('pending work in progress');
