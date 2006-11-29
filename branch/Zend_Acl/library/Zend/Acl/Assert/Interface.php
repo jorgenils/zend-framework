@@ -50,12 +50,16 @@ interface Zend_Acl_Assert_Interface
     /**
      * Returns true if and only if the assertion conditions are met
      *
-     * This method is passed the ACL, ARO, and ACO to which the authorization query applies.
+     * This method is passed the ACL, ARO, ACO, and privilege to which the authorization query applies. If the
+     * $aro, $aco, or $privilege parameters are null, it means that the query applies to all AROs, ACOs, or
+     * privileges, respectively.
      *
      * @param  Zend_Acl               $acl
      * @param  Zend_Acl_Aro_Interface $aro
      * @param  Zend_Acl_Aco_Interface $aco
+     * @param  string                 $privilege
      * @return boolean
      */
-    public function assert(Zend_Acl $acl, Zend_Acl_Aro_Interface $aro, Zend_Acl_Aco_Interface $aco);
+    public function assert(Zend_Acl $acl, Zend_Acl_Aro_Interface $aro = null, Zend_Acl_Aco_Interface $aco = null,
+                           $privilege = null);
 }

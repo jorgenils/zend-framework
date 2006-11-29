@@ -41,7 +41,7 @@ require_once 'Zend/Acl/Aro.php';
 
 
 /**
- * PHPUnit test case
+ * PHPUnit_Framework_TestCase
  */
 require_once 'PHPUnit/Framework/TestCase.php';
 
@@ -184,6 +184,75 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             $this->assertContains('already exists', $e->getMessage());
         }
+    }
+
+    /**
+     * Ensures that by default, Zend_Acl denies access to everything by all
+     *
+     * @return void
+     */
+    public function testDefaultDeny()
+    {
+        $this->assertFalse($this->_acl->isAllowed());
+    }
+
+    /**
+     * Ensures that ACL-wide rules (all AROs, ACOs, and privileges) work properly
+     *
+     * @return void
+     */
+    public function testDefaultRuleSet()
+    {
+        $this->_acl->allow();
+        $this->assertTrue($this->_acl->isAllowed());
+        $this->_acl->deny();
+        $this->assertFalse($this->_acl->isAllowed());
+    }
+
+    /**
+     * Ensures that by default, Zend_Acl denies access to a privilege on anything by all
+     *
+     * @return void
+     */
+    public function testDefaultPrivilegeDeny()
+    {
+        $this->assertFalse($this->_acl->isAllowed(null, null, 'somePrivilege'));
+    }
+
+    /**
+     * Ensures that ACL-wide rules apply to privileges
+     *
+     * @return void
+     */
+    public function testDefaultRuleSetPrivilege()
+    {
+        $this->_acl->allow();
+        $this->assertTrue($this->_acl->isAllowed(null, null, 'somePrivilege'));
+        $this->_acl->deny();
+        $this->assertFalse($this->_acl->isAllowed(null, null, 'somePrivilege'));
+    }
+
+    /**
+     * Ensures that a privilege allowed for all AROs upon all ACOs works properly
+     *
+     * @return void
+     */
+    public function testPrivilegeAllow()
+    {
+        $this->_acl->allow(null, null, 'somePrivilege');
+        $this->assertTrue($this->_acl->isAllowed(null, null, 'somePrivilege'));
+    }
+
+    /**
+     * Ensures that a privilege denied for all AROs upon all ACOs works properly
+     *
+     * @return void
+     */
+    public function testPrivilegeDeny()
+    {
+        $this->_acl->allow();
+        $this->_acl->deny(null, null, 'somePrivilege');
+        $this->assertFalse($this->_acl->isAllowed(null, null, 'somePrivilege'));
     }
 
     public function testCMSExample()

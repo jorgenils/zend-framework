@@ -88,14 +88,20 @@ class Zend_Acl
     protected $_acos = array();
 
     /**
-     * Creates a whitelist implementation (deny everything to all) by default
+     * ACL rules; whitelist (deny everything to all) by default
      *
-     * @return void
+     * @var array
      */
-    public function __construct()
-    {
-        $this->deny();
-    }
+    protected $_rules = array(
+        'allAcos' => array(
+            'allAros' => array(
+                'allPrivileges' => self::TYPE_DENY,
+                'byPrivilegeId' => array()
+                ),
+            'byAroId' => array()
+            ),
+        'byAcoId' => array()
+        );
 
     /**
      * Returns the ARO registry for this ACL
@@ -140,7 +146,7 @@ class Zend_Acl
      * @param  Zend_Acl_Aco_Interface        $aco
      * @param  Zend_Acl_Aco_Interface|string $parent
      * @throws Zend_Acl_Exception
-     * @return self Provides a fluent interface
+     * @return Zend_Acl Provides a fluent interface
      */
     public function add(Zend_Acl_Aco_Interface $aco, $parent = null)
     {
@@ -271,7 +277,7 @@ class Zend_Acl
      *
      * @param  Zend_Acl_Aco_Interface|string $aco
      * @throws Zend_Acl_Exception
-     * @return self Provides a fluent interface
+     * @return Zend_Acl Provides a fluent interface
      */
     public function remove($aco)
     {
@@ -298,7 +304,7 @@ class Zend_Acl
     /**
      * Removes all ACOs
      *
-     * @return self Provides a fluent interface
+     * @return Zend_Acl Provides a fluent interface
      */
     public function removeAll()
     {
@@ -310,59 +316,59 @@ class Zend_Acl
     /**
      * Adds an "allow" rule to the ACL
      *
-     * @param  Zend_Acl_Aro_Interface|string|array $aro
-     * @param  Zend_Acl_Aco_Interface|string|array $aco
+     * @param  Zend_Acl_Aro_Interface|string|array $aros
+     * @param  Zend_Acl_Aco_Interface|string|array $acos
      * @param  string|array                        $privileges
      * @param  Zend_Acl_Assert_Interface           $assert
      * @uses   Zend_Acl::setRule()
-     * @return self Provides a fluent interface
+     * @return Zend_Acl Provides a fluent interface
      */
-    public function allow($aro = null, $aco = null, $privileges = null, Zend_Acl_Assert_Interface $assert = null)
+    public function allow($aros = null, $acos = null, $privileges = null, Zend_Acl_Assert_Interface $assert = null)
     {
-        return $this->setRule(self::OP_ADD, self::TYPE_ALLOW, $aro, $aco, $privileges, $assert);
+        return $this->setRule(self::OP_ADD, self::TYPE_ALLOW, $aros, $acos, $privileges, $assert);
     }
 
     /**
      * Adds a "deny" rule to the ACL
      *
-     * @param  Zend_Acl_Aro_Interface|string|array $aro
-     * @param  Zend_Acl_Aco_Interface|string|array $aco
+     * @param  Zend_Acl_Aro_Interface|string|array $aros
+     * @param  Zend_Acl_Aco_Interface|string|array $acos
      * @param  string|array                        $privileges
      * @param  Zend_Acl_Assert_Interface           $assert
      * @uses   Zend_Acl::setRule()
-     * @return self Provides a fluent interface
+     * @return Zend_Acl Provides a fluent interface
      */
-    public function deny($aro = null, $aco = null, $privileges = null, Zend_Acl_Assert_Interface $assert = null)
+    public function deny($aros = null, $acos = null, $privileges = null, Zend_Acl_Assert_Interface $assert = null)
     {
-        return $this->setRule(self::OP_ADD, self::TYPE_DENY, $aro, $aco, $privileges, $assert);
+        return $this->setRule(self::OP_ADD, self::TYPE_DENY, $aros, $acos, $privileges, $assert);
     }
 
     /**
      * Removes "allow" permissions from the ACL
      *
-     * @param  Zend_Acl_Aro_Interface|string|array $aro
-     * @param  Zend_Acl_Aco_Interface|string|array $aco
+     * @param  Zend_Acl_Aro_Interface|string|array $aros
+     * @param  Zend_Acl_Aco_Interface|string|array $acos
      * @param  string|array                        $privileges
      * @uses   Zend_Acl::setRule()
-     * @return self Provides a fluent interface
+     * @return Zend_Acl Provides a fluent interface
      */
-    public function removeAllow($aro = null, $aco = null, $privileges = null)
+    public function removeAllow($aros = null, $acos = null, $privileges = null)
     {
-        return $this->setRule(self::OP_REMOVE, self::TYPE_ALLOW, $aro, $aco, $privileges);
+        return $this->setRule(self::OP_REMOVE, self::TYPE_ALLOW, $aros, $acos, $privileges);
     }
 
     /**
      * Removes "deny" restrictions from the ACL
      *
-     * @param  Zend_Acl_Aro_Interface|string|array $aro
-     * @param  Zend_Acl_Aco_Interface|string|array $aco
+     * @param  Zend_Acl_Aro_Interface|string|array $aros
+     * @param  Zend_Acl_Aco_Interface|string|array $acos
      * @param  string|array                        $privileges
      * @uses   Zend_Acl::setRule()
-     * @return self Provides a fluent interface
+     * @return Zend_Acl Provides a fluent interface
      */
-    public function removeDeny($aro = null, $aco = null, $privileges = null)
+    public function removeDeny($aros = null, $acos = null, $privileges = null)
     {
-        return $this->setRule(self::OP_REMOVE, self::TYPE_DENY, $aro, $aco, $privileges);
+        return $this->setRule(self::OP_REMOVE, self::TYPE_DENY, $aros, $acos, $privileges);
     }
 
     /**
@@ -379,20 +385,25 @@ class Zend_Acl
      *      If $assert is provided, then its assert() method must return true in order for
      *      the rule to apply.
      *
-     * OP_REMOVE specifics:
+     *      The $assert parameter is ignored when $aros, $acos, and $privileges are all null;
+     *      this is because the ACL needs an unconditional default rule.
      *
-     *      The $assert parameter is ignored.
+     * OP_REMOVE specifics:
      *
      *      The rule is removed only in the context of the given AROs, ACOs, and privileges.
      *      Existing rules to which the remove operation does not apply would remain in the
      *      ACL.
      *
+     *      The $assert parameter is ignored.
+     *
      * The $type parameter may be either TYPE_ALLOW or TYPE_DENY, depending on whether the
      * rule is intended to allow or deny permission, respectively.
      *
-     * The $aro and $aco parameters may be references to, or the string identifiers for,
+     * The $aros and $acos parameters may be references to, or the string identifiers for,
      * existing ACOs/AROs, or they may be passed as arrays of these - mixing string identifiers
-     * and objects is ok - to indicate the ACOs and AROs to which the rule applies.
+     * and objects is ok - to indicate the ACOs and AROs to which the rule applies. If either
+     * $aros or $acos is null, then the rule applies to all AROs or all ACOs, respectively.
+     * Both may be null in order to work with the default rule of the ACL.
      *
      * The $privileges parameter may be used to further specify that the rule applies only
      * to certain privileges upon the ACO(s) in question. This may be specified to be a single
@@ -400,19 +411,95 @@ class Zend_Acl
      *
      * @param  string                              $operation
      * @param  string                              $type
-     * @param  Zend_Acl_Aro_Interface|string|array $aro
-     * @param  Zend_Acl_Aco_Interface|string|array $aco
+     * @param  Zend_Acl_Aro_Interface|string|array $aros
+     * @param  Zend_Acl_Aco_Interface|string|array $acos
      * @param  string|array                        $privileges
      * @param  Zend_Acl_Assert_Interface           $assert
      * @throws Zend_Acl_Exception
-     * @return self Provides a fluent interface
+     * @uses   Zend_Acl_Aro_Registry::get()
+     * @uses   Zend_Acl::get()
+     * @return Zend_Acl Provides a fluent interface
      */
-    public function setRule($operation, $type, $aro = null, $aco = null, $privileges = null,
+    public function setRule($operation, $type, $aros = null, $acos = null, $privileges = null,
                             Zend_Acl_Assert_Interface $assert = null)
     {
-        /**
-         * @todo implementation
-         */
+        // ensure that the rule type is valid; normalize input to uppercase
+        $type = strtoupper($type);
+        if (self::TYPE_ALLOW !== $type && self::TYPE_DENY !== $type) {
+            throw Zend::exception('Zend_Acl_Exception', "Unsupported rule type; must be either '"
+                                . self::TYPE_ALLOW . "' or '" . self::TYPE_DENY . "'");
+        }
+
+        // ensure that all specified AROs exist; normalize input to array of ARO objects
+        $arosTemp = $aros;
+        if (null === $arosTemp) {
+            $arosTemp = array();
+        } else if (!is_array($arosTemp)) {
+            $arosTemp = array($arosTemp);
+        }
+        $aros = array();
+        foreach ($arosTemp as $aro) {
+            $aros[] = $this->getAroRegistry()->get($aro);
+        }
+        unset($arosTemp);
+
+        // ensure that all specified ACOs exist; normalize input to array of ACO objects
+        $acosTemp = $acos;
+        if (null === $acosTemp) {
+            $acosTemp = array();
+        } else if (!is_array($acosTemp)) {
+            $acosTemp = array($acosTemp);
+        }
+        $acos = array();
+        foreach ($acosTemp as $aco) {
+            $acos[] = $this->get($aco);
+        }
+        unset($acosTemp);
+
+        // normalize privileges to array
+        if (null === $privileges) {
+            $privileges = array();
+        } else if (!is_array($privileges)) {
+            $privileges = array($privileges);
+        }
+
+        switch ($operation) {
+
+            // add to the rules
+            case self::OP_ADD:
+                if (0 === count($acos)) {
+                    if (0 === count($aros)) {
+                        if (0 === count($privileges)) {
+                            $this->_rules['allAcos']['allAros']['allPrivileges'] = $type;
+                        } else {
+                            foreach ($privileges as $privilege) {
+                                $this->_rules['allAcos']['allAros']['byPrivilegeId'][$privilege]['type']   = $type;
+                                $this->_rules['allAcos']['allAros']['byPrivilegeId'][$privilege]['assert'] = $assert;
+                            }
+                        }
+                    } else {
+                        /**
+                         * @todo loop over AROs
+                         */
+                    }
+                } else {
+                    /**
+                     * @todo loop over ACOs
+                     */
+                }
+                break;
+
+            // remove from the rules
+            case self::OP_REMOVE:
+                /**
+                 * @todo implementation
+                 */
+                break;
+
+            default:
+                throw Zend::exception('Zend_Acl_Exception', "Unsupported operation; must be either '" . self::OP_ADD
+                                    . "' or '" . self::OP_REMOVE . "'");
+        }
 
         return $this;
     }
@@ -420,19 +507,63 @@ class Zend_Acl
     /**
      * Returns true if and only if the ARO has access to the ACO
      *
-     * If a $privilege is not provided, then this method returns false if the ARO is
-     * denied access to at least one privilege upon the ACO.
+     * The $aro and $aco parameters may be references to, or the string identifiers for,
+     * an existing ACO and ARO combination.
+     *
+     * If either $aros or $acos is null, then the query applies to all AROs or all ACOs,
+     * respectively. Both may be null to query whether the ACL has a "blacklist" rule
+     * (allow everything to all). By default, Zend_Acl creates a "whitelist" rule (deny
+     * everything to all), and this method would return false unless this default has
+     * been overridden (i.e., by executing $acl->allow()).
+     *
+     * If a $privilege is not provided, then this method returns false if and only if the
+     * ARO is denied access to at least one privilege upon the ACO. In other words, this
+     * method returns true if and only if the ARO is allowed all privileges on the ACO.
      *
      * @param  Zend_Acl_Aro_Interface|string $aro
      * @param  Zend_Acl_Aco_Interface|string $aco
      * @param  string                        $privilege
+     * @uses   Zend_Acl::get()
+     * @uses   Zend_Acl_Aro_Registry::get()
      * @return boolean
      */
-    public function isAllowed($aro, $aco, $privilege = null)
+    public function isAllowed($aro = null, $aco = null, $privilege = null)
     {
-        /**
-         * @todo implementation
-         */
+        if (null === $aco) {
+            if (null === $aro) {
+                if (null === $privilege) {
+                    // query against all ACOs, all AROs, and all privileges
+                    if (self::TYPE_DENY === $this->_rules['allAcos']['allAros']['allPrivileges']) {
+                        return false;
+                    }
+                    foreach ($this->_rules['allAcos']['allAros']['byPrivilegeId'] as $privilege => $type) {
+                        if (self::TYPE_DENY === $type) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } else {
+                    // query against all ACOs, all AROs, and one privilege
+                    if (!isset($this->_rules['allAcos']['allAros']['byPrivilegeId'][$privilege])) {
+                        return self::TYPE_ALLOW === $this->_rules['allAcos']['allAros']['allPrivileges'];
+                    }
+                    $rule = $this->_rules['allAcos']['allAros']['byPrivilegeId'][$privilege];
+                    if (null === $rule['assert'] || $rule['assert']->assert($this, null, null, $privilege)) {
+                        return self::TYPE_ALLOW === $rule['type'];
+                    } else {
+                        return self::TYPE_ALLOW === $this->_rules['allAcos']['allAros']['allPrivileges'];
+                    }
+                }
+            } else {
+                /**
+                 * @todo query against a particular ARO
+                 */
+            }
+        } else {
+            /**
+             * @todo the query is against a particular ACO
+             */
+        }
     }
 
 }

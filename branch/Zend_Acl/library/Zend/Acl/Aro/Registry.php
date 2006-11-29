@@ -59,7 +59,7 @@ class Zend_Acl_Aro_Registry
      * @param  Zend_Acl_Aro_Interface              $aro
      * @param  Zend_Acl_Aro_Interface|string|array $parents
      * @throws Zend_Acl_Aro_Registry_Exception
-     * @return self Provides a fluent interface
+     * @return Zend_Acl_Aro_Registry Provides a fluent interface
      */
     public function add(Zend_Acl_Aro_Interface $aro, $parents = null)
     {
@@ -196,7 +196,7 @@ class Zend_Acl_Aro_Registry
      *
      * @param  Zend_Acl_Aro_Interface|string $aro
      * @throws Zend_Acl_Aro_Registry_Exception
-     * @return self Provides a fluent interface
+     * @return Zend_Acl_Aro_Registry Provides a fluent interface
      */
     public function remove($aro)
     {
@@ -223,7 +223,7 @@ class Zend_Acl_Aro_Registry
     /**
      * Removes all AROs from the registry
      *
-     * @return self Provides a fluent interface
+     * @return Zend_Acl_Aro_Registry Provides a fluent interface
      */
     public function removeAll()
     {
