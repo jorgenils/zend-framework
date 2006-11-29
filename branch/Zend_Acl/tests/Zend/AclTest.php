@@ -255,7 +255,11 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->_acl->isAllowed(null, null, 'somePrivilege'));
     }
 
-    // test multiple privileges
+    /**
+     * Ensures that multiple privileges work properly
+     *
+     * @return void
+     */
     public function testPrivileges()
     {
         $this->_acl->allow(null, null, array('p1', 'p2', 'p3'));
@@ -268,6 +272,19 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $this->_acl->deny(null, null, array('p2', 'p3'));
         $this->assertFalse($this->_acl->isAllowed(null, null, 'p2'));
         $this->assertFalse($this->_acl->isAllowed(null, null, 'p3'));
+    }
+
+    /**
+     * Ensures that assertions on privileges work properly
+     *
+     * @return void
+     */
+    public function testPrivilegeAssert()
+    {
+        $this->_acl->allow(null, null, 'somePrivilege', new AssertTrue());
+        $this->assertTrue($this->_acl->isAllowed(null, null, 'somePrivilege'));
+        $this->_acl->allow(null, null, 'somePrivilege', new AssertFalse());
+        $this->assertFalse($this->_acl->isAllowed(null, null, 'somePrivilege'));
     }
 
     public function testCMSExample()
@@ -586,4 +603,24 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         self::assertTrue(is_array($list));
     }
 
+}
+
+
+class AssertFalse implements Zend_Acl_Assert_Interface
+{
+    public function assert(Zend_Acl $acl, Zend_Acl_Aro_Interface $aro = null, Zend_Acl_Aco_Interface $aco = null,
+                           $privilege = null)
+    {
+       return false;
+    }
+}
+
+
+class AssertTrue implements Zend_Acl_Assert_Interface
+{
+    public function assert(Zend_Acl $acl, Zend_Acl_Aro_Interface $aro = null, Zend_Acl_Aco_Interface $aco = null,
+                           $privilege = null)
+    {
+       return true;
+    }
 }
