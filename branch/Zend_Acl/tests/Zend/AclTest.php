@@ -141,6 +141,13 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $aroRegistry->add($aroGuest)
                     ->add($aroMember, $aroGuest->getAroId())
                     ->add($aroEditor, $aroMember);
+        $this->assertTrue(0 === count($aroRegistry->getParents($aroGuest)));
+        $aroMemberParents = $aroRegistry->getParents($aroMember);
+        $this->assertTrue(1 === count($aroMemberParents));
+        $this->assertTrue(isset($aroMemberParents['guest']));
+        $aroEditorParents = $aroRegistry->getParents($aroEditor);
+        $this->assertTrue(1 === count($aroEditorParents));
+        $this->assertTrue(isset($aroEditorParents['member']));
         $this->assertTrue($aroRegistry->inherits($aroMember, $aroGuest, true));
         $this->assertTrue($aroRegistry->inherits($aroEditor, $aroMember, true));
         $this->assertTrue($aroRegistry->inherits($aroEditor, $aroGuest));
@@ -148,7 +155,38 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($aroRegistry->inherits($aroMember, $aroEditor));
         $this->assertFalse($aroRegistry->inherits($aroGuest, $aroEditor));
         $aroRegistry->remove($aroMember);
+        $this->assertTrue(0 === count($aroRegistry->getParents($aroEditor)));
         $this->assertFalse($aroRegistry->inherits($aroEditor, $aroGuest));
+    }
+
+    /**
+     * Tests basic ARO multiple inheritance
+     *
+     * @return void
+     */
+    public function testARORegistryInheritsMultiple()
+    {
+        $aroParent1 = new Zend_Acl_Aro('parent1');
+        $aroParent2 = new Zend_Acl_Aro('parent2');
+        $aroChild   = new Zend_Acl_Aro('child');
+        $aroRegistry = $this->_acl->getAroRegistry();
+        $aroRegistry->add($aroParent1)
+                    ->add($aroParent2)
+                    ->add($aroChild, array($aroParent1, $aroParent2));
+        $aroChildParents = $aroRegistry->getParents($aroChild);
+        $this->assertTrue(2 === count($aroChildParents));
+        $i = 2;
+        foreach ($aroChildParents as $aroParentId => $aroParent) {
+            $this->assertTrue("parent$i" === $aroParentId);
+            $i--;
+        }
+        $this->assertTrue($aroRegistry->inherits($aroChild, $aroParent1));
+        $this->assertTrue($aroRegistry->inherits($aroChild, $aroParent2));
+        $aroRegistry->remove($aroParent1);
+        $aroChildParents = $aroRegistry->getParents($aroChild);
+        $this->assertTrue(1 === count($aroChildParents));
+        $this->assertTrue(isset($aroChildParents['parent2']));
+        $this->assertTrue($aroRegistry->inherits($aroChild, $aroParent2));
     }
 
     /**

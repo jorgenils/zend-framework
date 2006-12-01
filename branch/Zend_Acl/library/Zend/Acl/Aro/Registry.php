@@ -56,6 +56,12 @@ class Zend_Acl_Aro_Registry
      * these - mixing string identifiers and objects is ok - to indicate the AROs
      * from which the newly added ARO will directly inherit.
      *
+     * In order to resolve potential ambiguities with conflicting rules inherited
+     * from different parents, the most recently added parent takes precedence over
+     * parents that were previously added. In other words, the first parent added
+     * will have the least priority, and the last parent added will have the
+     * highest priority.
+     *
      * @param  Zend_Acl_Aro_Interface              $aro
      * @param  Zend_Acl_Aro_Interface|string|array $parents
      * @throws Zend_Acl_Aro_Registry_Exception
@@ -92,6 +98,9 @@ class Zend_Acl_Aro_Registry
                 }
                 $aroParents[$aroParentId] = $aroParent;
                 $this->_aros[$aroParentId]['children'][$aroId] = $aro;
+            }
+            if (count($aroParents) > 0) {
+                $aroParents = array_reverse($aroParents, true);
             }
         }
 
@@ -146,6 +155,26 @@ class Zend_Acl_Aro_Registry
         }
 
         return isset($this->_aros[$aroId]);
+    }
+
+    /**
+     * Returns an array of an existing ARO's parents
+     *
+     * The array keys are the identifiers of the parent AROs, and the values are
+     * the parent ARO instances. The parent AROs are ordered in this array by
+     * descending priority.
+     *
+     * If the ARO does not have any parents, then an empty array is returned.
+     *
+     * @param  Zend_Acl_Aro_Interface|string $aro
+     * @uses   Zend_Acl_Aro_Registry::get()
+     * @return array
+     */
+    public function getParents($aro)
+    {
+        $aroId = $this->get($aro)->getAroId();
+
+        return $this->_aros[$aroId]['parents'];
     }
 
     /**
