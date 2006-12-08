@@ -175,10 +175,10 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
                     ->add($aroChild, array($aroParent1, $aroParent2));
         $aroChildParents = $aroRegistry->getParents($aroChild);
         $this->assertTrue(2 === count($aroChildParents));
-        $i = 2;
+        $i = 1;
         foreach ($aroChildParents as $aroParentId => $aroParent) {
             $this->assertTrue("parent$i" === $aroParentId);
-            $i--;
+            $i++;
         }
         $this->assertTrue($aroRegistry->inherits($aroChild, $aroParent1));
         $this->assertTrue($aroRegistry->inherits($aroChild, $aroParent2));
