@@ -607,7 +607,7 @@ class Zend_Acl
         }
 
         while (null !== ($aro = array_pop($dfs['stack']))) {
-            if (!isset($dfs['visited'][$aroNext->getAroId()])) {
+            if (!isset($dfs['visited'][$aro->getAroId()])) {
                 if (null !== ($result = $this->_aroDFSVisitOnePrivilege($aro, $aco, $privilege, $dfs))) {
                     return $result;
                 }
