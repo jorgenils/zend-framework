@@ -99,9 +99,6 @@ class Zend_Acl_Aro_Registry
                 $aroParents[$aroParentId] = $aroParent;
                 $this->_aros[$aroParentId]['children'][$aroId] = $aro;
             }
-            if (count($aroParents) > 0) {
-                $aroParents = array_reverse($aroParents, true);
-            }
         }
 
         $this->_aros[$aroId] = array(
@@ -162,7 +159,8 @@ class Zend_Acl_Aro_Registry
      *
      * The array keys are the identifiers of the parent AROs, and the values are
      * the parent ARO instances. The parent AROs are ordered in this array by
-     * descending priority.
+     * ascending priority. The highest priority parent ARO, last in the array,
+     * corresponds with the parent ARO most recently added.
      *
      * If the ARO does not have any parents, then an empty array is returned.
      *
