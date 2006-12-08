@@ -485,9 +485,18 @@ class Zend_Acl
                             }
                         }
                     } else {
-                        /**
-                         * @todo loop over AROs
-                         */
+                        foreach ($aros as $aro) {
+                            if (0 === count($privileges)) {
+                                $this->_rules['allAcos']['byAroId'][$aro->getAroId()]['allPrivileges']['type']   = $type;
+                                $this->_rules['allAcos']['byAroId'][$aro->getAroId()]['allPrivileges']['assert'] = $assert;
+                                $this->_rules['allAcos']['byAroId'][$aro->getAroId()]['byPrivilegeId'] = array();
+                            } else {
+                                foreach ($privileges as $privilege) {
+                                    $this->_rules['allAcos']['byAroId'][$aro->getAroId()]['byPrivilegeId'][$privilege]['type']   = $type;
+                                    $this->_rules['allAcos']['byAroId'][$aro->getAroId()]['byPrivilegeId'][$privilege]['assert'] = $assert;
+                                }
+                            }
+                        }
                     }
                 } else {
                     /**

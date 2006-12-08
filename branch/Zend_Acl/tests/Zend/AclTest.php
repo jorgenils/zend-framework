@@ -337,6 +337,21 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->_acl->isAllowed($aroGuest));
     }
 
+    /**
+     * Ensures that ACL-wide rules (all ACOs and privileges) work properly for a particular ARO
+     *
+     * @return void
+     */
+    public function testARODefaultRuleSet()
+    {
+        $aroGuest = new Zend_Acl_Aro('guest');
+        $this->_acl->getAroRegistry()->add($aroGuest);
+        $this->_acl->allow($aroGuest);
+        $this->assertTrue($this->_acl->isAllowed($aroGuest));
+        $this->_acl->deny($aroGuest);
+        $this->assertFalse($this->_acl->isAllowed($aroGuest));
+    }
+
     public function testCMSExample()
     {
         $this->markTestSkipped('pending work in progress');
