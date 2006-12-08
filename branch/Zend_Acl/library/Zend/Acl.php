@@ -606,7 +606,7 @@ class Zend_Acl
      * @param  Zend_Acl_Aco_Interface $aco
      * @return boolean|null
      */
-    protected function _aroDFSAllPrivileges($aro, $aco)
+    protected function _aroDFSAllPrivileges(Zend_Acl_Aro_Interface $aro, Zend_Acl_Aco_Interface $aco = null)
     {
         $dfs = array(
             'visited' => array(),
@@ -641,7 +641,8 @@ class Zend_Acl
      * @param  array                  $dfs
      * @return boolean|null
      */
-    protected function _aroDFSVisitAllPrivileges(Zend_Acl_Aro_Interface $aro, Zend_Acl_Aco_Interface $aco, &$dfs)
+    protected function _aroDFSVisitAllPrivileges(Zend_Acl_Aro_Interface $aro, Zend_Acl_Aco_Interface $aco = null,
+                                                 &$dfs)
     {
         if (null !== ($rules = $this->_getRules($aco, $aro))) {
             foreach ($rules['byPrivilegeId'] as $privilege => $rule) {
@@ -674,7 +675,7 @@ class Zend_Acl
      * @param  string                 $privilege
      * @return boolean|null
      */
-    protected function _aroDFSOnePrivilege($aro, $aco, $privilege)
+    protected function _aroDFSOnePrivilege(Zend_Acl_Aro_Interface $aro, Zend_Acl_Aco_Interface $aco = null, $privilege)
     {
         $dfs = array(
             'visited' => array(),
@@ -710,8 +711,8 @@ class Zend_Acl
      * @param  array                  $dfs
      * @return boolean|null
      */
-    protected function _aroDFSVisitOnePrivilege(Zend_Acl_Aro_Interface $aro, Zend_Acl_Aco_Interface $aco, $privilege,
-                                             &$dfs)
+    protected function _aroDFSVisitOnePrivilege(Zend_Acl_Aro_Interface $aro, Zend_Acl_Aco_Interface $aco = null,
+                                                $privilege, &$dfs)
     {
         if (null !== ($ruleTypeOnePrivilege = $this->_getRuleType($aco, $aro, $privilege))) {
             return self::TYPE_ALLOW === $ruleTypeOnePrivilege;

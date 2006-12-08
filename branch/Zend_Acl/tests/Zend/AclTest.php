@@ -325,6 +325,18 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->_acl->isAllowed(null, null, 'somePrivilege'));
     }
 
+    /**
+     * Ensures that by default, Zend_Acl denies access to everything by a particular ARO
+     *
+     * @return void
+     */
+    public function testARODefaultDeny()
+    {
+        $aroGuest = new Zend_Acl_Aro('guest');
+        $this->_acl->getAroRegistry()->add($aroGuest);
+        $this->assertFalse($this->_acl->isAllowed($aroGuest));
+    }
+
     public function testCMSExample()
     {
         $this->markTestSkipped('pending work in progress');
