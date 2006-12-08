@@ -326,7 +326,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Ensures that by default, Zend_Acl denies access to everything by a particular ARO
+     * Ensures that by default, Zend_Acl denies access to everything for a particular ARO
      *
      * @return void
      */
@@ -350,6 +350,96 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->_acl->isAllowed($aroGuest));
         $this->_acl->deny($aroGuest);
         $this->assertFalse($this->_acl->isAllowed($aroGuest));
+    }
+
+    /**
+     * Ensures that by default, Zend_Acl denies access to a privilege on anything for a particular ARO
+     *
+     * @return void
+     */
+    public function testARODefaultPrivilegeDeny()
+    {
+        $aroGuest = new Zend_Acl_Aro('guest');
+        $this->_acl->getAroRegistry()->add($aroGuest);
+        $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
+    }
+
+    /**
+     * Ensures that ACL-wide rules apply to privileges for a particular ARO
+     *
+     * @return void
+     */
+    public function testARODefaultRuleSetPrivilege()
+    {
+        $aroGuest = new Zend_Acl_Aro('guest');
+        $this->_acl->getAroRegistry()->add($aroGuest);
+        $this->_acl->allow($aroGuest);
+        $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
+        $this->_acl->deny($aroGuest);
+        $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
+    }
+
+    /**
+     * Ensures that a privilege allowed for a particular ARO upon all ACOs works properly
+     *
+     * @return void
+     */
+    public function testAROPrivilegeAllow()
+    {
+        $aroGuest = new Zend_Acl_Aro('guest');
+        $this->_acl->getAroRegistry()->add($aroGuest);
+        $this->_acl->allow($aroGuest, null, 'somePrivilege');
+        $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
+    }
+
+    /**
+     * Ensures that a privilege denied for a particular ARO upon all ACOs works properly
+     *
+     * @return void
+     */
+    public function testAROPrivilegeDeny()
+    {
+        $aroGuest = new Zend_Acl_Aro('guest');
+        $this->_acl->getAroRegistry()->add($aroGuest);
+        $this->_acl->allow($aroGuest);
+        $this->_acl->deny($aroGuest, null, 'somePrivilege');
+        $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
+    }
+
+    /**
+     * Ensures that multiple privileges work properly for a particular ARO
+     *
+     * @return void
+     */
+    public function testAROPrivileges()
+    {
+        $aroGuest = new Zend_Acl_Aro('guest');
+        $this->_acl->getAroRegistry()->add($aroGuest);
+        $this->_acl->allow($aroGuest, null, array('p1', 'p2', 'p3'));
+        $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'p1'));
+        $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'p2'));
+        $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'p3'));
+        $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'p4'));
+        $this->_acl->deny($aroGuest, null, 'p1');
+        $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'p1'));
+        $this->_acl->deny($aroGuest, null, array('p2', 'p3'));
+        $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'p2'));
+        $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'p3'));
+    }
+
+    /**
+     * Ensures that assertions on privileges work properly for a particular ARO
+     *
+     * @return void
+     */
+    public function testAROPrivilegeAssert()
+    {
+        $aroGuest = new Zend_Acl_Aro('guest');
+        $this->_acl->getAroRegistry()->add($aroGuest);
+        $this->_acl->allow($aroGuest, null, 'somePrivilege', new AssertTrue());
+        $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
+        $this->_acl->allow($aroGuest, null, 'somePrivilege', new AssertFalse());
+        $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
     }
 
     public function testCMSExample()
