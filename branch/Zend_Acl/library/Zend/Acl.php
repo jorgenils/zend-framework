@@ -551,16 +551,28 @@ class Zend_Acl
 
         if (null === $privilege) {
             // query on all privileges
-            /**
-             * @todo
-             *
-             * if there are any TYPE_DENY rules on specific privileges
-             *      return false
-             * else if all privileges rule exists and is TYPE_ALLOW
-             *      return true
-             * else
-             *      return false
-             */
+            do {
+                // depth-first search on $aro if it is not 'allAros' pseudo-parent
+                if (null !== $aro && null !== ($result = $this->_aroDFSAllPrivileges($aro, $aco, $privilege))) {
+                    return $result;
+                }
+
+                // look for rule on 'allAros' psuedo-parent
+                if (null !== ($rules = $this->_getRules($aco, null))) {
+                    foreach ($rules['byPrivilegeId'] as $privilege => $rule) {
+                        if (self::TYPE_DENY === ($ruleTypeOnePrivilege = $this->_getRuleType($aco, null, $privilege))) {
+                            return false;
+                        }
+                    }
+                    if (null !== ($ruleTypeAllPrivileges = $this->_getRuleType($aco, null, null))) {
+                        return self::TYPE_ALLOW === $ruleTypeAllPrivileges;
+                    }
+                }
+
+                // try next ACO
+                $aco = $this->_acos['byAcoId'][$aco->getAcoId()]['parent'];
+
+            } while (true); // loop terminates at 'allAcos' pseudo-parent
         } else {
             // query on one privilege
             do {
@@ -581,6 +593,73 @@ class Zend_Acl
 
             } while (true); // loop terminates at 'allAcos' pseudo-parent
         }
+    }
+
+    /**
+     * Performs a depth-first search of the ARO DAG, starting at $aro, in order to find a rule
+     * allowing/denying $aro access to all privileges upon $aco
+     *
+     * This method returns true if a rule is found and allows access. If a rule exists and denies access,
+     * then this method returns false. If no applicable rule is found, then this method returns null.
+     *
+     * @param  Zend_Acl_Aro_Interface $aro
+     * @param  Zend_Acl_Aco_Interface $aco
+     * @return boolean|null
+     */
+    protected function _aroDFSAllPrivileges($aro, $aco)
+    {
+        $dfs = array(
+            'visited' => array(),
+            'stack'   => array()
+            );
+
+        if (null !== ($result = $this->_aroDFSVisitAllPrivileges($aro, $aco, $dfs))) {
+            return $result;
+        }
+
+        while (null !== ($aro = array_pop($dfs['stack']))) {
+            if (!isset($dfs['visited'][$aro->getAroId()])) {
+                if (null !== ($result = $this->_aroDFSVisitAllPrivileges($aro, $aco, $dfs))) {
+                    return $result;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Visits an $aro in order to look for a rule allowing/denying $aro access to all privileges upon $aco
+     *
+     * This method returns true if a rule is found and allows access. If a rule exists and denies access,
+     * then this method returns false. If no applicable rule is found, then this method returns null.
+     *
+     * This method is used by the internal depth-first search algorithm and may modify the DFS data structure.
+     *
+     * @param  Zend_Acl_Aro_Interface $aro
+     * @param  Zend_Acl_Aco_Interface $aco
+     * @param  array                  $dfs
+     * @return boolean|null
+     */
+    protected function _aroDFSVisitAllPrivileges(Zend_Acl_Aro_Interface $aro, Zend_Acl_Aco_Interface $aco, &$dfs)
+    {
+        if (null !== ($rules = $this->_getRules($aco, $aro))) {
+            foreach ($rules['byPrivilegeId'] as $privilege => $rule) {
+                if (self::TYPE_DENY === ($ruleTypeOnePrivilege = $this->_getRuleType($aco, $aro, $privilege))) {
+                    return false;
+                }
+            }
+            if (null !== ($ruleTypeAllPrivileges = $this->_getRuleType($aco, $aro, null))) {
+                return self::TYPE_ALLOW === $ruleTypeAllPrivileges;
+            }
+        }
+
+        $dfs['visited'][$aro->getAroId()] = true;
+        foreach ($this->getAroRegistry()->getParents($aro) as $aroParentId => $aroParent) {
+            $dfs['stack'][] = $aroParent;
+        }
+
+        return null;
     }
 
     /**
@@ -672,6 +751,44 @@ class Zend_Acl
     protected function _getRuleType(Zend_Acl_Aco_Interface $aco = null, Zend_Acl_Aro_Interface $aro = null,
                                     $privilege = null)
     {
+        // get the rules for the $aco and $aro
+        if (null === ($rules = $this->_getRules($aco, $aro))) {
+            return null;
+        }
+
+        // follow $privilege
+        if (null === $privilege) {
+            $rule = $rules['allPrivileges'];
+        } else if (!isset($rules['byPrivilegeId'][$privilege])) {
+            return null;
+        } else {
+            $rule = $rules['byPrivilegeId'][$privilege];
+        }
+
+        // check assertion if necessary
+        if (null === $rule['assert'] || $rule['assert']->assert($this, $aro, $aco, $privilege)) {
+            return $rule['type'];
+        } else if (null !== $aco || null !== $aro || null !== $privilege) {
+            return null;
+        } else if (self::TYPE_ALLOW === $rule['type']) {
+            return self::TYPE_DENY;
+        } else {
+            return self::TYPE_ALLOW;
+        }
+    }
+
+    /**
+     * Returns the rules associated with an ACO and an ARO, or null if no such rules exist
+     *
+     * If either $aco or $aro is null, this means that the rules returned are for all ACOs or all AROs,
+     * respectively. Both can be null to return the default rule set for all ACOs and all AROs.
+     *
+     * @param  Zend_Acl_Aco_Interface $aco
+     * @param  Zend_Acl_Aro_Interface $aro
+     * @return array|null
+     */
+    protected function _getRules(Zend_Acl_Aco_Interface $aco = null, Zend_Acl_Aro_Interface $aro = null)
+    {
         // follow $aco
         if (null === $aco) {
             $visitor = $this->_rules['allAcos'];
@@ -683,31 +800,11 @@ class Zend_Acl
 
         // follow $aro
         if (null === $aro) {
-            $visitor = $visitor['allAros'];
+            return $visitor['allAros'];
         } else if (!isset($visitor['byAroId'][$aroId = $aro->getAroId()])) {
             return null;
         } else {
-            $visitor = $visitor['byAroId'][$aroId];
-        }
-
-        // follow $privilege
-        if (null === $privilege) {
-            $visitor = $visitor['allPrivileges'];
-        } else if (!isset($visitor['byPrivilegeId'][$privilege])) {
-            return null;
-        } else {
-            $visitor = $visitor['byPrivilegeId'][$privilege];
-        }
-
-        // check assertion if necessary
-        if (null === $visitor['assert'] || $visitor['assert']->assert($this, $aro, $aco, $privilege)) {
-            return $visitor['type'];
-        } else if (null !== $aco || null !== $aro || null !== $privilege) {
-            return null;
-        } else if (self::TYPE_ALLOW === $visitor['type']) {
-            return self::TYPE_DENY;
-        } else {
-            return self::TYPE_ALLOW;
+            return $visitor['byAroId'][$aroId];
         }
     }
 
