@@ -225,6 +225,93 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Ensures that basic addition and retrieval of a single ACO works
+     *
+     * @return void
+     */
+    public function testACOAddAndGetOne()
+    {
+        $acoArea = new Zend_Acl_Aco('area');
+        $aco = $this->_acl->add($acoArea)
+                          ->get($acoArea->getAcoId());
+        $this->assertTrue($acoArea === $aco);
+        $aco = $this->_acl->get($acoArea);
+        $this->assertTrue($acoArea === $aco);
+    }
+
+    /**
+     * Ensures that basic removal of a single ACO works
+     *
+     * @return void
+     */
+    public function testACORemoveOne()
+    {
+        $acoArea = new Zend_Acl_Aco('area');
+        $aroRegistry = $this->_acl->getAroRegistry();
+        $this->_acl->add($acoArea)
+                   ->remove($acoArea);
+        $this->assertFalse($this->_acl->has($acoArea));
+    }
+
+    /**
+     * Tests basic ACO inheritance
+     *
+     * @return void
+     */
+    public function testACOInherits()
+    {
+        $acoCity     = new Zend_Acl_Aco('city');
+        $acoBuilding = new Zend_Acl_Aco('building');
+        $acoRoom     = new Zend_Acl_Aco('room');
+        $this->_acl->add($acoCity)
+                   ->add($acoBuilding, $acoCity->getAcoId())
+                   ->add($acoRoom, $acoBuilding);
+        $this->assertTrue($this->_acl->inherits($acoBuilding, $acoCity, true));
+        $this->assertTrue($this->_acl->inherits($acoRoom, $acoBuilding, true));
+        $this->assertTrue($this->_acl->inherits($acoRoom, $acoCity));
+        $this->assertFalse($this->_acl->inherits($acoCity, $acoBuilding));
+        $this->assertFalse($this->_acl->inherits($acoBuilding, $acoRoom));
+        $this->assertFalse($this->_acl->inherits($acoCity, $acoRoom));
+        $this->_acl->remove($acoBuilding);
+        $this->assertFalse($this->_acl->has($acoRoom));
+    }
+
+    /**
+     * Ensures that the same ACO cannot be added more than once
+     *
+     * @return void
+     */
+    public function testACODuplicate()
+    {
+        try {
+            $acoArea = new Zend_Acl_Aco('area');
+            $this->_acl->add($acoArea)
+                       ->add($acoArea);
+            $this->fail('Expected exception not thrown upon adding same ACO twice');
+        } catch (Zend_Acl_Exception $e) {
+            $this->assertContains('already exists', $e->getMessage());
+        }
+    }
+
+    /**
+     * Ensures that two ACOs having the same ID cannot be added
+     *
+     * @return void
+     */
+    public function testACODuplicateId()
+    {
+        try {
+            $acoArea1 = new Zend_Acl_Aco('area');
+            $acoArea2 = new Zend_Acl_Aco('area');
+            $this->_acl->add($acoArea1)
+                       ->add($acoArea2);
+            $this->fail('Expected exception not thrown upon adding two ACOs with same ID');
+        } catch (Zend_Acl_Exception $e) {
+            $this->assertContains('already exists', $e->getMessage());
+        }
+    }
+
+    /**
      * Ensures that by default, Zend_Acl denies access to everything by all
      *
      * @return void

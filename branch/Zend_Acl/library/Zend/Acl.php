@@ -257,14 +257,14 @@ class Zend_Acl
         }
 
         $inherits = (null !== $this->_acos[$acoId]['parent']
-                     && $inheritId === ($parentId = key($this->_acos[$acoId]['parent'])));
+                     && $inheritId === ($parentId = $this->_acos[$acoId]['parent']->getAcoId()));
 
         if ($inherits || $onlyParent) {
             return $inherits;
         }
 
         while (null !== $this->_acos[$parentId]['parent']) {
-            $parentId = key($this->_acos[$parentId]['parent']);
+            $parentId = $this->_acos[$parentId]['parent']->getAcoId();
             if ($inheritId === $parentId) {
                 return true;
             }
@@ -292,8 +292,8 @@ class Zend_Acl
             throw $e;
         }
 
-        if (null !== $this->_acos[$acoId]['parent']) {
-            unset($this->_acos[$acoId]['parent']['children'][$acoId]);
+        if (null !== ($acoParent = $this->_acos[$acoId]['parent'])) {
+            unset($this->_acos[$acoParent->getAcoId()]['children'][$acoId]);
         }
         foreach ($this->_acos[$acoId]['children'] as $childId => $child) {
             $this->remove($childId);
