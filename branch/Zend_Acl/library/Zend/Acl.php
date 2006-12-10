@@ -436,31 +436,33 @@ class Zend_Acl
                                 . self::TYPE_ALLOW . "' or '" . self::TYPE_DENY . "'");
         }
 
-        // ensure that all specified AROs exist; normalize input to array of ARO objects
-        $arosTemp = $aros;
-        if (null === $arosTemp) {
-            $arosTemp = array();
-        } else if (!is_array($arosTemp)) {
-            $arosTemp = array($arosTemp);
+        // ensure that all specified AROs exist; normalize input to array of ARO objects or null
+        if (!is_array($aros)) {
+            $aros = array($aros);
+        } else if (0 === count($arosTemp)) {
+            $aros = array(null);
+        } else {
+            $arosTemp = $aros;
+            $aros = array();
+            foreach ($arosTemp as $aro) {
+                $aros[] = $this->getAroRegistry()->get($aro);
+            }
+            unset($arosTemp);
         }
-        $aros = array();
-        foreach ($arosTemp as $aro) {
-            $aros[] = $this->getAroRegistry()->get($aro);
-        }
-        unset($arosTemp);
 
-        // ensure that all specified ACOs exist; normalize input to array of ACO objects
-        $acosTemp = $acos;
-        if (null === $acosTemp) {
-            $acosTemp = array();
-        } else if (!is_array($acosTemp)) {
-            $acosTemp = array($acosTemp);
+        // ensure that all specified ACOs exist; normalize input to array of ACO objects or null
+        if (!is_array($acos)) {
+            $acos = array($acos);
+        } else if (0 === count($acosTemp)) {
+            $acos = array(null);
+        } else {
+            $acosTemp = $acos;
+            $acos = array();
+            foreach ($acosTemp as $aco) {
+                $acos[] = $this->get($aco);
+            }
+            unset($acosTemp);
         }
-        $acos = array();
-        foreach ($acosTemp as $aco) {
-            $acos[] = $this->get($aco);
-        }
-        unset($acosTemp);
 
         // normalize privileges to array
         if (null === $privileges) {
@@ -473,43 +475,59 @@ class Zend_Acl
 
             // add to the rules
             case self::OP_ADD:
-                if (0 === count($acos)) {
-                    if (0 === count($aros)) {
+                foreach ($acos as $aco) {
+                    foreach ($aros as $aro) {
+                        $rules =& $this->_getRules($aco, $aro, true);
                         if (0 === count($privileges)) {
-                            $this->_rules['allAcos']['allAros']['allPrivileges']['type']   = $type;
-                            $this->_rules['allAcos']['allAros']['allPrivileges']['assert'] = $assert;
+                            $rules['allPrivileges']['type']   = $type;
+                            $rules['allPrivileges']['assert'] = $assert;
+                            if (!isset($rules['byPrivilegeId'])) {
+                                $rules['byPrivilegeId'] = array();
+                            }
                         } else {
                             foreach ($privileges as $privilege) {
-                                $this->_rules['allAcos']['allAros']['byPrivilegeId'][$privilege]['type']   = $type;
-                                $this->_rules['allAcos']['allAros']['byPrivilegeId'][$privilege]['assert'] = $assert;
-                            }
-                        }
-                    } else {
-                        foreach ($aros as $aro) {
-                            if (0 === count($privileges)) {
-                                $this->_rules['allAcos']['byAroId'][$aro->getAroId()]['allPrivileges']['type']   = $type;
-                                $this->_rules['allAcos']['byAroId'][$aro->getAroId()]['allPrivileges']['assert'] = $assert;
-                                $this->_rules['allAcos']['byAroId'][$aro->getAroId()]['byPrivilegeId'] = array();
-                            } else {
-                                foreach ($privileges as $privilege) {
-                                    $this->_rules['allAcos']['byAroId'][$aro->getAroId()]['byPrivilegeId'][$privilege]['type']   = $type;
-                                    $this->_rules['allAcos']['byAroId'][$aro->getAroId()]['byPrivilegeId'][$privilege]['assert'] = $assert;
-                                }
+                                $rules['byPrivilegeId'][$privilege]['type']   = $type;
+                                $rules['byPrivilegeId'][$privilege]['assert'] = $assert;
                             }
                         }
                     }
-                } else {
-                    /**
-                     * @todo loop over ACOs
-                     */
                 }
                 break;
 
             // remove from the rules
             case self::OP_REMOVE:
-                /**
-                 * @todo implementation
-                 */
+                foreach ($acos as $aco) {
+                    foreach ($aros as $aro) {
+                        $rules =& $this->_getRules($aco, $aro);
+                        if (null === $rules) {
+                            continue;
+                        }
+                        if (0 === count($privileges)) {
+                            if (null === $aco && null === $aro) {
+                                if ($type === $rules['allPrivileges']['type']) {
+                                    $rules = array(
+                                        'allPrivileges' => array(
+                                            'type'   => self::TYPE_DENY,
+                                            'assert' => null
+                                            ),
+                                        'byPrivilegeId' => array()
+                                        );
+                                }
+                                continue;
+                            }
+                            if ($type === $rules['allPrivileges']['type']) {
+                                unset($rules['allPrivileges']);
+                            }
+                        } else {
+                            foreach ($privileges as $privilege) {
+                                if (isset($rules['byPrivilegeId'][$privilege]) &&
+                                    $type === $rules['byPrivilegeId'][$privilege]['type']) {
+                                    unset($rules['byPrivilegeId'][$privilege]);
+                                }
+                            }
+                        }
+                    }
+                }
                 break;
 
             default:
@@ -793,29 +811,51 @@ class Zend_Acl
      * If either $aco or $aro is null, this means that the rules returned are for all ACOs or all AROs,
      * respectively. Both can be null to return the default rule set for all ACOs and all AROs.
      *
+     * If the $create parameter is true, then a rule set is first created and then returned to the caller.
+     *
      * @param  Zend_Acl_Aco_Interface $aco
      * @param  Zend_Acl_Aro_Interface $aro
+     * @param  boolean                $create
      * @return array|null
      */
-    protected function _getRules(Zend_Acl_Aco_Interface $aco = null, Zend_Acl_Aro_Interface $aro = null)
+    protected function &_getRules(Zend_Acl_Aco_Interface $aco = null, Zend_Acl_Aro_Interface $aro = null,
+                                  $create = false)
     {
         // follow $aco
-        if (null === $aco) {
-            $visitor = $this->_rules['allAcos'];
-        } else if (!isset($this->_rules['byAcoId'][$acoId = $aco->getAcoId()])) {
-            return null;
-        } else {
-            $visitor = $this->_rules['byAcoId'][$acoId];
-        }
+        do {
+            if (null === $aco) {
+                $visitor =& $this->_rules['allAcos'];
+                break;
+            }
+            $acoId = $aco->getAcoId();
+            if (!isset($this->_rules['byAcoId'][$acoId])) {
+                if (!$create) {
+                    return null;
+                }
+                $this->_rules['byAcoId'][$acoId] = array();
+            }
+            $visitor =& $this->_rules['byAcoId'][$acoId];
+        } while (false);
+
 
         // follow $aro
         if (null === $aro) {
+            if (!isset($visitor['allAros'])) {
+                if (!$create) {
+                    return null;
+                }
+                $visitor['allAros']['byPrivilegeId'] = array();
+            }
             return $visitor['allAros'];
-        } else if (!isset($visitor['byAroId'][$aroId = $aro->getAroId()])) {
-            return null;
-        } else {
-            return $visitor['byAroId'][$aroId];
         }
+        $aroId = $aro->getAroId();
+        if (!isset($visitor['byAroId'][$aroId])) {
+            if (!$create) {
+                return null;
+            }
+            $visitor['byAroId'][$aroId]['byPrivilegeId'] = array();
+        }
+        return $visitor['byAroId'][$aroId];
     }
 
 }

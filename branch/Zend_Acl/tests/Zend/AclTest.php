@@ -529,6 +529,67 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
     }
 
+    /**
+     * Ensures that removing the default deny rule results in default deny rule
+     *
+     * @return void
+     */
+    public function testRemoveDefaultDeny()
+    {
+        $this->assertFalse($this->_acl->isAllowed());
+        $this->_acl->removeDeny();
+        $this->assertFalse($this->_acl->isAllowed());
+    }
+
+    /**
+     * Ensures that removing the default deny rule results in assertion method being removed
+     *
+     * @return void
+     */
+    public function testRemoveDefaultDenyAssert()
+    {
+        $this->_acl->deny(null, null, null, new AssertFalse());
+        $this->assertTrue($this->_acl->isAllowed());
+        $this->_acl->removeDeny();
+        $this->assertFalse($this->_acl->isAllowed());
+    }
+
+    /**
+     * Ensures that removing the default allow rule results in default deny rule being assigned
+     *
+     * @return void
+     */
+    public function testRemoveDefaultAllow()
+    {
+        $this->_acl->allow();
+        $this->assertTrue($this->_acl->isAllowed());
+        $this->_acl->removeAllow();
+        $this->assertFalse($this->_acl->isAllowed());
+    }
+
+    /**
+     * Ensures that removing non-existent default allow rule does nothing
+     *
+     * @return void
+     */
+    public function testRemoveDefaultAllowNonExistent()
+    {
+        $this->_acl->removeAllow();
+        $this->assertFalse($this->_acl->isAllowed());
+    }
+
+    /**
+     * Ensures that removing non-existent default deny rule does nothing
+     *
+     * @return void
+     */
+    public function testRemoveDefaultDenyNonExistent()
+    {
+        $this->_acl->allow();
+        $this->_acl->removeDeny();
+        $this->assertTrue($this->_acl->isAllowed());
+    }
+
     public function testCMSExample()
     {
         $this->markTestSkipped('pending work in progress');
