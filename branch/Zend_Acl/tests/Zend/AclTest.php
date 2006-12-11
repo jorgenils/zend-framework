@@ -781,7 +781,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Enter description here...
+     * Ensures that removal of an ARO results in its rules being removed
      *
      * @return void
      */
@@ -791,6 +791,27 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
                    ->allow('guest');
         $this->assertTrue($this->_acl->isAllowed('guest'));
         $this->_acl->removeAro('guest');
+        try {
+            $this->_acl->isAllowed('guest');
+            $this->fail('Expected Zend_Acl_Aro_Registry_Exception not thrown upon isAllowed() on non-existent ARO');
+        } catch (Zend_Acl_Aro_Registry_Exception $e) {
+            $this->assertContains('not found', $e->getMessage());
+        }
+        $this->_acl->addAro(new Zend_Acl_Aro('guest'));
+        $this->assertFalse($this->_acl->isAllowed('guest'));
+    }
+
+    /**
+     * Ensures that removal of all AROs results in ARO-specific rules being removed
+     *
+     * @return void
+     */
+    public function testRuleARORemoveAll()
+    {
+        $this->_acl->addAro(new Zend_Acl_Aro('guest'))
+                   ->allow('guest');
+        $this->assertTrue($this->_acl->isAllowed('guest'));
+        $this->_acl->removeAroAll();
         try {
             $this->_acl->isAllowed('guest');
             $this->fail('Expected Zend_Acl_Aro_Registry_Exception not thrown upon isAllowed() on non-existent ARO');
@@ -816,7 +837,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
      *
      * @return void
      */
-    public function testRulesARORegistrySet()
+    public function testRulesACORemoveAll()
     {
 
     }

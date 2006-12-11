@@ -191,11 +191,26 @@ class Zend_Acl
      */
     public function removeAro($aro)
     {
-        /**
-         * @todo remove rules associated with $aro
-         */
-
         $this->_getAroRegistry()->remove($aro);
+
+        if ($aro instanceof Zend_Acl_Aro_Interface) {
+            $aroId = $aro->getAroId();
+        } else {
+            $aroId = $aro;
+        }
+
+        foreach ($this->_rules['allAcos']['byAroId'] as $aroIdCurrent => $rules) {
+            if ($aroId === $aroIdCurrent) {
+                unset($this->_rules['allAcos']['byAroId'][$aroIdCurrent]);
+            }
+        }
+        foreach ($this->_rules['byAcoId'] as $acoIdCurrent => $visitor) {
+            foreach ($visitor['byAroId'] as $aroIdCurrent => $rules) {
+                if ($aroId === $aroIdCurrent) {
+                    unset($this->_rules['byAcoId'][$acoIdCurrent]['byAroId'][$aroIdCurrent]);
+                }
+            }
+        }
 
         return $this;
     }
@@ -208,11 +223,16 @@ class Zend_Acl
      */
     public function removeAroAll()
     {
-        /**
-         * @todo remove rules associated with particular AROs
-         */
-
         $this->_getAroRegistry()->removeAll();
+
+        foreach ($this->_rules['allAcos']['byAroId'] as $aroIdCurrent => $rules) {
+            unset($this->_rules['allAcos']['byAroId'][$aroIdCurrent]);
+        }
+        foreach ($this->_rules['byAcoId'] as $acoIdCurrent => $visitor) {
+            foreach ($visitor['byAroId'] as $aroIdCurrent => $rules) {
+                unset($this->_rules['byAcoId'][$acoIdCurrent]['byAroId'][$aroIdCurrent]);
+            }
+        }
 
         return $this;
     }
