@@ -443,30 +443,36 @@ class Zend_Acl
         // ensure that all specified AROs exist; normalize input to array of ARO objects or null
         if (!is_array($aros)) {
             $aros = array($aros);
-        } else if (0 === count($arosTemp)) {
+        } else if (0 === count($aros)) {
             $aros = array(null);
-        } else {
-            $arosTemp = $aros;
-            $aros = array();
-            foreach ($arosTemp as $aro) {
-                $aros[] = $this->getAroRegistry()->get($aro);
-            }
-            unset($arosTemp);
         }
+        $arosTemp = $aros;
+        $aros = array();
+        foreach ($arosTemp as $aro) {
+            if (null !== $aro) {
+                $aros[] = $this->getAroRegistry()->get($aro);
+            } else {
+                $aros[] = null;
+            }
+        }
+        unset($arosTemp);
 
         // ensure that all specified ACOs exist; normalize input to array of ACO objects or null
         if (!is_array($acos)) {
             $acos = array($acos);
-        } else if (0 === count($acosTemp)) {
+        } else if (0 === count($acos)) {
             $acos = array(null);
-        } else {
-            $acosTemp = $acos;
-            $acos = array();
-            foreach ($acosTemp as $aco) {
-                $acos[] = $this->get($aco);
-            }
-            unset($acosTemp);
         }
+        $acosTemp = $acos;
+        $acos = array();
+        foreach ($acosTemp as $aco) {
+            if (null !== $aco) {
+                $acos[] = $this->get($aco);
+            } else {
+                $acos[] = null;
+            }
+        }
+        unset($acosTemp);
 
         // normalize privileges to array
         if (null === $privileges) {
