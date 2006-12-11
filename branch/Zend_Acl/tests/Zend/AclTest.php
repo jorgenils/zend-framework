@@ -444,6 +444,27 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Ensures that an exception is thrown when a non-existent ARO and ACO parameters are specified to isAllowed()
+     *
+     * @return void
+     */
+    public function testIsAllowedNonExistent()
+    {
+        try {
+            $this->_acl->isAllowed('nonexistent');
+            $this->fail('Expected Zend_Acl_Aro_Registry_Exception not thrown upon non-existent ARO');
+        } catch (Zend_Acl_Aro_Registry_Exception $e) {
+            $this->assertContains('not found', $e->getMessage());
+        }
+        try {
+            $this->_acl->isAllowed(null, 'nonexistent');
+            $this->fail('Expected Zend_Acl_Exception not thrown upon non-existent ACO');
+        } catch (Zend_Acl_Exception $e) {
+            $this->assertContains('not found', $e->getMessage());
+        }
+    }
+
+    /**
      * Ensures that by default, Zend_Acl denies access to everything by all
      *
      * @return void
@@ -844,100 +865,94 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
                    ->add(new Zend_Acl_Aco('hosts'), 'config');
         $this->assertTrue($this->_acl->isAllowed('guest', 'pending', 'view'));
         $this->assertTrue($this->_acl->isAllowed('staff', 'profiles', 'revise'));
+        $this->assertTrue($this->_acl->isAllowed('staff', 'pending', 'view'));
+        $this->assertTrue($this->_acl->isAllowed('staff', 'pending', 'edit'));
+        $this->assertFalse($this->_acl->isAllowed('staff', 'pending', 'publish'));
+        $this->assertFalse($this->_acl->isAllowed('staff', 'pending'));
         $this->assertFalse($this->_acl->isAllowed('editor', 'hosts', 'unknown'));
-
-        return;
-
-        // Checking permissions from the perspective of an ARO
-        $this->assertTrue($aro->staff->canAccess($this->_acl->newsletter->pending, 'view'));
-        $this->assertTrue($aro->staff->canAccess($this->_acl->newsletter->pending, 'edit'));
-        $this->assertFalse($aro->staff->canAccess($this->_acl->newsletter->pending, 'publish'));
-        $this->assertFalse($aro->staff->canAccess($this->_acl->newsletter->pending));
-        $this->assertTrue($aro->administrator->canAccess($this->_acl->newsletter->pending));
-
-        // Unknown ARO
-        $this->assertFalse($aro->unknown->canAccess($this->_acl->newsletter->pending));
+        $this->assertTrue($this->_acl->isAllowed('administrator', 'pending'));
 
         // Add a new group, marketing, which bases its permissions on staff
-        $aro->add('marketing', 'staff');
+        $this->_acl->getAroRegistry()->add(new Zend_Acl_Aro('marketing'), 'staff');
 
         // Refine the privilege sets for more specific needs
 
         // Allow marketing to publish and archive newsletters
-        $this->_acl->newsletter->allow($aro->marketing, array('publish', 'archive'));
+        $this->_acl->allow('marketing', 'newsletter', array('publish', 'archive'));
 
         // Allow marketing to publish and archive latest news
-        $this->_acl->news->latest->allow($aro->marketing, array('publish', 'archive'));
+        $this->_acl->add(new Zend_Acl_Aco('news'))
+                   ->add(new Zend_Acl_Aco('latest'), 'news');
+        $this->_acl->allow('marketing', 'latest', array('publish', 'archive'));
 
         // Deny staff (and marketing, by inheritance) rights to revise latest news
-        $this->_acl->news->latest->deny($aro->staff, 'revise');
+        $this->_acl->deny('staff', 'latest', 'revise');
 
         // Deny everyone access to archive news announcements
-        $this->_acl->news->announcement->deny(null, 'archive');
+        $this->_acl->add(new Zend_Acl_Aco('announcement'), 'news');
+        $this->_acl->deny(null, 'announcement', 'archive');
 
         // Access control checks for the above refined permission sets
 
-        $this->assertTrue($this->_acl->isAllowed('marketing', 'view'));
-        $this->assertTrue($this->_acl->isAllowed('marketing', 'edit'));
-        $this->assertTrue($this->_acl->isAllowed('marketing', 'submit'));
-        $this->assertTrue($this->_acl->isAllowed($aro->marketing, 'revise'));
-        $this->assertFalse($this->_acl->isAllowed('marketing', 'publish'));
-        $this->assertFalse($this->_acl->isAllowed('marketing', 'archive'));
-        $this->assertFalse($this->_acl->isAllowed($aro->marketing, 'delete'));
-        $this->assertFalse($this->_acl->isAllowed('marketing', 'unknown'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', null, 'view'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', null, 'edit'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', null, 'submit'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', null, 'revise'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', null, 'publish'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', null, 'archive'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', null, 'delete'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', null, 'unknown'));
         $this->assertFalse($this->_acl->isAllowed('marketing'));
 
-        $this->assertTrue($this->_acl->newsletter->isAllowed('marketing', 'publish'));
-        $this->assertFalse($this->_acl->newsletter->pending->isAllowed('staff', 'publish'));
-        $this->assertTrue($this->_acl->newsletter->pending->isAllowed('marketing', 'publish'));
-        $this->assertTrue($this->_acl->newsletter->isAllowed('marketing', 'archive'));
-        $this->assertFalse($this->_acl->newsletter->isAllowed('marketing', 'delete'));
-        $this->assertFalse($this->_acl->newsletter->isAllowed('marketing'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', 'newsletter', 'publish'));
+        $this->assertFalse($this->_acl->isAllowed('staff', 'pending', 'publish'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', 'pending', 'publish'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', 'newsletter', 'archive'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', 'newsletter', 'delete'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', 'newsletter'));
 
-        $this->assertTrue($this->_acl->news->latest->isAllowed('marketing', 'publish'));
-        $this->assertTrue($this->_acl->news->latest->isAllowed('marketing', 'archive'));
-        $this->assertFalse($this->_acl->news->latest->isAllowed('marketing', 'delete'));
-        $this->assertFalse($this->_acl->news->latest->isAllowed('marketing', 'revise'));
-        $this->assertFalse($this->_acl->news->latest->isAllowed('staging', 'revise'));
-        $this->assertFalse($this->_acl->news->latest->isAllowed('marketing'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', 'latest', 'publish'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', 'latest', 'archive'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', 'latest', 'delete'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', 'latest', 'revise'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', 'latest'));
 
-        $this->assertFalse($this->_acl->news->announcement->isAllowed('marketing', 'archive'));
-        $this->assertFalse($this->_acl->news->announcement->isAllowed('staff', 'archive'));
-        $this->assertFalse($this->_acl->news->announcement->isAllowed('administrator', 'archive'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', 'announcement', 'archive'));
+        $this->assertFalse($this->_acl->isAllowed('staff', 'announcement', 'archive'));
+        $this->assertFalse($this->_acl->isAllowed('administrator', 'announcement', 'archive'));
 
-        $this->assertFalse($aro->staff->canAccess($this->_acl->news->latest, 'publish'));
-        $this->assertTrue($aro->marketing->canAccess($this->_acl->news->latest, 'publish'));
-        $this->assertFalse($aro->editor->canAccess($this->_acl->news->announcement, 'archive'));
+        $this->assertFalse($this->_acl->isAllowed('staff', 'latest', 'publish'));
+        $this->assertFalse($this->_acl->isAllowed('editor', 'announcement', 'archive'));
 
         // Remove some previous permission specifications
 
         // Marketing can no longer publish and archive newsletters
-        $this->_acl->newsletter->removeAllow('marketing', array('publish', 'archive'));
+        $this->_acl->removeAllow('marketing', 'newsletter', array('publish', 'archive'));
 
         // Marketing can no longer archive the latest news
-        $this->_acl->news->latest->removeAllow($aro->marketing, 'archive');
+        $this->_acl->removeAllow('marketing', 'latest', 'archive');
 
         // Now staff (and marketing, by inheritance) may revise latest news
-        $this->_acl->news->latest->removeDeny($aro->staff, 'revise');
+        $this->_acl->removeDeny('staff', 'latest', 'revise');
 
         // Access control checks for the above refinements
 
-        $this->assertFalse($this->_acl->newsletter->isAllowed('marketing', 'publish'));
-        $this->assertFalse($this->_acl->newsletter->isAllowed('marketing', 'archive'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', 'newsletter', 'publish'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', 'newsletter', 'archive'));
 
-        $this->assertFalse($this->_acl->news->latest->isAllowed('marketing', 'archive'));
+        $this->assertFalse($this->_acl->isAllowed('marketing', 'latest', 'archive'));
 
-        $this->assertTrue($this->_acl->news->latest->isAllowed('staff', 'revise'));
-        $this->assertTrue($this->_acl->news->latest->isAllowed($aro->marketing, 'revise'));
+        $this->assertTrue($this->_acl->isAllowed('staff', 'latest', 'revise'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', 'latest', 'revise'));
 
         // Grant marketing all permissions on the latest news
-        $this->_acl->news->latest->allow('marketing');
+        $this->_acl->allow('marketing', 'latest');
 
         // Access control checks for the above refinement
-        $this->assertTrue($this->_acl->news->latest->isAllowed('marketing', 'archive'));
-        $this->assertTrue($this->_acl->news->latest->isAllowed('marketing', 'publish'));
-        $this->assertTrue($this->_acl->news->latest->isAllowed('marketing', 'edit'));
-        $this->assertTrue($this->_acl->news->latest->isAllowed('marketing'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', 'latest', 'archive'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', 'latest', 'publish'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', 'latest', 'edit'));
+        $this->assertTrue($this->_acl->isAllowed('marketing', 'latest'));
 
     }
 
