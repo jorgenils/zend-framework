@@ -256,11 +256,15 @@ class Zend_Acl
             throw $e;
         }
 
-        $inherits = (null !== $this->_acos[$acoId]['parent']
-                     && $inheritId === ($parentId = $this->_acos[$acoId]['parent']->getAcoId()));
-
-        if ($inherits || $onlyParent) {
-            return $inherits;
+        if (null !== $this->_acos[$acoId]['parent']) {
+            $parentId = $this->_acos[$acoId]['parent']->getAcoId();
+            if ($inheritId === $parentId) {
+                return true;
+            } else if ($onlyParent) {
+                return false;
+            }
+        } else {
+            return false;
         }
 
         while (null !== $this->_acos[$parentId]['parent']) {
@@ -786,7 +790,11 @@ class Zend_Acl
 
         // follow $privilege
         if (null === $privilege) {
-            $rule = $rules['allPrivileges'];
+            if (isset($rules['allPrivileges'])) {
+                $rule = $rules['allPrivileges'];
+            } else {
+                return null;
+            }
         } else if (!isset($rules['byPrivilegeId'][$privilege])) {
             return null;
         } else {
@@ -821,6 +829,10 @@ class Zend_Acl
     protected function &_getRules(Zend_Acl_Aco_Interface $aco = null, Zend_Acl_Aro_Interface $aro = null,
                                   $create = false)
     {
+        // create a reference to null
+        $null = null;
+        $nullRef =& $null;
+
         // follow $aco
         do {
             if (null === $aco) {
@@ -830,7 +842,7 @@ class Zend_Acl
             $acoId = $aco->getAcoId();
             if (!isset($this->_rules['byAcoId'][$acoId])) {
                 if (!$create) {
-                    return null;
+                    return $nullRef;
                 }
                 $this->_rules['byAcoId'][$acoId] = array();
             }
@@ -842,7 +854,7 @@ class Zend_Acl
         if (null === $aro) {
             if (!isset($visitor['allAros'])) {
                 if (!$create) {
-                    return null;
+                    return $nullRef;
                 }
                 $visitor['allAros']['byPrivilegeId'] = array();
             }
@@ -851,7 +863,7 @@ class Zend_Acl
         $aroId = $aro->getAroId();
         if (!isset($visitor['byAroId'][$aroId])) {
             if (!$create) {
-                return null;
+                return $nullRef;
             }
             $visitor['byAroId'][$aroId]['byPrivilegeId'] = array();
         }
