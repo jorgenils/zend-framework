@@ -124,7 +124,7 @@ class Zend_Acl_Aro_Registry
         if ($aro instanceof Zend_Acl_Aro_Interface) {
             $aroId = $aro->getAroId();
         } else {
-            $aroId = $aro;
+            $aroId = (string) $aro;
         }
 
         if (!$this->has($aro)) {
@@ -148,7 +148,7 @@ class Zend_Acl_Aro_Registry
         if ($aro instanceof Zend_Acl_Aro_Interface) {
             $aroId = $aro->getAroId();
         } else {
-            $aroId = $aro;
+            $aroId = (string) $aro;
         }
 
         return isset($this->_aros[$aroId]);

@@ -200,7 +200,7 @@ class Zend_Acl
         if ($aco instanceof Zend_Acl_Aco_Interface) {
             $acoId = $aco->getAcoId();
         } else {
-            $acoId = $aco;
+            $acoId = (string) $aco;
         }
 
         if (!$this->has($aco)) {
@@ -224,7 +224,7 @@ class Zend_Acl
         if ($aco instanceof Zend_Acl_Aco_Interface) {
             $acoId = $aco->getAcoId();
         } else {
-            $acoId = $aco;
+            $acoId = (string) $aco;
         }
 
         return isset($this->_acos[$acoId]);
