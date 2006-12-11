@@ -611,6 +611,24 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         self::assertFalse($this->_acl->isAllowed('staff', 'area1'));
     }
 
+    /**
+     * Ensures that for a particular ARO, a deny rule on a specific privilege is honored before an allow
+     * rule on the entire ACL
+     *
+     * @return void
+     */
+    public function testARODefaultAllowRuleWithPrivilegeDenyRule()
+    {
+        $this->_acl->getAroRegistry()->add(new Zend_Acl_Aro('guest'))
+                                     ->add(new Zend_Acl_Aro('staff'), 'guest');
+
+        $this->_acl->deny();
+        $this->_acl->allow('staff');
+        $this->_acl->deny('staff', null, array('privilege1', 'privilege2'));
+
+        self::assertFalse($this->_acl->isAllowed('staff', null, 'privilege1'));
+    }
+
     public function testCMSExample()
     {
         $this->markTestSkipped('pending work in progress');
@@ -785,31 +803,6 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testAclAroManagement()
     {
         $this->markTestSkipped('pending work in progress');
-
-        $acl = new Zend_Acl();
-
-        // retrieve an instance of the ARO registry
-        $aro = $acl->getAroRegistry();
-        $aro->add('guest');
-
-        // ensure we cannot create duplicates
-        try {
-            $guest = $aro->add('guest');
-            $this->fail('Cannot create duplicate aros');
-        } catch (Exception $e) {
-            // success
-        }
-
-        // ARO returns a default ARO for non-existant member
-        self::assertTrue(($aro->nonexistent instanceof Zend_Acl_Aro));
-        self::assertTrue(($aro->nonexistent->getId() == '_default'));
-
-        // ARO returns a correct object for existing member
-        $guest = $aro->guest;
-        self::assertTrue(($guest instanceof Zend_Acl_Aro));
-
-        // Ensure ARO returns a correct reference to parent registry
-        self::assertTrue(($guest->getRegistry() === $aro));
 
         // Add permissions to ACL, remove ARO and ensure permissions are wiped
         $acl->deny($guest);
