@@ -73,31 +73,6 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Ensures that the ARO registry is created automatically only once
-     *
-     * @return void
-     */
-    public function testGetARORegistryAuto()
-    {
-        $aroRegistry1 = $this->_acl->getAroRegistry();
-        $this->assertTrue($aroRegistry1 instanceof Zend_Acl_Aro_Registry);
-        $aroRegistry2 = $this->_acl->getAroRegistry();
-        $this->assertTrue($aroRegistry1 === $aroRegistry2);
-    }
-
-    /**
-     * Tests setting the ARO registry
-     *
-     * @return void
-     */
-    public function testSetARORegistry()
-    {
-        $aroRegistry = new Zend_Acl_Aro_Registry();
-        $this->_acl->setAroRegistry($aroRegistry);
-        $this->assertTrue($aroRegistry === $this->_acl->getAroRegistry());
-    }
-
-    /**
      * Ensures that basic addition and retrieval of a single ARO works
      *
      * @return void
@@ -105,11 +80,11 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testARORegistryAddAndGetOne()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $aroRegistry = $this->_acl->getAroRegistry();
-        $aro = $aroRegistry->add($aroGuest)
-                           ->get($aroGuest->getAroId());
+
+        $aro = $this->_acl->addAro($aroGuest)
+                          ->getAro($aroGuest->getAroId());
         $this->assertTrue($aroGuest === $aro);
-        $aro = $aroRegistry->get($aroGuest);
+        $aro = $this->_acl->getAro($aroGuest);
         $this->assertTrue($aroGuest === $aro);
     }
 
@@ -121,10 +96,9 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testARORegistryRemoveOne()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $aroRegistry = $this->_acl->getAroRegistry();
-        $aroRegistry->add($aroGuest)
-                    ->remove($aroGuest);
-        $this->assertFalse($aroRegistry->has($aroGuest));
+        $this->_acl->addAro($aroGuest)
+                   ->removeAro($aroGuest);
+        $this->assertFalse($this->_acl->hasAro($aroGuest));
     }
 
     /**
@@ -135,7 +109,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testARORegistryRemoveOneNonExistent()
     {
         try {
-            $this->_acl->getAroRegistry()->remove('nonexistent');
+            $this->_acl->removeAro('nonexistent');
             $this->fail('Expected Zend_Acl_Aro_Registry_Exception not thrown upon removing a non-existent ARO');
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             $this->assertContains('not found', $e->getMessage());
@@ -150,9 +124,9 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testARORegistryRemoveAll()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $this->_acl->getAroRegistry()->add($aroGuest)
-                                     ->removeAll();
-        $this->assertFalse($this->_acl->getAroRegistry()->has($aroGuest));
+        $this->_acl->addAro($aroGuest)
+                   ->removeAroAll();
+        $this->assertFalse($this->_acl->hasAro($aroGuest));
     }
 
     /**
@@ -163,7 +137,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testARORegistryAddInheritsNonExistent()
     {
         try {
-            $this->_acl->getAroRegistry()->add(new Zend_Acl_Aro('guest'), 'nonexistent');
+            $this->_acl->addAro(new Zend_Acl_Aro('guest'), 'nonexistent');
             $this->fail('Expected Zend_Acl_Aro_Registry_Exception not thrown upon specifying a non-existent parent');
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             $this->assertContains('does not exist', $e->getMessage());
@@ -178,15 +152,15 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testARORegistryInheritsNonExistent()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $this->_acl->getAroRegistry()->add($aroGuest);
+        $this->_acl->addAro($aroGuest);
         try {
-            $this->_acl->getAroRegistry()->inherits('nonexistent', $aroGuest);
+            $this->_acl->inheritsAro('nonexistent', $aroGuest);
             $this->fail('Expected Zend_Acl_Aro_Registry_Exception not thrown upon specifying a non-existent child ARO');
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             $this->assertContains('not found', $e->getMessage());
         }
         try {
-            $this->_acl->getAroRegistry()->inherits($aroGuest, 'nonexistent');
+            $this->_acl->inheritsAro($aroGuest, 'nonexistent');
             $this->fail('Expected Zend_Acl_Aro_Registry_Exception not thrown upon specifying a non-existent parent ARO');
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             $this->assertContains('not found', $e->getMessage());
@@ -203,7 +177,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $aroGuest  = new Zend_Acl_Aro('guest');
         $aroMember = new Zend_Acl_Aro('member');
         $aroEditor = new Zend_Acl_Aro('editor');
-        $aroRegistry = $this->_acl->getAroRegistry();
+        $aroRegistry = new Zend_Acl_Aro_Registry();
         $aroRegistry->add($aroGuest)
                     ->add($aroMember, $aroGuest->getAroId())
                     ->add($aroEditor, $aroMember);
@@ -235,7 +209,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $aroParent1 = new Zend_Acl_Aro('parent1');
         $aroParent2 = new Zend_Acl_Aro('parent2');
         $aroChild   = new Zend_Acl_Aro('child');
-        $aroRegistry = $this->_acl->getAroRegistry();
+        $aroRegistry = new Zend_Acl_Aro_Registry();
         $aroRegistry->add($aroParent1)
                     ->add($aroParent2)
                     ->add($aroChild, array($aroParent1, $aroParent2));
@@ -263,9 +237,10 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testARORegistryDuplicate()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
+        $aroRegistry = new Zend_Acl_Aro_Registry();
         try {
-            $this->_acl->getAroRegistry()->add($aroGuest)
-                                         ->add($aroGuest);
+            $aroRegistry->add($aroGuest)
+                        ->add($aroGuest);
             $this->fail('Expected exception not thrown upon adding same ARO twice');
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             $this->assertContains('already exists', $e->getMessage());
@@ -281,9 +256,10 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     {
         $aroGuest1 = new Zend_Acl_Aro('guest');
         $aroGuest2 = new Zend_Acl_Aro('guest');
+        $aroRegistry = new Zend_Acl_Aro_Registry();
         try {
-            $this->_acl->getAroRegistry()->add($aroGuest1)
-                                         ->add($aroGuest2);
+            $aroRegistry->add($aroGuest1)
+                        ->add($aroGuest2);
             $this->fail('Expected exception not thrown upon adding two AROs with same ID');
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             $this->assertContains('already exists', $e->getMessage());
@@ -313,7 +289,6 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testACORemoveOne()
     {
         $acoArea = new Zend_Acl_Aco('area');
-        $aroRegistry = $this->_acl->getAroRegistry();
         $this->_acl->add($acoArea)
                    ->remove($acoArea);
         $this->assertFalse($this->_acl->has($acoArea));
@@ -585,7 +560,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testARODefaultDeny()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $this->_acl->getAroRegistry()->add($aroGuest);
+        $this->_acl->addAro($aroGuest);
         $this->assertFalse($this->_acl->isAllowed($aroGuest));
     }
 
@@ -597,8 +572,8 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testARODefaultRuleSet()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $this->_acl->getAroRegistry()->add($aroGuest);
-        $this->_acl->allow($aroGuest);
+        $this->_acl->addAro($aroGuest)
+                   ->allow($aroGuest);
         $this->assertTrue($this->_acl->isAllowed($aroGuest));
         $this->_acl->deny($aroGuest);
         $this->assertFalse($this->_acl->isAllowed($aroGuest));
@@ -612,7 +587,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testARODefaultPrivilegeDeny()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $this->_acl->getAroRegistry()->add($aroGuest);
+        $this->_acl->addAro($aroGuest);
         $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
     }
 
@@ -624,8 +599,8 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testARODefaultRuleSetPrivilege()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $this->_acl->getAroRegistry()->add($aroGuest);
-        $this->_acl->allow($aroGuest);
+        $this->_acl->addAro($aroGuest)
+                   ->allow($aroGuest);
         $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
         $this->_acl->deny($aroGuest);
         $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
@@ -639,8 +614,8 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testAROPrivilegeAllow()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $this->_acl->getAroRegistry()->add($aroGuest);
-        $this->_acl->allow($aroGuest, null, 'somePrivilege');
+        $this->_acl->addAro($aroGuest)
+                   ->allow($aroGuest, null, 'somePrivilege');
         $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
     }
 
@@ -652,9 +627,9 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testAROPrivilegeDeny()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $this->_acl->getAroRegistry()->add($aroGuest);
-        $this->_acl->allow($aroGuest);
-        $this->_acl->deny($aroGuest, null, 'somePrivilege');
+        $this->_acl->addAro($aroGuest)
+                   ->allow($aroGuest)
+                   ->deny($aroGuest, null, 'somePrivilege');
         $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
     }
 
@@ -666,8 +641,8 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testAROPrivileges()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $this->_acl->getAroRegistry()->add($aroGuest);
-        $this->_acl->allow($aroGuest, null, array('p1', 'p2', 'p3'));
+        $this->_acl->addAro($aroGuest)
+                   ->allow($aroGuest, null, array('p1', 'p2', 'p3'));
         $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'p1'));
         $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'p2'));
         $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'p3'));
@@ -687,8 +662,8 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     public function testAROPrivilegeAssert()
     {
         $aroGuest = new Zend_Acl_Aro('guest');
-        $this->_acl->getAroRegistry()->add($aroGuest);
-        $this->_acl->allow($aroGuest, null, 'somePrivilege', new Zend_AclTest_AssertTrue());
+        $this->_acl->addAro($aroGuest)
+                   ->allow($aroGuest, null, 'somePrivilege', new Zend_AclTest_AssertTrue());
         $this->assertTrue($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
         $this->_acl->allow($aroGuest, null, 'somePrivilege', new Zend_AclTest_AssertFalse());
         $this->assertFalse($this->_acl->isAllowed($aroGuest, null, 'somePrivilege'));
@@ -750,8 +725,8 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
      */
     public function testRemoveDefaultDenyNonExistent()
     {
-        $this->_acl->allow();
-        $this->_acl->removeDeny();
+        $this->_acl->allow()
+                   ->removeDeny();
         $this->assertTrue($this->_acl->isAllowed());
     }
 
@@ -763,16 +738,13 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
      */
     public function testARODefaultAllowRuleWithACODenyRule()
     {
-        $this->_acl->getAroRegistry()->add(new Zend_Acl_Aro('guest'))
-                                     ->add(new Zend_Acl_Aro('staff'), 'guest');
-
-        $this->_acl->add(new Zend_Acl_Aco('area1'));
-        $this->_acl->add(new Zend_Acl_Aco('area2'));
-
-        $this->_acl->deny();
-        $this->_acl->allow('staff');
-        $this->_acl->deny('staff', array('area1', 'area2'));
-
+        $this->_acl->addAro(new Zend_Acl_Aro('guest'))
+                   ->addAro(new Zend_Acl_Aro('staff'), 'guest')
+                   ->add(new Zend_Acl_Aco('area1'))
+                   ->add(new Zend_Acl_Aco('area2'))
+                   ->deny()
+                   ->allow('staff')
+                   ->deny('staff', array('area1', 'area2'));
         $this->assertFalse($this->_acl->isAllowed('staff', 'area1'));
     }
 
@@ -784,23 +756,83 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
      */
     public function testARODefaultAllowRuleWithPrivilegeDenyRule()
     {
-        $this->_acl->getAroRegistry()->add(new Zend_Acl_Aro('guest'))
-                                     ->add(new Zend_Acl_Aro('staff'), 'guest');
-
-        $this->_acl->deny();
-        $this->_acl->allow('staff');
-        $this->_acl->deny('staff', null, array('privilege1', 'privilege2'));
-
+        $this->_acl->addAro(new Zend_Acl_Aro('guest'))
+                   ->addAro(new Zend_Acl_Aro('staff'), 'guest')
+                   ->deny()
+                   ->allow('staff')
+                   ->deny('staff', null, array('privilege1', 'privilege2'));
         $this->assertFalse($this->_acl->isAllowed('staff', null, 'privilege1'));
     }
 
+    /**
+     * Ensure that basic rule removal works
+     *
+     * @return void
+     */
+    public function testRulesRemove()
+    {
+        $this->_acl->allow(null, null, array('privilege1', 'privilege2'));
+        $this->assertFalse($this->_acl->isAllowed());
+        $this->assertTrue($this->_acl->isAllowed(null, null, 'privilege1'));
+        $this->assertTrue($this->_acl->isAllowed(null, null, 'privilege2'));
+        $this->_acl->removeAllow(null, null, 'privilege1');
+        $this->assertFalse($this->_acl->isAllowed(null, null, 'privilege1'));
+        $this->assertTrue($this->_acl->isAllowed(null, null, 'privilege2'));
+    }
+
+    /**
+     * Enter description here...
+     *
+     * @return void
+     */
+    public function testRuleARORemove()
+    {
+        $this->_acl->addAro(new Zend_Acl_Aro('guest'))
+                   ->allow('guest');
+        $this->assertTrue($this->_acl->isAllowed('guest'));
+        $this->_acl->removeAro('guest');
+        try {
+            $this->_acl->isAllowed('guest');
+            $this->fail('Expected Zend_Acl_Aro_Registry_Exception not thrown upon isAllowed() on non-existent ARO');
+        } catch (Zend_Acl_Aro_Registry_Exception $e) {
+            $this->assertContains('not found', $e->getMessage());
+        }
+        $this->_acl->addAro(new Zend_Acl_Aro('guest'));
+        $this->assertFalse($this->_acl->isAllowed('guest'));
+    }
+
+    /**
+     * Enter description here...
+     *
+     * @return void
+     */
+    public function testRulesACORemove()
+    {
+
+    }
+
+    /**
+     * Enter description here...
+     *
+     * @return void
+     */
+    public function testRulesARORegistrySet()
+    {
+
+    }
+
+    /**
+     * Ensures that an example for a content management system is operable
+     *
+     * @return void
+     */
     public function testCMSExample()
     {
         // Add some roles to the ARO registry
-        $this->_acl->getAroRegistry()->add(new Zend_Acl_Aro('guest'))
-                                     ->add(new Zend_Acl_Aro('staff'), 'guest')  // staff inherits permissions from guest
-                                     ->add(new Zend_Acl_Aro('editor'), 'staff') // editor inherits permissions from staff
-                                     ->add(new Zend_Acl_Aro('administrator'));
+        $this->_acl->addAro(new Zend_Acl_Aro('guest'))
+                   ->addAro(new Zend_Acl_Aro('staff'), 'guest')  // staff inherits permissions from guest
+                   ->addAro(new Zend_Acl_Aro('editor'), 'staff') // editor inherits permissions from staff
+                   ->addAro(new Zend_Acl_Aro('administrator'));
 
         // Guest may only view content
         $this->_acl->allow('guest', null, 'view');
@@ -873,7 +905,7 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->_acl->isAllowed('administrator', 'pending'));
 
         // Add a new group, marketing, which bases its permissions on staff
-        $this->_acl->getAroRegistry()->add(new Zend_Acl_Aro('marketing'), 'staff');
+        $this->_acl->addAro(new Zend_Acl_Aro('marketing'), 'staff');
 
         // Refine the privilege sets for more specific needs
 
