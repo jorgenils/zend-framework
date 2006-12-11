@@ -393,11 +393,21 @@ class Zend_Acl
             throw $e;
         }
 
+        $acosRemoved = array($acoId);
         if (null !== ($acoParent = $this->_acos[$acoId]['parent'])) {
             unset($this->_acos[$acoParent->getAcoId()]['children'][$acoId]);
         }
         foreach ($this->_acos[$acoId]['children'] as $childId => $child) {
             $this->remove($childId);
+            $acosRemoved[] = $childId;
+        }
+
+        foreach ($acosRemoved as $acoIdRemoved) {
+            foreach ($this->_rules['byAcoId'] as $acoIdCurrent => $rules) {
+                if ($acoIdRemoved === $acoIdCurrent) {
+                    unset($this->_rules['byAcoId'][$acoIdCurrent]);
+                }
+            }
         }
 
         unset($this->_acos[$acoId]);
@@ -412,6 +422,14 @@ class Zend_Acl
      */
     public function removeAll()
     {
+        foreach ($this->_acos as $acoId => $aco) {
+            foreach ($this->_rules['byAcoId'] as $acoIdCurrent => $rules) {
+                if ($acoId === $acoIdCurrent) {
+                    unset($this->_rules['byAcoId'][$acoIdCurrent]);
+                }
+            }
+        }
+
         $this->_acos = array();
 
         return $this;

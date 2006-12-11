@@ -823,23 +823,45 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Enter description here...
+     * Ensures that removal of an ACO results in its rules being removed
      *
      * @return void
      */
     public function testRulesACORemove()
     {
-
+        $this->_acl->add(new Zend_Acl_Aco('area'))
+                   ->allow(null, 'area');
+        $this->assertTrue($this->_acl->isAllowed(null, 'area'));
+        $this->_acl->remove('area');
+        try {
+            $this->_acl->isAllowed(null, 'area');
+            $this->fail('Expected Zend_Acl_Exception not thrown upon isAllowed() on non-existent ACO');
+        } catch (Zend_Acl_Exception $e) {
+            $this->assertContains('not found', $e->getMessage());
+        }
+        $this->_acl->add(new Zend_Acl_Aco('area'));
+        $this->assertFalse($this->_acl->isAllowed(null, 'area'));
     }
 
     /**
-     * Enter description here...
+     * Ensures that removal of all ACOs results in ACO-specific rules being removed
      *
      * @return void
      */
     public function testRulesACORemoveAll()
     {
-
+        $this->_acl->add(new Zend_Acl_Aco('area'))
+                   ->allow(null, 'area');
+        $this->assertTrue($this->_acl->isAllowed(null, 'area'));
+        $this->_acl->removeAll();
+        try {
+            $this->_acl->isAllowed(null, 'area');
+            $this->fail('Expected Zend_Acl_Exception not thrown upon isAllowed() on non-existent ACO');
+        } catch (Zend_Acl_Exception $e) {
+            $this->assertContains('not found', $e->getMessage());
+        }
+        $this->_acl->add(new Zend_Acl_Aco('area'));
+        $this->assertFalse($this->_acl->isAllowed(null, 'area'));
     }
 
     /**
