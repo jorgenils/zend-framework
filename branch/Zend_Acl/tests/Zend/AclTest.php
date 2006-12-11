@@ -156,17 +156,40 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Ensures that an exception is thrown when a non-existent ARO is specified as a parent
+     * Ensures that an exception is thrown when a non-existent ARO is specified as a parent upon ARO addition
      *
      * @return void
      */
-    public function testARORegistryInheritsNonExistent()
+    public function testARORegistryAddInheritsNonExistent()
     {
         try {
             $this->_acl->getAroRegistry()->add(new Zend_Acl_Aro('guest'), 'nonexistent');
             $this->fail('Expected Zend_Acl_Aro_Registry_Exception not thrown upon specifying a non-existent parent');
         } catch (Zend_Acl_Aro_Registry_Exception $e) {
             $this->assertContains('does not exist', $e->getMessage());
+        }
+    }
+
+    /**
+     * Ensures that an exception is thrown when a non-existent ARO is specified to each parameter of inherits()
+     *
+     * @return void
+     */
+    public function testARORegistryInheritsNonExistent()
+    {
+        $aroGuest = new Zend_Acl_Aro('guest');
+        $this->_acl->getAroRegistry()->add($aroGuest);
+        try {
+            $this->_acl->getAroRegistry()->inherits('nonexistent', $aroGuest);
+            $this->fail('Expected Zend_Acl_Aro_Registry_Exception not thrown upon specifying a non-existent child ARO');
+        } catch (Zend_Acl_Aro_Registry_Exception $e) {
+            $this->assertContains('not found', $e->getMessage());
+        }
+        try {
+            $this->_acl->getAroRegistry()->inherits($aroGuest, 'nonexistent');
+            $this->fail('Expected Zend_Acl_Aro_Registry_Exception not thrown upon specifying a non-existent parent ARO');
+        } catch (Zend_Acl_Aro_Registry_Exception $e) {
+            $this->assertContains('not found', $e->getMessage());
         }
     }
 
@@ -325,17 +348,40 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Ensures that an exception is thrown when a non-existent ACO is specified as a parent
+     * Ensures that an exception is thrown when a non-existent ACO is specified as a parent upon ACO addition
      *
      * @return void
      */
-    public function testACOInheritsNonExistent()
+    public function testACOAddInheritsNonExistent()
     {
         try {
             $this->_acl->add(new Zend_Acl_Aco('area'), 'nonexistent');
             $this->fail('Expected Zend_Acl_Exception not thrown upon specifying a non-existent parent');
         } catch (Zend_Acl_Exception $e) {
             $this->assertContains('does not exist', $e->getMessage());
+        }
+    }
+
+    /**
+     * Ensures that an exception is thrown when a non-existent ACO is specified to each parameter of inherits()
+     *
+     * @return void
+     */
+    public function testACOInheritsNonExistent()
+    {
+        $acoArea = new Zend_Acl_Aco('area');
+        $this->_acl->add($acoArea);
+        try {
+            $this->_acl->inherits('nonexistent', $acoArea);
+            $this->fail('Expected Zend_Acl_Exception not thrown upon specifying a non-existent child ACO');
+        } catch (Zend_Acl_Exception $e) {
+            $this->assertContains('not found', $e->getMessage());
+        }
+        try {
+            $this->_acl->inherits($acoArea, 'nonexistent');
+            $this->fail('Expected Zend_Acl_Exception not thrown upon specifying a non-existent parent ACO');
+        } catch (Zend_Acl_Exception $e) {
+            $this->assertContains('not found', $e->getMessage());
         }
     }
 
@@ -729,34 +775,25 @@ class Zend_AclTest extends PHPUnit_Framework_TestCase
 
     public function testCMSExample()
     {
-        $this->markTestSkipped('pending work in progress');
-
-        // Create new Zend_Acl instance
-        $acl = new Zend_Acl();
-
-        // Fetch the ARO registry
-        $aro = $acl->getAroRegistry();
-
         // Add some roles to the ARO registry
-        $aro->add('guest');
-        $aro->add('staff', $aro->guest);  // staff inherits permissions from guest
-        $aro->add('editor', $aro->staff); // editor inherits permissions from staff
-        $aro->add('administrator');
-
-        // Whitelist implementation; ACL denies access by default
-        $acl->deny();
+        $this->_acl->getAroRegistry()->add(new Zend_Acl_Aro('guest'))
+                                     ->add(new Zend_Acl_Aro('staff'), 'guest')  // staff inherits permissions from guest
+                                     ->add(new Zend_Acl_Aro('editor'), 'staff') // editor inherits permissions from staff
+                                     ->add(new Zend_Acl_Aro('administrator'));
 
         // Guest may only view content
-        $acl->allow($aro->guest, 'view');
+        $this->_acl->allow('guest', null, 'view');
 
         // Staff inherits view privilege from guest, but also needs additional privileges
-        $acl->allow($aro->staff, array('edit', 'submit', 'revise'));
+        $this->_acl->allow('staff', null, array('edit', 'submit', 'revise'));
 
         // Editor inherits view, edit, submit, and revise privileges, but also needs additional privileges
-        $acl->allow($aro->editor, array('publish', 'archive', 'delete'));
+        $this->_acl->allow('editor', null, array('publish', 'archive', 'delete'));
 
         // Administrator inherits nothing but is allowed all privileges
-        $acl->allow($aro->administrator);
+        $this->_acl->allow('administrator');
+
+        return;
 
         // Access control checks based on above permission sets
 
