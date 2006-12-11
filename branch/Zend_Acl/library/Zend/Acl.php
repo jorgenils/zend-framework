@@ -607,7 +607,7 @@ class Zend_Acl
                 }
 
                 // try next ACO
-                $aco = $this->_acos['byAcoId'][$aco->getAcoId()]['parent'];
+                $aco = $this->_acos[$aco->getAcoId()]['parent'];
 
             } while (true); // loop terminates at 'allAcos' pseudo-parent
         } else {
@@ -626,7 +626,7 @@ class Zend_Acl
                 }
 
                 // try next ACO
-                $aco = $this->_acos['byAcoId'][$aco->getAcoId()]['parent'];
+                $aco = $this->_acos[$aco->getAcoId()]['parent'];
 
             } while (true); // loop terminates at 'allAcos' pseudo-parent
         }
