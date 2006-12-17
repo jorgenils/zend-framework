@@ -1,0 +1,43 @@
+<sect1 id="zend.registry">
+    <title>Zend::registry()</title>
+
+    <para>
+        Возвращает значение из реестра или сам реестр.
+<!--
+        Returns a value in the registry or the registry itself.
+-->
+    </para>
+
+    <programlisting role="php"><![CDATA[<?php
+
+Zend::registry($index=null)
+
+?>]]></programlisting>
+
+    <para>
+        Если значение аргумента <code>$index</code> равно <code>NULL</code>, то
+        будет возврашен реестр (подкласс ArrayObject). 
+<!--
+    If the <code>$index</code> argument is <code>NULL</code>, the registry will be returned (a subclass
+    ArrayObject.
+-->
+    </para>
+
+    <para>
+        Если <code>$index</code> является строкой, то будет возвращено значение,
+        соответствующее этому индексу. Если в реестре нет значения с
+        таким индексом, то будет сгенерировано исключение
+        <code>Zend_Exception</code>.
+    </para>
+
+    <para>
+        Для быстрого определения, есть ли такой индекс в реестре, используйте
+        <code>Zend::isRegistered()</code>.
+<!--
+    To quickly determine if an index is present in the registry, use Zend::isRegistered().
+-->
+    </para>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

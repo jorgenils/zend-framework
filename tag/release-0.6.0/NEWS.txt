@@ -1,0 +1,143 @@
+Zend Framework                                                             NEWS
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+=RELEASE 0.6.0 / 16-Dec-2006=
+- Zend_Acl: new architecture (incubator).
+- Zend_Auth: new component (incubator).
+- Zend_Cache_Backend_ZendPlatform: new class (incubator).
+- Zend_Console_Getopt: new component (incubator).
+- Zend_Db_Adapter_Oci: new database adapter.
+- Zend_Gdata: new component integrated into core library.
+- Zend_Http_Client: new architecture, cookie support.
+- Zend_Http_Client: proxy server support (incubator)
+- Zend_Http_Server: new tool (incubator).
+- New I18N components Zend_Date, Zend_Locale, Zend_Measure (incubator).
+- Zend_Mail_Folder: new component (incubator).
+- MVC: improvements, documentation, moved to core library.
+- Zend_Registry: improvements, moved to core library.
+- Zend_Search_Lucene: new search query language, many improvements.
+- Zend_Service_Simpy: new component (incubator).
+- Zend_Session: new implementation (incubator).
+- Zend_TimeSync: new component (incubator).
+- Zend_Uri: new documentation.
+- Zend_XmlRpc_Client,Server: improvements, documentation, moved to core library.
+- Many improvements to documentation and testing coverage.
+- 135 issues resolved; for a detailed list, see the changelog
+  in the issue tracker at http://framework.zend.com/issues
+
+=RELEASE 0.2.0 / 29-Oct-2006=
+- New MVC implementation
+- New HTTP request and response objects make it easy to automate unit
+  testing for web apps without a web server, and also make it possible
+  to use MVC for command-line and PHP-GTK application development
+- Enhanced pure PHP Lucene-compatible search engine component, performs
+  index optimization and auto-optimization.  Boolean queries through the API.
+- New Mysqli DB adapter
+- New JSON server
+- New REST client and server
+- New XmlRpc client and server
+- New Acl component
+- New Session component
+- New Web Services clients for Delicious and Audioscrobbler
+- New Registry component
+- For detailed list of bugs fixed, see the changelog in the issue tracker
+  at http://framework.zend.com/issues
+
+=RELEASE 0.1.5 / 10-Jul-2006=
+- release notes can be found in the issue tracker at http://framework.zend.com/issues under the project changelog.
+
+=RELEASE 0.1.4 / 29-Jun-2006=
+- Zend_InputFilter moved to Zend_Filter_Input (Mike, Chris)
+- Fixed bug in Zend_Http_Client_File::delete() (Mike, Ralf)
+- Fixed bug in Zend_Pdf_Filter_ASCIIHEX::decode() (Mike, Ralf)
+- Improved Zend_Pdf_Image_PNG to handle more types; Alpha, Indexed (Kevin)
+- Added Zend_Pdf_ImageFactory for creating image objects by filename (Kevin)
+- Added parsing support in Zend_Pdf_Image_TIFF for TIFF format images (Kevin)
+- Added abstract methods to Zend_Pdf_Image for image details w/h etc (Kevin)
+- The Zend Framework is now released under the simpler new BSD license. (Andi)
+- Fixed bug in Zend_Feed::findFeeds(). Reported by Ben Ramsey. (Mike)
+- Zend_Db_Adapter_Pdo_Abstract::insert() has been removed (Rob)
+- Fixed bug in Zend_Log::log(). Ticket #28 (Mike)
+- Fixed bug in Zend_Controller_Dispatcher::formatActionName(). Ticket #10 (Mike)
+- Change to how arrays are handled in Zend_Json_Encoder; when using numeric
+  indices, if indices do not start with 0 and end with (count($array)-1), array
+  will be encoded as associative array. (Matthew)
+- Added stream support to Zend_Mime_Part. (Gaylord)
+- Zend_Config has been accepted to the incubator. (Rob)
+- Zend_Search_Lucene can now delete documents and update segments. (Alex)
+- Fixed problem with oci_bind_by_name() in Zend_Db_Statement_Oracle. (Gaylord)
+- Fixed header port number bug in Zend_Http_Client, ticket #97. (Shahar)
+- Added iconv() to string processing in Zend_Search_Lucene_Field. (Alex)
+- Bugfixes to Zend_Mail modules to correct Sendmail transport header issues,
+  ticket #47, ticket #42, ticket #115, changeset [540], changeset [574].
+  (Matthew)
+- Fixed access mode handling in Zend_Log_Adapter_File, ticket #108. (Mike)
+- Fixed bug in Zend_Pdf command line demo, ticket #11. (Mike)
+- Fixed bug in Zend_Db_Table_Row::save(), ticket #50. (Mike)
+- Fixed bug in Zend_Db_Adapter_Pdo_Mysql::describeTable having NOT NULL, 
+  ticket #81, changeset [487] (Rob)
+- Zend_Uri_Http now uses the default Zend_Filter::isHostname() rules. (Mike)
+- Fixed multipart/alternative handling when other attachments present in
+  Zend_Mail, ticket #59, changeset [583]. (Matthew)
+- Fixed multiple bugs in Zend_Http_Client, ticket #133. (Mike)
+- Added Zend_Db_Profiler documentation. (Matthew)
+- Zend_Config promoted to core library. (admin)
+- Zend_Cache promoted to core library. (admin)
+- Additional release notes from issue tracker: http://framework.zend.com/issues/secure/ReleaseNote.jspa?projectId=10000&styleName=Html&version=10000
+
+=RELEASE 0.1.3 / 18-Apr-2006=
+- Zend_Filter is* methods return strictly TRUE or FALSE. (Chris)
+- Zend_InputFilter has test* methods for retrieving valid data. (Chris)
+- Fixed bug in Zend_View_Abstract::__isset(). Reported by James Simmons. (Mike)
+- Zend_Db_Adapter_Pdo_Mysql::limit() now compatible with MySQL versions prior
+  to 4.0. Reported by Greg Neustaetter (Mike)
+- Fixed bug in Zend_Controller_Dispatcher_Token::setParams(). Reported by Rob
+  Allen. (Chris)
+- Fixed bug in Zend_Log::log(). Reported by Mislav. (Mike)
+- Updated Zend_Filter::isFloat() and Zend_Filter::isInt() to respect locale.
+  (Chris)
+- Improved Zend_Db_Adapter_Pdo_Mssql contributed by Rob Allen. (Mike)
+- Fixed bug in Zend_Controller_Dispatcher::_formatName. Reported by Arpad Ray.
+  (Chris)
+- Zend::dump() now works from CLI (Rob Allen)
+- Improved support for XML-RPC namespaces (Mike, Chuck)
+- Registry can now be tested with Zend::isRegistered (Shekar C. Reddy, Mike)
+- Zend_Search_Lucene promoted from incubator (Alex)
+- Zend_Cache has been accepted to the incubator (Fabien, Mislav)
+- Zend_Json testing expanded; covers all major cases (Matthew)
+- Fixed Zend_Json encoding of empty values (Matthew, Davey)
+- Fixed Zend_Json encoding of associative arrays (Matthew, Davey)
+- Fixed Zend_Json encoding of numeric indices in associative arrays (Matthew)
+- Removed formatting (newlines, tabs) from Zend_Json encoding methods (Matthew)
+- Fixed escaping in Zend_Json_Encoder (Matthew)
+- Zend_HttpClient moved to Zend_Http_Client (Mike)
+- Zend_Console_Args in the incubator but not yet refactored (Jason Garber)
+- Zend_Mail enhancements in the incubator by Telekom Austria (Nico, Clez)
+- Zend_Service classes no longer subclass Zend_Service_Rest (Davey, Andi, et al)
+- Zend_Service classes now use new Zend_InputFilter (Davey)
+- Fixed bug in Zend_Service_Amazon::itemLookup() (Davey)
+- Fixed bug in Zend_Service_Flickr::userSearch() (Davey)
+- Fixed bug in Zend_Uri_Http::__construct(). Reported by Adrian Gheorghe. (Mike)
+- Improved some not well-formed PDF processing with Zend_Pdf. (Alexander)
+- Minor Zend_Pdf documentation fixes. (Alexander)
+- Fixed Zend_Pdf processing of inherited page attributes. (Alexander)
+- Fixed Zend_Pdf umlauts support for standard fonts. (Alexander)
+
+=RELEASE 0.1.2 / 8-Mar-2006=
+- Unit test suite is now included. (Mike)
+- Docs for Zend_Controller are now included. (Mike)
+- Coding standards were out of date. Reported by Steph Fox. (Mike)
+- Fixed default charset in Zend_Mail constructor. Reported by Jakob Buchgraber. (Mike)
+- Fixed several Zend_Filter methods. (Chris)
+- Fixed JSON datum encoding.  Reported by Edwin Vlieg. (Mike)
+- Fixed FormRadio Helper.  Reported by AJ Tarachanowicz. (Chris)
+- Fixed Zend_Uri_Http to work with new Zend_Filter. (Chris, Mike)
+- Docs for the Zend_Db::factory() method were incorrect.  Reported by Dinh. (Chris)
+- Zend::loadClass() now works inside __autoload().  Reported by Rob Allen. (Mike)
+- Fixed notices from Zend_Pdf_Element_Dictionary.  Reported by Ralf Eggert. (Alex)
+- Fixed notices from Zend_Search_Lucene_Index_SegmentWriter.  Reported by Jared Williams. (Alex)
+- Removed defunct Zend_Db_DataObject docs. (Mike)
+- Added NEWS.txt file. (Andi)
+
+=RELEASE 0.1.1 / 3-Mar-2006=
+- Initial public code drop

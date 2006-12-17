@@ -1,0 +1,48 @@
+<sect1 id="zend.register">
+    <title>Zend::register()</title>
+
+    <para>
+        Регистрирует объект в реестре.
+<!--
+        Registers an object in the object store.
+-->
+    </para>
+
+    <programlisting role="php"><![CDATA[<?php
+
+Zend::register($index, $value)
+
+?>]]></programlisting>
+
+    <para>
+        Реестр является механизмом для предоставления экземпляров-синглетонов
+        в среде приложения. Посредством единичного сохранения значения в реестре
+        и дальнейшего извлечения его из реестра каждый раз, когда оно
+        понадобится, всегда возвращается один и тот же экземпляр.
+<!--
+    The registry is a mechanism for providing singleton instances of values to the application space.  By
+    storing the value in the registry once, and then retrieving the value from the registry whenever it
+    is needed, the same instance is always returned.
+-->
+    </para>
+
+    <para>
+        <code>$index</code> — произвольная строка для наименования значения в
+        реестре. Это имя передается <code>Zend::registry()</code> для получения
+        значения.
+<!--
+    The <code>$index</code> is an arbitrary string to name the value in the store.  This name will be
+    supplied to <code>Zend::registry()</code> to retrieve the value again.
+-->
+    </para>
+
+    <para>
+    Семантика реестра аналогична семантике ArrayObject. 
+<!--
+    The semantics of the registry adhere to those of ArrayObject.
+-->
+    </para>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

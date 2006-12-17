@@ -1,0 +1,31 @@
+<sect1 id="zend.register">
+    <title>Zend::register()</title>
+
+    <para>
+    Registers a value in the registry.
+    </para>
+
+    <programlisting role="php"><![CDATA[<?php
+
+Zend::register($index, $value)
+
+?>]]></programlisting>
+
+    <para>
+    The registry is a mechanism for providing singleton instances of values to the application space.  By
+    storing the value in the registry once, and then retrieving the value from the registry whenever it
+    is needed, the same instance is always returned.
+    </para>
+
+    <para>
+    The <code>$index</code> is an arbitrary string to name the value in the store.  This name will be
+    supplied to <code>Zend::registry()</code> to retrieve the value again.
+    </para>
+
+    <para>
+    The semantics of the registry adhere to those of ArrayObject.
+    </para>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

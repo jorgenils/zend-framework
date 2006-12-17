@@ -1,0 +1,31 @@
+<sect1 id="zend.registry">
+    <title>Zend::registry()</title>
+
+    <para>
+    Returns a value in the registry or the registry itself.
+    </para>
+
+    <programlisting role="php"><![CDATA[<?php
+
+Zend::registry($index=null)
+
+?>]]></programlisting>
+
+    <para>
+    If the <code>$index</code> argument is <code>NULL</code>, the registry will be returned (a subclass
+    ArrayObject.
+    </para>
+
+    <para>
+    If <code>$index</code> is a string, the value assigned to that index will be returned.  If
+    an object does not exist in the registry with that <code>$index</code>, a
+    <code>Zend_Exception</code> will be thrown.
+    </para>
+
+    <para>
+    To quickly determine if an index is present in the registry, use Zend::isRegistered().
+    </para>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
