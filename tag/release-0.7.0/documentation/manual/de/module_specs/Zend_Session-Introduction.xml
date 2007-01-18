@@ -1,0 +1,49 @@
+<sect1 id="zend.session.introduction">
+
+    <title>Einleitung</title>
+
+    <para>
+        Siehe
+        <ulink url="http://framework.zend.com/wiki/display/ZFDOC/Zend_Session">die aktuellste veröffentlichte 
+        Version dieses Dokuments</ulink>
+        . Das Zend-Framework-Auth-Team freut sich außerdem über jegliches Feedback und Beiträge auf der 
+        Mailing-Liste:
+        <ulink url="mailto:fw-auth@lists.zend.com">fw-auth@lists.zend.com</ulink>
+    </para>
+
+    <para>
+        Bei einer in PHP geschriebenen Web-Applikation steht eine <emphasis role="bold">Session</emphasis> für
+        eine logische Eins-Zu-Eins-Verbindung zwischen auf dem Server beständig gehaltenen Daten und einem 
+        bestimmten Client (zum Beispiel einem Web-Browser). Zend_Session hilft beim Verwalten und Aufbewahren
+        von Session-Daten, der logischen Ergänzung zu Cookie-Daten, über mehrere Seitenaufrufe eines Clients hinweg.
+        Anders als die in Cookies gespeicherten Daten werden die Session-Daten nicht client-seitig gespeichert und
+        stehen dem Client nur zur Verfügung, wenn das server-seitige Script die Daten durch eine Antwort auf eine
+        Anfrage des Clients verfügbar macht. Im Umfeld der Zend_Session-Komponente und in dieser Dokumentation
+        steht der Begriff Session-Daten für server-seitige Daten, die durch Zend_Session verwaltet werden.
+    </para>
+
+    <para>
+        Die Zend_Session-Komponente ist ein Wrapper für das bestehende PHP ext/session, der eine standardisierte,
+        objektorientierte Schnittstelle für den Umgang mit anonymen und authentifizierten Sessions zur Verfügung stellt.
+        Zend_Auth, die Authentifizierungs-Komponente des Zend Frameworks, verwendet Zend_Session, um einige 
+        Informationen im Zusammenhang mit Login-Sessions (authentifizierten Sessions) zu speichern. Da Zend_Session
+        intern die normalen Session-Funktionen von PHP verwendet, sind alle regulären Konfigurations-Optionen und
+        -Einstellungen nutzbar (siehe
+        <ulink
+      url="http://www.php.net/session">http://www.php.net/session</ulink>
+        ). Eine Session-Id, entweder in einem Cookie oder den URLs gespeichert, hält also die Verbindung zwischen
+        einem Client und bestehenden Session-Daten aufrecht.
+    </para>
+
+    <para>
+        Der standardmäßig vorhandene 
+        <ulink
+      url="http://www.php.net/manual/de/function.session-set-save-handler.php">ext/session
+      save handler</ulink>
+        löst nicht das Problem, diese Verbindung in Szenarien aufrecht zu erhalten, in denen ein Client sich mit einem
+        beliebigen Server eines Server-Clusters verbinden kann, da die bestehenden Session-Daten nur lokal auf einem
+        Server gespeichert werden. Eine Liste zusätzlicher, geeigneter Speicher-Module wird zur Verfügung gestellt werden
+        wenn diese verfügbar sind.
+    </para>
+
+</sect1>

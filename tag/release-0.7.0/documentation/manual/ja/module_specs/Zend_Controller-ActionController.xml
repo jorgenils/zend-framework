@@ -1,0 +1,217 @@
+<sect1 id="zend.controller.action">
+    <title>アクションコントローラ</title>
+
+    <sect2 id="zend.controller.action.introduction">
+        <title>導入</title>
+        <para>
+            <code>Zend_Controller_Action</code> は、
+            モデル - ビュー - コントローラ (MVC)
+            パターンにもとづいたウェブアプリケーションを作成する際に、
+            フロントコントローラで使用するアクションコントローラを実装するための抽象クラスです。
+        </para>
+
+        <para>
+            Zend_Controller_Action を使用するには、
+            実際のアクションコントローラ内でこのクラスのサブクラスを作成する必要があります
+            (あるいは、作成したサブクラスをもとにしてアクションコントローラを作成します)。
+            基本的な使い方としては、まずサブクラスを作成し、
+            そしてあなたのサイト上で処理したいさまざまなアクションに対応する
+            アクションメソッドを作成するという流れになります。
+            Zend_Controller は、このクラス内のメソッドで 'Action'
+            という名前で終わるものを見つけると、
+            ルーティングやディスパッチの際にそれらを自動的にアクションとして扱います。
+        </para>
+
+        <para>
+            たとえば、次のようなクラスを見てみましょう。
+        </para>
+
+        <programlisting role="php"><![CDATA[
+class FooController extends Zend_Controller_Action
+{
+    public function barAction()
+    {
+        // 何かをします
+    }
+
+    public function bazAction()
+    {
+        // 何かをします
+    }
+}
+]]></programlisting>
+            
+        <para>
+            この FooController クラス ('foo' コントローラ)
+            では、ふたつのアクション 'bar' および 'baz'
+            が定義されています。
+        </para>
+
+        <para>
+            もちろんこれ以外にもたくさんの機能があります。
+            たとえば初期化アクションを独自に作成したり、
+            アクションを指定しなかった (あるいは無効なアクションを指定した)
+            際にコールされるデフォルトのアクションを指定したり、
+            ディスパッチの前後に実行されるフックを指定したり、
+            さまざまなヘルパーメソッドを使用したりといったことができます。
+            この章では、アクションコントローラの機能の概要を説明します。
+        </para>
+    </sect2>
+
+    <sect2 id="zend.controller.action.initialization">
+        <title>オブジェクトの初期化</title>
+
+        <para>
+            アクションコントローラのコンストラクタをオーバーライドすることもできますが、
+            お勧めしません。Zend_Controller_Action::__construct()
+            は、リクエストオブジェクトやレスポンスオブジェクトを登録するなどの重要な作業を行います。
+            また、フロントコントローラから渡された起動時引数の処理も行います。
+            コンストラクタをオーバーライドする場合は、必ずその中で
+            parent::__construct($request, $response, $invokeArgs)
+            をコールするようにしましょう。
+        </para>
+
+        <para>
+            初期化作業をカスタマイズするには、コンストラクタをオーバーライドするよりも
+            init() メソッドを使うほうがお勧めです。これは、__construct()
+            の中で最後にコールされます。たとえば、
+            初期化時にデータベースに接続したいなら次のようにします。
+        </para>
+
+        <programlisting role="php"><![CDATA[
+class FooController extends Zend_Controller_Action
+{
+    public function init()
+    {
+        $this->db = Zend_Db::factory('Pdo_Mysql', array(
+            'host'     => 'myhost',
+            'username' => 'user',
+            'password' => 'XXXXXXX',
+            'dbname'   => 'website'
+        ));
+    }
+}
+]]></programlisting>
+
+    </sect2>
+
+    <sect2 id="zend.controller.action.prepostdispatch">
+        <title>ディスパッチ前後のフック</title>
+
+        <para>
+            Zend_Controller_Action には、
+            リクエストされたアクションの前後にコールされるふたつのメソッドがあります。それが
+            preDispatch() と postDispatch() です。
+            これらはさまざまな場面で活用できます。
+            たとえばアクションを実行する前に認証情報や ACL
+            を調べたり (preDispatch() の中で _forward() をコールすると、
+            そのアクションの処理は飛ばされます)、
+            作成したコンテンツを (postDispatch() で)
+            全サイト共通のテンプレートに配置したりといったことが考えられます。
+        </para>
+    </sect2>
+
+    <sect2 id="zend.controller.action.accessors">
+        <title>アクセス用メソッド</title>
+
+        <para>
+            さまざまなオブジェクトや変数がオブジェクトに登録されており、
+            それぞれにアクセス用メソッドが用意されています。
+        </para>
+
+        <itemizedlist>
+            <listitem><para>
+                <emphasis>リクエストオブジェクト</emphasis>:
+                getRequest() を使用してリクエストオブジェクトを取得し、
+                それを用いてアクションをコールします。
+            </para></listitem>
+
+            <listitem>
+                <para>
+                    <emphasis>レスポンスオブジェクト</emphasis>:
+                    getResponse() を使用して、最終的なレスポンスの内容を取得します。
+                    典型的な使用法は、このようになります。
+                </para>
+
+                <programlisting role="php"><![CDATA[
+$this->getResponse()->setHeader('Content-Type', 'text/xml');
+$this->getResponse()->appendBody($content);
+]]></programlisting>
+            </listitem>
+
+            <listitem>
+                <para>
+                    <emphasis>起動時引数</emphasis>:
+                    フロントコントローラは、パラメータを
+                    ルータやディスパッチャそしてアクションコントローラに送ります。
+                    これらのパラメータを取得するには、
+                    getInvokeArg($key) を使用します。あるいは、
+                    すべてのパラメータを取得するには
+                    getInvokeArgs() を使用します。
+                </para>
+            </listitem>
+
+            <listitem>
+                <para>
+                    <emphasis>リクエストパラメータ</emphasis>:
+                    リクエストオブジェクトは、_GET や _POST
+                    のようなリクエストパラメータのほかに
+                    URL のパスで指定したパラメータも収集します。
+                    これらを取得するには、_getParam($key) あるいは
+                    _getAllParams() を使用します。
+                    _setParam() を使用して、リクエストパラメータを設定することもできます。
+                    これは、さらに別のアクションに転送する際などに有用です。
+                </para>
+
+                <para>
+                    パラメータが存在するかどうかを調べる
+                    (条件分岐の際に使用します) には、
+                    _hasParam($key) を使用します。
+                </para>
+            </listitem>
+        </itemizedlist>
+    </sect2>
+
+    <sect2 id="zend.controller.action.utilmethods">
+        <title>ユーティリティメソッド</title>
+
+        <para>
+            アクセス用メソッド以外にも、Zend_Controller_Action
+            にはいくつかのユーティリティメソッドが用意されています。
+            これらを使用して、アクションメソッド
+            (あるいはディスパッチ前後のフックメソッド)
+            でのさまざまな作業を行います。
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>
+                    <emphasis>_forward($controller, $action, $params = array())</emphasis>: 
+                    別のアクションを実行します。preDispatch() の中でコールすると、
+                    リクエストされていたアクションは飛ばされ、
+                    新しいアクションを実行します。それ以外の場合は、
+                    現在のアクションの処理を済ませた後で
+                    _forward() で指定したアクションを実行します。
+                </para>
+            </listitem>
+
+            <listitem>
+                <para>
+                    <emphasis>_redirect($url, $code = 302)</emphasis>:
+                    別の場所にリダイレクトします。このメソッドには、URL
+                    のほかにオプションで HTTP 状態コードを指定します。
+                    リダイレクトはその場ですぐ行われ、プログラムの実行はそこで停止します。
+                </para>
+
+                <para>
+                    状態コードを指定した場合は、リダイレクト時に
+                    PHP の header() コマンドでコードが使用されます。
+                </para>
+            </listitem>
+        </itemizedlist>
+    </sect2>
+</sect1>
+
+<!--
+vim:se ts=4 sw=4 et:
+-->

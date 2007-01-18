@@ -1,0 +1,140 @@
+<sect1 id="zend.db.tablerowset">
+
+    <title>Zend_Db_Table_Rowset</title>
+
+    <sect2 id="zend.db.table.rowset.introduction">
+
+        <title>Введение</title>
+
+        <para>
+            <code>Zend_Db_Table_Rowset</code> является итератором для
+            наборов объектов <code>Zend_Db_Table_Row</code>. Обычно
+            вы не создаете экземпляр <code>Zend_Db_Table_Rowset</code> непосредственно,
+            вместо этого получаете <code>Zend_Db_Table_Rowset</code> как возвращаемый
+            результат вызова методов <code>Zend_Db_Table::find()</code>
+            или <code>fetchAll()</code>. После этого вы можете производить итерацию набора
+            объектов<code>Zend_Db_Table_Row</code> и изменять их по своему желанию.
+<!--
+            Zend_Db_Table_Rowset is an iterator for Zend_Db_Table_Row object collections.
+            In general, you do not instantiate Zend_Db_Table_Rowset by itself; instead,
+            you retrieve a Zend_Db_Table_Rowset as the return result from a call to
+            Zend_Db_Table::find() or fetchAll().  You can then iterate through the
+            collected Zend_Db_Table_Row objects and modify them as you wish.
+-->
+        </para>
+
+    </sect2>
+
+    <sect2 id="zend.db.table.rowset.fetch">
+
+        <title>Извлечение набора строк</title>
+
+        <para>
+            Первое, что нужно сделать — создать экземпляр класса <code>Zend_Db_Table</code>.
+<!--
+            The first thing to do is instantiate a Zend_Db_Table class.
+-->
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+// создание адаптера
+require_once 'Zend/Db.php';
+$params = array (
+    'host'     => '127.0.0.1',
+    'username' => 'malory',
+    'password' => '******',
+    'dbname'   => 'camelot'
+);
+
+$db = Zend_Db::factory('PDO_MYSQL', $params);
+
+// установка адаптера по умолчанию для всех объектов Zend_Db_Table
+require_once 'Zend/Db/Table.php';
+Zend_Db_Table::setDefaultAdapter($db);
+
+// соединение с таблицей в БД
+class RoundTable extends Zend_Db_Table {}
+$table = new RoundTable();
+?>]]>
+        </programlisting>
+
+        <para>
+            Далее, получите множество записей из БД, используя <code>Zend_Db_Table::find()</code>
+            с набором ключей или <code>Zend_Db_Table::fetchAll()</code>.
+            Возвращенный результат будет объектом <code>Zend_Db_Table_Rowset</code>,
+            который позволит вам производить обход каждого отдельного объекта
+            <code>Zend_Db_Table_Row</code> в наборе записей.
+<!--
+            Next, retrieve many records from the database using
+            Zend_Db_Table::find() with multiple keys, or by using
+            Zend_Db_Table::fetchAll(); the returned result will be a
+            Zend_Db_Table_Rowset object that will let you iterate through
+            the individual Zend_Db_Table_Row objects in the record set.
+-->
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+// извлечение множества записей из таблицы
+$rowset = $table->fetchAll();
+
+//
+// $rowset теперь является объектом Zend_Db_Table_Rowset,
+// состоящим из одного объекта Zend_Db_Table_Row на каждую запись в результате
+//
+?>]]>
+        </programlisting>
+
+    </sect2>
+
+    <sect2 id="zend.db.table.rowset.iterate">
+
+        <title>Итерация набора строк</title>
+
+        <para>
+            <code>Zend_Db_Table_Rowset</code> реализует интерфейс итератора SPL, это означает,
+            что вы можете обходить объекты <code>Zend_Db_Table_Rowset</code> как массивы,
+            используя <code>foreach()</code>. Каждое значение, которое вы извлечете таким
+            способом, будет объектом <code>Zend_Db_Table_Row</code>, который соответствует
+            одной записи, полученной из таблицы. Вы можете просматривать, изменять и сохранять
+            свойства для этих записей.
+<!--
+            Zend_Db_Table_Rowset implements the SPL Iterator interface,
+            which means you can loop through Zend_Db_Table_Rowset objects like arrays
+            using foreach().  Each value you retrieve this way will be a Zend_Db_Table_Row
+            that corresponds to one record from the table; you can then view, modify, and
+            save the properties for that record.
+-->
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+// соединение с таблицей в БД
+class RoundTable extends Zend_Db_Table {}
+$table = new RoundTable();
+
+// извлечение множества записей из таблицы
+$rowset = $table->fetchAll();
+
+// отображение их всех
+foreach ($rowset as $row) {
+    // $row теперь является объектом Zend_Db_Table_Row
+    echo "<p>" . htmlspecialchars($row->nobleTitle) . " "
+       . htmlspecialchars($row->firstName) . "'s "
+       . "favorite color is " . htmlspecialchars($row->favoriteColor)
+       . ".</p>\n";
+
+    // изменение количества отображений для данной строки
+    // (ему соответствует столбец "times_displayed" в таблице)
+    $row->timesDisplayed ++;
+
+    // сохранение записи с новой информацией
+    $row->save();
+}
+?>]]>
+        </programlisting>
+
+    </sect2>
+
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

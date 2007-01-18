@@ -1,0 +1,97 @@
+<?php
+/**
+ * @package UnitTests
+ *
+ * This file defines configuration for running the unit tests for the Zend
+ * Framework Incubator.  Some tests have dependencies to PHP extensions or
+ * databases which may not necessary * installed on the target system.
+ * For these cases, the ability to disable or configure testing is provided
+ * below.  Tests for components which should run universally, such as "Zend"
+ * or "Zend_InputFilter", are always run by the master suite and cannot be
+ * disabled.
+ */
+
+/**
+ * Zend_Mail_Pop3 / Zend_Mail_Transport_Pop3
+ *
+ * IMPORTANT: you need to copy tests/Zend/Mail/_files/test.mbox to your mail
+ * directory for the tests to work.
+ */
+define('TESTS_ZEND_MAIL_POP3_ENABLED', false);
+define('TESTS_ZEND_MAIL_POP3_HOST', 'localhost');
+define('TESTS_ZEND_MAIL_POP3_USER', 'test');
+define('TESTS_ZEND_MAIL_POP3_PASSWORD', '');
+// test SSL connections if enabled in your test server
+define('TESTS_ZEND_MAIL_POP3_SSL', true);
+define('TESTS_ZEND_MAIL_POP3_TLS', true);
+// wrong port should be an existing server port, invalid a non existing (each on defined host)
+define('TESTS_ZEND_MAIL_POP3_WRONG_PORT', 80);
+define('TESTS_ZEND_MAIL_POP3_INVALID_PORT', 3141);
+
+/**
+ * Zend_Mail_Imap / Zend_Mail_Transport_Imap
+ *
+ * IMPORTANT: you need to copy tests/Zend/Mail/_files/test.mbox to your mail
+ * directory for the tests to work.
+ */
+define('TESTS_ZEND_MAIL_IMAP_ENABLED', false);
+define('TESTS_ZEND_MAIL_IMAP_HOST', 'localhost');
+define('TESTS_ZEND_MAIL_IMAP_USER', 'test');
+define('TESTS_ZEND_MAIL_IMAP_PASSWORD', '');
+// test SSL connections if enabled in your test server
+define('TESTS_ZEND_MAIL_IMAP_SSL', true);
+define('TESTS_ZEND_MAIL_IMAP_TLS', true);
+// wrong port should be an existing server port, invalid a non existing (each on defined host)
+define('TESTS_ZEND_MAIL_IMAP_WRONG_PORT', 80);
+define('TESTS_ZEND_MAIL_IMAP_INVALID_PORT', 3141);
+
+
+/**
+ * Zend_Mail_Maildir test
+ *
+ * Before enabling this test you have to unpack messages.tar in
+ * Zend/Mail/_files/test.maildir/cur/ and remove the tar for this test to work.
+ * That's because the messages files have a colon in the filename and that's a
+ * forbidden character on Windows.
+ */
+define('TESTS_ZEND_MAIL_MAILDIR_ENABLED', false);
+
+
+/**
+ * Zend_Rest_Client test
+ *
+ * Before enabling these tests, you must get relevant API keys
+ */
+define('TESTS_ZEND_REST_CLIENT_FLICKR_APIKEY', false);
+
+/**
+ * Zend_Gdata tests
+ *
+ * If the CLIENTLOGIN_ENABLED property below is false, the authenticated
+ * tests are reported Skipped in the test run.  Set this property to true
+ * to enable tests that require ClientLogin authentication.  Enter your
+ * Google login credentials in the EMAIL and PASSWORD properties below.
+ *
+ * Edit TestConfiguration.php, not TestConfiguration.php.dist.
+ * Never commit plaintext passwords to the source code repository.
+ */
+define('TESTS_ZEND_GDATA_CLIENTLOGIN_ENABLED', false);
+define('TESTS_ZEND_GDATA_CLIENTLOGIN_EMAIL', 'example@example.com');
+define('TESTS_ZEND_GDATA_CLIENTLOGIN_PASSWORD', 'xxxxxxxx');
+
+/**
+ * Zend_Date tests
+ *
+ * If the BCMATH_ENABLED property below is false, all arithmetic
+ * operations will use ordinary PHP math operators and functions.
+ * Otherwise, the bcmath functions will be used for unlimited precision.
+ *
+ * Edit TestConfiguration.php, not TestConfiguration.php.dist.
+ */
+define('TESTS_ZEND_LOCALE_BCMATH_ENABLED', true);
+
+/**
+ * PHPUnit Code Coverage / Test Report
+ */
+define('TESTS_GENERATE_REPORT', false);
+define('TESTS_GENERATE_REPORT_TARGET', '/path/to/target');

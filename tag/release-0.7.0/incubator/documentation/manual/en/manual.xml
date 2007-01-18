@@ -1,0 +1,134 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+    "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+[
+    <!ENTITY % magic.fixup SYSTEM "./entities.ent">
+    %magic.fixup;
+]>
+<book id="manual" lang="en">
+    <bookinfo>
+        <title>Programmer's Reference Guide</title>
+        <subtitle>Zend Framework</subtitle>
+        <edition>Programmer's Reference Guide for Zend Framework</edition>
+        <pubdate><?dbtimestamp format="Y-m-d"?></pubdate>
+        <copyright>
+            <year>2005-<?dbtimestamp format="Y"?></year>
+            <holder>
+                Zend Technologies Inc.
+                (<ulink url="http://www.zend.com" />)
+            </holder>
+        </copyright>
+        <!--
+        A Title page graphic can be included like this
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="../web/images/foo.jpg"/>
+              </imageobject>
+            </mediaobject>
+        -->
+    </bookinfo>
+    <!-- &ref.preface; -->
+    <!-- &ref.install; -->
+    <!-- &ref.conf;    -->
+
+    <!--
+    <chapter id="zend">
+        <title>Zend</title>
+        &module_specs.Zend;
+    </chapter>
+    -->
+
+    <chapter id="zend.auth">
+        <title>Zend_Auth</title>
+        &module_specs.Zend_Auth;
+        &module_specs.Zend_Auth_Digest;
+    </chapter>
+
+    <!--
+    <chapter id="zend.console">
+        <title>Zend_Console_Getopt</title>
+        &module_specs.Zend_Console_Getopt;
+    </chapter>
+    -->
+
+    <chapter id="zend.http.server">
+        <title>Zend_Http_Server</title>
+        &module_specs.Zend_Http_Server-Introduction;
+    </chapter>
+
+    <!--
+    <chapter id="zend.json.server">
+        <title>Zend_Json_Server</title>
+        &module_specs.Zend_Json_Server;
+    </chapter>
+    -->
+
+    <chapter id="zend.mail">
+        <title>Zend_Mail</title>
+        &module_specs.Zend_Mail_Read;
+    </chapter>
+
+    <!--
+    <chapter id="zend.registry">
+        <title>Zend_Registry</title>
+        &module_specs.Zend_Registry;
+    </chapter>
+    -->
+
+    <chapter id="zend.rest">
+        <title>Zend_Rest</title>
+        &module_specs.Zend_Rest;
+        &module_specs.Zend_Rest_Client;
+        &module_specs.Zend_Rest_Server;
+    </chapter>
+
+    <chapter id="zend.service">
+        <title>Zend_Service</title>
+        <!--
+        &module_specs.Zend_Service_Audioscrobbler;
+        -->
+        &module_specs.Zend_Service_Delicious;
+        <!--
+        &module_specs.Zend_Service_Simpy;
+        -->
+    </chapter>
+
+    <!--
+    <chapter id="zend.soap">
+        <title>Zend_Soap</title>
+        &module_specs.Zend_Soap_Wsdl;
+    </chapter>
+    -->
+
+    <!--
+    <chapter id="zend.timesync">
+        <title>Zend_TimeSync</title>
+        &module_specs.Zend_TimeSync;
+    </chapter>
+    -->
+
+    <appendix id="appendix.languages">
+        <title>Appendix Zend_Locale Languages</title>
+        &module_specs.Zend_Locale-AppendixLanguages;
+    </appendix>
+    <appendix id="appendix.regions">
+        <title>Appendix Zend_Locale Regions</title>
+        &module_specs.Zend_Locale-AppendixRegions;
+    </appendix>
+    <!-- &ref.faq; -->
+    <appendix id="appendix.codingstandard">
+        <title>Zend Framework PHP Coding Standard</title>
+        &ref.Coding_Standard-Overview;
+        &ref.Coding_Standard-Formatting;
+        &ref.Coding_Standard-Naming;
+        &ref.Coding_Standard-Style;
+    </appendix>
+    <appendix id="appendix.copyright">
+        <title>Copyright Information</title>
+        &ref.copyrights;
+    </appendix>
+    <index id="the.index" />
+</book>
+<!--
+vim:se ts=4 sw=4 et:
+-->
