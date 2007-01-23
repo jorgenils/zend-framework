@@ -63,6 +63,35 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test for date object creation using default format for a locale
+     */
+    public function testCreationDefaultFormat()
+    {
+        $locale = 'de_AT';
+        $date2  = new Zend_Date('2006-01-01');
+    }
+
+    /**
+     * Test for date object creation using default format for a locale
+     */
+    public function testCreationDefaultFormatConsistency()
+    {
+        $locale = 'de_AT';
+        //2006-01-01T00:00:00+01:00
+        $date1  = new Zend_Date('2006-01-01', Zend_Date::ISO_8601, $locale);
+        $date1string = $date1->get(Zend_Date::ISO_8601);
+
+        $date2  = new Zend_Date('2006-01-01', Zend_Date::DATES, $locale);
+        $this->assertSame($date1string, $date2->get(Zend_Date::ISO_8601));
+        $date2  = new Zend_Date('01-01-2006', Zend_Date::DATES, $locale);
+        $this->assertSame($date1string, $date2->get(Zend_Date::ISO_8601));
+        $date2  = new Zend_Date('2006-01-01', null, $locale);
+        $this->assertSame($date1string, $date2->get(Zend_Date::ISO_8601));
+        $date2  = new Zend_Date('2006-01-01');
+        $this->assertSame($date1string, $date2->get(Zend_Date::ISO_8601));
+    }
+
+    /**
      * Test for creation with timestamp
      */
     public function testCreationTimestamp()
