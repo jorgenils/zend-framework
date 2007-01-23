@@ -2195,10 +2195,30 @@ class Zend_Date extends Zend_Date_DateObject {
                 break;
 
             default :
-                if (is_numeric($date)) {
-                    return $this->_assign($calc, $date, $this->getUnixTimestamp());
+                if (!is_numeric($date)) {
+                    try {
+                        $parsed = Zend_Locale_Format::getDate($date, null, $locale);
+
+                        if ($calc == 'set') {
+                            --$parsed['month'];
+                            --$month;
+                            --$parsed['day'];
+                            --$day;
+                            $parsed['year'] -= 1970;
+                            $year -= 1970;
+                        }
+                        return $this->_assign($calc, $this->mktime(
+                            isset($parsed['hour']) ? $parsed['hour'] : 0,
+                            isset($parsed['minute']) ? $parsed['minute'] : 0,
+                            isset($parsed['second']) ? $parsed['second'] : 0,
+                            1 + $parsed['month'], 1 + $parsed['day'], 1970 + $parsed['year'],
+                            $this->_DST, $this->_GMT), $this->getUnixTimestamp());
+                    } catch (Zend_Locale_Exception $e) {
+                        throw new Zend_Date_Exception($e->getMessage(), $date);
+                    }
                 }
-                throw new Zend_Date_Exception("invalid date ($date) operand, timestamp expected", $date);
+                return $this->_assign($calc, $date, $this->getUnixTimestamp());
+                // throw new Zend_Date_Exception("invalid date ($date) operand, timestamp expected", $date);
                 break;
         }
     }
