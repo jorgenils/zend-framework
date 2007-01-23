@@ -195,25 +195,20 @@ class Zend_Date extends Zend_Date_DateObject {
      *
      * @param  string                    $calc    Type of calculation to make
      * @param  string|integer|Zend_Date  $stamp   Timestamp to calculate, when null the actual timestamp is calculated
-     * @param  string|Zend_Locale        $locale  Locale for parsing input
      * @return Zend_Date|integer
      * @throws Zend_Date_Exception
      */
-    private function _timestamp($calc, $stamp, $locale)
+    private function _timestamp($calc, $stamp)
     {
-        if ($locale === null) {
-            $locale = $this->getLocale();
-        }
-
         if ($stamp instanceof Zend_Date) {
             // extract timestamp from object
-            $stamp = $stamp->get(Zend_Date::TIMESTAMP, true, $locale);
+            $stamp = $stamp->get(Zend_Date::TIMESTAMP, true);
         }
 
         if ($calc === 'set') {
             $return = $this->setUnixTimestamp($stamp);
         } else {
-            $return = $this->_calcdetail($calc, $stamp, Zend_Date::TIMESTAMP, $locale);
+            $return = $this->_calcdetail($calc, $stamp, Zend_Date::TIMESTAMP, null);
         }
         if ($calc != 'cmp') {
             return $this;
@@ -226,13 +221,12 @@ class Zend_Date extends Zend_Date_DateObject {
      * Sets a new timestamp
      *
      * @param  integer|string|Zend_Date  $timestamp  Timestamp to set
-     * @param  string|Zend_Locale        $locale     OPTIONAL Locale for parsing input
      * @return Zend_Date
      * @throws Zend_Date_Exception
      */
-    public function setTimestamp($timestamp, $locale = null)
+    public function setTimestamp($timestamp)
     {
-        return $this->_timestamp('set', $timestamp, $locale);
+        return $this->_timestamp('set', $timestamp);
     }
 
 
@@ -240,13 +234,12 @@ class Zend_Date extends Zend_Date_DateObject {
      * Adds a timestamp
      *
      * @param  integer|string      $timestamp  Timestamp to add
-     * @param  string|Zend_Locale  $locale     OPTIONAL Locale for parsing input
      * @return Zend_Date
      * @throws Zend_Date_Exception
      */
-    public function addTimestamp($timestamp, $locale = null)
+    public function addTimestamp($timestamp)
     {
-        return $this->_timestamp('add', $timestamp, $locale);
+        return $this->_timestamp('add', $timestamp);
     }
 
 
@@ -254,13 +247,12 @@ class Zend_Date extends Zend_Date_DateObject {
      * Subtracts a timestamp
      *
      * @param  integer|string      $timestamp  Timestamp to sub
-     * @param  string|Zend_Locale  $locale     OPTIONAL Locale for parsing input
      * @return Zend_Date
      * @throws Zend_Date_Exception
      */
-    public function subTimestamp($timestamp, $locale = null)
+    public function subTimestamp($timestamp)
     {
-        return $this->_timestamp('sub', $timestamp, $locale);
+        return $this->_timestamp('sub', $timestamp);
     }
 
 
@@ -268,13 +260,12 @@ class Zend_Date extends Zend_Date_DateObject {
      * Compares two timestamps, returning the difference as integer
      *
      * @param  integer|string      $timestamp  Timestamp to compare
-     * @param  string|Zend_Locale  $locale     OPTIONAL Locale for parsing input
      * @return integer  0 = equal, 1 = later, -1 = earlier
      * @throws Zend_Date_Exception
      */
-    public function compareTimestamp($timestamp, $locale = null)
+    public function compareTimestamp($timestamp)
     {
-        return $this->_timestamp('cmp', $timestamp, $locale);
+        return $this->_timestamp('cmp', $timestamp);
     }
 
 
