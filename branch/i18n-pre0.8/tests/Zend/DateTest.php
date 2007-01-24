@@ -1607,12 +1607,8 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $date->set($d2, Zend_Date::YEAR_SHORT, 'en_US');
         $this->assertSame($date->get(Zend_Date::W3C),'2002-02-14T00:31:30+01:00');
         $date->setTimeZone('UTC');
-        try {
-            $date->set(-20, Zend_Date::YEAR_SHORT, 'en_US');
-            $this->fail();
-        } catch (Zend_Date_Exception $e) {
-            // success
-        }
+        $date->set(-20, Zend_Date::YEAR_SHORT, 'en_US');
+        $this->assertSame($date->get(Zend_Date::W3C),'-20-02-13T23:31:30+00:00');
         $date->set($d2, Zend_Date::YEAR_SHORT, 'en_US');
         $this->assertSame($date->get(Zend_Date::W3C),'2002-02-13T23:31:30+00:00');
         $date->setTimezone('Europe/Vienna');
@@ -3447,10 +3443,12 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $result = $date->setDate(Zend_Date::now());
         $this->assertTrue($result instanceof Zend_Date);
         $result = $date->setDate('11.05.2008');
-        $this->assertSame($result->get(Zend_Date::W3C),'2008-04-11T00:31:30+02:00');
-        $this->assertSame($date->get(Zend_Date::W3C),'2008-04-11T00:31:30+02:00');
+        // Hint: the hour changes from 0 to 1 because of DST... 
+        // An hour is added by winter->summertime change
+        $this->assertSame($result->get(Zend_Date::W3C),'2008-04-11T01:31:30+02:00');
+        $this->assertSame($date->get(Zend_Date::W3C),'2008-04-11T01:31:30+02:00');
         $date->setDate('2008-05-11','YYYY-MM-dd');
-        $this->assertSame($date->get(Zend_Date::W3C),'2008-04-11T00:31:30+02:00');
+        $this->assertSame($date->get(Zend_Date::W3C),'2008-04-11T01:31:30+02:00');
         $date->setDate($d2);
         $this->assertSame($date->get(Zend_Date::W3C),'2009-02-14T00:31:30+01:00');
     }
