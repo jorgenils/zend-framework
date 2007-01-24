@@ -192,7 +192,7 @@ class Zend_Locale_Format
         $format  = Zend_Locale_Data::getContent($locale, 'decimalnumberformat');
         $format  = $format['default'];
         iconv_set_encoding('internal_encoding', 'UTF-8');
-
+        
         // seperate negative format pattern when avaiable 
         if (iconv_strpos($format, ';') !== false) {
             if (call_user_func(Zend_Locale_Math::$comp, $value, 0) < 0) {
@@ -243,19 +243,17 @@ class Zend_Locale_Format
             $format = iconv_substr($format, 0, $point) . $symbols['decimal'] . iconv_substr($prec, 2).
                       iconv_substr($format, iconv_strrpos($format, '#') + 1);
         }
-
         // Add seperation
         if ($group == 0) {
             // no seperation
             $format = $number . iconv_substr($format, $point);
             
         } else if ($group == $group2) {
-            
             // only 1 seperation
             $seperation = ($point - $group - 1);
-            for ($x = iconv_strlen($number); $x > $group2; $x -= $seperation) {
+            for ($x = iconv_strlen($number); $x > $seperation; $x -= $seperation) {
                 if (iconv_substr($number, 0, $x - $seperation) !== "") {
-                     $number = iconv_substr($number, 0, $x - $seperation) . $symbols['group']
+                    $number = iconv_substr($number, 0, $x - $seperation) . $symbols['group']
                              . iconv_substr($number, $x - $seperation);
                 }
             }
