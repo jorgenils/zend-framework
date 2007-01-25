@@ -1639,12 +1639,8 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $date->set($d2, Zend_Date::YEAR_SHORT_8601, 'en_US');
         $this->assertSame($date->get(Zend_Date::W3C),'2002-02-14T00:31:30+01:00');
         $date->setTimeZone('UTC');
-        try {
-            $date->set(-20, Zend_Date::YEAR_SHORT_8601, 'en_US');
-            $this->fail();
-        } catch (Zend_Date_Exception $e) {
-            // success
-        }
+        $date->set(-20, Zend_Date::YEAR_SHORT_8601, 'en_US');
+        $this->assertSame($date->get(Zend_Date::W3C),'-20-02-13T23:31:30+00:00');
         $date->set($d2, Zend_Date::YEAR_SHORT_8601, 'en_US');
         $this->assertSame($date->get(Zend_Date::W3C),'2002-02-13T23:31:30+00:00');
         $date->setTimezone('Europe/Vienna');
