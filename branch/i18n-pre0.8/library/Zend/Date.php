@@ -1450,12 +1450,15 @@ class Zend_Date extends Zend_Date_DateObject {
 
             case Zend_Date::YEAR_8601 :
                 if (is_numeric($date)) {
-                    if ($calc == 'set') {
-                        $date -= 1970;
-                        $year -= 1970;
+                    if ($calc == 'add') {
+                        $date += $year;
+                        $calc = 'set';
+                    } else if ($calc == 'sub') {
+                        $date -= $year;
+                        $calc = 'set';
                     }
-                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1, 1, 1970 + intval($date), $this->_DST, false),
-                                                 $this->mktime(0, 0, 0, 1, 1, 1970 + $year,         $this->_DST, false));
+                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1, 1, intval($date), $this->_DST, false),
+                                                 $this->mktime(0, 0, 0, 1, 1, $year,         $this->_DST, false));
                 }
                 throw new Zend_Date_Exception("invalid date ($date) operand, year expected", $date);
                 break;
@@ -1484,6 +1487,13 @@ class Zend_Date extends Zend_Date_DateObject {
                             $date += 100;
                         }
                     }
+                    if ($calc == 'add') {
+                        $date += $year;
+                        $calc = 'set';
+                    } else if ($calc == 'sub') {
+                        $date -= $year;
+                        $calc = 'set';
+                    }
                     return $this->_assign($calc, $this->mktime(0, 0, 0, 1, 1, $date, $this->_DST, false),
                                                  $this->mktime(0, 0, 0, 1, 1, $year, $this->_DST, false));
                 }
@@ -1494,18 +1504,21 @@ class Zend_Date extends Zend_Date_DateObject {
             case Zend_Date::YEAR_SHORT_8601 :
                 if (is_numeric($date)) {
                     $date = intval($date);
-                    if (($date >= 0) and ($date <= 100)) {
+                    if (($date >= 0) and ($date <= 100) and ($calc == 'set')) {
                         $date += 1900;
                         if ($date < 1970) {
                             $date += 100;
                         }
-                        if ($calc == 'set') {
-                            $date -= 1970;
-                            $year -= 1970;
-                        }
-                        return $this->_assign($calc, $this->mktime(0, 0, 0, 1, 1, 1970 + $date, $this->_DST, false),
-                                                     $this->mktime(0, 0, 0, 1, 1, 1970 + $year, $this->_DST, false));
                     }
+                    if ($calc == 'add') {
+                        $date += $year;
+                        $calc = 'set';
+                    } else if ($calc == 'sub') {
+                        $date -= $year;
+                        $calc = 'set';
+                    }
+                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1, 1, $date, $this->_DST, false),
+                                                 $this->mktime(0, 0, 0, 1, 1, $year, $this->_DST, false));
                 }
                 throw new Zend_Date_Exception("invalid date ($date) operand, year expected", $date);
                 break;
