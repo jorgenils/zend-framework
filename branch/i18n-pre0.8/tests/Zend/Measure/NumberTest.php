@@ -192,31 +192,6 @@ class Zend_Measure_NumberTest extends PHPUnit_Framework_TestCase
 
 
     /**
-     * test for serialization
-     * expected string
-     */
-    public function testNumberSerialize()
-    {
-        $value = new Zend_Measure_Number('string -100.100,200',Zend_Measure_Number::STANDARD,'de');
-        $serial = $value->serialize();
-        $this->assertTrue(!empty($serial),'Zend_Measure_Number not serialized');
-    }
-
-
-    /**
-     * test for unserialization
-     * expected object
-     */
-    public function testNumberUnSerialize()
-    {
-        $value = new Zend_Measure_Number('string -100.100,200',Zend_Measure_Number::STANDARD,'de');
-        $serial = $value->serialize();
-        $newvalue = unserialize($serial);
-        $this->assertTrue($value->equals($newvalue),'Zend_Measure_Number not unserialized');
-    }
-
-
-    /**
      * test for set positive value
      * expected integer
      */
@@ -515,7 +490,7 @@ class Zend_Measure_NumberTest extends PHPUnit_Framework_TestCase
     public function testNumberToString()
     {
         $value = new Zend_Measure_Number('-100',Zend_Measure_Number::STANDARD,'de');
-        $this->assertEquals($value->toString(), '100', 'Value 100 expected');
+        $this->assertEquals($value->toString(), '100 ⑽', 'Value 100 ⑽ expected');
     }
 
 
@@ -526,7 +501,7 @@ class Zend_Measure_NumberTest extends PHPUnit_Framework_TestCase
     public function testNumber_ToString()
     {
         $value = new Zend_Measure_Number('-100',Zend_Measure_Number::STANDARD,'de');
-        $this->assertEquals($value->__toString(), '100', 'Value 100 expected');
+        $this->assertEquals($value->__toString(), '100 ⑽', 'Value 100 ⑽ expected');
     }
 
 
