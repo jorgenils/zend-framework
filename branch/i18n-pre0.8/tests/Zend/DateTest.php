@@ -2565,23 +2565,15 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
 
         $date->set($d2);
         $date->add(10, Zend_Date::YEAR_SHORT);
-        $this->assertSame($date->get(Zend_Date::W3C),'4012-01-04T00:36:50+01:00');
-        try {
-            $date->add(-10, Zend_Date::YEAR_SHORT);
-            $this->fail('exception expected');
-        } catch (Zend_Date_Exception $e) {
-            // success
-        }
+        $this->assertSame($date->get(Zend_Date::W3C),'2012-01-04T00:36:50+01:00');
+        $date->add(-10, Zend_Date::YEAR_SHORT);
+        $this->assertSame($date->get(Zend_Date::W3C),'2002-01-04T00:36:50+01:00');
 
         $date->set($d2);
         $date->add(10, Zend_Date::YEAR_SHORT_8601);
-        $this->assertSame($date->get(Zend_Date::W3C),'4012-01-04T00:36:50+01:00');
-        try {
-            $date->add(-10, Zend_Date::YEAR_SHORT_8601);
-            $this->fail('exception expected');
-        } catch (Zend_Date_Exception $e) {
-            // success
-        }
+        $this->assertSame($date->get(Zend_Date::W3C),'2012-01-04T00:36:50+01:00');
+        $date->add(-10, Zend_Date::YEAR_SHORT_8601);
+        $this->assertSame($date->get(Zend_Date::W3C),'2002-01-04T00:36:50+01:00');
 
         $date->set($d2);
         try {
