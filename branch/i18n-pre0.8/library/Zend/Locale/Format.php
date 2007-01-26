@@ -40,7 +40,8 @@ class Zend_Locale_Format
 {
 
     private static $_signs = array(
-        'Decimal'=>array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'), // Decimal
+        'Default'=>array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'), // Default == Latin
+        'Latin'=> array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'), // Latin == Default
         'Arab' => array( '٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'), // 0660 - 0669 arabic
         'Deva' => array( '०', '१', '२', '३', '४', '५', '६', '७', '८', '९'), // 0966 - 096F devanagari
         'Beng' => array( '০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'), // 09E6 - 09EF bengali
@@ -68,10 +69,10 @@ class Zend_Locale_Format
      * 'Decimal' representated the stardard numbers 0-9, if a script does not exist
      * an exception will be thrown.
      *
-     * Examples for input:
-     *   toNumberSystem('١١٠ Tests', 'Arab'); -> returns '100 Tests'
-     * Example for not supported script
-     *   toNumberSystem('١١٠ Tests', 'Decimal'); -> returns '100 Tests'
+     * Examples for conversion from Arabic to Latin numerals:
+     *   convertNumerals('١١٠ Tests', 'Arab'); -> returns '100 Tests'
+     * Example for conversion from Latin to Arabic numerals:
+     *   convertNumerals('100 Tests', 'Latin', 'Arab'); -> returns '١١٠ Tests'
      * 
      * @param  string  $input   String to convert
      * @param  string  $locale  Script to parse, see Zend_Locale->getScriptList() for details
@@ -79,13 +80,13 @@ class Zend_Locale_Format
      * @return string  Returns the converted input
      * @throws Zend_Locale_Exception
      */
-    public static function toNumberSystem($input, $from, $to = null)
+    public static function convertNumerals($input, $from, $to = null)
     {
         if (!array_key_exists($from, self::$_signs)) {
-            throw new Zend_Locale_Exception("script ($from) is no known script, use 'Decimal' for 0-9");
+            throw new Zend_Locale_Exception("script ($from) is no known script, use 'Latin' for 0-9");
         }
         if (($to !== null) and (!array_key_exists($to, self::$_signs))) {
-            throw new Zend_Locale_Exception("script ($to) is no known script, use 'Decimal' for 0-9");
+            throw new Zend_Locale_Exception("script ($to) is no known script, use 'Latin' for 0-9");
         }
         
         if (isset(self::$_signs[$from])) {

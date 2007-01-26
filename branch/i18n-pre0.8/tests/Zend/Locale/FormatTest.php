@@ -471,21 +471,21 @@ class Zend_Locale_FormatTest extends PHPUnit_Framework_TestCase
     public function testToNumberSystem()
     {
         try {
-            $value = Zend_Locale_Format::toNumberSystem('١١٠', 'xxxx');
+            $value = Zend_Locale_Format::convertNumerals('١١٠', 'xxxx');
             $this->fail("no conversion expected");
         } catch (Zend_Locale_Exception $e) {
             // success
         }
 
         try {
-            $value = Zend_Locale_Format::toNumberSystem('١١٠', 'Arab', 'xxxx');
+            $value = Zend_Locale_Format::convertNumerals('١١٠', 'Arab', 'xxxx');
             $this->fail("no conversion expected");
         } catch (Zend_Locale_Exception $e) {
             // success
         }
 
-        $this->assertEquals(Zend_Locale_Format::toNumberSystem('١١٠', 'Arab'), '110', "110 expected");
-        $this->assertEquals(Zend_Locale_Format::toNumberSystem('١١٠', 'Arab', 'Deva'), '११०', "११० expected");
-        $this->assertEquals(Zend_Locale_Format::toNumberSystem('110', 'Decimal', 'Arab'), '١١٠', "١١٠ expected");
+        $this->assertEquals(Zend_Locale_Format::convertNumerals('١١٠', 'Arab'), '110', "110 expected");
+        $this->assertEquals(Zend_Locale_Format::convertNumerals('١١٠', 'Arab', 'Deva'), '११०', "११० expected");
+        $this->assertEquals(Zend_Locale_Format::convertNumerals('110', 'Latin', 'Arab'), '١١٠', "١١٠ expected");
     }
 }
