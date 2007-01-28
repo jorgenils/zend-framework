@@ -119,7 +119,7 @@ abstract class Zend_Date_DateObject {
      * by allowing PHP to auto-convert to using a float value.
      *
      * Returns a timestamp relative to 1970/01/01 00:00:00 GMT/UTC.
-     * DST (Summer/Winter) time is only supported for 32bit timestamps.
+     * DST (Summer/Winter) is depriciated since php 5.1.0.
      * Year has to be 4 digits otherwise it would be recognised as
      * year 70 AD instead of 1970 AD as expected !!
      *
@@ -129,12 +129,10 @@ abstract class Zend_Date_DateObject {
      * @param  integer  $month
      * @param  integer  $day
      * @param  integer  $year
-     * @param  boolean  $dst     OPTIONAL Summer/Winter time (Daylight Savings Time)
      * @param  boolean  $gmt     OPTIONAL true = other arguments are for UTC time, false = arguments are for local time/date
      * @return  integer|float  timestamp (number of seconds elapsed relative to 1970/01/01 00:00:00 GMT/UTC)
      */
-    protected function mktime($hour, $minute, $second, $month, $day, $year, 
-                           $dst= -1, $gmt = false)
+    protected function mktime($hour, $minute, $second, $month, $day, $year, $gmt = false)
     {
         // complete date but in 32bit timestamp - use PHP internal
         if ((1901 < $year) and ($year < 2038)) {
@@ -144,8 +142,8 @@ abstract class Zend_Date_DateObject {
                 date_default_timezone_set($this->_timezone);
             }
 
-            $result = ($gmt) ? @gmmktime($hour, $minute, $second, $month, $day, $year, $dst) 
-                          :   @mktime($hour, $minute, $second, $month, $day, $year, $dst);
+            $result = ($gmt) ? @gmmktime($hour, $minute, $second, $month, $day, $year) 
+                             :   @mktime($hour, $minute, $second, $month, $day, $year);
             date_default_timezone_set($oldzone);
 
             return $result;
@@ -270,7 +268,6 @@ abstract class Zend_Date_DateObject {
      * Internal mktime function used by Zend_Date for handling 64bit timestamps.
      *
      * Returns a formatted date for a given timestamp.
-     * Cannot handle DST (Daylight Savings Time).
      *
      * @param  string   $format     format for output
      * @param  mixed    $timestamp
@@ -949,7 +946,7 @@ abstract class Zend_Date_DateObject {
      */
     public function setTimezone($zone = null)
     {
-        $oldzone = date_default_timezone_get();
+        $oldzone = @date_default_timezone_get();
         if ($zone === null) {
             $zone = $oldzone;
         }
