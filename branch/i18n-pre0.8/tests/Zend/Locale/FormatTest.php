@@ -184,7 +184,7 @@ class Zend_Locale_FormatTest extends PHPUnit_Framework_TestCase
      * test getInteger
      * expected integer
      */
-    public function testgetInteger()
+    public function stestgetInteger()
     {
         $this->assertEquals(Zend_Locale_Format::getInteger(0), 0, "value 0 expected");
         $this->assertEquals(Zend_Locale_Format::getInteger(-1234567), -1234567, "value -1234567 expected");
@@ -211,7 +211,7 @@ class Zend_Locale_FormatTest extends PHPUnit_Framework_TestCase
      * test toInteger
      * expected string
      */
-    public function testtoInteger()
+    public function stesttoInteger()
     {
         $this->assertEquals(Zend_Locale_Format::toInteger(0), '0', "string 0 expected");
         $this->assertEquals(Zend_Locale_Format::toInteger(0, 'de'), '0', "string 0 expected");
@@ -232,7 +232,7 @@ class Zend_Locale_FormatTest extends PHPUnit_Framework_TestCase
      * test isInteger
      * expected boolean
      */
-    public function testIsInteger()
+    public function stestIsInteger()
     {
         $this->assertEquals(Zend_Locale_Format::isInteger('-1.234.567,12345', 'de_AT'), TRUE, "TRUE expected");
         $this->assertEquals(Zend_Locale_Format::isInteger('textwithoutnumber', 'de_AT'), FALSE, "FALSE expected");

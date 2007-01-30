@@ -183,13 +183,19 @@ class Zend_Locale_Format
      */
     public static function toNumber($value, $precision = null, $locale = null)
     {
+        if (Zend_Locale::isLocale($precision)) {
+            $locale = $precision;
+            $precision = null;
+        }
+
         $format  = Zend_Locale_Data::getContent($locale, 'decimalnumberformat');
         $format  = $format['default'];
+
         if (is_int($precision)) {
             $format = substr($format, 0, strpos($format, '.'));
             if ((int) $precision > 0) {
                 $format .= ".";
-                $format .= str_pad($format, strlen($format) + $precision, '0');
+                $format = str_pad($format, strlen($format) + $precision, "0");
             }
         }
         return self::toNumberFormat($value, $format, $locale);
@@ -210,8 +216,12 @@ class Zend_Locale_Format
     public static function toNumberFormat($value, $format = null, $locale = null)
     {
         if (Zend_Locale::isLocale($format)) {
-            $locale    = $format;
+            $locale = $format;
             $format = null;
+        }
+
+        if ($locale instanceof Zend_Locale) {
+            $locale = $locale->toString();
         }
 
         // Get correct signs for this locale
@@ -225,6 +235,7 @@ class Zend_Locale_Format
             $precision = null;
         } else {
             $precision = substr($format, strpos($format, '.') + 1);
+
             if (is_numeric($precision)) {
                 $precision = strlen($precision);
                 $format = substr($format, 0, strpos($format, '.') + 1);
