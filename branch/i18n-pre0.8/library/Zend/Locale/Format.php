@@ -186,8 +186,11 @@ class Zend_Locale_Format
         $format  = Zend_Locale_Data::getContent($locale, 'decimalnumberformat');
         $format  = $format['default'];
         if (is_int($precision)) {
-            $format = substr($format, 0, strpos($format, '.') + 1);
-            $format = str_pad($format, strlen($format) + $precision, '0');
+            $format = substr($format, 0, strpos($format, '.'));
+            if ((int) $precision > 0) {
+                $format .= ".";
+                $format .= str_pad($format, strlen($format) + $precision, '0');
+            }
         }
         return self::toNumberFormat($value, $format, $locale);
     }
