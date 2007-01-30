@@ -622,20 +622,6 @@ class Zend_SessionTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(empty($result), "unsetAll() did not remove keys from namespace: '$result'");
     }
 
-    /**
-     * test constructor
-     * expect exception
-     */
-    public function testConstructor()
-    {
-        try {
-            $instance = new Zend_Session();
-        } catch (Zend_Session_Exception $e) {
-            $this->assertRegexp('/not.allowed/i', $e->getMessage());
-            return;
-        }
-        $this->fail('No exception was returned when trying to clone the session core; expected Zend_Session_Exception');
-    }
 
     /**
      * test unset() keys in non-default namespace
@@ -822,6 +808,7 @@ class Zend_SessionTest extends PHPUnit_Framework_TestCase
     public function testArrays()
     {
         $s = new Zend_Session_Namespace('aspace');
+        // http://framework.zend.com/issues/browse/ZF-800
         $this->markTestIncomplete(); // PHP 5.2.1 is required (fixes a bug with magic __get() returning by reference)
         $id = Zend_Session::getId();
         $this->assertSame($id, session_id());

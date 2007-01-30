@@ -164,21 +164,11 @@ class Zend_Session extends Zend_Session_Persistence
     static private $_defaultOptionsSet = false;
 
 
-    public function __construct()
-    {
-        throw new Zend_Session_Exception('Zend_Session follows the singleton pattern.  Instances are not allowed.');
-    }
-
-
     /**
-     * Clone overriding - make sure that a developer cannot clone the core instance
-     *
-     * @throws Zend_Session_Exception
-     * @return void
+     * Constructor overriding - make sure that a developer cannot instantiate
      */
-    public function __clone()
+    private function __construct()
     {
-        throw new Zend_Session_Exception('Zend_Session follows the singleton pattern.  Cloning is not allowed.');
     }
 
 

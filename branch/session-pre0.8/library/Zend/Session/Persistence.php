@@ -21,7 +21,7 @@
  */
 
 /**
- * Zend_Session
+ * Zend_Session_Persistence
  *
  * @category Zend
  * @package Zend_Session

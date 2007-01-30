@@ -22,7 +22,7 @@
 
 
 /**
- * Zend_Session
+ * Zend_Session_Namespace
  *
  * @category Zend
  * @package Zend_Session
@@ -36,13 +36,6 @@ class Zend_Session_Namespace extends Zend_Session_Persistence implements Iterato
      * used as option to constructor to prevent additional instances to the same namespace
      */
     const SINGLE_INSTANCE = true;
-
-    /**
-     * Session_Core instance
-     *
-     * @var Zend_Session_Core
-     */
-    protected $_sessionCore = null;
 
     /**
      * Namespace - which namespace this instance of zend-session is saving-to/getting-from
@@ -66,11 +59,10 @@ class Zend_Session_Namespace extends Zend_Session_Persistence implements Iterato
     static protected $_singleInstances = array();
 
     /**
-     * __construct() - This will create an instance that saves to/gets from an
-     * instantiated core.  An optional namespace allows for saving/getting
-     * to isolated sections of the session.  An optional argument $singleInstance
-     * will prevent any futured attempts of getting a Zend_Session object in the
-     * same namespace that is provided.
+     * __construct() - Returns an instance object bound to a particular, isolated section
+     * of the session, identified by $namespace name (defaulting to 'Default').
+     * The optional argument $singleInstance will prevent construction of additional
+     * instance objects acting as accessors to this $namespace.
      *
      * @param string $namespace       - programmatic name of the requested namespace
      * @param bool $singleInstance    - prevent creation of additional accessor instance objects for this namespace
@@ -249,7 +241,7 @@ class Zend_Session_Namespace extends Zend_Session_Persistence implements Iterato
             throw new Zend_Session_Exception("The '$name' key must be a non-empty string");
         }
 
-        if (Zend_Session::isWritable() === false) {
+        if (parent::$_writable === false) {
             throw new Zend_Session_Exception(parent::_THROW_NOT_WRITABLE_MSG);
         }
 
@@ -302,7 +294,7 @@ class Zend_Session_Namespace extends Zend_Session_Persistence implements Iterato
      */
     public function setExpirationSeconds($seconds, $variables = null)
     {
-        if (Zend_Session::isWritable() === false) {
+        if (parent::$_writable === false) {
             throw new Zend_Session_Exception(parent::_THROW_NOT_WRITABLE_MSG);
         }
 
@@ -342,7 +334,7 @@ class Zend_Session_Namespace extends Zend_Session_Persistence implements Iterato
      */
     public function setExpirationHops($hops, $variables = null, $hopCountOnUsageOnly = false)
     {
-        if (Zend_Session::isWritable() === false) {
+        if (parent::$_writable === false) {
             throw new Zend_Session_Exception(parent::_THROW_NOT_WRITABLE_MSG);
         }
 
