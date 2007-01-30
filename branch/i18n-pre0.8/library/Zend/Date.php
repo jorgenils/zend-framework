@@ -1453,7 +1453,7 @@ class Zend_Date extends Zend_Date_DateObject {
                         $date += $year;
                         $calc = 'set';
                     } else if ($calc == 'sub') {
-                        $date -= $year;
+                        $date = $year - $date;
                         $calc = 'set';
                     }
                     return $this->_assign($calc, $this->mktime(0, 0, 0, 1, 1, intval($date), true),
@@ -1468,7 +1468,7 @@ class Zend_Date extends Zend_Date_DateObject {
                         $date += $year;
                         $calc = 'set';
                     } else if ($calc == 'sub') {
-                        $date -= $year;
+                        $date = $year - $date;
                         $calc = 'set';
                     }
                     return $this->_assign($calc, $this->mktime(0, 0, 0, 1, 1, intval($date), true),
@@ -1490,7 +1490,7 @@ class Zend_Date extends Zend_Date_DateObject {
                         $date += $year;
                         $calc = 'set';
                     } else if ($calc == 'sub') {
-                        $date -= $year;
+                        $date = $year - $date;
                         $calc = 'set';
                     }
                     return $this->_assign($calc, $this->mktime(0, 0, 0, 1, 1, $date, true),
@@ -1513,7 +1513,7 @@ class Zend_Date extends Zend_Date_DateObject {
                         $date += $year;
                         $calc = 'set';
                     } else if ($calc == 'sub') {
-                        $date -= $year;
+                        $date = $year - $date;
                         $calc = 'set';
                     }
                     return $this->_assign($calc, $this->mktime(0, 0, 0, 1, 1, $date, true),
@@ -1761,8 +1761,8 @@ class Zend_Date extends Zend_Date_DateObject {
                     $year  -= 1970;
                 }
 
-                return $this->_assign($calc, $this->mktime($hours, $minutes, $seconds, 1 + $months, 1 + $days, 1970 + $years, 0, true),
-                                             $this->mktime($hour,  $minute,  $second,  1 + $month,  1 + $day,  1970 + $year,  0, true));
+                return $this->_assign($calc, $this->mktime($hours, $minutes, $seconds, 1 + $months, 1 + $days, 1970 + $years, false),
+                                             $this->mktime($hour,  $minute,  $second,  1 + $month,  1 + $day,  1970 + $year,  false));
                 break;
 
             case Zend_Date::RFC_2822 :
@@ -1786,8 +1786,8 @@ class Zend_Date extends Zend_Date_DateObject {
                     $years -= 1970;
                     $year  -= 1970;
                 }
-                return $this->_assign($calc, $this->mktime($hours, $minutes, $seconds, 1 + $months, 1 + $days, 1970 + $years, true),
-                                             $this->mktime($hour,  $minute,  $second,  1 + $month,  1 + $day,  1970 + $year,  true));
+                return $this->_assign($calc, $this->mktime($hours, $minutes, $seconds, 1 + $months, 1 + $days, 1970 + $years, false),
+                                             $this->mktime($hour,  $minute,  $second,  1 + $month,  1 + $day,  1970 + $year,  false));
                 break;
 
             case Zend_Date::TIMESTAMP :
@@ -2050,8 +2050,8 @@ class Zend_Date extends Zend_Date_DateObject {
                     $years -= 1970;
                     $year  -= 1970;
                 }
-                return $this->_assign($calc, $this->mktime($hours, $minutes, $seconds, 1 + $months, 1 + $days, 1970 + $years, true),
-                                             $this->mktime($hour,  $minute,  $second,  1 + $month,  1 + $day,  1970 + $year,  true));
+                return $this->_assign($calc, $this->mktime($hours, $minutes, $seconds, 1 + $months, 1 + $days, 1970 + $years, false),
+                                             $this->mktime($hour,  $minute,  $second,  1 + $month,  1 + $day,  1970 + $year,  false));
                 break;
 
             case Zend_Date::RFC_850 :
@@ -2927,32 +2927,26 @@ class Zend_Date extends Zend_Date_DateObject {
     /**
      * Returns if the set date is yesterdays date
      *
-     * @param  integer  $today  OPTIONAL Used only for unit tests.
      * @return boolean
      */
-    public function isYesterday($today = null)
+    public function isYesterday()
     {
-        list($year, $month, $day) = explode('-', $this->date('Y-m-d', $today === null ? time() : $today));
-        // adjusts for leap days and DST changes that are timezone specific
-        $yesterday = $this->date('Ymd', $this->mktime(0, 0, 0, $month, $day -1, $year));
-        $day   = $this->date('Ymd', $this->getUnixTimestamp());
-        return $day == $yesterday;
+        $today = $this->date('Ymd',$this->mktime(0, 0, 0, $this->date('m'), $this->date('d') - 1, $this->date('Y')));
+        $day   = $this->date('Ymd',$this->getUnixTimestamp());
+        return ($today == $day);
     }
 
 
     /**
      * Returns if the set date is tomorrows date
      *
-     * @param  integer  $today  OPTIONAL Used only for unit tests.
      * @return boolean
      */
-    public function isTomorrow($today = null)
+    public function isTomorrow()
     {
-        list($year, $month, $day) = explode('-', $this->date('Y-m-d', $today === null ? time() : $today));
-        // adjusts for leap days and DST changes that are timezone specific
-        $tomorrow = $this->date('Ymd', $this->mktime(0, 0, 0, $month, $day +1, $year));
-        $day   = $this->date('Ymd', $this->getUnixTimestamp());
-        return $day == $tomorrow;
+        $today = $this->date('Ymd', $this->mktime(0, 0, 0, $this->date('m'), $this->date('d') + 1, $this->date('Y'), true));
+        $day   = $this->date('Ymd',$this->getUnixTimestamp());
+        return ($today == $day);
     }
 
 
