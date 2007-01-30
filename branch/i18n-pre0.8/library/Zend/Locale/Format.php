@@ -183,17 +183,54 @@ class Zend_Locale_Format
      */
     public static function toNumber($value, $precision = null, $locale = null)
     {
-        if (Zend_Locale::isLocale($precision)) {
-            $locale    = $precision;
-            $precision = null;
+        $format  = Zend_Locale_Data::getContent($locale, 'decimalnumberformat');
+        $format  = $format['default'];
+        if (is_int($precision)) {
+            $format = substr($format, 0, strpos($format, '.') + 1);
+            $format = str_pad($format, strlen($format) + $precision, '0');
+        }
+        return self::toNumberFormat($value, $format, $locale);
+    }
+        
+    /**
+     * Returns a self formatted number
+     * The seperation and fraction sign is used from the set locale
+     * ##0.#  -> 12345.12345 -> 12345.12345
+     * ##0.00 -> 12345.12345 -> 12345.12
+     * ##,##0.00 -> 12345.12345 -> 12,345.12
+     * 
+     * @param  string              $value      Number to localize
+     * @param  integer             $format     OPTIONAL Format to use
+     * @param  string|Zend_Locale  $locale     OPTIONAL Locale for parsing
+     * @return string  locale formatted number
+     */
+    public static function toNumberFormat($value, $format = null, $locale = null)
+    {
+        if (Zend_Locale::isLocale($format)) {
+            $locale    = $format;
+            $format = null;
         }
 
         // Get correct signs for this locale
         $symbols = Zend_Locale_Data::getContent($locale, 'numbersymbols');
-        $format  = Zend_Locale_Data::getContent($locale, 'decimalnumberformat');
-        $format  = $format['default'];
         iconv_set_encoding('internal_encoding', 'UTF-8');
-        
+
+        // Get format
+        if ($format === null) {
+            $format  = Zend_Locale_Data::getContent($locale, 'decimalnumberformat');
+            $format  = $format['default'];
+            $precision = null;
+        } else {
+            $precision = substr($format, strpos($format, '.') + 1);
+            if (is_numeric($precision)) {
+                $precision = strlen($precision);
+                $format = substr($format, 0, strpos($format, '.') + 1);
+                $format .= '###';
+            } else {
+                $precision = null;
+            }
+        }
+
         // seperate negative format pattern when avaiable 
         if (iconv_strpos($format, ';') !== false) {
             if (call_user_func(Zend_Locale_Math::$comp, $value, 0) < 0) {
@@ -416,8 +453,10 @@ class Zend_Locale_Format
         $hour  = iconv_strpos($format, 'H');
         $min   = iconv_strpos($format, 'm');
         $sec   = iconv_strpos($format, 's');
+        $am    = null;
         if ($hour === false) {
             $hour = iconv_strpos($format, 'h');
+            $am   = 1;
         }
         if ($day === false) {
             $day = iconv_strpos($format, 'E');
@@ -459,6 +498,16 @@ class Zend_Locale_Format
                 $monthlist = Zend_Locale_Data::getContent($locale, 'monthlist', array('gregorian', 'wide'));
             } else {
                 $monthlist = Zend_Locale_Data::getContent($locale, 'monthlist', array('gregorian', 'abbreviated'));
+            }
+        }
+
+        // get daytime
+        if ((($am == 2) or ($am == 3)) and (iconv_strpos($format, ' a') !== false)) {
+            $daytime = Zend_Locale_Data::getContent($locale, 'daytime', 'gregorian');
+            if (iconv_strpos($number, $daytime['am'])) {
+                $am = 2;
+            } else if (iconv_strpos($number, $daytime['pm'])) {
+                $am = 3;
             }
         }
 
@@ -569,6 +618,15 @@ class Zend_Locale_Format
             }
         }
 
+        // AM/PM correction
+        if ($hour !== false) {
+            if (($am == 2) and ($result['hour'] == 12)){
+                $result['hour'] = 0;
+            } else if ($am == 3) {
+                $result['hour'] += 12;
+            }
+        }
+        
         if ($day !== false) {
             // fix false month
             if (isset($result['day']) and isset($result['month'])) {
