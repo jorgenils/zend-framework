@@ -4026,4 +4026,36 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * test isTomorrow() and isYesterday()
+     */
+    public function testIsDay()
+    {
+        date_default_timezone_set('Europe/Vienna'); // should have DST
+        $locale = new Zend_Locale('de_AT');
+        $date = new Zend_Date_TestHelper('01.01.2006', Zend_Date::DATES, $locale);
+
+        $this->assertFalse($date->isTomorrow($date->mktime(0, 0, 0, 1, 1, 2006)));
+        $this->assertFalse($date->isYesterday($date->mktime(0, 0, 0, 1, 1, 2006)));
+
+        $this->assertTrue($date->isTomorrow($date->mktime(0, 0, 0, 12, 31, 2005)));
+        $this->assertFalse($date->isYesterday($date->mktime(0, 0, 0, 12, 31, 2005)));
+
+        $this->assertFalse($date->isTomorrow($date->mktime(0, 0, 0, 12, 31, 2006)));
+        $this->assertFalse($date->isYesterday($date->mktime(0, 0, 0, 12, 31, 2006)));
+
+        $this->assertTrue($date->isTomorrow($date->mktime(0, 0, 0, 1, 0, 2006)));
+        $this->assertFalse($date->isYesterday($date->mktime(0, 0, 0, 1, 0, 2006)));
+
+        $this->assertFalse($date->isTomorrow($date->mktime(0, 0, 0, 1, 2, 2006)));
+        $this->assertTrue($date->isYesterday($date->mktime(0, 0, 0, 1, 2, 2006)));
+    }
+}
+
+class Zend_Date_TestHelper extends Zend_Date
+{
+    public function mktime($hour, $minute, $second, $month, $day, $year, $dst= -1, $gmt = false)
+    {
+        return parent::mktime($hour, $minute, $second, $month, $day, $year, $dst, $gmt);
+    }
 }

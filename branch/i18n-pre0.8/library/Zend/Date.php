@@ -2927,26 +2927,32 @@ class Zend_Date extends Zend_Date_DateObject {
     /**
      * Returns if the set date is yesterdays date
      *
+     * @param  integer  $today  OPTIONAL Used only for unit tests.
      * @return boolean
      */
-    public function isYesterday()
+    public function isYesterday($today = null)
     {
-        $today = $this->date('Ymd');
-        $day   = $this->date('Ymd',$this->getUnixTimestamp());
-        return (((int) $today - (int) $day) == 1);
+        list($year, $month, $day) = explode('-', $this->date('Y-m-d', $today === null ? time() : $today));
+        // adjusts for leap days and DST changes that are timezone specific
+        $yesterday = $this->date('Ymd', $this->mktime(0, 0, 0, $month, $day -1, $year));
+        $day   = $this->date('Ymd', $this->getUnixTimestamp());
+        return $day == $yesterday;
     }
 
 
     /**
      * Returns if the set date is tomorrows date
      *
+     * @param  integer  $today  OPTIONAL Used only for unit tests.
      * @return boolean
      */
-    public function isTomorrow()
+    public function isTomorrow($today = null)
     {
-        $today = $this->date('Ymd');
-        $day   = $this->date('Ymd',$this->getUnixTimestamp());
-        return (($today - $day) == -1);
+        list($year, $month, $day) = explode('-', $this->date('Y-m-d', $today === null ? time() : $today));
+        // adjusts for leap days and DST changes that are timezone specific
+        $tomorrow = $this->date('Ymd', $this->mktime(0, 0, 0, $month, $day +1, $year));
+        $day   = $this->date('Ymd', $this->getUnixTimestamp());
+        return $day == $tomorrow;
     }
 
 
