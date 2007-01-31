@@ -341,9 +341,11 @@ abstract class Zend_Measure_Abstract
         $object->setType($this->getType());
         $value  = $this->getValue() - $object->getValue();
 
-        if ($value == 0) {
-            return true;
+        if ($value < 0) {
+            return -1;
+        } else if ($value > 0) {
+            return 1;
         }
-        return false;
+        return 0;
     }
 }

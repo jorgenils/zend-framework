@@ -268,7 +268,8 @@ class Zend_Measure_AccelerationTest extends PHPUnit_Framework_TestCase
         $value  = new Zend_Measure_Acceleration('-100',Zend_Measure_Acceleration::STANDARD,'de');
         $value2 = new Zend_Measure_Acceleration('200',Zend_Measure_Acceleration::STANDARD,'de');
         $value3 = new Zend_Measure_Acceleration('200',Zend_Measure_Acceleration::STANDARD,'de');
-        $this->assertFalse($value->compare($value2));
-        $this->assertTrue($value2->compare($value3));
+        $this->assertEquals($value->compare($value2), -1);
+        $this->assertEquals($value2->compare($value), 1);
+        $this->assertEquals($value2->compare($value3), 0);
     }
 }
