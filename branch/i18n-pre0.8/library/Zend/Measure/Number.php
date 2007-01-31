@@ -68,7 +68,7 @@ class Zend_Measure_Number extends Zend_Measure_Abstract
         'DUODECIMAL'  => array(12, '⑿'),
         'HEXADECIMAL' => array(16, '⒃'),
         'ROMAN'       => array(99, ''),
-        'STANDARD'    => array(99, '')
+        'STANDARD'    => 'DECIMAL'
     );
 
 
@@ -135,13 +135,24 @@ class Zend_Measure_Number extends Zend_Measure_Abstract
      */
     public function __construct($value, $type, $locale = null)
     {
+        if (Zend_Locale::isLocale($type)) {
+            $locale = $type;
+            $type = null;
+        }
+
         if ($locale === null) {
-            $locale = $this->_Locale;
+            $locale = new Zend_Locale();
+        }
+
+        if ($locale instanceof Zend_Locale) {
+            $locale = $locale->toString();
         }
 
         if (!$this->_Locale = Zend_Locale::isLocale($locale, true)) {
             throw new Zend_Measure_Exception("Language ($locale) is unknown");
         }
+
+        $this->_Locale = $locale;
 
         if ($type === null) {
             $type = $this->_UNITS['STANDARD'];

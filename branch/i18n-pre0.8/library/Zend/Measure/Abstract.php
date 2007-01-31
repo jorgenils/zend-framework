@@ -20,6 +20,9 @@
  */
 
 
+require_once 'Zend/Locale.php';
+
+
 /**
  * @category   Zend
  * @package    Zend_Measure
@@ -62,15 +65,26 @@ abstract class Zend_Measure_Abstract
      * @param  $locale locale - OPTIONAL a Zend_Locale Type
      * @throws Zend_Measure_Exception
      */
-    public function __construct($value, $type, $locale = null)
+    public function __construct($value, $type = null, $locale = null)
     {
+        if (Zend_Locale::isLocale($type)) {
+            $locale = $type;
+            $type = null;
+        }
+
         if ($locale === null) {
-            $locale = $this->_Locale;
+            $locale = new Zend_Locale();
+        }
+
+        if ($locale instanceof Zend_Locale) {
+            $locale = $locale->toString();
         }
 
         if (!$this->_Locale = Zend_Locale::isLocale($locale, true)) {
             throw new Zend_Measure_Exception("Language ($locale) is unknown");
         }
+
+        $this->_Locale = $locale;
 
         if ($type === null) {
             $type = $this->_UNITS['STANDARD'];
@@ -102,12 +116,21 @@ abstract class Zend_Measure_Abstract
      */
     public function setValue($value, $type = null, $locale = null)
     {
+        if (Zend_Locale::isLocale($type)) {
+            $locale = $type;
+            $type = null;
+        }
+
         if ($locale === null) {
             $locale = $this->_Locale;
         }
 
-        if (!$locale = Zend_Locale::isLocale($locale, true)) {
-            throw new Zend_Measure_Exception("Locale ($locale) is unknown");
+        if ($locale instanceof Zend_Locale) {
+            $locale = $locale->toString();
+        }
+
+        if (!Zend_Locale::isLocale($locale)) {
+            throw new Zend_Measure_Exception("Language ($locale) is unknown");
         }
 
         if ($type === null) {
@@ -163,7 +186,7 @@ abstract class Zend_Measure_Abstract
                     switch ($key) {
                         case "/":
                             if ($found != 0) {
-                                $value = call_user_func(Zend_Locale_Math::$div, $value, $found, 25);
+                                $value = @call_user_func(Zend_Locale_Math::$div, $value, $found, 25);
                             }
                             break;
                         case "+":
@@ -196,7 +219,7 @@ abstract class Zend_Measure_Abstract
                             break;
                         default:
                             if ($found != 0) {
-                                $value = call_user_func(Zend_Locale_Math::$div, $value, $found, 25);
+                                $value = @call_user_func(Zend_Locale_Math::$div, $value, $found, 25);
                             }
                             break;
                     }
@@ -311,13 +334,16 @@ abstract class Zend_Measure_Abstract
      * Compares two units
      *
      * @param $object  object of same unit type
-     * @return object
+     * @return boolean
      */
     public function compare($object)
     {
         $object->setType($this->getType());
         $value  = $this->getValue() - $object->getValue();
 
-        return $value;
+        if ($value == 0) {
+            return true;
+        }
+        return false;
     }
 }
