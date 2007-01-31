@@ -206,24 +206,17 @@ class Zend_Locale_Format
             if ((int) $precision > 0) {
                 $format .= ".";
                 $format = str_pad($format, strlen($format) + $precision, "0");
+                $value = round($value, $precision);
             }
             if (($rest != '0') and ($rest != '#')) {
                 $format .= $rest;
             }
-        }
-        $value = self::toNumberFormat($value, $format, $locale);
-        if ($precision == -1) {
-            $symbols = Zend_Locale_Data::getContent($locale, 'numbersymbols');
-            if (iconv_strpos($value, $symbols['decimal']) !== false) {
-                if (iconv_strpos($value, $symbols['minus']) > iconv_strpos($value, $symbols['decimal'])) {
-                    $value = iconv_substr($value, 0, iconv_strpos($value, $symbols['decimal']));
-//                    $value = $value . $symbols['minus'];
-                } else {
-                    $value = iconv_substr($value, 0, iconv_strpos($value, $symbols['decimal']));
-                }
+            if ($precision == -1) {
+                $value = round($value);
             }
         }
-        return $value;
+        
+        return self::toNumberFormat($value, $format, $locale);
     }
         
     /**
@@ -259,14 +252,17 @@ class Zend_Locale_Format
             $format  = $format['default'];
             $precision = null;
         } else {
-            $precision = substr($format, strpos($format, '.') + 1);
-
-            if (is_numeric($precision)) {
-                $precision = strlen($precision);
-                $format = substr($format, 0, strpos($format, '.') + 1);
-                $format .= '###';
+            if (strpos($format, '.')) {
+                $precision = substr($format, strpos($format, '.') + 1);
+                if (is_numeric($precision)) {
+                    $precision = strlen($precision);
+                    $format = substr($format, 0, strpos($format, '.') + 1);
+                    $format .= '###';
+                } else {
+                    $precision = null;
+                }
             } else {
-                $precision = null;
+                $value = round($value);
             }
         }
         
@@ -494,7 +490,6 @@ class Zend_Locale_Format
         $am    = null;
         if ($hour === false) {
             $hour = iconv_strpos($format, 'h');
-            $am   = 1;
         }
         if ($day === false) {
             $day = iconv_strpos($format, 'E');
@@ -540,12 +535,12 @@ class Zend_Locale_Format
         }
 
         // get daytime
-        if ((($am == 2) or ($am == 3)) and (iconv_strpos($format, ' a') !== false)) {
+        if (iconv_strpos($format, ' a') !== false) {
             $daytime = Zend_Locale_Data::getContent($locale, 'daytime', 'gregorian');
-            if (iconv_strpos($number, $daytime['am'])) {
-                $am = 2;
-            } else if (iconv_strpos($number, $daytime['pm'])) {
-                $am = 3;
+            if (iconv_strpos(strtoupper($number), strtoupper($daytime['am']))) {
+                $am = true;
+            } else if (iconv_strpos(strtoupper($number), strtoupper($daytime['pm']))) {
+                $am = false;
             }
         }
 
@@ -658,13 +653,13 @@ class Zend_Locale_Format
 
         // AM/PM correction
         if ($hour !== false) {
-            if (($am == 2) and ($result['hour'] == 12)){
+            if (($am === true) and ($result['hour'] == 12)){
                 $result['hour'] = 0;
-            } else if ($am == 3) {
+            } else if (($am === false) and ($result['hour'] != 12)) {
                 $result['hour'] += 12;
             }
         }
-        
+
         if ($day !== false) {
             // fix false month
             if (isset($result['day']) and isset($result['month'])) {
