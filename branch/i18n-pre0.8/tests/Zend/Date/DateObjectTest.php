@@ -423,6 +423,20 @@ class Zend_Date_DateObjectTest extends PHPUnit_Framework_TestCase
         $this->assertSame($date->date('S',6900691200, true),'rd');
         $this->assertSame($date->date('N',6900432000, true),'7');
     }
+
+    function testMktimeDay0And32()
+    {
+        // the following functionality is used by isTomorrow() and isYesterday() in Zend_Date.
+        list($month, $day, $year) = array(12,32,2005);
+        $date = new Zend_Date_DateObjectTestHelper(0);
+        $this->assertSame($date->date('Ymd', $date->mktime(0, 0, 0, $month, $day, $year)), '20060101');
+        list($month, $day, $year) = array(2,29,2005);
+        $this->assertSame($date->date('Ymd', $date->mktime(0, 0, 0, $month, $day, $year)), '20050301');
+        list($month, $day, $year) = array(1,0,2006);
+        $this->assertSame($date->date('Ymd', $date->mktime(0, 0, 0, $month, $day, $year)), '20051231');
+        list($month, $day, $year) = array(2,0,2005);
+        $this->assertSame($date->date('Ymd', $date->mktime(0, 0, 0, $month, $day, $year)), '20050131');
+    }
 }
 
 class Zend_Date_DateObjectTestHelper extends Zend_Date

@@ -112,6 +112,17 @@ abstract class Zend_Date_DateObject {
         }
     }
 
+    /**
+     * Returns time().  This method exists to allow unit tests to work-around methods that might otherwise
+     * be hard-coded to use time().  For example, this makes it possible to test isYesterday() in Date.php.
+     *
+     * @return  integer  timestamp
+     */
+    protected function _getTime()
+    {
+        return time();
+    }
+
 
     /**
      * Internal mktime function used by Zend_Date.

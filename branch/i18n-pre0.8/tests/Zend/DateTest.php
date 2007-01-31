@@ -3862,6 +3862,42 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * test isToday(), isTomorrow(), and isYesterday() for cases other than time() = "now"
+     */
+    public function testIsDay()
+    {
+        date_default_timezone_set('Europe/Vienna'); // should have DST
+        $locale = new Zend_Locale('de_AT');
+        $date = new Zend_Date_TestHelper('01.01.2006', Zend_Date::DATES, $locale);
+
+        $date->_setTime($date->mktime(0, 0, 0, 1, 1, 2006));
+        $this->assertTrue($date->isToday());
+        $this->assertFalse($date->isTomorrow());
+        $date->_setTime($date->mktime(0, 0, 0, 1, 1, 2006));
+        $this->assertFalse($date->isYesterday());
+
+        $date->_setTime($date->mktime(0, 0, 0, 12, 31, 2005));
+        $this->assertTrue($date->isTomorrow());
+        $date->_setTime($date->mktime(0, 0, 0, 12, 31, 2005));
+        $this->assertFalse($date->isYesterday());
+
+        $date->_setTime($date->mktime(0, 0, 0, 12, 31, 2006));
+        $this->assertFalse($date->isTomorrow());
+        $date->_setTime($date->mktime(0, 0, 0, 12, 31, 2006));
+        $this->assertFalse($date->isYesterday());
+
+        $date->_setTime($date->mktime(0, 0, 0, 1, 0, 2006));
+        $this->assertTrue($date->isTomorrow());
+        $date->_setTime($date->mktime(0, 0, 0, 1, 0, 2006));
+        $this->assertFalse($date->isYesterday());
+
+        $date->_setTime($date->mktime(0, 0, 0, 1, 2, 2006));
+        $this->assertFalse($date->isTomorrow());
+        $date->_setTime($date->mktime(0, 0, 0, 1, 2, 2006));
+        $this->assertTrue($date->isYesterday());
+    }
+
+    /**
      * Test for Now
      */
     public function testNow()
@@ -4026,5 +4062,29 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    
+}
+
+class Zend_Date_TestHelper extends Zend_Date
+{
+    public function _setTime($timestamp)
+    {
+        $this->_getTime($timestamp);
+    }
+
+    protected function _getTime($timestamp = null)
+    {
+        static $_timestamp = null;
+        if ($timestamp !== null) {
+            $_timestamp = $timestamp;
+        }
+        if ($_timestamp !== null) {
+            return $_timestamp;
+        }
+        return time();
+    }
+
+    public function mktime($hour, $minute, $second, $month, $day, $year, $dst= -1, $gmt = false)
+    {
+        return parent::mktime($hour, $minute, $second, $month, $day, $year, $dst, $gmt);
+    }
 }
