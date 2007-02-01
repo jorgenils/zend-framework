@@ -151,8 +151,6 @@ class Zend_Date extends Zend_Date_DateObject {
         } else if (Zend_Locale::isLocale($part)) {
             $locale = $part;
             $part = null;
-        } else if ($part === null and $date !== null and (!is_numeric($date))) {
-            throw new Zend_Date_Exception('parameter part has to be set for non timestamp values ($date)');
         }
 
         $this->setLocale($locale);

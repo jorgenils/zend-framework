@@ -113,6 +113,7 @@ abstract class Zend_Date_DateObject {
     }
 
     /**
+     * Internal function.
      * Returns time().  This method exists to allow unit tests to work-around methods that might otherwise
      * be hard-coded to use time().  For example, this makes it possible to test isYesterday() in Date.php.
      *
@@ -149,7 +150,10 @@ abstract class Zend_Date_DateObject {
         if ((1901 < $year) and ($year < 2038)) {
 
             $oldzone = @date_default_timezone_get();
-            if ($this->_timezone != $oldzone) {
+            // Timezone also includes DST settings, therefor substracting the GMT offset is not enough
+            // We have to set the correct timezone to get the right value
+            if (($this->_timezone != $oldzone) and ($gmt === false)) {
+                $second -= $this->_offset;
                 date_default_timezone_set($this->_timezone);
             }
 

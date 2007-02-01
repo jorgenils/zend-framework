@@ -88,6 +88,10 @@ class Zend_Date_DateObjectTest extends PHPUnit_Framework_TestCase
         $date->setUnixTimestamp(0);
         $this->assertSame((string)$date->setUnixTimestamp("12345678901234567890"), '0');
         $this->assertSame((string)$date->setUnixTimestamp("12345678901234567890"), "12345678901234567890");
+
+        $date->setUnixTimestamp();
+        $diff = abs(time() - $date->getUnixTimestamp());
+        $this->assertTrue($diff < 2, "setUnixTimestamp has a significantly different time than returned by time()): $diff seconds");
     }
 
     /**
@@ -111,7 +115,8 @@ class Zend_Date_DateObjectTest extends PHPUnit_Framework_TestCase
     {
         $date = new Zend_Date_DateObjectTestHelper(Zend_Date::now());
         $result = $date->getUnixTimestamp();
-        $this->assertSame((string) $result, (string) time(), time()." expected");
+        $diff = abs($result - time());
+        $this->assertTrue($diff < 2, "Instance of Zend_Date_DateObject has a significantly different time than returned by setTime(): $diff seconds");
     }
 
     /**
@@ -149,6 +154,15 @@ class Zend_Date_DateObjectTest extends PHPUnit_Framework_TestCase
         $this->assertSame($date->mktime(0, 0, 0, 1, 1, 3000, true),  32503680000);
         $this->assertSame($date->mktime(0, 0, 0, 1, 1, 5000, false), 95617580400);
         $this->assertSame($date->mktime(0, 0, 0, 1, 1, 5000, true),  95617584000);
+
+        // test for different set external timezone
+        // the internal timezone should always be used for calculation
+        $date->setTimezone('Europe/Paris');
+        $this->assertSame($date->mktime(0, 0, 0, 1, 1, 2020, true), 1577836800);
+        $this->assertSame($date->mktime(0, 0, 0, 1, 1, 2020, false), 1577833200);
+        date_default_timezone_set('Indian/Maldives');
+        $this->assertSame($date->mktime(0, 0, 0, 1, 1, 2020, true), 1577836800);
+        $this->assertSame($date->mktime(0, 0, 0, 1, 1, 2020, false), 1577836800);
     }
 
     /**
@@ -437,10 +451,28 @@ class Zend_Date_DateObjectTest extends PHPUnit_Framework_TestCase
         list($month, $day, $year) = array(2,0,2005);
         $this->assertSame($date->date('Ymd', $date->mktime(0, 0, 0, $month, $day, $year)), '20050131');
     }
+
+    /**
+     * Test for _getTime
+     */
+    public function test_getTime()
+    {
+        $date = new Zend_Date_DateObjectTestHelper(Zend_Date::now());
+        $time = $date->_getTime();
+        $diff = abs(time() - $time);
+        $this->assertTrue(($diff < 2), "Zend_Date_DateObject->_getTime() returned a significantly "
+            . "different timestamp than expected: $diff seconds");
+    }
 }
 
 class Zend_Date_DateObjectTestHelper extends Zend_Date
 {
+    public function __construct($date = null, $part = null, $locale = null)
+    {
+        $this->setTimezone('Europe/Paris');
+        parent::__construct($date, $part, $locale);
+    }
+
     public function mktime($hour, $minute, $second, $month, $day, $year, $dst= -1, $gmt = false)
     {
         return parent::mktime($hour, $minute, $second, $month, $day, $year, $dst, $gmt);
@@ -479,5 +511,10 @@ class Zend_Date_DateObjectTestHelper extends Zend_Date
     public function getDateParts($timestamp = null, $fast = null)
     {
         return parent::getDateParts($timestamp, $fast);
+    }
+
+    public function _getTime()
+    {
+        return parent::_getTime();
     }
 }
