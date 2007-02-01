@@ -164,9 +164,10 @@ class Zend_Date extends Zend_Date_DateObject {
         }
 
         if (is_null($date)) {
-            $date = time();
+            $date = Zend_Date::now();
+            $date = $date->get($part);
         }
-        
+
         // set datepart
         if (($part !== null && $part !== Zend_Date::TIMESTAMP) or (!is_numeric($date))) {
             $this->setUnixTimestamp(0);
