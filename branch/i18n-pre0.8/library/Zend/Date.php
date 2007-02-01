@@ -135,23 +135,24 @@ class Zend_Date extends Zend_Date_DateObject {
      * For example, in your bootstrap: date_default_timezone_set('America/Los_Angeles');
      * For detailed instructions please look in the docu.
      *
-     * @param  string|integer|Zend_Date  $date    Date value or value of date part to set, depending on $part
+     * @param  string|integer|Zend_Date  $date    OPTIONAL Date value or value of date part to set
+                                                           ,depending on $part. If null the actual time is set
      * @param  string                    $part    OPTIONAL Defines the input format of $date
      * @param  string|Zend_Locale        $locale  OPTIONAL Locale for parsing input
      * @return Zend_Date
      * @throws Zend_Date_Exception
      */
-    public function __construct($date, $part = null, $locale = null)
+    public function __construct($date = null, $part = null, $locale = null)
     {
-        if (is_null($date)) {
-            throw new Zend_Date_Exception('parameter $date must be set');
-        }
-
-        $type = gettype($part);
-        if (($type === 'object' && ($part instanceof Zend_Locale)) or
-            ($type === 'string' && (Zend_Locale::isLocale($part)))) {
+        if (Zend_Locale::isLocale($date)) {
+            $locale = $date;
+            $date = null;
+            $part = null;
+        } else if (Zend_Locale::isLocale($part)) {
             $locale = $part;
             $part = null;
+        } else if ($part === null and $date !== null and (!is_numeric($date))) {
+            throw new Zend_Date_Exception('parameter part has to be set for non timestamp values ($date)');
         }
 
         $this->setLocale($locale);
@@ -162,6 +163,10 @@ class Zend_Date extends Zend_Date_DateObject {
             $this->setTimezone($zone);
         }
 
+        if (is_null($date)) {
+            $date = time();
+        }
+        
         // set datepart
         if (($part !== null && $part !== Zend_Date::TIMESTAMP) or (!is_numeric($date))) {
             $this->setUnixTimestamp(0);
