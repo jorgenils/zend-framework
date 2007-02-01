@@ -161,6 +161,11 @@ class Zend_Date extends Zend_Date_DateObject {
             $this->setTimezone($zone);
         }
 
+        if (@constant("Zend_Date::".$date) !== null) {
+            $part = $date;
+            $date = null;
+        }
+
         if (is_null($date)) {
             $date = Zend_Date::now();
             $date = $date->get($part);

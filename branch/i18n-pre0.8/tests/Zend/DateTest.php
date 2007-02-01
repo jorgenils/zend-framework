@@ -140,6 +140,25 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test for date object creation using default format for a locale
+     */
+    public function testCreationDefaultLoose()
+    {
+        $locale = 'de_AT';
+        $date  = new Zend_Date();
+
+        $date = $date->getTimestamp();
+        $this->assertTrue(abs($date - time()) < 2);
+
+        date_default_timezone_set('GMT');
+        $date  = new Zend_Date(Zend_Date::YEAR);
+
+        $date = $date->getTimestamp();
+        $reference = gmmktime(0,0,0,1,1,date('Y'));
+        $this->assertTrue($reference == $date);
+    }
+
+    /**
      * Test for getTimestamp
      */
     public function testGetTimestamp()
