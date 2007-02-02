@@ -410,12 +410,8 @@ abstract class Zend_Date_DateObject {
                     break;
 
                 case 'o':  // ISO 8601 year number
-                    $firstday = self::dayOfWeek($date['year'], 1, 1);
-                    $day = self::dayOfWeek($date['year'], $date['mon'], $date['mday']);
-                    if ($day == 0) {
-                        $day = 7;
-                    }
-                    if (($date['mon'] == 1) and (($firstday < 1) or ($firstday > 4)) and ($day < 4)) {
+                    $week = $this->weekNumber($date['year'], $date['mon'], $date['mday']);
+                    if (($week > 50) and ($date['mon'] == 1)) {
                         $output .= ($date['year'] - 1);
                     } else {
                         $output .= $date['year'];
