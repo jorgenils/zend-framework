@@ -992,6 +992,9 @@ class Zend_Date extends Zend_Date_DateObject {
 
             case "Dec":
                 return 12;
+
+            default:
+                throw new Zend_Date_Exception('Month ($name) is not a known month');
         }
     }
 
@@ -1158,9 +1161,7 @@ class Zend_Date extends Zend_Date_DateObject {
             throw new Zend_Date_Exception('parameter $date must be set, null is not allowed');
         }
 
-        $type = gettype($part);
-        if (($type === 'object' && ($part instanceof Zend_Locale)) or
-            ($type === 'string' && (Zend_Locale::isLocale($part)))) {
+        if (Zend_Locale::isLocale($part)) {
             $locale = $part;
             $part = null;
         }
@@ -4307,7 +4308,6 @@ class Zend_Date extends Zend_Date_DateObject {
         } else {
             $this->_Locale = new Zend_Locale($locale);
         }
-
         return $this->getLocale();
     }
 

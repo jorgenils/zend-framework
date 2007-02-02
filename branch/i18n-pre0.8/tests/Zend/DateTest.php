@@ -156,6 +156,11 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $date = $date->getTimestamp();
         $reference = gmmktime(0,0,0,1,1,date('Y'));
         $this->assertTrue($reference == $date);
+
+        $date  = new Zend_Date('ar_EG');
+        $this->assertSame($date->getLocale(), 'ar_EG');
+        $date = $date->getTimestamp();
+        $this->assertTrue(abs($date - time()) < 2);
     }
 
     /**
@@ -2171,7 +2176,14 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $date->set(1234567890);
         $date->set('Thu, 05 Dec 2009 01:31:30 +0500', Zend_Date::RFC_2822);
         $this->assertSame($date->get(Zend_Date::W3C),'2009-12-05T01:31:30+05:00');
-
+        $date->set(1234567890);
+        try {
+            $date->set('Thu, 05 Fxx 2009 01:31:30 +0500', Zend_Date::RFC_2822);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+        
         $date->set(1234567890);
         try {
             $date->set('noday', Zend_Date::TIMESTAMP);
@@ -3790,6 +3802,65 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $this->assertSame($result['sunset']['civil']->get(Zend_Date::W3C),      '2002-01-04T21:00:08+05:00');
         $this->assertSame($result['sunset']['nautic']->get(Zend_Date::W3C),     '2002-01-04T20:59:18+05:00');
         $this->assertSame($result['sunset']['astronomic']->get(Zend_Date::W3C), '2002-01-04T20:58:28+05:00');
+
+        unset($result);
+        $result = array('longitude' => 0);
+        try {
+            $result = $date->getSunrise($result);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        unset($result);
+        $result = array('latitude' => 0);
+        try {
+            $result = $date->getSunrise($result);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        unset($result);
+        $result = array('longitude' => 180.1, 'latitude' => 0);
+        try {
+            $result = $date->getSunrise($result);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        unset($result);
+        $result = array('longitude' => -180.1, 'latitude' => 0);
+        try {
+            $result = $date->getSunrise($result);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        unset($result);
+        $result = array('longitude' => 0, 'latitude' => 90.1);
+        try {
+            $result = $date->getSunrise($result);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        unset($result);
+        $result = array('longitude' => 0, 'latitude' => -90.1);
+        try {
+            $result = $date->getSunrise($result);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        unset($result);
+        $result = array('latitude' => 0, 'longitude' => 0);
+        $result = $date->getSunInfo($result);
+        $this->assertTrue(is_array($result));
     }
 
     /**
@@ -3955,6 +4026,7 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $locale = new Zend_Locale('de_AT');
 
         $date = new Zend_Date(1577833200,$locale);
+        $date2 = new Zend_Date(2006, Zend_Date::YEAR);
         $date->setTimeZone(date_default_timezone_get());
 
         $date->setYear(2000);
@@ -3965,6 +4037,9 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
 
         $date->setYear(2100);
         $this->assertSame($date->get(Zend_Date::W3C), '2100-01-01T04:00:00+05:00');
+
+        $date->setYear($date2);
+        $this->assertSame($date->get(Zend_Date::W3C), '2006-01-01T04:00:00+05:00');
     }
 
     /**
