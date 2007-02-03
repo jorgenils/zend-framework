@@ -4080,6 +4080,54 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test for subYear
+     */
+    public function testSubYear()
+    {
+        $locale = new Zend_Locale('de_AT');
+
+        $date = new Zend_Date(1577833200,$locale);
+        $date->setTimeZone(date_default_timezone_get());
+
+        $date->subYear(1);
+        $this->assertSame($date->get(Zend_Date::W3C), '2019-01-01T04:00:00+05:00');
+        $date->subYear(1);
+        $this->assertSame($date->get(Zend_Date::W3C), '2018-01-01T04:00:00+05:00');
+        $date->subYear(1);
+        $this->assertSame($date->get(Zend_Date::W3C), '2017-01-01T04:00:00+05:00');
+        $date->subYear(1);
+        $this->assertSame($date->get(Zend_Date::W3C), '2016-01-01T04:00:00+05:00');
+        $date->subYear(1);
+        $this->assertSame($date->get(Zend_Date::W3C), '2015-01-01T04:00:00+05:00');
+
+        $date->setYear(1500);
+        $this->assertSame($date->get(Zend_Date::W3C), '1500-01-01T04:00:00+05:00');
+        $date->subYear(20);
+        $this->assertSame($date->get(Zend_Date::W3C), '1480-01-01T04:00:00+05:00');
+
+        $date->setYear(2100);
+        $this->assertSame($date->get(Zend_Date::W3C), '2100-01-01T04:00:00+05:00');
+        $date->subYear(20);
+        $this->assertSame($date->get(Zend_Date::W3C), '2080-01-01T04:00:00+05:00');
+    }
+
+    /**
+     * Test for compareYear
+     */
+    public function testCompareYear()
+    {
+        $locale = new Zend_Locale('de_AT');
+        $date = new Zend_Date(1234567890,$locale);
+        $d2   = new Zend_Date(1234567899,$locale);
+
+        $date = new Zend_Date(1234567890,$locale);
+        $this->assertSame($date->compareYear(2010), -1);
+        $this->assertSame($date->compareYear(2009), 0);
+        $this->assertSame($date->compareYear(2008), 1);
+        $this->assertSame($date->compareYear($d2), 0);
+    }
+
+    /**
      * Test accessors for _Locale member property of Zend_Date
      */
     public function testLocale()
@@ -4201,6 +4249,9 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
             // success
         }
 
+        $date->set(10, 'de');
+        $this->assertSame($date->getTimestamp(), '10');
+
         try {
             $date->add(null, Zend_Date::YEAR);
             $this->fail();
@@ -4208,12 +4259,18 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
             // success
         }
 
+        $date->add(10, 'de');
+        $this->assertSame($date->getTimestamp(), '20');
+
         try {
             $date->sub(null, Zend_Date::YEAR);
             $this->fail();
         } catch (Zend_Date_Exception $e) {
             // success
         }
+
+        $date->sub(10, 'de');
+        $this->assertSame($date->getTimestamp(), '10');
 
         try {
             $date->compare(null, Zend_Date::YEAR);
