@@ -1121,6 +1121,11 @@ class Zend_Date extends Zend_Date_DateObject {
     private function _assign($calc, $date, $comp = 0)
     {
         switch ($calc) {
+            case 'set' :
+                $this->setUnixTimestamp(call_user_func(Zend_Locale_Math::$sub, $this->getUnixTimestamp(), $comp));
+                $this->setUnixTimestamp(call_user_func(Zend_Locale_Math::$add, $this->getUnixTimestamp(), $date));
+                return $this->getUnixTimestamp();
+                break;
             case 'add' :
                 $this->setUnixTimestamp(call_user_func(Zend_Locale_Math::$add, $this->getUnixTimestamp(), $date));
                 return $this->getUnixTimestamp();
@@ -1129,17 +1134,9 @@ class Zend_Date extends Zend_Date_DateObject {
                 $this->setUnixTimestamp(call_user_func(Zend_Locale_Math::$sub, $this->getUnixTimestamp(), $date));
                 return $this->getUnixTimestamp();
                 break;
-            case 'cmp' :
+            default :
+                // cmp - compare
                 return call_user_func(Zend_Locale_Math::$comp, $comp, $date);
-                break;
-            case 'copy' :
-                $result = $this->copyPart(Zend_Date::TIMESTAMP);
-                return $result;
-                break;
-            case 'set' :
-                $this->setUnixTimestamp(call_user_func(Zend_Locale_Math::$sub, $this->getUnixTimestamp(), $comp));
-                $this->setUnixTimestamp(call_user_func(Zend_Locale_Math::$add, $this->getUnixTimestamp(), $date));
-                return $this->getUnixTimestamp();
                 break;
         }
     }

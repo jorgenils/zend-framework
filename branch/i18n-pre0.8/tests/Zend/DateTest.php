@@ -3861,6 +3861,11 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $result = array('latitude' => 0, 'longitude' => 0);
         $result = $date->getSunInfo($result);
         $this->assertTrue(is_array($result));
+
+        unset($result);
+        $result = array('latitude' => 0, 'longitude' => 0);
+        $result = $date->getSunrise($result);
+        $this->assertTrue($result instanceof Zend_Date);
     }
 
     /**
@@ -4156,6 +4161,453 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * test setLocale/getLocale
+     */
+    public function testSetLocale()
+    {
+        $date = new Zend_Date(0, 'de');
+        
+        $this->assertSame($date->getLocale(), 'de');
+        $date->setLocale('en');
+        $this->assertSame($date->getLocale(), 'en');
+        $date->setLocale('en_XX');
+        $this->assertSame($date->getLocale(), 'en');
+        $date->setLocale('de_AT');
+        $this->assertSame($date->getLocale(), 'de_AT');
+        $locale = new Zend_Locale('ar');
+        $date->setLocale($locale);
+        $this->assertSame($date->getLocale(), 'ar');
+
+        try {
+            $date->setLocale('xx_XX');
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+    }
+
+    /**
+     * test looseBehaviour
+     */
+    public function testLoose()
+    {
+        $date = new Zend_Date(0, 'de');
+
+        try {
+            $date->set(null, Zend_Date::YEAR);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->add(null, Zend_Date::YEAR);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->sub(null, Zend_Date::YEAR);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compare(null, Zend_Date::YEAR);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->equals(null, Zend_Date::YEAR);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->isEarlier(null, Zend_Date::YEAR);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->isLater(null, Zend_Date::YEAR);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setTime(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addTime(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subTime(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareTime(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setDate(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addDate(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subDate(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareDate(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setIso(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addIso(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subIso(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareIso(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setArpa(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addArpa(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subArpa(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareArpa(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setYear(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addYear(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subYear(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareYear(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setMonth(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addMonth(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subMonth(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareMonth(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setDay(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addDay(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subDay(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareDay(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setWeekday(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addWeekday(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subWeekday(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareWeekday(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setDayOfYear(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addDayOfYear(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subDayOfYear(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareDayOfYear(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setHour(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addHour(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subHour(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareHour(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setMinute(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addMinute(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subMinute(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareMinute(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setSecond(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addSecond(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subSecond(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareSecond(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->setWeek(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->addWeek(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->subWeek(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+        try {
+            $date->compareWeek(null);
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+
+    }
 }
 
 class Zend_Date_TestHelper extends Zend_Date
