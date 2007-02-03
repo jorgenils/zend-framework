@@ -1358,9 +1358,11 @@ class Zend_Date extends Zend_Date_DateObject {
                     if ($calc == 'set') {
                         --$found;
                         --$monthnr;
+                    } else {
+                        $year = 1970;
                     }
-                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1 + $found,   1, 1970, true),
-                                                 $this->mktime(0, 0, 0, 1 + $monthnr, 1, 1970, true));
+                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1 + $found,   1, $year, true),
+                                                 $this->mktime(0, 0, 0, 1 + $monthnr, 1, $year, true));
                 }
 
                 // Monthname not found
@@ -1372,9 +1374,11 @@ class Zend_Date extends Zend_Date_DateObject {
                     if ($calc == 'set') {
                         --$date;
                         --$month;
+                    } else {
+                        $year = 1970;
                     }
-                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1 + intval($date), 1, 1970, true),
-                                                 $this->mktime(0, 0, 0, 1 + $month,        1, 1970, true));
+                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1 + intval($date), 1, $year, true),
+                                                 $this->mktime(0, 0, 0, 1 + $month,        1, $year, true));
                 }
                 throw new Zend_Date_Exception("invalid date ($date) operand, month expected", $date);
                 break;
@@ -1396,9 +1400,11 @@ class Zend_Date extends Zend_Date_DateObject {
                     if ($calc == 'set') {
                         --$found;
                         --$monthnr;
+                    } else {
+                        $year = 1970;
                     }
-                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1 + $found,   1, 1970, true),
-                                                 $this->mktime(0, 0, 0, 1 + $monthnr, 1, 1970, true));
+                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1 + $found,   1, $year, true),
+                                                 $this->mktime(0, 0, 0, 1 + $monthnr, 1, $year, true));
                 }
 
                 // Monthname not found
@@ -1410,9 +1416,11 @@ class Zend_Date extends Zend_Date_DateObject {
                     if ($calc == 'set') {
                         --$date;
                         --$month;
+                    } else {
+                        $year = 1970;
                     }
-                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1 + intval($date), 1, 1970, true),
-                                                 $this->mktime(0, 0, 0, 1 + $month,        1, 1970, true));
+                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1 + intval($date), 1, $year, true),
+                                                 $this->mktime(0, 0, 0, 1 + $month,        1, $year, true));
                 }
                 throw new Zend_Date_Exception("invalid date ($date) operand, month expected", $date);
                 break;
@@ -1439,9 +1447,11 @@ class Zend_Date extends Zend_Date_DateObject {
                     if ($calc == 'set') {
                         --$found;
                         --$monthnr;
+                    } else {
+                        $year = 1970;
                     }
-                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1 + $found,   1, 1970, true),
-                                                 $this->mktime(0, 0, 0, 1 + $monthnr, 1, 1970, true));
+                    return $this->_assign($calc, $this->mktime(0, 0, 0, 1 + $found,   1, $year, true),
+                                                 $this->mktime(0, 0, 0, 1 + $monthnr, 1, $year, true));
                 }
 
                 // Monthname not found

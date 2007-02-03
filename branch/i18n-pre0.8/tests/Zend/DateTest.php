@@ -1436,9 +1436,9 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $this->assertSame($date->get(Zend_Date::W3C),'2009-01-14T04:31:30+05:00');
         $date->setTimeZone('UTC');
         $date->set(-20, Zend_Date::MONTH_SHORT, 'en_US');
-        $this->assertSame($date->get(Zend_Date::W3C),'2007-04-14T23:31:30+00:00');
+        $this->assertSame($date->get(Zend_Date::W3C),'2007-04-13T23:31:30+00:00');
         $date->set($d2, Zend_Date::MONTH_SHORT, 'en_US');
-        $this->assertSame($date->get(Zend_Date::W3C),'2007-01-14T23:31:30+00:00');
+        $this->assertSame($date->get(Zend_Date::W3C),'2007-01-13T23:31:30+00:00');
         $date->setTimezone('Indian/Maldives');
 
         $date->set(1234567890);
@@ -1498,9 +1498,9 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $this->assertSame($date->get(Zend_Date::W3C),'2009-01-14T04:31:30+05:00');
         $date->setTimeZone('UTC');
         $date->set(-20, Zend_Date::MONTH_DIGIT, 'en_US');
-        $this->assertSame($date->get(Zend_Date::W3C),'2007-04-14T23:31:30+00:00');
+        $this->assertSame($date->get(Zend_Date::W3C),'2007-04-13T23:31:30+00:00');
         $date->set($d2, Zend_Date::MONTH_DIGIT, 'en_US');
-        $this->assertSame($date->get(Zend_Date::W3C),'2007-01-14T23:31:30+00:00');
+        $this->assertSame($date->get(Zend_Date::W3C),'2007-01-13T23:31:30+00:00');
         $date->setTimezone('Indian/Maldives');
 
         $date->set(1234567890);
@@ -3464,10 +3464,10 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $result = $date->setDate('11.05.2008');
         // Hint: the hour changes from 0 to 1 because of DST... 
         // An hour is added by winter->summertime change
-        $this->assertSame($result->get(Zend_Date::W3C),'2008-04-11T04:31:30+05:00');
-        $this->assertSame($date->get(Zend_Date::W3C),'2008-04-11T04:31:30+05:00');
+        $this->assertSame($result->get(Zend_Date::W3C),'2008-05-11T04:31:30+05:00');
+        $this->assertSame($date->get(Zend_Date::W3C),'2008-05-11T04:31:30+05:00');
         $date->setDate('2008-05-11','YYYY-MM-dd');
-        $this->assertSame($date->get(Zend_Date::W3C),'2008-04-11T04:31:30+05:00');
+        $this->assertSame($date->get(Zend_Date::W3C),'2008-05-11T04:31:30+05:00');
         $date->setDate($d2);
         $this->assertSame($date->get(Zend_Date::W3C),'2009-02-14T04:31:30+05:00');
     }
@@ -4045,6 +4045,13 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
 
         $date->setYear($date2);
         $this->assertSame($date->get(Zend_Date::W3C), '2006-01-01T04:00:00+05:00');
+
+        try {
+            $date->setYear('noyear');
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
     }
 
     /**
@@ -4124,6 +4131,103 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $this->assertSame($date->compareYear(2010), -1);
         $this->assertSame($date->compareYear(2009), 0);
         $this->assertSame($date->compareYear(2008), 1);
+        $this->assertSame($date->compareYear($d2), 0);
+    }
+
+    /**
+     * Test for getMonth
+     */
+    public function testGetMonth()
+    {
+        $locale = new Zend_Locale('de_AT');
+
+        $date = new Zend_Date(1234567890,$locale);
+        $d2 = new Zend_Date(1610101010,$locale);
+        $date->setTimeZone(date_default_timezone_get());
+        $d2->setTimeZone(date_default_timezone_get());
+
+        $result = $date->getMonth();
+        $this->assertTrue($result instanceof Zend_Date);
+        $this->assertSame($result->toString(), '01.02.1970 05:00:00');
+        $this->assertSame($date->getMonth()->toString(), '01.02.1970 05:00:00');
+    }
+
+    /**
+     * Test for setMonth
+     */
+    public function testSetMonth()
+    {
+        $locale = new Zend_Locale('de_AT');
+
+        $date = new Zend_Date(1577833200,$locale);
+        $date2 = new Zend_Date(2006, Zend_Date::YEAR);
+        $date->setTimeZone(date_default_timezone_get());
+
+        $date->setMonth(3);
+        $this->assertSame($date->get(Zend_Date::W3C), '2020-03-01T04:00:00+05:00');
+
+        $date->setMonth(-3);
+        $this->assertSame($date->get(Zend_Date::W3C), '2019-09-01T04:00:00+05:00');
+
+        $date->setMonth('March', 'en');
+        $this->assertSame($date->get(Zend_Date::W3C), '2019-03-01T04:00:00+05:00');
+
+        $date->setMonth($date2);
+        $this->assertSame($date->get(Zend_Date::W3C), '2019-01-01T04:00:00+05:00');
+
+        try {
+            $date->setMonth('nomonth');
+            $this->fail();
+        } catch (Zend_Date_Exception $e) {
+            // success
+        }
+    }
+
+    /**
+     * Test for addMonth
+     */
+    public function testAddMonth()
+    {
+        $locale = new Zend_Locale('de_AT');
+
+        $date = new Zend_Date(1577833200,$locale);
+        $date->setTimeZone(date_default_timezone_get());
+
+        $date->addMonth(1);
+        $this->assertSame($date->get(Zend_Date::W3C), '2020-02-01T04:00:00+05:00');
+        $date->addMonth(5);
+        $this->assertSame($date->get(Zend_Date::W3C), '2020-07-01T04:00:00+05:00');
+    }
+
+    /**
+     * Test for subMonth
+     */
+    public function testSubMonth()
+    {
+        $locale = new Zend_Locale('de_AT');
+
+        $date = new Zend_Date(1577833200,$locale);
+        $date->setTimeZone(date_default_timezone_get());
+
+        $date->subMonth(1);
+        $this->assertSame($date->get(Zend_Date::W3C), '2019-12-01T04:00:00+05:00');
+        $date->subMonth(12);
+        $this->assertSame($date->get(Zend_Date::W3C), '2018-12-01T04:00:00+05:00');
+    }
+
+    /**
+     * Test for compareMonth
+     */
+    public function testCompareMonth()
+    {
+        $locale = new Zend_Locale('de_AT');
+        $date = new Zend_Date(1234567890,$locale);
+        $d2   = new Zend_Date(1234567899,$locale);
+
+        $date = new Zend_Date(1234567890,$locale);
+        $this->assertSame($date->compareMonth(1), 1);
+        $this->assertSame($date->compareMonth(2), 0);
+        $this->assertSame($date->compareMonth(3), -1);
         $this->assertSame($date->compareYear($d2), 0);
     }
 
