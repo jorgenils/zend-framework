@@ -3687,9 +3687,9 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $date->addArpa($d2);
         $this->assertSame($date->get(Zend_Date::W3C),'4018-04-28T04:03:09+05:00');
 
-        $result = $date->setArpa('Fri, 05 Jan 07 03:35:53 GMT');
+        $result = $date->setArpa('Fri, 05 Jan 07 03:35:53 +0500');
         $arpa = $result->getArpa();
-        $this->assertSame($arpa,'Fri, 05 Jan 07 03:35:53 GMT');
+        $this->assertSame($arpa,'Fri, 05 Jan 07 03:35:53 +0500');
     }
 
     /**
