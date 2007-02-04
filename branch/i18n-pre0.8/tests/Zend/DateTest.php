@@ -878,12 +878,6 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $this->assertSame($date->get(Zend_Date::ISO_8601, 'es'),'2009-02-13T23:31:30+00:00');
         $date->setTimezone('Indian/Maldives');
 
-        // PHP 5.1.4 has a wrong ISO constant defined
-        // or the reference page http://devzone.zend.com/manual/view/page/ref.datetime.html is wrong ??
-//        $this->assertSame($date->get(Zend_Date::ISO_8601),'2009-02-14T00:31:30+0500');
-//        $this->assertSame($date->get(Zend_Date::ISO_8601, true),'2009-02-13T23:31:30+0000');
-//        $this->assertSame($date->get(Zend_Date::ISO_8601, true, 'es'),'2009-02-13T23:31:30+0000');
-
         $this->assertSame($date->get(Zend_Date::RFC_2822),'Sat, 14 Feb 2009 04:31:30 +0500');
         $date->setTimezone('UTC');
         $this->assertSame($date->get(Zend_Date::RFC_2822),'Fri, 13 Feb 2009 23:31:30 +0000');
@@ -3693,13 +3687,9 @@ class Zend_DateTest extends PHPUnit_Framework_TestCase
         $date->addArpa($d2);
         $this->assertSame($date->get(Zend_Date::W3C),'4018-04-28T04:03:09+05:00');
 
-        // @todo: implementation like PHP but is not RFC 822 conform,
-        // maybe needes to be reworked
-        // markTestIncomplete() craches PHP with XDebug-2.0.0rc2-5.1.2
-//        $this->markTestIncomplete();
-//        $result = $date->setArpa('Fri, 05 Jan 07 03:35:53 GMT');
-//        $arpa = $result->getArpa();
-//        $this->assertSame($arpa->get(Zend_Date::RFC_822),'Fri, 05 Jan 07 03:35:53 GMT');
+        $result = $date->setArpa('Fri, 05 Jan 07 03:35:53 GMT');
+        $arpa = $result->getArpa();
+        $this->assertSame($arpa,'Fri, 05 Jan 07 03:35:53 GMT');
     }
 
     /**

@@ -2046,7 +2046,12 @@ class Zend_Date extends Zend_Date_DateObject {
                 break;
 
             case Zend_Date::RFC_822 :
+                // new RFC 822 format
                 $result = preg_match('/\w{3},\s\d{2}\s\w{3}\s\d{2}\s\d{2}:\d{2}:\d{2}\s\+\d{4}/', $date, $match);
+                if (!$result) {
+                    // old RFC 822 format
+                    $result = preg_match('/\w{3},\s\d{2}\s\w{3}\s\d{2}\s\d{2}:\d{2}:\d{2}\s\w{1,3}/', $date, $match);
+                }
                 if (!$result) {
                     throw new Zend_Date_Exception("invalid date ($date) operand, RFC 822 date format expected", $date);
                 }
