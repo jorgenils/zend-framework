@@ -21,14 +21,14 @@
  */
 
 /**
- * Zend_Session_Persistence
+ * Zend_Session_Abstract
  *
  * @category Zend
  * @package Zend_Session
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-abstract class Zend_Session_Persistence
+abstract class Zend_Session_Abstract
 {
     /**
      * Whether or not session permits writing (modification of $_SESSION[])

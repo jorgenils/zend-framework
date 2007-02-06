@@ -26,9 +26,9 @@
 require_once 'Zend.php';
 
 /**
- * Zend_Session_Persistence
+ * Zend_Session_Abstract
  */
-require_once 'Zend/Session/Persistence.php';
+require_once 'Zend/Session/Abstract.php';
 
 /**
  * Zend_Session_Namespace
@@ -53,7 +53,7 @@ require_once 'Zend/Session/SaveHandler/Interface.php';
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Session extends Zend_Session_Persistence
+class Zend_Session extends Zend_Session_Abstract
 {
     /**
      * Check whether or not the session was started
