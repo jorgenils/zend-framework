@@ -25,8 +25,8 @@ require_once 'Zend/Controller/Router/Abstract.php';
 /** Zend_Controller_Router_Route */
 require_once 'Zend/Controller/Router/Route.php';
 
-/** Zend_Controller_Router_StaticRoute */
-require_once 'Zend/Controller/Router/StaticRoute.php';
+/** Zend_Controller_Router_Route_Static */
+require_once 'Zend/Controller/Router/Route/Static.php';
 
 /**
  * Ruby routing based Router.
@@ -39,11 +39,22 @@ require_once 'Zend/Controller/Router/StaticRoute.php';
  */
 class Zend_Controller_RewriteRouter extends Zend_Controller_Router_Abstract
 {
-    
+    /**
+     * Whether or not to use default routes
+     * @var boolean
+     */
     protected $_useDefaultRoutes = true;
-    protected $_defaultPath = ':controller/:action/*';
 
+    /**
+     * Array of routes to match against
+     * @var array
+     */
     protected $_routes = array();
+
+    /**
+     * Currently matched route
+     * @var Zend_Controller_Router_Route_Interface
+     */
     protected $_currentRoute = null;
 
     /** 
@@ -54,7 +65,8 @@ class Zend_Controller_RewriteRouter extends Zend_Controller_Router_Abstract
         $dispatcher = $this->getFrontController()->getDispatcher();
         return array(
             'controller' => $dispatcher->getDefaultController(), 
-            'action' => $dispatcher->getDefaultAction()
+            'action'     => $dispatcher->getDefaultAction(),
+            'module'     => 'default'
         );
     }
 
@@ -64,7 +76,8 @@ class Zend_Controller_RewriteRouter extends Zend_Controller_Router_Abstract
     protected function addDefaultRoutes()
     {
         if (!$this->hasRoute('default')) {
-            $compat = new Zend_Controller_Router_Route($this->_defaultPath, $this->getRouteDefaults());
+            require_once 'Zend/Controller/Router/Route/Module.php';
+            $compat = new Zend_Controller_Router_Route_Module();
             $this->_routes = array_merge(array('default' => $compat), $this->_routes);
         }
     }
@@ -100,7 +113,7 @@ class Zend_Controller_RewriteRouter extends Zend_Controller_Router_Abstract
      * routes.archive.defaults.year = 2000
      * routes.archive.reqs.year = "\d+"
      * 
-     * routes.news.type = "Zend_Controller_Router_StaticRoute"
+     * routes.news.type = "Zend_Controller_Router_Route_Static"
      * routes.news.route = "news"
      * routes.news.defaults.controller = "news"
      * routes.news.defaults.action = "list"

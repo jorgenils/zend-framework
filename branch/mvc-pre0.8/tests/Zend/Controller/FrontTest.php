@@ -5,7 +5,7 @@ require_once 'PHPUnit/Framework/TestCase.php';
 require_once 'Zend/Controller/Request/Http.php';
 require_once 'Zend/Controller/Response/Cli.php';
 require_once 'Zend/Controller/Dispatcher.php';
-require_once 'Zend/Controller/Router.php';
+require_once 'Zend/Controller/RewriteRouter.php';
 
 class Zend_Controller_FrontTest extends PHPUnit_Framework_TestCase
 {
@@ -82,14 +82,14 @@ class Zend_Controller_FrontTest extends PHPUnit_Framework_TestCase
 
     public function testSetGetRouter()
     {
-        $router = new Zend_Controller_Router();
+        $router = new Zend_Controller_RewriteRouter();
         $this->_controller->setRouter($router);
         $this->assertTrue($router === $this->_controller->getRouter());
 
         $this->_controller->resetInstance();
-        $this->_controller->setRouter('Zend_Controller_Router');
+        $this->_controller->setRouter('Zend_Controller_RewriteRouter');
         $router = $this->_controller->getRouter();
-        $this->assertTrue($router instanceof Zend_Controller_Router);
+        $this->assertTrue($router instanceof Zend_Controller_RewriteRouter);
     }
 
     public function testSetRouterThrowsExceptionWithBadRouter()
@@ -113,7 +113,7 @@ class Zend_Controller_FrontTest extends PHPUnit_Framework_TestCase
     public function testSetGetControllerDirectory()
     {
         $test = $this->_controller->getControllerDirectory();
-        $expected = array(dirname(__FILE__) . DIRECTORY_SEPARATOR . '_files');
+        $expected = array('default' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '_files');
         $this->assertSame($expected, $test);
     }
 
@@ -155,12 +155,12 @@ class Zend_Controller_FrontTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array('bar' => 'baz'), $this->_controller->getParams());
     }
 
-    public function testSetGetDefaultController()
+    public function testSetGetDefaultControllerName()
     {
-        $this->assertEquals('index', $this->_controller->getDefaultController());
+        $this->assertEquals('index', $this->_controller->getDefaultControllerName());
 
-        $this->_controller->setDefaultController('foo');
-        $this->assertEquals('foo', $this->_controller->getDefaultController());
+        $this->_controller->setDefaultControllerName('foo');
+        $this->assertEquals('foo', $this->_controller->getDefaultControllerName());
     }
 
     public function testSetGetDefaultAction()
@@ -271,7 +271,7 @@ class Zend_Controller_FrontTest extends PHPUnit_Framework_TestCase
     {
         $request = new Zend_Controller_Request_Http('http://framework.zend.com/foo/bar/var1/baz');
         $this->_controller->setResponse(new Zend_Controller_Response_Cli());
-        $this->_controller->setRouter(new Zend_Controller_Router());
+        $this->_controller->setRouter(new Zend_Controller_RewriteRouter());
         $response = $this->_controller->dispatch($request);
 
         $body = $response->getBody();
@@ -365,7 +365,7 @@ class Zend_Controller_FrontTest extends PHPUnit_Framework_TestCase
         $this->_controller->setControllerDirectory(dirname(__FILE__));
         $request = new Zend_Controller_Request_Http('http://framework.zend.com/bogus/baz');
         $this->_controller->setResponse(new Zend_Controller_Response_Cli());
-        $this->_controller->setRouter(new Zend_Controller_Router());
+        $this->_controller->setRouter(new Zend_Controller_RewriteRouter());
 
         try {
             $response = $this->_controller->dispatch($request);
@@ -393,7 +393,7 @@ class Zend_Controller_FrontTest extends PHPUnit_Framework_TestCase
     {
         $request = new Zend_Controller_Request_Http('http://framework.zend.com/foo/bar/var1/baz');
         $this->_controller->setResponse(new Zend_Controller_Response_Cli());
-        $this->_controller->setRouter(new Zend_Controller_Router());
+        $this->_controller->setRouter(new Zend_Controller_RewriteRouter());
         $this->_controller->returnResponse(false);
 
         ob_start();
