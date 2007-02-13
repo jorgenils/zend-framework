@@ -79,20 +79,6 @@ class Zend_Controller_Router_Route_Module implements Zend_Controller_Router_Rout
      */
     public function __construct(array $defaults = array())
     {
-        $dispatcher = $this->getFrontController()->getDispatcher();
-
-        if (isset($defaults['module'])) {
-            unset($defaults['module']);
-        }
-
-        if (!isset($defaults['controller'])) {
-            $defaults['controller'] = $dispatcher->getDefaultControllerName();
-        }
-
-        if (!isset($defaults['action'])) {
-            $defaults['action'] = $dispatcher->getDefaultAction();
-        }
-
         $this->_defaults = array_merge($this->_defaults, $defaults);
     }
 
@@ -118,31 +104,34 @@ class Zend_Controller_Router_Route_Module implements Zend_Controller_Router_Rout
      */
     public function match($path)
     {
-        $pathStaticCount = 0;
-
-        $module     = $this->_defaults['module'];
-        $controller = $this->_defaults['controller'];
-        $action     = $this->_defaults['action'];
-        $params     = array();
-        
-        $path = trim($path, self::URI_DELIMITER);
+        $values = array();
+        $params = array();
+        $path   = trim($path, self::URI_DELIMITER);
 
         if ($path != '') {
             $path = explode(self::URI_DELIMITER, $path);
         
             // Module
             if (count($path) && $this->isValidModule($path[0])) {
-                $module = array_shift($path);
+                $values['module'] = array_shift($path);
+            } elseif ('default' != $this->_defaults['module']
+                && $this->isValidModule($this->_defaults['module']))
+            {
+                $values['module'] = $this->_defaults['module'];
             }
 
             // Controller
             if (count($path) && !empty($path[0])) {
-                $controller = array_shift($path);
+                $values['controller'] = array_shift($path);
+            } elseif (isset($this->_defaults['controller'])) {
+                $values['controller'] = $this->_defaults['controller'];
             }
 
             // Action
             if (count($path) && !empty($path[0])) {
-                $action = array_shift($path);
+                $values['action'] = array_shift($path);
+            } elseif (isset($this->_defaults['action'])) {
+                $values['action'] = $this->_defaults['action'];
             }
 
             // Path info
@@ -156,14 +145,9 @@ class Zend_Controller_Router_Route_Module implements Zend_Controller_Router_Rout
             }
         }
         
-        $this->_values = array(
-            'module'     => $module,
-            'controller' => $controller,
-            'action'     => $action
-        );
-        $this->_values = array_merge($params, $this->_values);
+        $values = array_merge($params, $values);
 
-        return $this->_values;
+        return $values;
     }
 
     /**

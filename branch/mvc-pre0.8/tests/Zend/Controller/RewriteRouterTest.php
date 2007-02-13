@@ -160,7 +160,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
         $token = $this->_router->route($request);
 
         $this->assertSame('ctrl', $token->getControllerName());
-        $this->assertSame('defact', $token->getActionName());
+        $this->assertNull($token->getActionName());
     }
 
     public function testEmptyRoute()
@@ -231,7 +231,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
         $token = $this->_router->route($request);
 
         $this->assertSame('ctrl', $token->getControllerName());
-        $this->assertSame('defact', $token->getActionName());
+        $this->assertNull($token->getActionName());
     }
 
     public function testFirstRouteMatched()
@@ -331,9 +331,9 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
         
         $token = $this->_router->route($request);
 
-        $this->assertSame('default', $token->getModuleName());
-        $this->assertSame('defctrl', $token->getControllerName());
-        $this->assertSame('defact',  $token->getActionName());
+        $this->assertNull($token->getModuleName());
+        $this->assertNull($token->getControllerName());
+        $this->assertNull($token->getActionName());
     }
     
     public function testDefaultRouteWithEmptyControllerAndAction()
@@ -346,9 +346,9 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
         
         $token = $this->_router->route($request);
 
-        $this->assertSame('mod',     $token->getModuleName());
-        $this->assertSame('defctrl', $token->getControllerName());
-        $this->assertSame('defact',  $token->getActionName());
+        $this->assertSame('mod', $token->getModuleName());
+        $this->assertNull($token->getControllerName());
+        $this->assertNull($token->getActionName());
     }
 }
 
