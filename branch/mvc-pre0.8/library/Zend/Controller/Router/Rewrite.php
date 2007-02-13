@@ -37,7 +37,7 @@ require_once 'Zend/Controller/Router/Route/Static.php';
  * @license    http://www.zend.com/license/framework/1_0.txt Zend Framework License version 1.0
  * @see        http://manuals.rubyonrails.com/read/chapter/65
  */
-class Zend_Controller_RewriteRouter extends Zend_Controller_Router_Abstract
+class Zend_Controller_Router_Rewrite extends Zend_Controller_Router_Abstract
 {
     /**
      * Whether or not to use default routes
@@ -119,7 +119,7 @@ class Zend_Controller_RewriteRouter extends Zend_Controller_Router_Abstract
      * routes.news.defaults.action = "list"
      * 
      * And finally after you have created a Zend_Config with above ini:
-     * $router = new Zend_Controller_RewriteRouter();
+     * $router = new Zend_Controller_Router_Rewrite();
      * $router->addConfig($config, 'routes');
      * 
      * @param Zend_Config Configuration object
@@ -237,7 +237,7 @@ class Zend_Controller_RewriteRouter extends Zend_Controller_Router_Abstract
     {
         
         if (!$request instanceof Zend_Controller_Request_Http) {
-            throw new Zend_Controller_Router_Exception('Zend_Controller_RewriteRouter requires a Zend_Controller_Request_Http-based request object');
+            throw new Zend_Controller_Router_Exception('Zend_Controller_Router_Rewrite requires a Zend_Controller_Request_Http-based request object');
         }
 
         if ($this->_useDefaultRoutes) {

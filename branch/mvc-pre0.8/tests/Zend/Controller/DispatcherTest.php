@@ -1,5 +1,5 @@
 <?php
-require_once 'Zend/Controller/Dispatcher.php';
+require_once 'Zend/Controller/Dispatcher/Standard.php';
 require_once 'PHPUnit/Framework/TestCase.php';
 
 require_once 'Zend/Controller/Request/Http.php';
@@ -11,7 +11,7 @@ class Zend_Controller_DispatcherTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->_dispatcher = new Zend_Controller_Dispatcher();
+        $this->_dispatcher = new Zend_Controller_Dispatcher_Standard();
         $this->_dispatcher->setControllerDirectory(dirname(__FILE__) . DIRECTORY_SEPARATOR . '_files');
         $this->_dispatcher->addControllerDirectory(dirname(__FILE__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Admin', 'admin');
     }

@@ -365,15 +365,15 @@ class Zend_Controller_Front
     /**
      * Return the router object.
      *
-     * Instantiates a Zend_Controller_RewriteRouter object if no router currently set.
+     * Instantiates a Zend_Controller_Router_Rewrite object if no router currently set.
      *
      * @return null|Zend_Controller_Router_Interface
      */
     public function getRouter()
     {
         if (null == $this->_router) {
-            require_once 'Zend/Controller/RewriteRouter.php';
-            $this->setRouter(new Zend_Controller_RewriteRouter());
+            require_once 'Zend/Controller/Router/Rewrite.php';
+            $this->setRouter(new Zend_Controller_Router_Rewrite());
         }
 
         return $this->_router;
@@ -445,8 +445,8 @@ class Zend_Controller_Front
          * Instantiate the default dispatcher if one was not set.
          */
         if (!$this->_dispatcher instanceof Zend_Controller_Dispatcher_Interface) {
-            require_once 'Zend/Controller/Dispatcher.php';
-            $this->_dispatcher = new Zend_Controller_Dispatcher();
+            require_once 'Zend/Controller/Dispatcher/Standard.php';
+            $this->_dispatcher = new Zend_Controller_Dispatcher_Standard();
         }
         return $this->_dispatcher;
     }

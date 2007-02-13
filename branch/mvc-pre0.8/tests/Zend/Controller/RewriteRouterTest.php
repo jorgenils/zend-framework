@@ -5,11 +5,11 @@
  * @subpackage UnitTests
  */
 
-/** Zend_Controller_RewriteRouter */
-require_once 'Zend/Controller/RewriteRouter.php';
+/** Zend_Controller_Router_Rewrite */
+require_once 'Zend/Controller/Router/Rewrite.php';
 
-/** Zend_Controller_Dispatcher */
-require_once 'Zend/Controller/Dispatcher.php';
+/** Zend_Controller_Dispatcher_Standard */
+require_once 'Zend/Controller/Dispatcher/Standard.php';
 
 /** Zend_Controller_Front */
 require_once 'Zend/Controller/Front.php';
@@ -29,7 +29,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
     protected $_router;
     
     public function setUp() {
-        $this->_router = new Zend_Controller_RewriteRouter();
+        $this->_router = new Zend_Controller_Router_Rewrite();
         $front = Zend_Controller_Front::getInstance();
         $front->resetInstance();
         $front->setDispatcher(new Zend_Controller_RewriteRouterTest_Dispatcher());
@@ -372,7 +372,7 @@ class Zend_Controller_RewriteRouterTest_Request extends Zend_Controller_Request_
 /**
  * Zend_Controller_RouterTest_Dispatcher
  */
-class Zend_Controller_RewriteRouterTest_Dispatcher extends Zend_Controller_Dispatcher
+class Zend_Controller_RewriteRouterTest_Dispatcher extends Zend_Controller_Dispatcher_Standard
 {
     public function getDefaultControllerName() 
     {

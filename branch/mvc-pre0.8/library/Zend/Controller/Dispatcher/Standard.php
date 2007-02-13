@@ -38,7 +38,7 @@ require_once 'Zend/Controller/Action.php';
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Controller_Dispatcher extends Zend_Controller_Dispatcher_Abstract
+class Zend_Controller_Dispatcher_Standard extends Zend_Controller_Dispatcher_Abstract
 {
     /**
      * Current dispatchable directory
