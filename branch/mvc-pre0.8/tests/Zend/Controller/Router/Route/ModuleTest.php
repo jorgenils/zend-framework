@@ -16,7 +16,7 @@ require_once 'PHPUnit/Framework/TestCase.php';
  * @package    Zend_Controller
  * @subpackage UnitTests
  */
-class Zend_Controller_ModuleRouteTest extends PHPUnit_Framework_TestCase
+class Zend_Controller_Router_Route_ModuleTest extends PHPUnit_Framework_TestCase
 {
 
     public function setUp()
@@ -24,8 +24,8 @@ class Zend_Controller_ModuleRouteTest extends PHPUnit_Framework_TestCase
         $front = Zend_Controller_Front::getInstance();
         $front->resetInstance();
         $front->getDispatcher()->setControllerDirectory(array(
-            'default' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '_files',
-            'mod'     => dirname(__FILE__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Admin',
+            'default' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '_files',
+            'mod'     => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Admin',
         ));
         $this->route = new Zend_Controller_Router_Route_Module();
     }

@@ -24,7 +24,7 @@ require_once 'PHPUnit/Runner/Version.php';
  * @package    Zend_Controller
  * @subpackage UnitTests
  */
-class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
+class Zend_Controller_Router_RewriteTest extends PHPUnit_Framework_TestCase
 {
     protected $_router;
     
@@ -32,7 +32,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
         $this->_router = new Zend_Controller_Router_Rewrite();
         $front = Zend_Controller_Front::getInstance();
         $front->resetInstance();
-        $front->setDispatcher(new Zend_Controller_RewriteRouterTest_Dispatcher());
+        $front->setDispatcher(new Zend_Controller_Router_RewriteTest_Dispatcher());
         $this->_router->setFrontController($front);
     }
     
@@ -124,7 +124,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testRoute()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request();
+        $request = new Zend_Controller_Router_RewriteTest_Request();
         
         $token = $this->_router->route($request);
 
@@ -133,7 +133,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testRouteWithIncorrectRequest()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request_Incorrect();
+        $request = new Zend_Controller_Router_RewriteTest_Request_Incorrect();
         
         try {
             $token = $this->_router->route($request);
@@ -145,7 +145,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
     
     public function testDefaultRoute()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request();
+        $request = new Zend_Controller_Router_RewriteTest_Request();
 
         $token = $this->_router->route($request);
         
@@ -155,7 +155,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testDefaultRouteWithEmptyAction()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/ctrl');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/ctrl');
         
         $token = $this->_router->route($request);
 
@@ -165,7 +165,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testEmptyRoute()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/');
         
         $this->_router->removeDefaultRoutes();
         $this->_router->addRoute('empty', new Zend_Controller_Router_Route('', array('controller' => 'ctrl', 'action' => 'act')));
@@ -178,7 +178,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testEmptyPath()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/');
         
         $this->_router->removeDefaultRoutes();
         $this->_router->addRoute('catch-all', new Zend_Controller_Router_Route(':controller/:action/*', array('controller' => 'ctrl', 'action' => 'act')));
@@ -191,7 +191,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testEmptyPathWithWildcardRoute()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/');
         
         $this->_router->removeDefaultRoutes();
         $this->_router->addRoute('catch-all', new Zend_Controller_Router_Route('*', array('controller' => 'ctrl', 'action' => 'act')));
@@ -204,7 +204,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testRouteNotMatched()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/archive/action/bogus');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/archive/action/bogus');
 
         $this->_router->addRoute('default', new Zend_Controller_Router_Route(':controller/:action'));
         
@@ -216,7 +216,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testDefaultRouteMatched()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/ctrl/act');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/ctrl/act');
 
         $token = $this->_router->route($request);
 
@@ -226,7 +226,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testDefaultRouteMatchedWithControllerOnly()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/ctrl');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/ctrl');
 
         $token = $this->_router->route($request);
 
@@ -236,7 +236,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testFirstRouteMatched()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/archive/2006');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/archive/2006');
 
         $this->_router->addRoute('archive', new Zend_Controller_Router_Route('archive/:year', array('year' => '2006', 'controller' => 'archive', 'action' => 'show'), array('year' => '\d+')));
         $this->_router->addRoute('register', new Zend_Controller_Router_Route('register/:action', array('controller' => 'profile', 'action' => 'register')));
@@ -249,7 +249,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testGetCurrentRoute()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/ctrl/act');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/ctrl/act');
 
         try {
             $route = $this->_router->getCurrentRoute();
@@ -281,7 +281,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
     public function testAddConfig()
     {
         require_once 'Zend/Config/Ini.php';
-        $file = dirname(__FILE__) . '/_files/routes.ini';
+        $file = dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'routes.ini';
         $config = new Zend_Config_Ini($file, 'testing');
         
         $this->_router->addConfig($config, 'routes');
@@ -302,7 +302,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
     
     public function testRemoveDefaultRoutes()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/ctrl/act');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/ctrl/act');
         $this->_router->removeDefaultRoutes();
 
         $token = $this->_router->route($request);
@@ -314,10 +314,10 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
     public function testDefaultRouteMatchedWithModules()
     {
         Zend_Controller_Front::getInstance()->getDispatcher()->setControllerDirectory(array(
-            'default' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '_files',
-            'mod'     => dirname(__FILE__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Admin',
+            'default' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '_files',
+            'mod'     => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Admin',
         ));
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/mod/ctrl/act');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/mod/ctrl/act');
         $token = $this->_router->route($request);
         
         $this->assertSame('mod',  $token->getModuleName());
@@ -327,7 +327,7 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 
     public function testRouteCompatDefaults()
     {
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/');
         
         $token = $this->_router->route($request);
 
@@ -339,10 +339,10 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
     public function testDefaultRouteWithEmptyControllerAndAction()
     {
         Zend_Controller_Front::getInstance()->getDispatcher()->setControllerDirectory(array(
-            'default' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '_files',
-            'mod'     => dirname(__FILE__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Admin',
+            'default' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '_files',
+            'mod'     => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Admin',
         ));
-        $request = new Zend_Controller_RewriteRouterTest_Request('http://localhost/mod');
+        $request = new Zend_Controller_Router_RewriteTest_Request('http://localhost/mod');
         
         $token = $this->_router->route($request);
 
@@ -353,11 +353,11 @@ class Zend_Controller_RewriteRouterTest extends PHPUnit_Framework_TestCase
 }
 
 /**
- * Zend_Controller_RewriteRouterTest_Request - request object for router testing
+ * Zend_Controller_Router_RewriteTest_Request - request object for router testing
  * 
  * @uses Zend_Controller_Request_Interface
  */
-class Zend_Controller_RewriteRouterTest_Request extends Zend_Controller_Request_Http
+class Zend_Controller_Router_RewriteTest_Request extends Zend_Controller_Request_Http
 {
     public function __construct($uri = null)
     {
@@ -372,7 +372,7 @@ class Zend_Controller_RewriteRouterTest_Request extends Zend_Controller_Request_
 /**
  * Zend_Controller_RouterTest_Dispatcher
  */
-class Zend_Controller_RewriteRouterTest_Dispatcher extends Zend_Controller_Dispatcher_Standard
+class Zend_Controller_Router_RewriteTest_Dispatcher extends Zend_Controller_Dispatcher_Standard
 {
     public function getDefaultControllerName() 
     {
@@ -390,6 +390,6 @@ class Zend_Controller_RewriteRouterTest_Dispatcher extends Zend_Controller_Dispa
  * 
  * @uses Zend_Controller_Request_Abstract
  */
-class Zend_Controller_RewriteRouterTest_Request_Incorrect extends Zend_Controller_Request_Abstract
+class Zend_Controller_Router_RewriteTest_Request_Incorrect extends Zend_Controller_Request_Abstract
 {
 }
