@@ -1,0 +1,575 @@
+<sect1 id="zend.controller.providedsubclasses">
+    <title>Dostępne podklasy</title>
+
+    <sect2 id="zend.controller.providedsubclasses.introduction">
+        <title>Wprowadzenie</title>
+
+        <para>
+            Zend Framework zapewnia kilka alternatyw dla domyślnych klas,
+            włączając w to alternatywne obiekty żądania, routery oraz obiekty
+            odpowiedzi.
+        </para>
+    </sect2>
+
+    <sect2 id="zend.controller.providedsubclasses.request.http">
+        <title>Zend_Controller_Request_Http</title>
+
+        <sect3 id="zend.controller.providedsubclasses.request.http.introduction">
+            <title>Wprowadzenie</title>
+
+            <para>
+                <code>Zend_Controller_Request_Http</code> zapewnia obiekt 
+                żądania do użycia w środowisku HTTP. Klasa  
+                <code>Zend_Controller_Request_Http</code> jest domyślną klasą
+                żądania używaną przez <code>Zend_Controller_Dispatcher</code>.
+            </para>
+        </sect3>
+
+        <sect3 id="zend.controller.providedsubclasses.request.http.dataaccess">
+            <title>Dostęp do danych żądania</title>
+
+            <para>
+                <code>Zend_Controller_Request_Http</code> obudowuje dostęp
+                do odpowiednich wartości takich jak nazwa klucza i wartość
+                dla zmiennych kontrolera i akcji routera, oraz do dodatkowych
+                parametrów pobranych z adresu URI. Rozszerzając
+                <code>Zend_Controller_Request_Http</code> dodatkowo pozwala na 
+                uzyskanie dostępu do wartości zawartych w superglobalnych 
+                tablicach jako do publicznych właściwości obiektu i zarządza 
+                obecnym bazowym adresem URL oraz adresem URL żądania. 
+                Superglobalne wartości nie mogą być ustawione w obiekcie 
+                żądania, zamiast tego użyj metod setParam/getParam aby ustawić 
+                lub odebrać parametry użytkownika.
+            </para>
+
+            <note>
+                <title>Dane superglobalne</title>
+                <para>
+                    Kiedy uzyskujemy dostęp do danych superglobalnych za pomocą
+                    klasy <code>Zend_Controller_Request_Http</code> jak do jej 
+                    publicznych właściwości, ważne jest aby pamiętać, że nazwa właściwości 
+                    (klucz tablicy superglobalnej) jest dopasowana do superglobalnych 
+                    w określonej kolejności: 1. GET, 2. POST, 3. COOKIE, 4. SERVER, 5. ENV.
+                </para>
+            </note>
+
+            <para>
+                Konkretne zmienne superglobalne mogą być alternatywnie dostępne 
+                za pomocą publicznej metody. Na przykład, wartość 
+                <code>$_POST['user']</code> może być dostępna przez wywołanie 
+                metody <code>getPost('user')</code> na obiekcie żądania.
+            </para>
+
+        </sect3>
+
+        <sect3 id="zend.controller.providedsubclasses.request.http.baseurl">
+            <title>Bazowy Url oraz podkatalogi</title>
+
+            <para>
+                Klasa <code>Zend_Controller_Request_Http</code> pozwala na użycie 
+                klasy Zend_Controller_Router_Rewrite w podkatalogach. 
+                Zend_Controller_Request_Http spróbuje automatycznie wykryć twój 
+                bazowy adres URL i ustawi go odpowiednio.
+            </para>
+
+            <para>
+                Na przykład jeśli twój plik <code>index.php</code> jest w
+                podkatalogu nazwanym <code>/projects/myapp/index.php</code>, 
+                bazowy URL (bazowy adres przepisania) powinien być ustawiony na
+                <code>/projects/myapp</code>. Ten łańcuch znaków zostanie 
+                obcięty z początu ścieżki zanim będą dopasowane jakiekolwiek trasy.
+                To zwalnia z konieczności dołączania tego adresu do każdej z tras. 
+                Trasa <code>'user/:username'</code> dopasuje adresy URI takie
+                jak <code>http://localhost/projects/myapp/user/martel</code> oraz
+                <code>http://example.com/user/martel</code>.
+            </para>
+
+            <note>
+                <title>Detekcja URL jest wrażliwa na małe i duże litery</title>
+                <para>
+                    Automatyczna detekcja adresów URL jest wrażliwa na małe i duże
+                    litery, więc upewnij się, że adres URL zostanie dobrze dopasowany
+                    do nazwy podkatalogu w systemie plików (nawet w systemie 
+                    Windows). Jeśli nie zostanie, zostanie wywołana akcja noRoute.
+                </para>
+            </note>
+
+            <para>
+                Jeśli bazowy adres URL jest wykrywany nieprawidłowo, możesz
+                go nadpisać w obiekcie Zend_Http_Request wywołując metodę
+                <code>setBaseUrl()</code> lub tą samą metodę klasy
+                <code>Zend_Controller_Request_Http</code> lub klasy
+                <code>Zend_Controller_Front</code>. Najłatwiejszy sposób
+                to ustawienie tego w klasie <code>Zend_Controller_Front</code>, 
+                która przekaże to do obiektu żądania. Przykładowe użycie
+                ustawiania własnego bazowego adresu URL:
+            </para>
+
+            <programlisting role="php"><![CDATA[
+/** 
+ * Uruchom żądanie z własnym bazowym URL za pomocą Zend_Controller_Front.
+ */
+$router     = new Zend_Controller_Router_Rewrite();
+$controller = Zend_Controller_Front::getInstance();
+$controller->setControllerDirectory('./application/controllers')
+           ->setRouter($router)
+           ->setBaseUrl('/projects/myapp'); // ustaw bazowy URL!
+$response   = $controller->dispatch();]]></programlisting>
+        </sect3>
+    </sect2>
+
+    <sect2 id="zend.controller.providedsubclasses.rewriterouter">
+        <title>Zend_Controller_Router_Rewrite</title>
+
+        <sect3 id="zend.controller.providedsubclasses.rewriterouter.introduction">
+            <title>Wprowadzenie</title>
+            <para>
+                <code>Zend_Controller_Router_Rewrite</code> jest standardowym
+                routerem we frameworku. Routing jest procesem pobrania adresu 
+                URI i rozłożenia go w celu ustalenia jaki kontroler i jaka akcja 
+                powinny otrzymać żądanie. Ta informacja o kontrolerze, akcji i 
+                opcjonalnych parametrach jest pakowana do obiektu 
+                <code>Zend_Controller_Request_Http</code>, który jest potem 
+                przetwarzany przez <code>Zend_Controller_Dispatcher_Standard</code>. 
+                Routing ma miejsce tylko raz: wtedy gdy żądanie jest po raz 
+                pierwszy otrzymane, przed wywołaniem pierwszego kontrolera.
+            </para>
+
+            <para>
+                <code>Zend_Controller_Router_Rewrite</code> jest zaprojektowany w 
+                celu uzyskania w czystym PHP takiej funkcjonalności jak w 
+                mod_rewrite. Jest to luźno wzorowane na routingu Ruby on Rails i 
+                nie wymaga żadnej wiedzy o przepisywaniu adresów przez serwer 
+                www. Jest to zaprojektowane w taki sposób, aby działało po 
+                dodaniu tylko jednej reguły mod_rewrite (jednej z poniższych):
+            </para>
+
+            <programlisting role="php"><![CDATA[
+RewriteEngine on
+RewriteRule !\.(js|ico|gif|jpg|png|css)$ index.php]]></programlisting>
+
+            <para>
+            lub:
+            </para>
+
+            <programlisting role="php"><![CDATA[
+RewriteEngine on
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 ]]></programlisting>
+            
+            <para>
+                Rewrite router może być także użyty z serwerem IIS, jeśli moduł
+                <ulink url="http://www.isapirewrite.com">Isapi_Rewrite</ulink>
+                jest zainstalowany jako rozszerzenie Isapi, z taką regułą 
+                przepisywania:
+            </para>
+
+            <programlisting role="php"><![CDATA[
+RewriteRule ^[\w/\%]*(?:\.(?!(?:js|ico|gif|jpg|png|css)$)[\w\%]*$)? /index.php [I]]]></programlisting>
+
+            <note>
+                <title>IIS Isapi_Rewrite</title>
+                <para>
+                    Jeśli używasz serwera IIS, to wartość 
+                    <code>$_SERVER['REQUEST_URI']</code> nie istnieje lub jest 
+                    pustym łańcuchem znaków. W takim wypadku, 
+                    <code>Zend_Controller_Request_Http</code> spróbuje użyć wartości 
+                    <code>$_SERVER['HTTP_X_REWRITE_URL']</code> ustawionej przez 
+                    rozszerzenie Isapi_Rewrite.
+                </para>
+            </note>
+
+            <para>Jeśli używasz serwera Lighttpd, poniższa reguła jest prawidłowa:</para>
+
+            <programlisting role="php"><![CDATA[
+url.rewrite-once = ( ".*\.(js|ico|gif|jpg|png|css)$" => "$0", "" => "/index.php")]]></programlisting>
+        </sect3>
+
+        <sect3 id="zend.controller.providedsubclasses.rewriterouter.usage">
+            <title>Użycie routera</title>
+
+            <para>
+                Aby prawidłowo użyć rewrite routera musisz utworzyć jego 
+                instancję, zdefiniować jakieś trasy i przekazać ten obiekt do 
+                kontrolera. Poniższy kod pokazuje tą procedurę:
+            </para>
+
+            <programlisting role="php"><![CDATA[
+/* Utwórz router */
+
+$router = $ctrl->getRouter(); // domyślnie zwraca rewrite router
+$router->addRoute(
+	'user',
+	new Zend_Controller_Router_Route('user/:username', array('controller' => 'user', 'action' => 'info'))
+);
+]]></programlisting>
+        </sect3>
+
+        <sect3 id="zend.controller.providedsubclasses.rewriterouter.basic">
+            <title>Podstawowe trasy</title>
+
+            <para>
+                Sercem RewriteRoutera jest definicja tras określonych przez 
+                użytkownika. Trasy są tworzone przez wywołanie metody addRoute 
+                obiektu RewriteRouter i przekazanie do niej nowej instancji
+                obiektu <code>Zend_Controller_Router_Route</code>:
+            </para>
+
+            <programlisting role="php"><![CDATA[
+$router->addRoute('user', new Zend_Controller_Router_Route('user/:username'));]]></programlisting>
+
+            <para>
+                Pierwszy parametr jest nazwą trasy. Obecnie nie jest konieczne 
+                jego definiowanie, jednak będzie on używany w przyszłości w 
+                klasie pomocniczej widoku ułatwiającej łatwe generowanie adresów 
+                URL. Jeśli chcesz użyć wcześniej skonfigurowanej trasy, możesz 
+                ją odebrać za pomocą metody getRoute RewriteRoutera. Drugi 
+                parametr jest instancją <code>Zend_Controller_Router_Route</code>.
+            </para>
+
+            <para>
+                Pierwszy parametr konstruktora obiektu 
+                <code>Zend_Controller_Router_Route</code> jest trasą, która ma
+                być dopasowana do adresu URL - na przykład powyższa trasa 
+                zostanie dopasowana do adresu <code>http://example.com/user/martel</code>. 
+                Dwukropek w trasie oznacza zmienną adresu URL. Po udanym dopasowaniu
+                trasy, wartości wszystkich zdefiniowanych zmiennych zostaną przekazane
+                do obiektu Zend_Controller_Request. Po tym będą one dostępne za pomocą
+                metod Zend_Controller_Request::getParam oraz
+                Zend_Controller_Action::_getParam. W naszym przykładzie
+                parametr nazwany username będzie miał ustawioną wartość 'martel'.
+            </para>
+
+            <note>
+                <title>Odwrotne dopasowywanie</title>
+                <para>
+                    Trasy są dopasowywane w odwrotnej kolejności więc musisz 
+                    pamiętać żeby podstawowe trasy były zdefiniowane na początku.
+                </para>
+            </note>
+
+            <note>
+                <title>Użycie znaków</title>
+                <para>
+                    Teraz obecna implementacja pozwala na użycie w nazwie 
+                    zmiennej dowolnych znaków z wyjątkiem ukośnika (/), ale jest 
+                    mocno zalecane używanie jedynie znaków, które są 
+                    bezproblemowo obsługiwane ptzrz PHP. W przyszłości 
+                    implementacja prawdopodobnie zostanie zmodyfikowana co 
+                    mogłoby wprowadzić do twojego kodu błędy.
+                </para>
+            </note>
+
+            <para>
+                Są dwie specjalne zmienne które nie mogą być użyte w twoich 
+                trasach - ':controller' oraz ':action'. Te specjalne zmienne 
+                będą użyte aby znaleść kotroler oraz akcję w danym adresie URL. 
+                Zmienna ':action' zawsze musi być zdefiniowana w trasie lub jako 
+                domyślny parametr. Zmienna ':controller' będzie domyślnie 
+                ustawiona na IndexController jeśli nie będzie zdefiniowana.
+            </para>
+
+            <note>
+                <title>Specjalne zmienne</title>
+                <para>
+                    Nazwy tych specjalnych zmiennych mogą być inne, jeśli zdecydujesz
+                    zmienić je w obiekcie <code>Zend_Controller_Request_Http</code>  
+                    za pomocą metod setControllerKey oraz setActionKey.
+                </para>
+            </note>
+
+            <programlisting role="php"><![CDATA[
+$router->addRoute(
+    'user', new Zend_Controller_Router_Route(':controller/:action')
+);]]></programlisting>
+
+            <para>
+                Jeśli skierujesz przeglądarkę na adres 
+                'http://example.com/news/latest' ze zdefiniowaną powyższą trasą 
+                <code>Zend_Controller_Dispatcher</code> odwoła się do akcji 
+                latestAction z kontrolera NewsController.
+            </para>
+
+        </sect3>
+
+        <sect3 id="zend.controller.providedsubclasses.rewriterouter.variable-defaults">
+            <title>Domyślne wartości zmiennych</title>
+
+            <para>
+                Każda zmienna w trasie może mieć wartość domyślną. Aby to 
+                zrobić, musisz przekazać drugi parametr do konstruktora 
+                <code>Zend_Controller_Router_Route</code>. Ten parametr jest 
+                tablicą z nazwami zmiennych jako kluczami i z wartościami, 
+                które mają być uznane za domyślne.
+            </para>
+
+            <programlisting role="php"><![CDATA[
+$router->addRoute(
+    'archive', new Zend_Controller_Router_Route('archive/:year', array('year' => 2006))
+);]]></programlisting>
+
+            <para>
+                Może nie jest wyraźnie widoczne to, że powyższa trasa dopasuje 
+                adresy URL takie jak 'http://example.com/archive/2005' oraz 
+                'http://example.com/archive'. Ostatecznie zmienna year i tak 
+                będzie miała wartość 2006.
+            </para>
+
+            <para>
+                Powyższy przykład spowoduje jedynie przekazanie zmiennej 
+                oznaczającej rok do żądania. Nie będzie miał miejsca routing, 
+                ponieważ parametry oznaczające kontroler i akcję nie są ustawione.
+                Aby było to bardziej użyteczne, musisz zapewnić prawidłową nazwę
+                kontrolera i akcji jako domyślne wartości.
+            </para>
+
+            <programlisting role="php"><![CDATA[
+$router->addRoute(
+    'archive',
+    new Zend_Controller_Router_Route('archive/:year', array('year' => 2006, 'controller' => 'archive', 'action' => 'show')
+);]]></programlisting>
+
+            <para>
+				Ta trasa spowoduje uruchomienie akcji showAction kontrolera ArchiveController.
+            </para>
+
+        </sect3>
+
+        <sect3 id="zend.controller.providedsubclasses.rewriterouter.variable-requirements">
+            <title>Wymagania zmiennych</title>
+
+            <para>
+                Można dodać trzeci parametr do konstruktora 
+                <code>Zend_Controller_Router_Route</code> w którym będą 
+                ustawione wymagania zmiennych. Są one zdefiniowane jako 
+                wyrażenia regularne:
+            </para>
+
+            <programlisting role="php"><![CDATA[
+$router->addRoute(
+    'archive',
+    new Zend_Controller_Router_Route('archive/:year', array('year' => 2006), array('year' => '\d+'))
+);]]></programlisting>
+
+            <note>
+                <title>Zachowanie routera</title>
+                <para>
+                    W przeciwieństwie do Ruby on Rails, RewriteRouter z ZF 
+                    dopasuje trasę i użyje domyślnej gdy trzeci parametr 
+                    zawierający wymagania zmiennych nie zostanie znaleziony. 
+                    Więc adres URL 'http://example.com/archive/test' zostanie 
+                    dopasowany do powyższej trasy, a rok zostanie ustawiony na 
+                    2006. Ta funkcjonalność może w przyszłości się zmienić, 
+                    ponieważ w momencie pisania tej dokumentacji ta kwestia jest 
+                    jeszcze uzgadniana.
+                </para>
+            </note>
+
+        </sect3>
+
+        <sect3 id="zend.controller.providedsubclasses.rewriterouter.rewritebase">
+            <title>Bazowy adres URL i podkatalogi</title>
+
+            <para>
+                Rewrite router może być użyty w podkatalogach, a bazowy adres 
+                URL zostanie automatycznie wykryty przez obiekt 
+                <code>Zend_Controller_Request_Http</code>.
+            </para>
+
+            <para>
+                Jeśli bazowy adres URL jest wykrywany nieprawidłowo, możesz
+                go nadpisać w obiekcie <code>Zend_Controller_Request_Http</code> 
+                wywołując metodę <code>setBaseUrl()</code> (zobacz 
+                <xref linkend="zend.controller.providedsubclasses.request.http.baseurl" />).
+            </para>
+
+        </sect3>
+
+        <sect3 id="zend.controller.providedsubclasses.rewriterouter.default-routes">
+            <title>Domyślne trasy</title>
+
+            <para>
+                Zend_Controller_Router_Rewrite jest skonfigurowany z jedną domyślną
+                trasą. Dopasuje on adresy w postaci <code>'controller/action'</code> .
+                Dodatkowo, nazwa modułu może być określoa jako pierwszy element
+                ścieżki, pozwalając na użycie adresów w postaci
+                <code>'module/controller/action</code>. Ostatecznie domyślnie
+                dopasuje dodatkowe parametry dołączone do adresu URI.
+            </para>
+
+            <para>
+                Kilka przykładów doopasowania tras:
+            </para>
+
+            <programlisting role="php"><![CDATA[
+// Zakładając poniższe:
+// $ctrl->setControllerDirectory(array(
+//     'default' => '/path/to/default/controllers',
+//     'news'    => '/path/to/blog/controllers',
+//     'blog'    => '/path/to/blog/controllers'
+// ));
+
+Tylko moduł:
+http://example/news
+    module == news
+
+Nieprawidłowy moduł mapuje do nazwy kontrolera:
+http://example/foo
+    controller == foo
+
+Moduł oraz kontroler:
+http://example/blog/archive
+    module     == blog
+    controller == archive
+
+Moduł, kontroler oraz akcja:
+http://example/blog/archive/list
+    module     == blog
+    controller == archive
+    action     == list
+
+Moduł, kontroler, akcja oraz parametry:
+http://example/blog/archive/list/sort/alpha/date/desc
+    module     == blog
+    controller == archive
+    action     == list
+    sort       == alpha
+    date       == desc
+]]></programlisting>
+
+            <para>
+                Domyślną trasą jest obiekt
+                <code>Zend_Controller_Router_Route_Module</code> utworzony
+                bez żadnych domyślnych parametrów:
+            </para>
+
+            <programlisting role="php"><![CDATA[
+// Trasa kompatybilna z pierwszą wersja routera
+$compat = new Zend_Controller_Router_Route_Module();
+$this->addRoute('default', $compat);]]></programlisting>
+
+            <note>
+                <title>Dopasowanie adresów URI</title>
+                <para>
+                    <code>Zend_Controller_Router_Rewrite</code> jest 
+                    skonfigurowany z kompatybilnością wsteczną. Automatycznie dopasuje 
+                    kontroler i akcję z adresu wraz z dodatkowymi parametrami.
+                    Dodatkowe parametry nie wymagają dodawania nowych tras, o ile
+                    nie chcemy zdefiniować dla nich domyślnych wartości lub wymagań.
+                    Te dodatkowe parametry będą dostępne za pomocą metody
+                    <code>Zend_Controller_Action::_getParam()</code>.
+                </para>
+            </note>
+
+            <para>
+                Jeśli nie potrzebujesz domyślnych tras w swoim schemacie 
+                routingu, możesz je usunąć używając metody <code>removeDefaultRoutes()</code>:
+            </para>
+
+            <programlisting role="php"><![CDATA[
+// Usuwa domyślną trasę
+$router->removeDefaultRoutes();]]></programlisting>
+
+        </sect3>
+
+        <sect3 id="zend.controller.providedsubclasses.rewriterouter.static-routes">
+            <title>Trasy statyczne</title>
+
+            <para>
+                Wszystkie powyższe przykłady używają dynamicznych tras -- tras,
+                które są dopasowywane do szablonów. Czasem jakaś trasa jest 
+                niezmienna, a ciągłe sprawdzanie wyrażenia regularnego może
+                być zabójcze dla serwera. Rozwiązaniem takiej sytuacji jest 
+                użycie statycznych tras:
+            </para>
+
+            <programlisting role="php"><![CDATA[
+$loginRoute = new Zend_Controller_Router_Route_Static('login', array('controller' => 'login', 'action' => 'form'));
+$router->addRoute('login', $static);
+]]></programlisting>
+        </sect3>
+
+        <sect3 id="zend.controller.providedsubclasses.rewriterouter.add-config">
+            <title>Użycie Zend_Config z RewriteRouterem</title>
+
+            <para>
+                Czasem wygodniej jest uaktualnić plik konfiguracyjny z nowymi
+                trasami niż zmieniać kod. Jest to możliwe za pomocą metody
+                <code>addConfig()</code>. Zasadniczo tworzysz konfigurację
+                kompatybilną z Zend_Config, a w kodzie odczytujesz ją i 
+                przekazujesz ją do RewriteRoutera.
+            </para>
+
+            <programlisting role="php"><![CDATA[
+/**
+ * Przykładowy plik INI:
+ * routes.archive.route = "archive/:year/*"
+ * routes.archive.defaults.controller = archive
+ * routes.archive.defaults.action = show
+ * routes.archive.defaults.year = 2000
+ * routes.archive.reqs.year = "\d+"
+ * 
+ * routes.news.type = "Zend_Controller_Router_Route_Static"
+ * routes.news.route = "news"
+ * routes.news.defaults.controller = "news"
+ * routes.news.defaults.action = "list"
+ */
+$config = new Zend_Config_Ini($file);
+$router = new Zend_Controller_Router_Rewrite();
+$router->addConfig($config, 'routes');
+]]></programlisting>
+
+            <para>
+                W powyższym przykładzie, nakazujemy routerowi użyć sekcji 'routes'
+                pliku INI aby użyć tras zdefiniowanych w tym pliku. Każdy element
+                pierwszego poziomu w tej sekcji będzie użyty do zdefiiniowania
+                nazwy trasy; powyższy przekład definiuje trasy 'archive' oraz 
+                'news'. Wymagane jest aby każda trasa miała określony przynajmniej 
+                parametr 'route' i jeden lub więcej parametrów 'defaults'; 
+                opcjonalnie mogą być zdeiniowane parametry 'reqs' (skrót
+                'required'). Wszystkie te parametry odpowiadają trzem argumentom
+                przekazywanym do obiektu <code>Zend_Controller_Router_Route_Interface</code> 
+                Klucz opcji 'type' może być użyty aby określić typ
+                klasy, która ma być użyta dla danej trasy; domyślnie używana jest
+                klasa <code>Zend_Controller_Router_Route</code>. W powyższym 
+                przykładzie, trasa 'news' jest zdefiniowana aby używała
+                <code>Zend_Controller_Router_Route_Static</code>.
+            </para>
+        </sect3>
+
+    </sect2>
+
+    <sect2 id="zend.controller.providedsubclasses.response.http">
+        <title>Zend_Controller_Response_Http</title>
+
+        <para>
+            <code>Zend_Controller_Response_Http</code> jest obiektem odpowiedzi
+            odpowiednim do użycia w środowisku HTTP. Zawiera metody
+            do ustawiania, odbierania i czyszczenia nagłówków, a metoda 
+            <code>__toString()</code> wysyła wszystkie nagłówki na raz przed 
+            wysłaniem zawartości odpowiedzi.
+        </para>
+
+        <para>
+            Metoda <code>setHeader()</code> przyjmuje dwa argumenty, typ nagłówka
+            oraz wartość nagłówka. Trzeci opcjonalny parametr, jeśli jest 
+            przekazany i ma wartość true, spowoduje, że nowy nagłówek zastąpi
+            inne zarejestrowane nagłówki o tym typie.
+        </para>
+    </sect2>
+
+    <sect2 id="zend.controller.providedsubclasses.response.cli">
+        <title>Zend_Controller_Response_Cli</title>
+
+        <para>
+            <code>Zend_Controller_Response_Cli</code> jest obiektem odpowiedzi
+            odpowiednim do użycia w środowisku CLI. Nie ma on metod do obsługi
+            nagłówków i w prosty sposób zwraca całą zawartość gdy wywoływana jest
+            metoda <code>__toString()</code>.
+        </para>
+    </sect2>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
