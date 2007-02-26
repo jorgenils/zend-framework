@@ -1,0 +1,85 @@
+<sect1 id="zend.validate.validating_hostnames">
+
+    <title>Walidacja adresów serwerów</title>
+
+    <para>
+        Zend_Validate_Hostname pozwala ci na przeprowadzenie walidacji adresów
+        serwerów w oparciu o zestaw znanych specyfikacji. Możliwe jest 
+        sprawdzenie trzech różnych typów adresów serwerów: adresu DNS (np. 
+        domain.com), adresu IP (np. 1.2.3.4), oraz adresu lokalnego (np. 
+        localhost). Domyślne będzie to sprawdzane jedynie w kontekście adresów
+        DNS.
+    </para>
+
+    <para>
+        <emphasis role="strong">Podstawowe użycie</emphasis>
+    </para>
+
+    <para>
+        Poniżej podstawowy przykład użycia:
+
+        <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Validate/Hostname.php';
+$validator = new Zend_Validate_Hostname();
+if ($validator->isValid($hostname)) {
+    // nazwa serwera wygląda na prawidłową
+} else {
+    // nazwa jest nieprawidłowa; wyświetl powody
+    foreach ($validator->getMessages() as $message) {
+        echo "$message\n";
+    }
+}]]></programlisting>
+
+        Sprawdzi to nazwę serwera <code>$hostname</code> i w przypadku niepowodzenia
+        wypełni <code>$validator->getMessages()</code> użytecznymi informacjami
+        informującymi o błędach.
+
+    </para>
+
+    <para>
+        <emphasis role="strong">Walidacja różnych typów adresów serwerów</emphasis>
+    </para>
+
+    <para>
+        Może się okazać, że chcesz zezwolić na użycie adresów IP, adresów 
+        lokalnych lub kombinacji dozwolonych typów. Możesz to zrobić przekazując
+        parametr do obiektu Zend_Validate_Hostname gdy tworzysz jego instancję. 
+        Parametr powinien być liczbą całkowitą określającą, ktorego typu adresy
+        są dozwolone. Zalecamy użycie stałych klasy Zend_Validate_Hostname w
+        tym celu.
+    </para>
+
+    <para>
+        Stałe klasy Zend_Validate_Hostname to: <code>ALLOW_DNS</code> aby 
+        zezwalać tylko na adresy DNS, <code>ALLOW_IP</code> aby zezwalać tylko
+        na adresy IP, <code>ALLOW_LOCAL</code> aby zezwalać tylko na adresy
+        lokalne, oraz <code>ALLOW_ALL</code> aby zezwalać na wszystkie typy. 
+        Aby tylko sprawdzić adres dla adresów IP możesz użyć poniższego przykładu:
+        <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Validate/Hostname.php';
+$validator = new Zend_Validate_Hostname(Zend_Validate_Hostname::ALLOW_IP);
+if ($validator->isValid($hostname)) {
+    // nazwa serwera wygląda na prawidłową
+} else {
+    // nazwa jest nieprawidłowa; wyświetl powody
+    foreach ($validator->getMessages() as $message) {
+        echo "$message\n";
+    }
+}]]></programlisting>
+    </para>
+
+    <para>
+        Tak samo dobrze jak używając stałej <code>ALLOW_ALL</code> do określenia 
+        akceptacji adresów wszystkich typow, możesz użyć dowolnej kombinacji 
+        tych typów. Na przykład aby akceptować adresy DNS oraz adresy lokalne, 
+        uwtórz instancję obiektu Zend_Validate_Hostname w taki sposób:
+        <programlisting role="php"><![CDATA[<?php
+$validator = new Zend_Validate_Hostname(Zend_Validate_Hostname::ALLOW_DNS | Zend_Validate_Hostname::ALLOW_IP);
+}]]></programlisting>
+
+    </para>  
+
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
