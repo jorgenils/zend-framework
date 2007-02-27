@@ -104,7 +104,7 @@ abstract class Zend_Db_Table_Abstract
      * - rowsetclass = rowset class name
      *
      * @param  array $config Array of user-specified config options.
-     * @return void
+     * @throws Zend_Db_Table_Exception
      */
     public function __construct(array $config = array())
     {
@@ -182,8 +182,8 @@ abstract class Zend_Db_Table_Abstract
     /**
      * Populate static properties for this table module.
      *
-     * @throws Zend_Db_Table_Exception
      * @return void
+     * @throws Zend_Db_Table_Exception
      */
     protected function _setup()
     {
@@ -192,7 +192,6 @@ abstract class Zend_Db_Table_Abstract
             $this->_db = self::getDefaultAdapter();
         }
 
-        // ensure adapter is valid
         if (! $this->_db instanceof Zend_Db_Adapter_Abstract) {
             require_once 'Zend/Db/Table/Exception.php';
             throw new Zend_Db_Table_Exception('No object of type Zend_Db_Adapter_Abstract has been specified');
@@ -351,7 +350,7 @@ abstract class Zend_Db_Table_Abstract
         $count = null, $offset = null)
     {
         $data  = array(
-            'table'    => get_class($this),
+            'table'    => $this,
             'data'     => $this->_fetch('All', $where, $order, $count, $offset),
             'rowclass' => $this->_rowClass
         );
@@ -381,12 +380,12 @@ abstract class Zend_Db_Table_Abstract
 
         // @todo is this the right thing to do?
         // How can we tell that the query was unsuccessful?
-        if (!count($values)) {
+        if (empty($values)) {
             return $this->fetchNew();
         }
 
         $data = array(
-            'table'   => get_class($this),
+            'table'   => $this,
             'data'    => $row
         );
 
@@ -407,7 +406,7 @@ abstract class Zend_Db_Table_Abstract
         $row  = array_combine($keys, $vals);
 
         $config = array(
-            'table'   => get_class($this),
+            'table'   => $this,
             'data'    => $row
         );
 

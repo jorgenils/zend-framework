@@ -240,6 +240,10 @@ abstract class Zend_Db_Adapter_Abstract
             $set[] = "$col = ?";
         }
 
+        if (is_array($where)) {
+            $where = implode(' AND ', $where);
+        }
+
         // build the statement
         $sql = "UPDATE $table "
              . 'SET ' . implode(', ', $set)
@@ -260,6 +264,10 @@ abstract class Zend_Db_Adapter_Abstract
      */
     public function delete($table, $where)
     {
+        if (is_array($where)) {
+            $where = implode(' AND ', $where);
+        }
+
         // build the statement
         $sql = "DELETE FROM $table"
              . (($where) ? " WHERE $where" : '');

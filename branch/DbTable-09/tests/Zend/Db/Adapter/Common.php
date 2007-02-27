@@ -1096,24 +1096,25 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
     {
         list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
 
-        $title = $this->getIdentifier('title');
-        $subtitle = $this->getIdentifier('subtitle');
-        $body = $this->getIdentifier('body');
-        $dateCreated = $this->getIdentifier('date_created');
+        $title        = $this->getIdentifier('title');
+        $subtitle     = $this->getIdentifier('subtitle');
+        $body         = $this->getIdentifier('body');
+        $date_created = $this->getIdentifier('date_created');
 
         $info = $dbTable->info();
         $this->assertThat($info, $this->arrayHasKey('name'));
         $this->assertThat($info, $this->arrayHasKey('cols'));
         $this->assertThat($info, $this->arrayHasKey('primary'));
+
         $this->assertEquals($table, $this->getIdentifier($info['name']));
 
-        $this->assertThat($info['cols'], $this->arrayHasKey($id));
-        $this->assertThat($info['cols'], $this->arrayHasKey($title));
-        $this->assertThat($info['cols'], $this->arrayHasKey($subtitle));
-        $this->assertThat($info['cols'], $this->arrayHasKey($body));
-        $this->assertThat($info['cols'], $this->arrayHasKey($dateCreated));
+        $this->assertContains($id, $info['cols'], "Expected column '$id' to be in list of columns");
+        $this->assertContains($title, $info['cols'], "Expected column '$title' to be in list of columns");
+        $this->assertContains($subtitle, $info['cols'], "Expected column '$subtitle' to be in list of columns");
+        $this->assertContains($body, $info['cols'], "Expected column '$body' to be in list of columns");
+        $this->assertContains($date_created, $info['cols'], "Expected column '$date_created' to be in list of columns");
 
-        $this->assertEquals($id, $info['primary']);
+        $this->assertContains($id, $info['primary'], "Expected column '$id' to be in list of primary key columns");
     }
 
     public function testTableSetAndGetAdapter()
@@ -1145,8 +1146,9 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         try {
             Zend_Db_Table_ZfTestTable::setDefaultAdapter(new stdClass());
         } catch (Exception $e) {
-            $this->assertThat($e, $this->isInstanceOf('Zend_Db_Table_Exception'), 'Expecting object of type Zend_Db_Table_Exception');
-            $this->assertEquals('db object does not extend Zend_Db_Adapter_Abstract', $e->getMessage());
+            $this->assertThat($e, $this->isInstanceOf('PHPUnit_Framework_Error'), 'Expecting object of type PHPUnit_Framework_Error');
+            $mesg = substr("Argument 1 passed to Zend_Db_Table_Abstract::setDefaultAdapter() must be an instance of Zend_Db_Adapter_Abstract, instance of stdClass given", 0, 100);
+            $this->assertEquals($mesg, substr($e->getMessage(), 0, 100));
             $caughtException = true;
         }
         $this->assertTrue($caughtException);
@@ -1167,7 +1169,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
             );
         } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Table_Exception'), 'Expecting object of type Zend_Db_Table_Exception');
-            $this->assertEquals("primary key not specified for table '$table'", $e->getMessage());
+            $this->assertEquals("Primary key column(s) specified are not columns in this table", $e->getMessage());
             $caughtException = true;
         }
         $this->assertTrue($caughtException);
@@ -1189,7 +1191,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
             );
         } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Table_Exception'), 'Expecting object of type Zend_Db_Table_Exception');
-            $this->assertEquals("primary key '$invalidId' not in columns for table '$table'", $e->getMessage());
+            $this->assertEquals("Primary key column(s) specified are not columns in this table", $e->getMessage());
             $caughtException = true;
         }
         $this->assertTrue($caughtException);
@@ -1200,7 +1202,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
 
         $row1 = $dbTable->find(1);
-        $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
+        $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
 
         $rows = $dbTable->find(array(1, 2));
         $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
@@ -1239,8 +1241,11 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $result);
 
         // Query the row to see if we have the new values.
-        $row = $dbTable->find(2);
-
+        $rows = $dbTable->find(2);
+        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
+        $this->assertEquals(1, $rows->count(), "Expecting rowset count to be 1");
+        $row = $rows->current();
+        $this->assertThat($row, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
         $this->assertEquals(2, $row->id, "Expecting row->id to be 2");
         $this->assertEquals($newTitle, $row->title, "Expecting row->title to be \"$newTitle\"");
         $this->assertEquals($newSubTitle, $row->subtitle, "Expecting row->subtitle to be \"$newSubTitle\"");
@@ -1267,16 +1272,6 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
     }
 
-    public function testTableFindRowset()
-    {
-        list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
-
-        $rows = $dbTable->find(array(1, 2));
-        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
-        $this->assertTrue($rows->exists());
-        $this->assertEquals(2, $rows->count());
-    }
-
     public function testTableExceptionNoAdapter()
     {
         Zend::loadClass('Zend_Db_Table_ZfTestTable');
@@ -1285,7 +1280,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
             $dbTable = new Zend_Db_Table_ZfTestTable(array('db' => 327));
         } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Table_Exception'), 'Expecting object of type Zend_Db_Table_Exception');
-            $this->assertEquals($e->getMessage(), 'db object does not extend Zend_Db_Adapter_Abstract');
+            $this->assertEquals("No object of type Zend_Db_Adapter_Abstract has been specified", $e->getMessage());
         }
 
         Zend::register('registered_db', 327);
@@ -1293,14 +1288,15 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
             $dbTable = new Zend_Db_Table_ZfTestTable(array('db' => 'registered_db'));
         } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Table_Exception'), 'Expecting object of type Zend_Db_Table_Exception');
-            $this->assertEquals($e->getMessage(), 'db object does not extend Zend_Db_Adapter_Abstract');
+            $this->assertEquals("No object of type Zend_Db_Adapter_Abstract has been specified", $e->getMessage());
         }
 
         try {
             Zend_Db_Table_ZfTestTable::setDefaultAdapter(327);
         } catch (Exception $e) {
-            $this->assertThat($e, $this->isInstanceOf('Zend_Db_Table_Exception'), 'Expecting object of type Zend_Db_Table_Exception');
-            $this->assertEquals($e->getMessage(), 'db object does not extend Zend_Db_Adapter_Abstract');
+            $this->assertThat($e, $this->isInstanceOf('PHPUnit_Framework_Error'), 'Expecting object of type Zend_Db_Table_Exception');
+            $mesg = substr("Argument 1 passed to Zend_Db_Table_Abstract::setDefaultAdapter() must be an instance of Zend_Db_Adapter_Abstract, integer given", 0, 100);
+            $this->assertEquals($mesg, substr($e->getMessage(), 0, 100));
         }
 
     }
@@ -1310,6 +1306,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
 
         $rows = $dbTable->find(array(1, 2));
+        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
 
         // see if we're at the beginning
         $this->assertEquals(0, $rows->key());
@@ -1378,8 +1375,10 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
     {
         list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
 
-        $row1 = $dbTable->find(1);
-        $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
+        $rows = $dbTable->find(1);
+        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
+        $this->assertTrue($rows->exists());
+        $this->assertEquals(1, $rows->count());
     }
 
     public function testTableRowConstructor()
@@ -1388,19 +1387,22 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
 
         $row1 = new Zend_Db_Table_Row(
             array(
-                'db' => $this->_db,
+                'db'    => $this->_db,
                 'table' => $dbTable
             )
         );
 
         $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
 
+        $caughtException = false;
         try {
             $title = $row1->title;
         } catch (Exception $e) {
-            $this->fail("Caught exception of type \"".get_class($e)."\" where no exception was expected.  Exception message: \"".$e->getMessage()."\"\n");
+            $this->assertThat($e, $this->isInstanceOf('Zend_Db_Table_Row_Exception'), 'Expecting object of type Zend_Db_Table_Row_Exception');
+            $this->assertEquals("Specified column \"title\" is not in the row", $e->getMessage());
+            $caughtException = true;
         }
-        $this->assertNull($title);
+        $this->assertTrue($caughtException);
     }
 
     public function testTableRowToArray()
@@ -1409,30 +1411,37 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         $title = $this->getIdentifier('title');
         $subtitle = $this->getIdentifier('subtitle');
         $body = $this->getIdentifier('body');
-        $dateCreated = $this->getIdentifier('date_created');
+        $date_created = $this->getIdentifier('date_created');
 
-        $row1 = $dbTable->find(1);
+        $rows = $dbTable->find(1);
+        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
+        $row1 = $rows->current();
+        $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
+
         $a = $row1->toArray();
 
         $this->assertTrue(is_array($a));
         $this->assertThat($a, $this->arrayHasKey($id));
         $this->assertThat($a, $this->arrayHasKey($id));
         $this->assertThat($a, $this->arrayHasKey($body));
-        $this->assertThat($a, $this->arrayHasKey($dateCreated));
+        $this->assertThat($a, $this->arrayHasKey($date_created));
     }
 
     public function testTableRowMagicGet()
     {
         list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
 
-        $row1 = $dbTable->find(1);
+        $rows = $dbTable->find(1);
+        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
+        $row1 = $rows->current();
+        $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
 
         try {
             $this->assertEquals(1, $row1->id);
             $this->assertEquals('News Item 1', $row1->title);
             $this->assertEquals('Sub title 1', $row1->subtitle);
             $this->assertEquals('This is body 1', $row1->body);
-            $this->assertEquals('2006-05-01 11:11:11', $row1->dateCreated);
+            $this->assertEquals('2006-05-01 11:11:11', $row1->date_created);
         } catch (Exception $e) {
             $this->fail("Caught exception of type \"".get_class($e)."\" where no exception was expected.  Exception message: \"".$e->getMessage()."\"\n");
         }
@@ -1444,7 +1453,10 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         $newTitle = 'New News Item 1';
         $newSubTitle = 'New Sub title 1';
 
-        $row1 = $dbTable->find(1);
+        $rows = $dbTable->find(1);
+        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
+        $row1 = $rows->current();
+        $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
 
         try {
             $row1->title = $newTitle;
@@ -1465,7 +1477,10 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
             'subtitle' => 'New Sub title 1'
         );
 
-        $row1 = $dbTable->find(1);
+        $rows = $dbTable->find(1);
+        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
+        $row1 = $rows->current();
+        $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
 
         $row1->setFromArray($data);
 
@@ -1501,7 +1516,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
             $this->assertEquals($data['title'], $row3->title);
             $this->assertEquals($data['subtitle'], $row3->subtitle);
             $this->assertEquals($data['body'], $row3->body);
-            $this->assertEquals($data['date_created'], $row3->dateCreated);
+            $this->assertEquals($data['date_created'], $row3->date_created);
         } catch (Exception $e) {
             $this->fail("Caught exception of type \"".get_class($e)."\" where no exception was expected.  Exception message: \"".$e->getMessage()."\"\n");
         }
@@ -1518,7 +1533,10 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
             'date_created' => '2006-05-01 14:14:14'
         );
 
-        $row1 = $dbTable->find(1);
+        $rows = $dbTable->find(1);
+        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
+        $row1 = $rows->current();
+        $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
 
         $row1->setFromArray($data);
 
@@ -1529,7 +1547,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
             $this->assertEquals($data['title'], $row1->title);
             $this->assertEquals($data['subtitle'], $row1->subtitle);
             $this->assertEquals($data['body'], $row1->body);
-            $this->assertEquals($data['date_created'], $row1->dateCreated);
+            $this->assertEquals($data['date_created'], $row1->date_created);
         } catch (Exception $e) {
             $this->fail("Caught exception of type \"".get_class($e)."\" where no exception was expected.  Exception message: \"".$e->getMessage()."\"\n");
         }
@@ -1539,7 +1557,11 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
     {
         list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
 
-        $row1 = $dbTable->find(1);
+        $rows = $dbTable->find(1);
+        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
+        $row1 = $rows->current();
+        $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
+
         $column = 'doesNotExist';
 
         $caughtException = false;
@@ -1548,7 +1570,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Table_Row_Exception'), 'Expecting object of type Zend_Db_Table_Row_Exception');
             $caughtException = true;
-            $this->assertEquals("column '$column' not in row", $e->getMessage());
+            $this->assertEquals("Specified column \"$column\" is not in the row", $e->getMessage());
         }
         $this->assertTrue($caughtException);
     }
@@ -1557,7 +1579,11 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
     {
         list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
 
-        $row1 = $dbTable->find(1);
+        $rows = $dbTable->find(1);
+        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
+        $row1 = $rows->current();
+        $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
+
         $column = 'doesNotExist';
 
         $caughtException = false;
@@ -1566,7 +1592,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Table_Row_Exception'), 'Expecting object of type Zend_Db_Table_Row_Exception');
             $caughtException = true;
-            $this->assertEquals("column '$column' not in row", $e->getMessage());
+            $this->assertEquals("Specified column \"$column\" is not in the row", $e->getMessage());
         }
         $this->assertTrue($caughtException);
     }
@@ -1575,7 +1601,10 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
     {
         list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
 
-        $row1 = $dbTable->find(1);
+        $rows = $dbTable->find(1);
+        $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
+        $row1 = $rows->current();
+        $this->assertThat($row1, $this->isInstanceOf('Zend_Db_Table_Row'), 'Expecting object of type Zend_Db_Table_Row');
 
         $caughtException = false;
         try {
@@ -1583,7 +1612,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Table_Row_Exception'), 'Expecting object of type Zend_Db_Table_Row_Exception');
             $caughtException = true;
-            $this->assertEquals("not allowed to change primary key value", $e->getMessage());
+            $this->assertEquals("Changing the primary key value(s) is not allowed", $e->getMessage());
         }
         $this->assertTrue($caughtException);
     }

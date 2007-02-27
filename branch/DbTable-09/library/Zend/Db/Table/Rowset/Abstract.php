@@ -41,18 +41,25 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
     protected $_data = array();
 
     /**
+     * Zend_Db_Table object.
+     *
+     * @var Zend_Db_Table_Abstract
+     */
+    protected $_table;
+
+    /**
      * Zend_Db_Table class name.
      *
      * @var string
      */
-    protected $_table;
+    protected $_tableClass;
 
     /**
      * Zend_Db_Table_Row_Abstract class name.
      *
      * @var string
      */
-    protected $_rowClass;
+    protected $_rowClass = 'Zend_Db_Table_Row';
 
     /**
      * Iterator pointer.
@@ -80,12 +87,23 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
      */
     public function __construct(array $config)
     {
-        $this->_table    = $config['table'];
-        $this->_rowClass = $config['rowclass'];
-        $this->_data     = $config['data'];
+        $this->_table      = $config['table'];
+        $this->_tableClass = get_class($this->_table);
+        $this->_rowClass   = $config['rowclass'];
+        $this->_data       = $config['data'];
 
         // set the count of rows
         $this->_count = count($this->_data);
+    }
+
+    /**
+     * Store data, class names, and state in serialized object
+     *
+     * @return array
+     */
+    public function __sleep()
+    {
+        return array('_data', '_tableClass', '_rowClass', '_pointer', '_count', '_rows');
     }
 
     /**

@@ -59,17 +59,21 @@ abstract class Zend_Db_Table_Row_Abstract
 
     /**
      * Constructor.
+     *
+     * Supported params for $config are:-
+     * - table       = class name or object of type Zend_Db_Table_Abstract
+     * - data        = values of columns in this row.
+     *
+     * @param  array $config Array of user-specified config options.
+     * @throws Zend_Db_Table_Row_Exception
      */
     public function __construct(array $config = array())
     {
-        if ($this->_table instanceof Zend_Db_Table) {
+        if (isset($config['table']) && $config['table'] instanceof Zend_Db_Table_Abstract) {
             $this->_table = $config['table'];
             $this->_tableClass = get_class($this->_table);
-        } elseif (is_string($config['table'])) {
-            $this->_tableClass = $config['table'];
-            // _table is set in _getTable()
         }
-        
+
         if (isset($config['data'])) {
             $this->_data = $config['data'];
         }
@@ -84,12 +88,19 @@ abstract class Zend_Db_Table_Row_Abstract
      *
      * @param  string $key The column key.
      * @return string      The mapped column value.
+     * @throws Zend_Db_Table_Row_Exception
      */
     public function __get($key)
     {
-        if ($this->_data{$key} !== null) {
-            return $this->_data{$key};
+        if (!array_key_exists($key, $this->_data)) {
+            require_once 'Zend/Db/Table/Row/Exception.php';
+            throw new Zend_Db_Table_Row_Exception("Specified column \"$key\" is not in the row");
         }
+
+        if (isset($this->_data[$key]) && $this->_data[$key] !== null) {
+            return $this->_data[$key];
+        }
+
         return null;
     }
 
@@ -99,6 +110,7 @@ abstract class Zend_Db_Table_Row_Abstract
      * @param  string $key   The column key.
      * @param  mixed  $value The value for the property.
      * @return void
+     * @throws Zend_Db_Table_Row_Exception
      */
     public function __set($key, $value)
     {
@@ -106,13 +118,15 @@ abstract class Zend_Db_Table_Row_Abstract
         // not all table have an auto-generated primary key
         if (in_array($key, $this->_primary)) {
             require_once 'Zend/Db/Table/Row/Exception.php';
-            throw new Zend_Db_Table_Row_Exception("not allowed to change primary key value");
-        } elseif (!array_key_exists($key, $this->_data)) {
-            require_once 'Zend/Db/Table/Row/Exception.php';
-            throw new Zend_Db_Table_Row_Exception("column '$key' not in row");
-        } else {
-            $this->_data[$key] = $value;
+            throw new Zend_Db_Table_Row_Exception("Changing the primary key value(s) is not allowed");
         }
+
+        if (!array_key_exists($key, $this->_data)) {
+            require_once 'Zend/Db/Table/Row/Exception.php';
+            throw new Zend_Db_Table_Row_Exception("Specified column \"$key\" is not in the row");
+        }
+
+        $this->_data[$key] = $value;
     }
 
     /**
@@ -133,7 +147,7 @@ abstract class Zend_Db_Table_Row_Abstract
      */
     public function __sleep()
     {
-        return array('_table', '_primary', '_data');
+        return array('_tableClass', '_primary', '_data');
     }
 
     /**
@@ -176,7 +190,7 @@ abstract class Zend_Db_Table_Row_Abstract
 
             if (is_int($result)) {
                 // update worked, refresh with data from the table
-                $this->_refresh($primary);
+                $this->_refresh();
             }
         }
         return $result;
@@ -185,9 +199,6 @@ abstract class Zend_Db_Table_Row_Abstract
     /**
      * Deletes existing rows.
      *
-     * The WHERE clause must be in native (underscore) format.
-     *
-     * @param  string $where An SQL WHERE clause.
      * @return int The number of rows deleted.
      */
     public function delete()
@@ -217,6 +228,20 @@ abstract class Zend_Db_Table_Row_Abstract
     }
 
     /**
+     * Sets all data in the row from an array.
+     *
+     * @param array $data
+     */
+    public function setFromArray($data)
+    {
+        foreach ($data as $key => $val) {
+            if (array_key_exists($key, $this->_data)) {
+                $this->_data[$key] = $val;
+            }
+        }
+    }
+
+    /**
      * Retrieves an instance of the parent table.
      *
      * @return Zend_Db_Table
@@ -224,7 +249,12 @@ abstract class Zend_Db_Table_Row_Abstract
     protected function _getTable()
     {
         if ($this->_table == null) {
-            $this->_table = new $this->_tableClass;
+            if (empty($this->_tableClass)) {
+                require_once 'Zend/Db/Table/Row/Exception.php';
+                throw new Zend_Db_Table_Row_Exception('No table class name specified');
+            }
+            // @todo: the Table constructor requires a db adapter in its config argument
+            $this->_table = new $this->_tableClass();
         }
         return $this->_table;
     }
