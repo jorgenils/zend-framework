@@ -31,7 +31,7 @@ require_once 'Zend/Db/Table/Row.php';
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-abstract class Zend_Db_Table_Rowset implements Iterator, Countable
+abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
 {
     /**
      * The original data for each row.
@@ -53,13 +53,6 @@ abstract class Zend_Db_Table_Rowset implements Iterator, Countable
      * @var string
      */
     protected $_rowClass;
-
-    /**
-     * Primary key.
-     *
-     * @var string
-     */
-    protected $_primary;
 
     /**
      * Iterator pointer.
@@ -88,7 +81,6 @@ abstract class Zend_Db_Table_Rowset implements Iterator, Countable
     public function __construct(array $config)
     {
         $this->_table    = $config['table'];
-        $this->_primary  = $config['primary'];
         $this->_rowClass = $config['rowclass'];
         $this->_data     = $config['data'];
 
@@ -129,7 +121,6 @@ abstract class Zend_Db_Table_Rowset implements Iterator, Countable
             $this->_rows[$this->_pointer] = new $this->_rowClass(
                 array(
                     'table'   => $this->_table,
-                    'primary' => $this->_primary,
                     'data'    => $this->_data[$this->_pointer]
                 )
             );

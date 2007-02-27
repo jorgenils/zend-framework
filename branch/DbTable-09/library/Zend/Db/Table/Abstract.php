@@ -99,7 +99,7 @@ abstract class Zend_Db_Table_Abstract
      * Supported params for $config are:-
      * - db          = user-supplied instance of database connector, or key name of registry instance
      * - name        = table name
-     * - primary     = string of primary key
+     * - primary     = string or array of primary key(s)
      * - rowclass    = row class name
      * - rowsetclass = rowset class name
      *
@@ -130,7 +130,7 @@ abstract class Zend_Db_Table_Abstract
 
         // set primary key name if supplied
         if (isset($config['primary'])) {
-            $this->_primary = $config['primary'];
+            $this->_primary = (array) $config['primary'];
         }
 
         // set default row classname if supplied
@@ -141,16 +141,6 @@ abstract class Zend_Db_Table_Abstract
         // set default rowset classname if supplied
         if (isset($config['rowsetclass'])) {
             $this->_rowSetClass = $config['rowsetclass'];
-        }
-
-        // set default criteria if supplied
-        if (isset($config['where'])) {
-            $this->addWhere($config['where']);
-        }
-
-        // set default order if supplied
-        if (isset($config['order'])) {
-            $this->addOrder($config['order']);
         }
 
         // continue with automated setup
@@ -202,6 +192,7 @@ abstract class Zend_Db_Table_Abstract
             $this->_db = self::getDefaultAdapter();
         }
 
+        // ensure adapter is valid
         if (! $this->_db instanceof Zend_Db_Adapter_Abstract) {
             require_once 'Zend/Db/Table/Exception.php';
             throw new Zend_Db_Table_Exception('No object of type Zend_Db_Adapter_Abstract has been specified');
@@ -212,7 +203,7 @@ abstract class Zend_Db_Table_Abstract
             require_once 'Zend/Db/Table/Exception.php';
             throw new Zend_Db_Table_Exception('No table name has been specified');
         }
-
+        
         // get the table columns
         if (! $this->_cols) {
             $tmp = array_keys($this->_db->describeTable($this->_name));
@@ -226,8 +217,6 @@ abstract class Zend_Db_Table_Abstract
             require_once 'Zend/Db/Table/Exception.php';
             throw new Zend_Db_Table_Exception("Primary key column(s) specified are not columns in this table");
         }
-
-        $this->setDefaults(array());
     }
 
     /**
@@ -361,9 +350,8 @@ abstract class Zend_Db_Table_Abstract
     public function fetchAll($where = null, $order = null,
         $count = null, $offset = null)
     {
-        $data = array(
+        $data  = array(
             'table'    => get_class($this),
-            'primary'  => $this->_primary,
             'data'     => $this->_fetch('All', $where, $order, $count, $offset),
             'rowclass' => $this->_rowClass
         );
@@ -383,8 +371,8 @@ abstract class Zend_Db_Table_Abstract
      */
     public function fetchRow($where = null, $order = null)
     {
-        $keys = array_values((array) $this->_primary);
-        $vals = array_fill(0, count($keys), null);
+        $keys    = array_values((array) $this->_primary);
+        $vals    = array_fill(0, count($keys), null);
         $primary = array_combine($keys, $vals);
 
         $row = $this->_fetch('Row', $where, $order, 1);
@@ -399,7 +387,6 @@ abstract class Zend_Db_Table_Abstract
 
         $data = array(
             'table'   => get_class($this),
-            'primary' => $this->_primary,
             'data'    => $row
         );
 
@@ -415,9 +402,13 @@ abstract class Zend_Db_Table_Abstract
      */
     public function fetchNew()
     {
+        $keys = array_values($this->_cols);
+        $vals = array_fill(0, count($keys), null);
+        $row  = array_combine($keys, $vals);
+
         $config = array(
             'table'   => get_class($this),
-            'primary' => $this->_primary,
+            'data'    => $row
         );
 
         Zend::loadClass($this->_rowClass);
@@ -455,10 +446,6 @@ abstract class Zend_Db_Table_Abstract
                 // and $val is quoted into the condition
                 $select->where($key, $val);
             }
-        }
-
-        foreach ($order as $val) {
-            $select->order($val);
         }
 
         // the LIMIT clause

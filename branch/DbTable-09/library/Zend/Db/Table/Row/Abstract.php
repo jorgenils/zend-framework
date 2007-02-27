@@ -69,9 +69,14 @@ abstract class Zend_Db_Table_Row_Abstract
             $this->_tableClass = $config['table'];
             // _table is set in _getTable()
         }
-        // @todo why does this take _primary as option?
-        $this->_primary  = $config['primary'];
-        $this->_data = $config['data'];
+        
+        if (isset($config['data'])) {
+            $this->_data = $config['data'];
+        }
+
+        // Retrieve primary keys from table schema
+        $info = $this->_getTable()->info();
+        $this->_primary = (array) $info['primary'];
     }
 
     /**
@@ -99,11 +104,11 @@ abstract class Zend_Db_Table_Row_Abstract
     {
         // @todo this should permit a primary key value to be set
         // not all table have an auto-generated primary key
-        if (in_array($key, (array) $this->_primary)) {
-            require_once 'Zend/Db/Table/Row/Exception';
+        if (in_array($key, $this->_primary)) {
+            require_once 'Zend/Db/Table/Row/Exception.php';
             throw new Zend_Db_Table_Row_Exception("not allowed to change primary key value");
         } elseif (!array_key_exists($key, $this->_data)) {
-            require_once 'Zend/Db/Table/Row/Exception';
+            require_once 'Zend/Db/Table/Row/Exception.php';
             throw new Zend_Db_Table_Row_Exception("column '$key' not in row");
         } else {
             $this->_data[$key] = $value;
@@ -142,11 +147,8 @@ abstract class Zend_Db_Table_Row_Abstract
     public function save()
     {
         // convenience var for the primary key name
-        $keys = array_values((array) $this->_primary);
-        $vals = array_fill(0, count($keys), null);
-        $primary = array_combine($keys, $vals);
-
-        $values = array_filter(array_intersect_key($primary, $this->_data));
+        $keys = $this->_getPrimaryKey();
+        $values = array_filter($keys);
 
         // check the primary key value for insert/update
         if (empty($values)) {
@@ -159,16 +161,12 @@ abstract class Zend_Db_Table_Row_Abstract
 
             if (is_numeric($result)) {
                 // insert worked, refresh with data from the table
-                $this->_data[key($primary)] = $result;
-                $this->_refresh($primary);
+                $this->_data[key($keys)] = $result;
+                $this->_refresh();
             }
         } else {
             // has a primary key value, update only that key.
-            $where = array();
-
-            foreach (array_keys($primary) as $key) {
-                $where[] = "$key = " . $this->_data[$key];
-            }
+            $where = $this->_getWhereQuery();
 
             // apply any built-in logic for row update
             $this->_update();
@@ -189,26 +187,20 @@ abstract class Zend_Db_Table_Row_Abstract
      *
      * The WHERE clause must be in native (underscore) format.
      *
-     * @param string $where An SQL WHERE clause.
+     * @param  string $where An SQL WHERE clause.
      * @return int The number of rows deleted.
      */
     public function delete()
     {
-        // convenience var for the primary key name
-        $primary = $this->_primary;
-
         // has a primary key value, update only that key.
-        $where = array();
-
-        foreach ((array) $primary as $key) {
-            $where[] = "$key = " . $this->_data[$key];
-        }
+        $where = $this->_getWhereQuery();
 
         // apply any built-in logic for row deletion
         $this->_delete();
 
         $result = $this->_getTable()->delete($where);
 
+        // reset all fields to null
         $this->_data = array_combine(array_keys($this->_data), array());
 
         return $result;
@@ -238,18 +230,47 @@ abstract class Zend_Db_Table_Row_Abstract
     }
 
     /**
+     * Retrieves an associative array of primary keys.
+     *
+     * @return array
+     */
+    protected function _getPrimaryKey()
+    {
+        $keys = array_values($this->_primary);
+        $vals = array_fill(0, count($keys), null);
+        $primary = array_combine($keys, $vals);
+
+        return array_intersect_key($this->_data, $primary);
+    }
+
+    /**
+     * Constructs where statement for retrieving row(s).
+     *
+     * @return array
+     */
+    protected function _getWhereQuery()
+    {
+        $db = $this->_getTable()->getAdapter();
+        $keys = $this->_getPrimaryKey();
+
+        // retrieve recently updated row using primary keys
+        foreach ($keys as $key => $val) {
+            $where[] = $db->quoteInto($db->quoteIdentifier($key) . ' = ?', $val);
+        }
+        
+        return $where;
+    }
+
+    /**
      * Refreshes properties from the database.
      *
-     * @param  array $primary Array of primary keys
      * @return void
      */
-    protected function _refresh(array $primary)
+    protected function _refresh()
     {
-        $values = array_values(array_intersect_key($this->_data, $primary));
-        $fresh = call_user_func_array(array($this->_getTable(), 'find'), $values);
-        // we can do this because they're both Zend_Db_Table_Row objects
-        // @todo handle find() returning Rowset, not Row
-        $this->_data = $fresh->_data;
+        $where = $this->_getWhereQuery();
+
+        $this->_data = $this->_getTable()->fetchRow($where)->toArray();
     }
 
     /**
