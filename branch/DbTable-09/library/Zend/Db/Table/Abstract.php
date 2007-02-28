@@ -447,6 +447,14 @@ abstract class Zend_Db_Table_Abstract
             }
         }
 
+        // the ORDER clause
+        if (!is_array($order)) {
+            $order = array($order);
+        }
+        foreach ($order as $val) {
+            $select->order($val);
+        }
+
         // the LIMIT clause
         $select->limit($count, $offset);
 
