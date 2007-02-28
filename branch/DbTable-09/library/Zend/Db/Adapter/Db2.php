@@ -293,10 +293,9 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
      * PRECISION   => number; precision of NUMERIC/DECIMAL
      * UNSIGNED    => boolean; unsigned property of an integer type
      * PRIMARY     => boolean; true if column is part of the primary key
+     * PRIMARY_POSITION => integer; position of column in primary key
      *
-     * @todo Discover column position.
      * @todo Discover integer unsigned property.
-     * @todo Improve discovery of primary key columns; they are not always identity columns.
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
@@ -305,11 +304,20 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
     public function describeTable($tableName, $schemaName = null)
     {
         $tableName = strtoupper($tableName);
-        $sql = "SELECT tabschema, tabname, colname, typename, default, nulls, length, scale, identity
-            FROM syscat.columns
-            WHERE tabname = '$tableName'";
+        $sql = "SELECT DISTINCT c.tabschema, c.tabname, c.colname, c.colno,
+              c.typename, c.default, c.nulls, c.length, c.scale,
+              c.identity, tc.type AS tabconsttype, k.colseq
+            FROM syscat.columns c
+              LEFT JOIN (syscat.keycoluse k JOIN syscat.tabconst tc
+                ON (k.tabschema = tc.tabschema
+                  AND k.tabname = tc.tabname
+                  AND tc.type = 'P'))
+              ON (c.tabschema = k.tabschema
+                AND c.tabname = k.tabname
+                AND c.colname = k.colname)
+            WHERE c.tabname = '$tableName'";
         if ($schemaName != null) {
-            $sql .= " AND tabschema = '$schemaName'";
+            $sql .= " AND c.tabschema = '$schemaName'";
         }
 
         $desc = array();
@@ -320,7 +328,7 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
                 'SCHEMA_NAME' => $row['TABSCHEMA'],
                 'TABLE_NAME'  => $row['TABNAME'],
                 'COLUMN_NAME' => $row['COLNAME'],
-                'COLUMN_POSITION' => null, // @todo
+                'COLUMN_POSITION' => $row['COLNO']+1,
                 'DATA_TYPE'   => $row['TYPENAME'],
                 'DEFAULT'     => $row['DEFAULT'],
                 'NULLABLE'    => (bool) ($row['NULLS'] == 'Y'),
@@ -328,7 +336,8 @@ class Zend_Db_Adapter_Db2 extends Zend_Db_Adapter_Abstract
                 'SCALE'       => $row['SCALE'],
                 'PRECISION'   => ($row['TYPENAME'] == 'DECIMAL' ? $row['LENGTH'] : 0),
                 'UNSIGNED'    => null, // @todo
-                'PRIMARY'     => (bool) ($row['IDENTITY'] == 'Y')
+                'PRIMARY'     => (bool) ($row['TABCONSTTYPE'] == 'P' || $row['IDENTITY'] == 'Y'),
+                'PRIMARY_POSITION' => $row['COLSEQ']
             );
         }
 

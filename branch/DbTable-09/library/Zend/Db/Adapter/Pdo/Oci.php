@@ -99,6 +99,7 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
      * PRECISION   => number; precision of NUMERIC/DECIMAL
      * UNSIGNED    => boolean; unsigned property of an integer type
      * PRIMARY     => boolean; true if column is part of the primary key
+     * PRIMARY_POSITION => integer; position of column in primary key
      *
      * @todo Discover column position.
      * @todo Discover integer unsigned property.
@@ -111,9 +112,15 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
     public function describeTable($tableName, $schemaName = null)
     {
         $tableName = strtoupper($tableName);
-        $sql = "SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, DATA_DEFAULT, NULLABLE, DATA_LENGTH, DATA_SCALE, DATA_PRECISION
-            FROM ALL_TAB_COLUMNS
-            WHERE TABLE_NAME = '$tableName'";
+        $sql = "SELECT T.TABLE_NAME, T.COLUMN_NAME, T.DATA_TYPE,
+                T.DATA_DEFAULT, T.NULLABLE, T.COLUMN_ID, T.DATA_LENGTH,
+                T.DATA_SCALE, T.DATA_PRECISION, C.CONSTRAINT_TYPE, CC.POSITION
+            FROM USER_TAB_COLUMNS T
+            LEFT JOIN (USER_CONS_COLUMNS CC JOIN USER_CONSTRAINTS C
+                ON (CC.CONSTRAINT_NAME = C.CONSTRAINT_NAME AND CC.TABLE_NAME = C.TABLE_NAME AND C.CONSTRAINT_TYPE = 'P'))
+              ON T.TABLE_NAME = CC.TABLE_NAME AND T.COLUMN_NAME = CC.COLUMN_NAME
+            WHERE T.TABLE_NAME = '$tableName'";
+
         $stmt = $this->query($sql);
         $result = $stmt->fetchAll(Zend_Db::FETCH_ASSOC);
         $desc = array();
@@ -122,7 +129,7 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
                 'SCHEMA_NAME' => null,
                 'TABLE_NAME'  => $row['table_name'],
                 'COLUMN_NAME' => $row['column_name'],
-                'COLUMN_POSITION' => null,
+                'COLUMN_POSITION' => $row['column_id'],
                 'DATA_TYPE'   => $row['data_type'],
                 'DEFAULT'     => $row['data_default'],
                 'NULLABLE'    => (bool) ($row['nullable'] == 'Y'),
@@ -130,7 +137,8 @@ class Zend_Db_Adapter_Pdo_Oci extends Zend_Db_Adapter_Pdo_Abstract
                 'SCALE'       => $row['data_scale'],
                 'PRECISION'   => $row['data_precision'],
                 'UNSIGNED'    => null,
-                'PRIMARY'     => (bool) 0
+                'PRIMARY'     => (bool) ($row['constraint_type'] == 'P'),
+                'PRIMARY_POSITION' => $row['position']
             );
         }
         return $desc;

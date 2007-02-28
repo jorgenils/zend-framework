@@ -87,8 +87,7 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
      * PRECISION   => number; precision of NUMERIC/DECIMAL
      * UNSIGNED    => boolean; unsigned property of an integer type
      * PRIMARY     => boolean; true if column is part of the primary key
-     *
-     * @todo Discover column position.
+     * PRIMARY_POSITION => integer; position of column in primary key
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
@@ -96,6 +95,18 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
      */
     public function describeTable($tableName, $schemaName = null)
     {
+        $result = array();
+        try {
+            $stmt = $this->query("DESCRIBE INFORMATION_SCHEMA.TABLES");
+            $result = $stmt->fetchAll(Zend_Db::FETCH_ASSOC);
+        } catch (Exception $e) {
+            // fallthrough
+        }
+
+        if (!empty($result)) {
+            return $this->_describeTableInformationSchema($tableName, $schemaName);
+        }
+
         $sql = "DESCRIBE $tableName";
         $row_defaults = array(
             'length'    => null,
@@ -106,6 +117,7 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
         $stmt = $this->query($sql);
         $result = $stmt->fetchAll(Zend_Db::FETCH_ASSOC);
         $desc = array();
+        $i = 1;
         foreach ($result as $key => $row) {
             $row = array_merge($row_defaults, $row);
             if (preg_match('/unsigned/', $row['type'])) {
@@ -124,19 +136,21 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
                 // or length; it is only a hint for display width.
             }
             $desc[$row['field']] = array(
-                'SCHEMA_NAME' => null,
-                'TABLE_NAME'  => $tableName,
-                'COLUMN_NAME' => $row['field'],
-                'COLUMN_POSITION' => null, // @todo
-                'DATA_TYPE'   => $row['type'],
-                'DEFAULT'     => $row['default'],
-                'NULLABLE'    => (bool) ($row['null'] == 'YES'),
-                'LENGTH'      => $row['length'],
-                'PRECISION'   => $row['precision'],
-                'SCALE'       => $row['scale'],
-                'UNSIGNED'    => $row['unsigned'],
-                'PRIMARY'     => (bool) (strtoupper($row['key']) == 'PRI')
+                'SCHEMA_NAME'      => null,
+                'TABLE_NAME'       => $tableName,
+                'COLUMN_NAME'      => $row['field'],
+                'COLUMN_POSITION'  => $i,
+                'DATA_TYPE'        => $row['type'],
+                'DEFAULT'          => $row['default'],
+                'NULLABLE'         => (bool) ($row['null'] == 'YES'),
+                'LENGTH'           => $row['length'],
+                'PRECISION'        => $row['precision'],
+                'SCALE'            => $row['scale'],
+                'UNSIGNED'         => $row['unsigned'],
+                'PRIMARY'          => (bool) (strtoupper($row['key']) == 'PRI'),
+                'PRIMARY_POSITION' => null // not available from DESCRIBE
             );
+            ++$i;
         }
         return $desc;
     }

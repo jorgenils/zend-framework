@@ -239,6 +239,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
      */
     public function testDescribeTable()
     {
+        $idKey = $this->getResultSetKey('id');
         $bodyKey = $this->getResultSetKey('body');
         $table = $this->getIdentifier(self::TABLE_NAME);
 
@@ -258,15 +259,21 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         $this->assertThat($desc[$bodyKey], $this->arrayHasKey('PRECISION'));
         $this->assertThat($desc[$bodyKey], $this->arrayHasKey('UNSIGNED'));
         $this->assertThat($desc[$bodyKey], $this->arrayHasKey('PRIMARY'));
+        $this->assertThat($desc[$bodyKey], $this->arrayHasKey('PRIMARY_POSITION'));
 
         $this->assertEquals($table, $desc[$bodyKey]['TABLE_NAME']);
         $this->assertEquals($bodyKey, $desc[$bodyKey]['COLUMN_NAME']);
+        $this->assertEquals(4, $desc[$bodyKey]['COLUMN_POSITION']);
         $this->assertEquals($this->_textDataType, $desc[$bodyKey]['DATA_TYPE']);
         $this->assertEquals('', $desc[$bodyKey]['DEFAULT']);
         $this->assertTrue($desc[$bodyKey]['NULLABLE']);
         $this->assertEquals(0, $desc[$bodyKey]['SCALE']);
         $this->assertEquals(0, $desc[$bodyKey]['PRECISION']);
         $this->assertEquals('', $desc[$bodyKey]['PRIMARY']);
+        $this->assertEquals('', $desc[$bodyKey]['PRIMARY_POSITION']);
+
+        $this->assertTrue($desc[$idKey]['PRIMARY']);
+        $this->assertEquals(1, $desc[$idKey]['PRIMARY_POSITION']);
     }
 
     /**
@@ -550,7 +557,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         $exceptionSeen = false;
         try {
             $sql = $this->_db->limit('SELECT * FROM ' . $this->_db->quoteIdentifier($table), 0);
-        } catch (Zend_Db_Exception $e) {
+        } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Adapter_Exception'), 'Expecting object of type Zend_Db_Adapter_Exception');
             $exceptionSeen = true;
         }
@@ -559,7 +566,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         $exceptionSeen = false;
         try {
             $sql = $this->_db->limit('SELECT * FROM ' . $this->_db->quoteIdentifier($table), 1, -1);
-        } catch (Zend_Db_Exception $e) {
+        } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Adapter_Exception'), 'Expecting object of type Zend_Db_Adapter_Exception');
             $exceptionSeen = true;
         }
@@ -1348,7 +1355,6 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
     public function testTableRowsetToArray()
     {
         list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
-        $titleKey = $this->getIdentifier('title');
 
         $rows = $dbTable->find(array(1, 2));
         $this->assertEquals(2, $rows->count());
@@ -1368,7 +1374,7 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         $this->assertEquals(count($a), $rows->count());
         $this->assertTrue(is_array($a[0]));
         $this->assertEquals(5, count($a[0]));
-        $this->assertEquals('foo', $a[0][$titleKey]);
+        $this->assertEquals('foo', $a[0]['title']);
     }
 
     public function testTableFindRow()
@@ -1408,10 +1414,6 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
     public function testTableRowToArray()
     {
         list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
-        $title = $this->getIdentifier('title');
-        $subtitle = $this->getIdentifier('subtitle');
-        $body = $this->getIdentifier('body');
-        $date_created = $this->getIdentifier('date_created');
 
         $rows = $dbTable->find(1);
         $this->assertThat($rows, $this->isInstanceOf('Zend_Db_Table_Rowset'), 'Expecting object of type Zend_Db_Table_Rowset');
@@ -1421,10 +1423,12 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         $a = $row1->toArray();
 
         $this->assertTrue(is_array($a));
-        $this->assertThat($a, $this->arrayHasKey($id));
-        $this->assertThat($a, $this->arrayHasKey($id));
-        $this->assertThat($a, $this->arrayHasKey($body));
-        $this->assertThat($a, $this->arrayHasKey($date_created));
+
+        $this->assertThat($a, $this->arrayHasKey('id'));
+        $this->assertThat($a, $this->arrayHasKey('title'));
+        $this->assertThat($a, $this->arrayHasKey('subtitle'));
+        $this->assertThat($a, $this->arrayHasKey('body'));
+        $this->assertThat($a, $this->arrayHasKey('date_created'));
     }
 
     public function testTableRowMagicGet()
@@ -1612,9 +1616,10 @@ abstract class Zend_Db_Adapter_Common extends PHPUnit_Framework_TestCase
         } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Table_Row_Exception'), 'Expecting object of type Zend_Db_Table_Row_Exception');
             $caughtException = true;
+            echo "*** caught exception in ".__FUNCTION__."\n";
             $this->assertEquals("Changing the primary key value(s) is not allowed", $e->getMessage());
         }
-        $this->assertTrue($caughtException);
+        $this->assertTrue($caughtException, 'Expecting to have caught exception');
     }
 
 }

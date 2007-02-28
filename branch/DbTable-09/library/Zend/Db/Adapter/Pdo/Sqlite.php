@@ -120,6 +120,7 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
      * PRECISION   => number; precision of NUMERIC/DECIMAL
      * UNSIGNED    => boolean; unsigned property of an integer type
      * PRIMARY     => boolean; true if column is part of the primary key
+     * PRIMARY_POSITION => integer; position of column in primary key
      *
      * @todo Discover column position.
      * @todo Discover integer unsigned property.
@@ -143,11 +144,12 @@ class Zend_Db_Adapter_Pdo_Sqlite extends Zend_Db_Adapter_Pdo_Abstract
                 'DATA_TYPE'   => $row['type'],
                 'DEFAULT'     => $row['dflt_value'],
                 'NULLABLE'    => ! (bool) $row['notnull'],
-                'LENGTH'      => null,
-                'SCALE'       => null,
-                'PRECISION'   => null,
+                'LENGTH'      => null, // @todo
+                'SCALE'       => null, // @todo
+                'PRECISION'   => null, // @todo
                 'UNSIGNED'    => null, // @todo
                 'PRIMARY'     => (bool) $row['pk'],
+                'PRIMARY_POSITION' => null // @todo
             );
         }
         return $desc;

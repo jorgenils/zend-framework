@@ -128,6 +128,7 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
      * PRECISION   => number; precision of NUMERIC/DECIMAL
      * UNSIGNED    => boolean; unsigned property of an integer type
      * PRIMARY     => boolean; true if column is part of the primary key
+     * PRIMARY_POSITION => integer; position of column in primary key
      *
      * @todo Discover column position.
      * @todo Discover integer unsigned property.
@@ -169,7 +170,8 @@ class Zend_Db_Adapter_Pdo_Mssql extends Zend_Db_Adapter_Pdo_Abstract
                 'SCALE'       => $row['scale'],
                 'PRECISION'   => $row['precision'],
                 'UNSIGNED'    => null, // @todo
-                'PRIMARY'     => (bool) $row['is_primary']
+                'PRIMARY'     => (bool) $row['is_primary'],
+                'PRIMARY_POSITION' => null // @todo
             );
         }
         return $desc;

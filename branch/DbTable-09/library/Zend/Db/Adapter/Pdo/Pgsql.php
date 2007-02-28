@@ -93,6 +93,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
      * PRECISION   => number; precision of NUMERIC/DECIMAL
      * UNSIGNED    => boolean; unsigned property of an integer type
      * PRIMARY     => boolean; true if column is part of the primary key
+     * PRIMARY_POSITION => integer; position of column in primary key
      *
      * @todo Discover column position.
      * @todo Discover integer unsigned property.
@@ -113,14 +114,14 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
                 d.adsrc AS default_value,
                 a.attnotnull AS notnull,
                 a.attlen AS length,
-                CASE WHEN i.indrelid IS NOT NULL THEN 1 ELSE 0 END AS pri
+                co.contype,
+                ARRAY_TO_STRING(co.conkey, ',') AS conkey
             FROM pg_attribute AS a
                 JOIN pg_class AS c ON a.attrelid = c.oid
                 JOIN pg_namespace AS n ON c.relnamespace = n.oid
                 JOIN pg_type AS t ON a.atttypid = t.oid
-                LEFT OUTER JOIN pg_index AS i ON (i.indrelid = c.oid
-                    AND i.indkey[0] = a.attnum
-                    AND i.indisprimary = 't')
+                LEFT OUTER JOIN pg_constraint AS co ON (co.conrelid = c.oid
+                    AND a.attnum = ANY(co.conkey) AND co.contype = 'p')
                 LEFT OUTER JOIN pg_attrdef AS d ON d.adrelid = c.oid AND d.adnum = a.attnum
             WHERE c.relname = '$tableName' AND a.attnum > 0";
 
@@ -141,7 +142,7 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
                 'SCHEMA_NAME' => null,
                 'TABLE_NAME'  => $row['relname'],
                 'COLUMN_NAME' => $row['colname'],
-                'COLUMN_POSITION' => null, // @todo
+                'COLUMN_POSITION' => $row['attnum'],
                 'DATA_TYPE'   => $row['type'],
                 'DEFAULT'     => $row['default_value'],
                 'NULLABLE'    => (bool) ($row['notnull'] != 't'),
@@ -149,7 +150,8 @@ class Zend_Db_Adapter_Pdo_Pgsql extends Zend_Db_Adapter_Pdo_Abstract
                 'SCALE'       => null, // @todo
                 'PRECISION'   => null, // @todo
                 'UNSIGNED'    => null, // @todo
-                'PRIMARY'     => (bool) $row['pri']
+                'PRIMARY'     => (bool) ($row['contype'] == 'p'),
+                'PRIMARY_POSITION' => isset($row['conkey']) ? array_search($row['attnum'], explode(',', $row['conkey'])) + 1 : null
             );
         }
         return $desc;

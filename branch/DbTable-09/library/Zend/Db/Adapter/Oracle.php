@@ -207,10 +207,9 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
      * PRECISION   => number; precision of NUMERIC/DECIMAL
      * UNSIGNED    => boolean; unsigned property of an integer type
      * PRIMARY     => boolean; true if column is part of the primary key
+     * PRIMARY_POSITION => integer; position of column in primary key
      *
-     * @todo Discover column position.
      * @todo Discover integer unsigned property.
-     * @todo Improve discovery of primary key columns.
      *
      * @param string $tableName
      * @param string $schemaName OPTIONAL
@@ -219,9 +218,14 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
     public function describeTable($tableName, $schemaName = null)
     {
         $tableName = strtoupper($tableName);
-        $sql = "SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, DATA_DEFAULT, NULLABLE, DATA_LENGTH, DATA_SCALE, DATA_PRECISION
-            FROM ALL_TAB_COLUMNS
-            WHERE TABLE_NAME = '$tableName'";
+        $sql = "SELECT T.TABLE_NAME, T.COLUMN_NAME, T.DATA_TYPE,
+                T.DATA_DEFAULT, T.NULLABLE, T.COLUMN_ID, T.DATA_LENGTH,
+                T.DATA_SCALE, T.DATA_PRECISION, C.CONSTRAINT_TYPE, CC.POSITION
+            FROM USER_TAB_COLUMNS T
+            LEFT JOIN (USER_CONS_COLUMNS CC JOIN USER_CONSTRAINTS C
+                ON (CC.CONSTRAINT_NAME = C.CONSTRAINT_NAME AND CC.TABLE_NAME = C.TABLE_NAME AND C.CONSTRAINT_TYPE = 'P'))
+              ON T.TABLE_NAME = CC.TABLE_NAME AND T.COLUMN_NAME = CC.COLUMN_NAME
+            WHERE T.TABLE_NAME = '$tableName'";
         $stmt = $this->query($sql);
         $result = $stmt->fetchAll(Zend_Db::FETCH_ASSOC);
         $desc = array();
@@ -230,7 +234,7 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
                 'SCHEMA_NAME' => '',
                 'TABLE_NAME'  => $row['TABLE_NAME'],
                 'COLUMN_NAME' => $row['COLUMN_NAME'],
-                'COLUMN_POSITION' => null, // @todo
+                'COLUMN_POSITION' => $row['COLUMN_ID'],
                 'DATA_TYPE'   => $row['DATA_TYPE'],
                 'DEFAULT'     => $row['DATA_DEFAULT'],
                 'NULLABLE'    => (bool) ($row['NULLABLE'] == 'Y'),
@@ -238,7 +242,8 @@ class Zend_Db_Adapter_Oracle extends Zend_Db_Adapter_Abstract
                 'SCALE'       => $row['DATA_SCALE'],
                 'PRECISION'   => $row['DATA_PRECISION'],
                 'UNSIGNED'    => null, // @todo
-                'PRIMARY'     => (bool) 0
+                'PRIMARY'     => (bool) ($row['constraint_type'] == 'P'),
+                'PRIMARY_POSITION' => $row['position']
             );
         }
         return $desc;
