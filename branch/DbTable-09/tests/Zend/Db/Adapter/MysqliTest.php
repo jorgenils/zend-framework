@@ -41,7 +41,7 @@ class Zend_Db_Adapter_MysqliTest extends Zend_Db_Adapter_Pdo_MysqlTest
         set_include_path($include_path . PATH_SEPARATOR . $incubator);
         try {
             Zend::loadClass('Zend_Db_Adapter_Mysqli');
-        } catch (Zend_Exception $e) {
+        } catch (Exception $e) {
             $this->markTestIncomplete($e->getMessage());
         }
         set_include_path($include_path);
@@ -56,9 +56,9 @@ class Zend_Db_Adapter_MysqliTest extends Zend_Db_Adapter_Pdo_MysqlTest
 
         try {
             $db = new Zend_Db_Adapter_Mysqli($params);
-        } catch (Zend_Db_Adapter_Exception $e) {
+            $this->fail('Expected to catch Zend_Db_Adapter_Mysqli_Exception');
+        } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Adapter_Mysqli_Exception'));
-            echo $e->getMessage();
         }
     }
 

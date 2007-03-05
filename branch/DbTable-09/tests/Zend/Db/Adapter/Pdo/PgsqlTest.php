@@ -228,9 +228,9 @@ class Zend_Db_Adapter_Pdo_PgsqlTest extends Zend_Db_Adapter_Pdo_Common
 
         try {
             $db = new Zend_Db_Adapter_Pdo_Pgsql($params);
-        } catch (Zend_Db_Adapter_Exception $e) {
+            $this->fail('Expected to catch Zend_Db_Adapter_Pdo_Exception');
+        } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Adapter_Pdo_Exception'));
-            echo $e->getMessage();
         }
     }
 

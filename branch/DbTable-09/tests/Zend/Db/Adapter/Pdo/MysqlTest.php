@@ -135,9 +135,9 @@ class Zend_Db_Adapter_Pdo_MysqlTest extends Zend_Db_Adapter_Pdo_Common
 
         try {
             $db = new Zend_Db_Adapter_Pdo_Mysql($params);
-        } catch (Zend_Db_Adapter_Exception $e) {
+            $this->fail('Expected to catch Zend_Db_Adapter_Pdo_Exception');
+        } catch (Exception $e) {
             $this->assertThat($e, $this->isInstanceOf('Zend_Db_Adapter_Pdo_Exception'));
-            echo $e->getMessage();
         }
     }
 
