@@ -124,7 +124,8 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
         $stmt = $this->query($sql);
         $result = $stmt->fetchAll(Zend_Db::FETCH_ASSOC);
         $desc = array();
-        $i = 0;
+        $i = 1;
+        $p = 1;
         foreach ($result as $key => $row) {
             $row = array_merge($row_defaults, $row);
             if (preg_match('/unsigned/', $row['Type'])) {
@@ -155,7 +156,7 @@ class Zend_Db_Adapter_Mysqli extends Zend_Db_Adapter_Abstract
                 'SCALE'            => $row['Scale'],
                 'UNSIGNED'         => $row['Unsigned'],
                 'PRIMARY'          => (bool) (strtoupper($row['key']) == 'PRI'),
-                'PRIMARY_POSITION' => null // not available from DESCRIBE
+                'PRIMARY_POSITION' => ((bool) (strtoupper($row['key']) == 'PRI')) ? $p++ : 0
             );
             ++$i;
         }
