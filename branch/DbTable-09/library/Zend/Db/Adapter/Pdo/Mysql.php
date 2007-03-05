@@ -118,6 +118,7 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
         $result = $stmt->fetchAll(Zend_Db::FETCH_ASSOC);
         $desc = array();
         $i = 1;
+        $p = 1;
         foreach ($result as $key => $row) {
             $row = array_merge($row_defaults, $row);
             if (preg_match('/unsigned/', $row['type'])) {
@@ -148,7 +149,7 @@ class Zend_Db_Adapter_Pdo_Mysql extends Zend_Db_Adapter_Pdo_Abstract
                 'SCALE'            => $row['scale'],
                 'UNSIGNED'         => $row['unsigned'],
                 'PRIMARY'          => (bool) (strtoupper($row['key']) == 'PRI'),
-                'PRIMARY_POSITION' => null // not available from DESCRIBE
+                'PRIMARY_POSITION' => ((bool) (strtoupper($row['key']) == 'PRI') ? $p++ : 0)
             );
             ++$i;
         }

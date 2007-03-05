@@ -58,7 +58,7 @@ class Zend_Db_Adapter_MysqliTest extends Zend_Db_Adapter_Pdo_MysqlTest
             $db = new Zend_Db_Adapter_Mysqli($params);
             $this->fail('Expected to catch Zend_Db_Adapter_Mysqli_Exception');
         } catch (Exception $e) {
-            $this->assertThat($e, $this->isInstanceOf('Zend_Db_Adapter_Mysqli_Exception'));
+            $this->assertThat($e, $this->isInstanceOf('Zend_Db_Adapter_Mysqli_Exception'), 'Expected to catch Zend_Db_Adapter_Mysqli_Exception, got '.get_class($e));
         }
     }
 

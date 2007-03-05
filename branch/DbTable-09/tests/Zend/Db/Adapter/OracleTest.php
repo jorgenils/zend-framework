@@ -82,7 +82,7 @@ class Zend_Db_Adapter_OracleTest extends Zend_Db_Adapter_Pdo_OciTest
             $db = new Zend_Db_Adapter_Oracle($params);
             $this->fail('Expected to catch Zend_Db_Adapter_Oracle_Exception');
         } catch (Exception $e) {
-            $this->assertThat($e, $this->isInstanceOf('Zend_Db_Adapter_Oracle_Exception'));
+            $this->assertThat($e, $this->isInstanceOf('Zend_Db_Adapter_Oracle_Exception'), 'Expected to catch Zend_Db_Adapter_Oracle_Exception, got '.get_class($e));
         }
     }
 
