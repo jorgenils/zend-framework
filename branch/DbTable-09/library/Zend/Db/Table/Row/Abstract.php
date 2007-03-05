@@ -37,6 +37,14 @@ abstract class Zend_Db_Table_Row_Abstract
     protected $_data = array();
 
     /**
+     * This is set to a copy of $_data when the data is fetched from
+     * a database, specified as a new tuple in the constructor, or
+     * when dirty data is posted to the database with save().
+     * @var array
+     */ 
+    protected $_cleanData = array(); 
+ 
+    /**
      * Zend_Db_Table parent class or instance.
      *
      * @var Zend_Db_Table
@@ -76,6 +84,7 @@ abstract class Zend_Db_Table_Row_Abstract
 
         if (isset($config['data'])) {
             $this->_data = $config['data'];
+            $this->_cleanData = $this->_data;
         }
 
         // Retrieve primary keys from table schema
@@ -185,6 +194,20 @@ abstract class Zend_Db_Table_Row_Abstract
             // apply any built-in logic for row update
             $this->_update();
 
+            // execute cascading updates against dependent tables
+            $depTables = $this->_getTable()->getDependentTables();
+            if (!empty($depTables)) {
+                $db = $this->_getTable()->getAdapter();
+                $pkNew = $this->_getPrimaryKey();
+                $pkOld = $this->_getPrimaryKey(false);
+                $thisClass = get_class($this);
+                foreach ($depTables as $tableClass) {
+                    Zend::loadClass($tableClass);
+                    $t = new $tableClass(array('db' => $db));
+                    $t->_cascadeUpdate($thisClass, $pkOld, $pkNew);
+                }
+            }
+
             // return the result of the update attempt, no need to update the row object.
             $result = $this->_getTable()->update($this->_data, $where);
 
@@ -208,6 +231,19 @@ abstract class Zend_Db_Table_Row_Abstract
 
         // apply any built-in logic for row deletion
         $this->_delete();
+
+        // execute cascading deletes against dependent tables
+        $depTables = $this->_getTable()->getDependentTables();
+        if (!empty($depTables)) {
+            $db = $this->_getTable()->getAdapter();
+            $pk = $this->_getPrimaryKey();
+            $thisClass = get_class($this);
+            foreach ($depTables as $tableClass) {
+                Zend::loadClass($tableClass);
+                $t = new $tableClass(array('db' => $db));
+                $t->_cascadeDelete($thisClass, $pk);
+            }
+        }
 
         $result = $this->_getTable()->delete($where);
 
@@ -262,15 +298,17 @@ abstract class Zend_Db_Table_Row_Abstract
     /**
      * Retrieves an associative array of primary keys.
      *
+     * @param bool $dirty
      * @return array
      */
-    protected function _getPrimaryKey()
+    protected function _getPrimaryKey($dirty = true)
     {
-        $keys = array_values($this->_primary);
-        $vals = array_fill(0, count($keys), null);
-        $primary = array_combine($keys, $vals);
-
-        return array_intersect_key($this->_data, $primary);
+        $primary = array_flip($this->_primary);
+        if ($dirty) {
+            return array_intersect_key($this->_data, $primary);
+        } else {
+            return array_intersect_key($this->_cleanData, $primary);
+        }
     }
 
     /**
@@ -301,10 +339,12 @@ abstract class Zend_Db_Table_Row_Abstract
         $where = $this->_getWhereQuery();
 
         $this->_data = $this->_getTable()->fetchRow($where)->toArray();
+        $this->_cleanData = $this->_data;
     }
 
     /**
      * Allows pre-insert logic to be applied to row.
+     * Subclasses may override this method.
      *
      * @return void
      */
@@ -314,6 +354,7 @@ abstract class Zend_Db_Table_Row_Abstract
 
     /**
      * Allows pre-update logic to be applied to row.
+     * Subclasses may override this method.
      *
      * @return void
      */
@@ -323,11 +364,145 @@ abstract class Zend_Db_Table_Row_Abstract
 
     /**
      * Allows pre-delete logic to be applied to row.
+     * Subclasses may override this method.
      *
      * @return void
      */
     protected function _delete()
     {
     }
+
+    /**
+     * @return Zend_Db_Table_Rowset - Query $dependentTableClass
+     *   for the rows matching the primary key in the current row.
+     * @throws Zend_Db_Table_Exception
+     */ 
+    public function findDependentRowset($dependentTableClass, $ruleKey = null) 
+    { 
+        $db = $this->_getTable()->getAdapter();
+        Zend::loadClass($dependentTableClass);
+        $depTable = new $dependentTableClass(array('db' => $db));
+        $map = $depTable->getReference($this->_tableClass, $ruleKey);
+        for ($i = 0; $i < count($map['columns']); ++$i) {
+            $cond = $db->quoteIdentifier($map['columns'][$i]) . ' = ?';
+            $where[$cond] = $this->_data[$map['refColumns'][$i]];
+        }
+        return $depTable->fetchAll($where);
+    } 
+ 
+    /**
+     * @return Zend_Db_Table_Row - Query $parentTableClass for the
+     *   single row matching the foreign key in the current row.
+     */ 
+    public function findParentRow($parentTableClass, $ruleKey = null) 
+    { 
+        $db = $this->_getTable()->getAdapter();
+        Zend::loadClass($parentTableClass);
+        $parentTable = new $parentTableClass(array('db' => $db));
+        $map = $this->_getTable()->getReference($parentTableClass, $ruleKey);
+        for ($i = 0; $i < count($map['columns']); ++$i) {
+            $cond = $db->quoteIdentifier($map['refColumns'][$i]) . ' = ?';
+            $where[$cond] = $this->_data[$map['columns'][$i]];
+        }
+        return $parentTable->fetchRow($where);
+    } 
+ 
+    /**
+     * @return Zend_Db_Table_Rowset - Query $matchingTableClass
+     *   and $intersectionTableClass for the rows matching the primary
+     *   key in the current row.
+     */ 
+    public function findManyToManyRowset( 
+        $matchTableClass, $intersectionTableClass, 
+        $primaryRefRule = null, $matchRefRule = null) 
+    { 
+        $db = $this->_getTable()->getAdapter();
+        Zend::loadClass($intersectionTableClass);
+        $interTable = new $intersectionTableClass(array('db' => $db));
+        Zend::loadClass($matchTableClass);
+        $matchTable = new $matchTableClass(array('db' => $db));
+        $interInfo = $interTable->info();
+        $inter = $interInfo['name'];
+        $matchInfo = $matchTable->info();
+        $match = $matchInfo['name'];
+
+        $matchMap = $interTable->getReference($matchTableClass, $matchRefRule);
+        for ($i = 0; $i < count($matchMap['columns']); ++$i) {
+            $interCol = $db->quoteIdentifier($inter) . '.' . $db->quoteIdentifier($matchMap['columns'][$i]);
+            $matchCol = $db->quoteIdentifier($match) . '.' . $db->quoteIdentifier($matchMap['refColumns'][$i]);
+            $joinCond[] = "$interCol = $matchCol";
+        }
+        $joinCond = implode(' AND ', $joinCond);
+
+        $select = $db->select()
+            ->from($inter, array())
+            ->join($match, $joinCond, '*');
+
+        $primaryMap = $interTable->getReference($matchTableClass, $primaryRefRule);
+        for ($i = 0; $i < count($primaryMap['columns']); ++$i) {
+            $interCol = $db->quoteIdentifier($inter) . '.' . $db->quoteIdentifier($matchMap['columns'][$i]);
+            $value = $this->_data[$primaryMap['refColumns'][$i]];
+            $select->where("$interCol = ?", $value);
+        }
+        $stmt = $select->query(Zend_Db::FETCH_ASSOC);
+
+        $config = array(
+            'table' => $matchTable,
+            'data'  => $stmt->fetchAll()
+        );
+        $rowsetClass = $matchTable->getRowsetClass();
+        $rowset = new $rowsetClass($config);
+        return $rowset;
+    } 
+
+    /**
+     * Turn magic function calls into non-magic function calls
+     * to the above methods.
+     *
+     * @return Zend_Db_Table_Row_Abstract|Zend_Db_Table_Rowset_Abstract
+     */ 
+    protected function __call($method, $args) 
+    { 
+        /**
+         * Recognize methods for Belongs-To cases: 
+         * find<Class>() 
+         * find<Class>By<Rule>() 
+         *
+         * Recognize methods for Has-Many cases: 
+         * findParent<Class>() 
+         * findParent<Class>By<Rule>() 
+         *
+         * Recognize methods for Many-to-Many cases: 
+         * find<Class1>Via<Class2>() 
+         * find<Class1>Via<Class2>By<Rule>() 
+         * find<Class1>Via<Class2>By<Rule1>And<Rule2>() 
+         */
+        if (preg_match('/^find(Parent)?(\w+)(?:Via(\w+))?(?:By(\w+)(?:And(\w+))?)?/', $method, $matches)) { 
+            $isParent = $matches[1];
+            $class    = $matches[2];
+            $viaClass = isset($matches[3]) ? $matches[3] : null;
+            $ruleKey1 = isset($matches[4]) ? $matches[4] : null;
+            $ruleKey2 = isset($matches[5]) ? $matches[5] : null;
+
+            if (!empty($isParent)) {
+                if (!empty($ruleKey2) || !empty($viaClass)) {
+                    require_once 'Zend/Db/Table/Row/Exception.php';
+                    throw new Zend_Db_Table_Row_Exception("Invalid syntax in method '$method()': do not specify Via classname or second rule");
+                }
+                return $this->findParentRow($class, $ruleKey1); 
+            }
+            if (!empty($viaClass)) {
+                return $this->findManyToManyRowset($class, $viaClass, $ruleKey1, $ruleKey2); 
+            }
+            if (!empty($ruleKey2)) {
+                require_once 'Zend/Db/Table/Row/Exception.php';
+                throw new Zend_Db_Table_Row_Exception("Invalid syntax in method '$method()': do not specify second rule");
+            }
+            return $this->findDependentRowset($class, $ruleKey1); 
+        } 
+
+        require_once 'Zend/Db/Table/Row/Exception.php';
+        throw new Zend_Db_Table_Row_Exception("Unrecognized method '$method()'");
+    } 
 
 }

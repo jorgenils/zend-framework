@@ -23,8 +23,17 @@ require_once('Zend/Db/Table.php');
 
 PHPUnit_Util_Filter::addFileToFilter(__FILE__);
 
-class Zend_Db_Table_ZfTestTable extends Zend_Db_Table_Abstract
+class Zend_Db_Table_ZfTestTable2 extends Zend_Db_Table_Abstract
 {
-    protected $_name = 'zf_test_table';
-    protected $_dependentTables = array('zf_test_table2');
+    protected $_name = 'zf_test_table2';
+    protected $_primary = array();
+    protected $_referenceMap = array(
+        'News' => array(
+            'columns'    => array('news_id'),
+            'refTable'   => 'Zend_Db_Table_ZfTestTable',
+            'refColumns' => array('id'),
+            'onDelete'   => self::CASCADE,
+            'onUpdate'   => self::CASCADE
+        )
+    );
 }

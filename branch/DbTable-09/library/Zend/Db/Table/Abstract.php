@@ -41,6 +41,17 @@ require_once 'Zend/Db/Table/Rowset.php';
 abstract class Zend_Db_Table_Abstract
 {
 
+    const NAME             = 'name';
+    const PRIMARY          = 'primary';
+    const ROW_CLASS        = 'rowClass';
+    const ROWSET_CLASS     = 'rowsetClass';
+    const REFERENCE_MAP    = 'referenceMap';
+    const DEPENDENT_TABLES = 'dependentTables';
+
+    const CASCADE          = 'cascade';
+    const RESTRICT         = 'restrict';
+    const SET_NULL         = 'setNull';
+
     /**
      * Default Zend_Db_Adapter_Abstract object.
      *
@@ -91,17 +102,51 @@ abstract class Zend_Db_Table_Abstract
      *
      * @var string
      */
-    protected $_rowSetClass = 'Zend_Db_Table_Rowset';
+    protected $_rowsetClass = 'Zend_Db_Table_Rowset';
+
+    /**
+     * Associative array map of declarative referential integrity rules.
+     * This array has one entry per foreign key in the current table.
+     * Each key is a mnemonic name for one reference rule.
+     *
+     * Each value is also an associative array, with the following keys:
+     * - columns    = array of names of column(s) in the child table.
+     * - refTable   = class name of the parent table.
+     * - refColumns = array of names of column(s) in the parent table,
+     *                in the same order as those in the 'columns' entry.
+     * - onDelete   = "cascade" means that a delete in the parent table also
+     *                causes a delete of referencing rows in the child table.
+     * - onUpdate   = "cascade" means that an update of primary key values in
+     *                the parent table also causes an update of referencing
+     *                rows in the child table.
+     *
+     * @var array
+     */ 
+    protected $_referenceMap = array(); 
+ 
+    /**
+     * Simple array of class names of tables that are "children" of the current
+     * table, in other words tables that contain a foreign key to this one.
+     * Array elements are not table names; they are class names of classes that
+     * extend Zend_Db_Table_Abstract.
+     *
+     * @var array
+     */ 
+    protected $_dependentTables = array(); 
 
     /**
      * Constructor.
      *
-     * Supported params for $config are:-
-     * - db          = user-supplied instance of database connector, or key name of registry instance
-     * - name        = table name
-     * - primary     = string or array of primary key(s)
-     * - rowclass    = row class name
-     * - rowsetclass = rowset class name
+     * Supported params for $config are:
+     * - db              = user-supplied instance of database connector,
+     *                     or key name of registry instance.
+     * - name            = table name.
+     * - primary         = string or array of primary key(s).
+     * - rowclass        = row class name.
+     * - rowsetClass     = rowset class name.
+     * - referenceMap    = array structure to declare relationship
+     *                     to parent tables.
+     * - dependentTables = array of child tables.
      *
      * @param  array $config Array of user-specified config options.
      * @throws Zend_Db_Table_Exception
@@ -124,23 +169,31 @@ abstract class Zend_Db_Table_Abstract
         }
 
         // set default table name if supplied
-        if (isset($config['name'])) {
-            $this->_name = $config['name'];
+        if (isset($config[self::NAME])) {
+            $this->_name = $config[self::NAME];
         }
 
         // set primary key name if supplied
-        if (isset($config['primary'])) {
-            $this->_primary = (array) $config['primary'];
+        if (isset($config[self::PRIMARY])) {
+            $this->_primary = (array) $config[self::PRIMARY];
         }
 
         // set default row classname if supplied
-        if (isset($config['rowclass'])) {
-            $this->_rowClass = $config['rowclass'];
+        if (isset($config[self::ROW_CLASS])) {
+            $this->setRowClass($config[self::ROW_CLASS]);
         }
 
         // set default rowset classname if supplied
-        if (isset($config['rowsetclass'])) {
-            $this->_rowSetClass = $config['rowsetclass'];
+        if (isset($config[self::ROWSET_CLASS])) {
+            $this->setRowsetClass($config[self::ROWSET_CLASS]);
+        }
+
+        if (isset($config[self::REFERENCE_MAP])) {
+            $this->setReferences($config[self::REFERENCE_MAP]);
+        }
+
+        if (isset($config[self::DEPENDENT_TABLES])) {
+            $this->setDependentTables($config[self::DEPENDENT_TABLES]);
         }
 
         // continue with automated setup
@@ -148,11 +201,101 @@ abstract class Zend_Db_Table_Abstract
     }
 
     /**
+     * @param string $classname
+     * @return void
+     */
+    public function setRowClass($classname)
+    {
+        // @todo: confirm class is available or throw exception
+        $this->_rowClass = $classname;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRowClass()
+    {
+        return $this->_rowClass;
+    }
+
+    /**
+     * @param string $classname
+     * @return void
+     */
+    public function setRowsetClass($classname)
+    {
+        // @todo: confirm class is available or throw exception
+        $this->_rowsetClass = $classname;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRowsetClass()
+    {
+        return $this->_rowsetClass;
+    }
+
+    /**
+     * @param array $referenceMap
+     * @return void
+     */
+    public function setReferences(array $referenceMap)
+    {
+        $this->_referenceMap = $referenceMap;
+    }
+
+    /**
+     * @param string $tableClassname
+     * @param string $ruleKey OPTIONAL
+     * @return array
+     * @throws Zend_Db_Table_Exception
+     */
+    public function getReference($tableClassname, $ruleKey = null)
+    {
+        $thisClass = get_class($this);
+        if ($ruleKey != null) {
+            if (!isset($this->_referenceMap[$ruleKey])) {
+                require_once "Zend/Db/Table/Exception.php";
+                throw new Zend_Db_Table_Exception("No reference rule \"$ruleKey\" from table $thisClass to table $tableClassname");
+            }
+            if ($this->_referenceMap[$ruleKey]['refTable'] != $tableClassname) {
+                require_once "Zend/Db/Table/Exception.php";
+                throw new Zend_Db_Table_Exception("Reference rule \"$ruleKey\" does not reference table $tableClassname");
+            }
+            return $this->_referenceMap[$ruleKey];
+        }
+        foreach ($this->_referenceMap as $reference) {
+            if ($reference['refTable'] == $tableClassname) {
+                return $reference;
+            }
+        }
+        require_once "Zend/Db/Table/Exception.php";
+        throw new Zend_Db_Table_Exception("No reference from table $thisClass to table $tableClassname");
+    }
+
+    /**
+     * @param array $dependentTables
+     * @return void
+     */
+    public function setDependentTables(array $dependentTables)
+    {
+        $this->_dependentTables = $dependentTables;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDependentTables()
+    {
+        return $this->_dependentTables;
+    }
+
+    /**
      * Sets the default Zend_Db_Adapter_Abstract for all Zend_Db_Table objects.
      *
      * @param  Zend_Db_Adapter_Abstract
      * @return void
-     * @throws Zend_Db_Table_Exception
      */
     static public final function setDefaultAdapter(Zend_Db_Adapter_Abstract $db)
     {
@@ -205,16 +348,18 @@ abstract class Zend_Db_Table_Abstract
         
         // get the table columns
         if (! $this->_cols) {
-            $tmp = array_keys($this->_db->describeTable($this->_name));
-            foreach ($tmp as $native) {
-                $this->_cols[$native] = $native;
-            }
+            $desc = $this->_db->describeTable($this->_name);
+            $this->_cols = array_keys($desc);
         }
 
         // primary key
         if ($this->_primary && array_intersect((array) $this->_primary, $this->_cols) !== (array) $this->_primary) {
             require_once 'Zend/Db/Table/Exception.php';
-            throw new Zend_Db_Table_Exception("Primary key column(s) specified are not columns in this table");
+            throw new Zend_Db_Table_Exception("Primary key column(s) ("
+                . implode(',', (array) $this->_primary)
+                . ") are not columns in this table ("
+                . implode(',', $this->_cols)
+                . ")");
         }
     }
 
@@ -266,6 +411,41 @@ abstract class Zend_Db_Table_Abstract
     }
 
     /**
+     * Called by a row object for the parent table's class during save() method.
+     *
+     * @param string $parentTableClassname
+     * @param array $oldPrimaryKey
+     * @param array $newPrimaryKey
+     */ 
+    public function _cascadeUpdate($parentTableClassname, $oldPrimaryKey, $newPrimaryKey) 
+    { 
+        $rowsAffected = 0;
+        foreach ($this->_referenceMap as $rule => $map) {
+            if ($map['refTable'] == $parentTableClassname) {
+                switch ($map['onUpdate']) {
+                    case self::CASCADE:
+                        for ($i = 0; $i < count($map['columns']); ++$i) {
+                            $where[] = $this->_db->quoteInto(
+                                $this->_db->quoteIdentifier($map['columns'][$i]) . ' = ?', 
+                                $oldPrimaryKey[$map['refColumns'][$i]]
+                            );
+                        }
+                        $rowsAffected += $this->update($newPrimaryKey, $where); 
+                        break;
+                    case self::NO_ACTION:
+                    case self::RESTRICT:
+                    case self::SET_NULL:
+                    case self::SET_DEFAULT:
+                    default:
+                        // @todo
+                        break;
+                }
+            }
+        }
+        return $rowsAffected;
+    } 
+
+    /**
      * Deletes existing rows.
      *
      * @param  string $where An SQL WHERE clause.
@@ -275,6 +455,40 @@ abstract class Zend_Db_Table_Abstract
     {
         return $this->_db->delete($this->_name, $where);
     }
+
+    /**
+     * Called by parent table's class during delete() method.
+     *
+     * @param string $parentTableClassname
+     * @param array $primaryKey
+     */ 
+    public function _cascadeDelete($parentTableClassname, $primaryKey) 
+    { 
+        $rowsAffected = 0;
+        foreach ($this->_referenceMap as $rule => $map) {
+            if ($map['reftable'] == $parentTableClassname) {
+                switch ($map['onDelete']) {
+                    case self::CASCADE:
+                        for ($i = 0; $i < count($map['columns']); ++$i) {
+                            $where[] = $this->_db->quoteInto(
+                                $this->_db->quoteIdentifier($map['columns'][$i]) . ' = ?', 
+                                $primaryKey[$map['refColumns'][$i]]
+                            );
+                        }
+                        $rowsAffected += $this->delete($where); 
+                        break;
+                    case self::NO_ACTION:
+                    case self::RESTRICT:
+                    case self::SET_NULL:
+                    case self::SET_DEFAULT:
+                    default:
+                        // @todo
+                        break;
+                }
+            }
+        }
+        return $rowsAffected;
+    } 
 
     /**
      * Fetches rows by primary key.
@@ -293,6 +507,7 @@ abstract class Zend_Db_Table_Abstract
      *
      * @param  mixed                The value(s) of the primary key.
      * @return Zend_Db_Table_Rowset Row(s) matching the criteria.
+     * @throws Zend_Db_Table_Exception
      */
     public function find()
     {
@@ -355,8 +570,8 @@ abstract class Zend_Db_Table_Abstract
             'rowclass' => $this->_rowClass
         );
 
-        Zend::loadClass($this->_rowSetClass);
-        return new $this->_rowSetClass($data);
+        Zend::loadClass($this->_rowsetClass);
+        return new $this->_rowsetClass($data);
     }
 
     /**
@@ -431,7 +646,7 @@ abstract class Zend_Db_Table_Abstract
         $select = $this->_db->select();
 
         // the FROM clause
-        $select->from($this->_name, array_keys($this->_cols));
+        $select->from($this->_name, $this->_cols);
 
         // the WHERE clause
         $where = (array) $where;
