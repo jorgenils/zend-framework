@@ -64,10 +64,11 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
      *
      * @throws Zend_Feed_Exception If loading the feed failed.
      *
-     * @param string $uri The full URI of the feed to load, or NULL if not retrieved via HTTP.
-     * @param string $string The feed as a string, or NULL if retrieved via HTTP.
+     * @param string $uri The full URI of the feed to load, or NULL if not retrieved via HTTP or as an array.
+     * @param string $string The feed as a string, or NULL if retrieved via HTTP or as an array.
+     * @param array $array The feed as an array or NULL if retrieved as a string or via HTTP.
      */
-    public function __construct($uri = null, $string = null)
+    public function __construct($uri = null, $string = null, $array = null)
     {
         if ($uri !== null) {
             // Retrieve the feed via HTTP
@@ -78,12 +79,20 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
                 throw new Zend_Feed_Exception('Feed failed to load, got response code ' . $response->getStatus());
             }
             $this->_element = $response->getBody();
-        } else {
+            $this->__wakeup();
+        } elseif ($string !== null) {
             // Retrieve the feed from $string
             $this->_element = $string;
+            $this->__wakeup();
+        } else {
+            // Generate the feed from the array
+            $this->_checkFeedData($array);
+            $this->_element = new DOMDocument('1.0', $array['charset']);
+            $root = $this->_mapFeedHeaders($array);
+            $this->_mapFeedEntries($root, $array);
+            $this->_element = $root;
+            $this->_buildEntryCache();
         }
-
-        $this->__wakeup();
     }
 
 
@@ -210,4 +219,45 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
         return (0 <= $this->_entryIndex && $this->_entryIndex < $this->count());
     }
 
+    /**
+     * Checks the format of the user's data and ensure we can generate a Zend_Feed_Abstract object
+     *
+     * @param array $array the data to check - see Zend_Feed_Interface for array structure
+     * @throws Zend_Feed_Exception
+     */
+    private function _checkFeedData($array)
+    {
+        $mandatory = array('title', 'link', 'lastUpdate', 'charset');
+        foreach ($mandatory as $key) {
+            if (empty($array[$key])) {
+                throw new Zend_Feed_Exception("The key $key can not be empty");
+            }
+        }
+    }
+
+    /**
+     * Generate the header of the feed when working in write mode
+     *
+     * @param array $array the data to use - see Zend_Feed_Interface for array structure
+     * @return DOMElement root node
+     * @internal
+     */
+    abstract protected function _mapFeedHeaders($array);
+
+    /**
+     * Generate the entries of the feed when working in write mode
+     *
+     * @param array $array the data to use - see Zend_Feed_Interface for array structure
+     * @param DOMElement $root the root node to use
+     * @internal
+     */
+    abstract protected function _mapFeedEntries(DOMElement $root, $array);
+
+    /**
+     * Send feed to a http client with the correct header
+     *
+     * @throws Zend_Feed_Exception if headers have already been sent 
+     * @return void
+     */
+    abstract public function send();
 }
