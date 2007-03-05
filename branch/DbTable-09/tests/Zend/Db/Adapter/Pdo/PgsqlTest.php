@@ -194,6 +194,9 @@ class Zend_Db_Adapter_Pdo_PgsqlTest extends Zend_Db_Adapter_Pdo_Common
 
     public function testTableInsert()
     {
+        $this->markTestIncomplete('Need solution for Zend_Db_Table when inserting to PostgreSQL');
+        return;
+
         Zend::loadClass('Zend_Db_Table_ZfTestTable');
         $table = $this->getIdentifier(self::TABLE_NAME);
         $id = $this->getIdentifier('id');
@@ -237,10 +240,7 @@ class Zend_Db_Adapter_Pdo_PgsqlTest extends Zend_Db_Adapter_Pdo_Common
 
     public function testTableRowSaveInsert()
     {
-        list ($dbTable, $table, $id) = $this->getInstanceOfDbTable();
-
         $this->markTestIncomplete('Need solution for Zend_Db_Table when inserting to PostgreSQL');
-        return;
     }
 
 }
