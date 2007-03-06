@@ -200,13 +200,21 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
             $feed->appendChild($author);
         }
         
-        $updated = isset($array['pubDate']) ? $array['pubDate'] : time();
+        $updated = isset($array['lastUpdate']) ? $array['lastUpdate'] : time();
         $updated = $this->_element->createElement('updated', date(DATE_ATOM, $updated));
         $feed->appendChild($updated);
+
+        if (isset($array['published'])) {
+            $published = $this->_element->createElement('published', date(DATE_ATOM, $array['published']));
+            $feed->appendChild($published);
+        }
         
         $link = $this->_element->createElement('link');
         $link->setAttribute('rel', 'self');
         $link->setAttribute('href', $array['link']);
+        if (isset($array['language'])) {
+            $link->setAttribute('hreflang', $array['language']);
+        }
         $feed->appendChild($link);
         
         if (isset($array['description'])) {
@@ -262,7 +270,7 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
             $title = $this->_element->createElement('title', $dataentry['title']);
             $entry->appendChild($title);
             
-            $updated = isset($array['pubDate']) ? $array['pubDate'] : time();
+            $updated = isset($array['lastUpdate']) ? $array['lastUpdate'] : time();
             $updated = $this->_element->createElement('updated', date(DATE_ATOM, $updated));
             $entry->appendChild($updated);
             
@@ -280,6 +288,55 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
                 $content->setAttribute('type', 'html');
                 $content->appendChild($this->_element->createCDATASection($dataentry['content']));
                 $entry->appendChild($content);
+            }
+
+            if (isset($dataentry['category'])) {
+                foreach ($dataentry['category'] as $category) {
+                    $node = $this->_element->createElement('category');
+                    $node->setAttribute('term', $category['term']);
+                    if (isset($category['scheme'])) {
+                        $node->setAttribute('scheme', $category['scheme']);
+                    }
+                    $entry->appendChild($node);
+                }
+            }
+
+            if (isset($dataentry['source'])) {
+                $source = $this->_element->createElement('source');
+                $title = $this->_element->createElement('title', $dataentry['source']['title']);
+                $source->appendChild($title);
+                $link = $this->_element->createElement('link', $dataentry['source']['title']);
+                $link->setAttribute('rel', 'alternate');
+                $link->setAttribute('href', $dataentry['source']['url']);
+                $source->appendChild($link);
+            }
+
+            if (isset($dataentry['enclosure'])) {
+                foreach ($dataentry['enclosure'] as $enclosure) {
+                    $node = $this->_element->createElement('link');
+                    $node->setAttribute('rel', 'enclosure');
+                    $node->setAttribute('href', $enclosure['url']);
+                    if (isset($enclosure['type'])) {
+                        $node->setAttribute('type', $enclosure['type']);
+                    }
+                    if (isset($enclosure['length'])) {
+                        $node->setAttribute('length', $enclosure['length']);
+                    }
+                    $entry->appendChild($node);
+                }
+            }
+
+            if (isset($dataentry['comments'])) {
+                $comments = $this->_element->createElementNS('http://wellformedweb.org/CommentAPI/',
+                                                             'wfw:comment',
+                                                             $dataentry['comments']);
+                $entry->appendChild($comments);
+            }
+            if (isset($dataentry['commentRss'])) {
+                $comments = $this->_element->createElementNS('http://wellformedweb.org/CommentAPI/',
+                                                             'wfw:commentRss',
+                                                             $dataentry['commentRss']);
+                $entry->appendChild($comments);
             }
             
             $root->appendChild($entry);

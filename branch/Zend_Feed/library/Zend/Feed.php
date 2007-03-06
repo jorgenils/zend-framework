@@ -314,21 +314,11 @@ class Zend_Feed
      * @param $data 
      * @param $format string (rss|atom) the requested output format
      * @return Zend_Feed_Abstract see Zend_Feed_Interface for array structure
-     * @throws Zend_Feed_Exception if format is unknown
      */
     public static function importArray(array $data, $format = 'atom')
     {
-        $format = strtolower($format);
-        switch($format) {
-            case 'rss':
-                $obj = 'Zend_Feed_Rss';
-                break;
-            case 'atom':
-                $obj = 'Zend_Feed_Atom';
-                break;
-            default:
-                throw new Zend_Feed_Exception("format '$format' is not supported");
-        }
+        $obj = 'Zend_Feed_' . ucfirst(strtolower($format));
+        Zend::loadClass($obj);
 
         return new $obj(null, null, $data);
     }
@@ -339,21 +329,11 @@ class Zend_Feed
      * @param $builder Zend_Feed_Interface this object will be used to extract the data of the feed
      * @param $format string (rss|atom) the requested output format
      * @return Zend_Feed_Abstract
-     * @throws Zend_Feed_Exception if format is unknown
      */
     public static function importBuilder(Zend_Feed_Builder_Interface $builder, $format = 'atom')
     {
-        $format = strtolower($format);
-        switch($format) {
-            case 'rss':
-                $obj = 'Zend_Feed_Rss';
-                break;
-            case 'atom':
-                $obj = 'Zend_Feed_Atom';
-                break;
-            default:
-                throw new Zend_Feed_Exception("format '$format' is not supported");
-        }
+        $obj = 'Zend_Feed_' . ucfirst(strtolower($format));
+        Zend::loadClass($obj);
 
         return new $obj(null, null, $builder->getFeedData());
     }

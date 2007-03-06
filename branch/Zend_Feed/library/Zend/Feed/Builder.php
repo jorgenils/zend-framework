@@ -71,23 +71,134 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
     private function _validate()
     {
         /* general properties */
-        $mandatories = array('title', 'link', 'lastUpdate', 'charset');
+        $mandatories = array('title', 'link', 'charset');
         foreach ($mandatories as $mandatory) {
             if (empty($this->_data[$mandatory])) {
-                throw new Zend_Feed_Exception("you have to set $mandatory key to a non empty value");
+                throw new Zend_Feed_Exception("you have to set \"$mandatory\" key to a non empty value");
             }
         }
+
+        if (isset($this->_data['email'])) {
+            Zend::loadClass('Zend_Validate_EmailAddress');
+            $validate = new Zend_Validate_EmailAddress();
+            if (!$validate->isValid($this->_data['email'])) {
+                throw new Zend_Feed_Exception("you have to set a valid email address into the email property");
+            }
+        }
+
+        /* validate rss specific properties */
+        $this->_validateRssProperties();
+
         if (!isset($this->_data['entries'])) {
             throw new Zend_Feed_Exception("you have to set entries key");
         }
 
         /* entry properties */
-        $mandatories = array('title', 'link', 'description');
         foreach ($this->_data['entries'] as $idx => $entry) {
+            $mandatories = array('title', 'link', 'description');
             foreach ($mandatories as $mandatory) {
                 if (empty($entry[$mandatory])) {
-                    throw new Zend_Feed_Exception("you have to set $mandatory key (entry $idx) to a non empty value");
+                    throw new Zend_Feed_Exception("you have to set \"$mandatory\" key (entry $idx) to a non empty value");
                 }
+            }
+
+            if (isset($entry['category'])) {
+                /* validate category entries */
+                foreach ($entry['category'] as $i => $category) {
+                    if (empty($category['term'])) {
+                        throw new Zend_Feed_Exception("you have to set \"term\" key (entry $idx, category $i) to a non empty value");
+                    }
+                }
+            }
+
+            if (isset($entry['source'])) {
+                /* validate source property */
+                $mandatories = array('title', 'url');
+                foreach ($mandatories as $mandatory) {
+                    if (empty($entry['source'][$mandatory])) {
+                        throw new Zend_Feed_Exception("you have to set \"$mandatory\" key of the source property (entry $idx) to a non empty value");
+                    }
+                }
+            }
+
+            if (isset($entry['enclosure'])) {
+                /* validate enclosure property */
+                foreach ($entry['enclosure'] as $i => $enclosure) {
+                    if (empty($enclosure['url'])) {
+                        throw new Zend_Feed_Exception("you have to set \"url\" key of the enclosure property (entry $idx, enclosure $i) to a non empty value");
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Validate the rss specific properties of the channel node
+     *
+     * @throws Zend_Feed_Exception
+     */
+    private function _validateRssProperties()
+    {
+        /* webmaster email */
+        if (isset($this->_data['webmaster'])) {
+            Zend::loadClass('Zend_Validate_EmailAddress');
+            $validate = new Zend_Validate_EmailAddress();
+            if (!$validate->isValid($this->_data['webmaster'])) {
+                throw new Zend_Feed_Exception("you have to set a valid email address into the webmaster property");
+            }
+        }
+
+        /* rss cloud node */
+        if (isset($this->_data['cloud'])) {
+            $mandatories = array('domain', 'path', 'registerProcedure', 'protocol');
+            foreach ($mandatories as $mandatory) {
+                if (empty($this->_data['cloud'][$mandatory])) {
+                    throw new Zend_Feed_Exception("you have to set \"$mandatory\" key of the cloud property");
+                }
+            }
+        }
+
+        /* rss textInput */
+        if (isset($this->_data['textInput'])) {
+            $mandatories = array('title', 'description', 'name', 'link');
+            foreach ($mandatories as $mandatory) {
+                if (empty($this->_data['textInput'][$mandatory])) {
+                    throw new Zend_Feed_Exception("you have to set \"$mandatory\" key of the textInput property");
+                }
+            }
+        }
+
+        /* rss skipHours */
+        if (isset($this->_data['skipHours'])) {
+            if (count($this->_data['skipHours']) > 24) {
+                throw new Zend_Feed_Exception("you can not have more than 24 rows in the skipHours property");
+            }
+            foreach ($this->_data['skipHours'] as $hour) {
+                if ($hour < 0 || $hour > 23) {
+                    throw new Zend_Feed_Exception("$hour has te be between 0 and 23");
+                }
+            }
+        }
+
+        /* rss skipDays */
+        if (isset($this->_data['skipDays'])) {
+            if (count($this->_data['skipDays']) > 7) {
+                throw new Zend_Feed_Exception("you can not have more than 7 rows in the skipDays property");
+            }
+            $days = array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
+            foreach ($this->_data['skipDays'] as $day) {
+                if (!in_array($day, $days)) {
+                    throw new Zend_Feed_Exception("$day is not a valid day");
+                }
+            }
+        }
+
+        /* rss ttl */
+        if (isset($this->_data['ttl'])) {
+            Zend::loadClass('Zend_Validate_Int');
+            $validate = new Zend_Validate_Int();
+            if (!$validate->isValid($this->_data['ttl'])) {
+                throw new Zend_Feed_Exception("you have to set an integer value to the ttl property");
             }
         }
     }

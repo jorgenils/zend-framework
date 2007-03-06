@@ -131,9 +131,13 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
         $description = $this->_element->createElement('description', $description);
         $channel->appendChild($description);
         
-        $pubdate = isset($array['pubDate']) ? $array['pubDate'] : time();
+        $pubdate = isset($array['lastUpdate']) ? $array['lastUpdate'] : time();
         $pubdate = $this->_element->createElement('pubDate', gmdate('r', $pubdate));
         $channel->appendChild($pubdate);
+
+        if (isset($array['published'])) {
+            $lastBuildDate = $this->_element->createElement('lastBuildDate', gmdate('r', $array['published']));
+        }
         
         $editor = '';
         if (!empty($array['email'])) {
@@ -142,8 +146,13 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
         if (!empty($array['author'])) {
             $editor .= ' (' . $array['author'] . ')';
         }
-        $author = $this->_element->createElement('managingEditor', ltrim($editor));
-        $channel->appendChild($author);
+        if (!empty($editor)) {
+            $author = $this->_element->createElement('managingEditor', ltrim($editor));
+            $channel->appendChild($author);
+        }
+        if (isset($array['webmaster'])) {
+            $channel->appendChild($this->_element->createElement('webMaster', $array['webmaster']));
+        }
         
         if (!empty($array['copyright'])) {
             $copyright = $this->_element->createElement('copyright', $array['copyright']);
@@ -165,6 +174,54 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
         $generator = !empty($array['generator']) ? $array['generator'] : 'Zend_Feed';
         $generator = $this->_element->createElement('generator', $generator);
         $channel->appendChild($generator);
+
+        if (!empty($array['language'])) {
+            $language = $this->_element->createElement('language', $array['language']);
+            $channel->appendChild($language);
+        }
+
+        $doc = $this->_element->createElement('docs', 'http://blogs.law.harvard.edu/tech/rss');
+        $channel->appendChild($doc);
+
+        if (isset($array['cloud'])) {
+            $cloud = $this->_element->createElement('cloud');
+            $cloud->setAttribute('domain', $array['cloud']['domain']);
+            $cloud->setAttribute('port', isset($array['cloud']['port']) ? $array['cloud']['port'] : '80');
+            $cloud->setAttribute('path', $array['cloud']['path']);
+            $cloud->setAttribute('registerProcedure', $array['cloud']['registerProcedure']);
+            $cloud->setAttribute('protocol', $array['cloud']['protocol']);
+            $channel->appendChild($cloud);
+        }
+
+        if (isset($array['rating'])) {
+            $rating = $this->_element->createElement('rating', $array['rating']);
+            $channel->appendChild($rating);
+        }
+
+        if (isset($array['textInput'])) {
+            $textinput = $this->_element->createElement('textInput');
+            $textinput->appendChild($this->_element->createElement('title', $array['textInput']['title']));
+            $textinput->appendChild($this->_element->createElement('description', $array['textInput']['description']));
+            $textinput->appendChild($this->_element->createElement('name', $array['textInput']['name']));
+            $textinput->appendChild($this->_element->createElement('link', $array['textInput']['link']));
+            $channel->appendChild($textinput);
+        }
+
+        if (isset($array['skipHours'])) {
+            $skipHours = $this->_element->createElement('skipHours');
+            foreach ($array['skipHours'] as $hour) {
+                $skipHours->appendChild($this->_element->createElement('hour', $hour));
+            }
+            $channel->appendChild($skipHours);
+        }
+
+        if (isset($array['skipDays'])) {
+            $skipDays = $this->_element->createElement('skipDays');
+            foreach ($array['skipDays'] as $day) {
+                $skipDays->appendChild($this->_element->createElement('day', $day));
+            }
+            $channel->appendChild($skipDays);
+        }
         
         return $channel;
     }
@@ -202,8 +259,10 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
             $link = $this->_element->createElement('link', $dataentry['link']);
             $item->appendChild($link);
             
-            $guid = $this->_element->createElement('guid', isset($dataentry['guid']) ? $dataentry['guid'] : $dataentry['link']);
-            $item->appendChild($guid);
+            if (isset($dataentry['guid'])) {
+                $guid = $this->_element->createElement('guid', isset($dataentry['guid']) ? $dataentry['guid'] : $dataentry['link']);
+                $item->appendChild($guid);
+            }
             
             $description = $this->_element->createElement('description');
             $description->appendChild($this->_element->createCDATASection($dataentry['description']));
@@ -215,9 +274,51 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
                 $item->appendChild($content);
             }
 
-            $pubdate = isset($dataentry['pubDate']) ? $dataentry['pubDate'] : time();
+            $pubdate = isset($dataentry['lastUpdate']) ? $dataentry['lastUpdate'] : time();
             $pubdate = $this->_element->createElement('pubDate', gmdate('r', $pubdate));
-            $item->appendChild($pubdate);            
+            $item->appendChild($pubdate);
+
+            if (isset($dataentry['category'])) {
+                foreach ($dataentry['category'] as $category) {
+                    $node = $this->_element->createElement('category', $category['term']);
+                    if (isset($category['scheme'])) {
+                        $node->setAttribute('domain', $category['scheme']);
+                    }
+                    $item->appendChild($node);
+                }
+            }
+
+            if (isset($dataentry['source'])) {
+                $source = $this->_element->createElement('source', $dataentry['source']['title']);
+                $source->setAttribute('url', $dataentry['source']['url']);
+                $item->appendChild($source);
+            }
+
+            if (isset($dataentry['comments'])) {
+                $comments = $this->_element->createElement('comments', $dataentry['comments']);
+                $item->appendChild($comments);
+            }
+            if (isset($dataentry['commentRss'])) {
+                $comments = $this->_element->createElementNS('http://wellformedweb.org/CommentAPI/',
+                                                             'wfw:commentRss',
+                                                             $dataentry['commentRss']);
+                $item->appendChild($comments);
+            }
+
+
+            if (isset($dataentry['enclosure'])) {
+                foreach ($dataentry['enclosure'] as $enclosure) {
+                    $node = $this->_element->createElement('enclosure');
+                    $node->setAttribute('url', $enclosure['url']);
+                    if (isset($enclosure['type'])) {
+                        $node->setAttribute('type', $enclosure['type']);
+                    }
+                    if (isset($enclosure['length'])) {
+                        $node->setAttribute('length', $enclosure['length']);
+                    }
+                    $item->appendChild($node);
+                }
+            }
 
             $root->appendChild($item);
         }
