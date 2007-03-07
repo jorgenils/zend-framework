@@ -1,0 +1,680 @@
+<sect1 id="zend.db.table.relationships">
+
+    <title>Zend_Db_Table Relationships</title>
+
+    <sect2 id="zend.db.table.relationships.introduction">
+
+        <title>Introduction</title>
+
+        <para>
+            Tables have relationships to each other in a relational database.
+            An entity in one table can be linked to one or more entities in
+            another table by using referential integrity constraints
+            defined in the database schema.
+            For example, in an order-processing database, a row in a table
+            <code>Orders</code> may have one or more rows in a table
+            <code>LineItems</code> that reference that Orders entity.
+        </para>
+
+        <para>
+            The Zend_Db_Table_Row class has methods for querying
+            related rows in other tables.  For example, if you have an instance
+            of a row from the <code>Orders</code> table, you can retrieve the
+            set of related rows from the <code>LineItems</code> table.
+        </para>
+
+    </sect2>
+
+    <sect2 id="zend.db.table.relationships.defining">
+
+        <title>Defining Relationships</title>
+
+        <para>
+            Define classes for each of your tables, extending the abstract
+            class Zend_Db_Table_Abstract, as described in the
+            "<link linkend="zend.db.table.getting-started">
+            Zend_Db_Table: Getting Started</link>" section.
+            In the class file for each child table, declare the reference
+            relationships in the <code>protected $_referenceMap</code>
+            and <code>protected $_dependentTables</code>
+            array variables.  See the following example:
+        </para>
+
+        <para>
+            The following SQL data definition language pseudocode
+            describes a few tables in an example database.
+        </para>
+
+        <programlisting role="sql"><![CDATA[
+CREATE TABLE orders ( 
+  order_id          PRIMARY KEY, 
+  customer_id       FOREIGN KEY REFERENCES Customers 
+);
+ 
+CREATE TABLE products ( 
+  product_id        PRIMARY KEY 
+);
+ 
+CREATE TABLE line_items ( 
+  order_id          FOREIGN KEY REFERENCES orders, 
+  product_id        FOREIGN KEY REFERENCES products 
+  PRIMARY KEY       (order_id, product_id) 
+);]]>
+        </programlisting>
+
+        <para>
+            The <code>orders</code> table has a one-to-many
+            relationship to the <code>line_items</code> table.
+            The <code>products</code> table also has a one-to-many
+            relationship to the <code>line_items</code> table.
+            Thus the <code>orders</code> table has a many-to-many
+            relationship to the <code>products</code> table.
+        </para>
+
+        <para>
+            Below is the PHP class definitions for these tables:
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+class Orders extends Zend_Db_Table_Abstract
+{
+    protected $_name            = 'orders';
+    protected $_primary         = array('order_id');
+    protected $_dependentTables = array('LineItems');
+}
+
+class Products extends Zend_Db_Table_Abstract
+{
+    protected $_name            = 'products';
+    protected $_primary         = array('product_id');
+    protected $_dependentTables = array('LineItems');
+}
+
+class LineItems extends Zend_Db_Table_Abstract
+{
+    protected $_name            = 'line_items';
+    protected $_referenceMap    = array(
+        'Order' => array(
+            'columns'           => array('order_id'),
+            'refTable'          => 'Orders',
+            'refColumns'        => array('order_id'),
+            'onDelete'          => self::CASCADE,
+            'onUpdate'          => self::RESTRICT
+        ),
+        'Product' => array(
+            'columns'           => array('product_id'),
+            'refTable'          => 'Products',
+            'refColumns'        => array('product_id'),
+        )
+    );
+}
+
+?>]]>
+        </programlisting>
+
+        <para>
+            The <code>$_dependentTables</code> array is declared in the
+            class for the parent table.  List the class name for each
+            dependent table.  Use the class name, not the physical name
+            of the SQL table.
+        </para>
+
+        <para>
+            The <code>$_referenceMap</code> array is declared in the
+            class for each dependent table.  This is an associative array.
+            The key is an arbitrary string used as an identifier for the
+            reference relationship; you can choose a mnemonic name,
+            but it is best to use a string that can easily be part of a
+            PHP method name, as you will see later.
+        </para>
+
+        <para>
+            The value of each entry in the <code>$_referenceMap</code> array 
+            is also an associative array.  The keys and values are explained
+            below:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>
+                    <emphasis role="strong">columns</emphasis> =>
+                    An array of foreign key column names in the dependent table.
+                    It is common for this to be a single column, but
+                    some tables have multi-column keys.
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    <emphasis role="strong">refTable</emphasis> =>
+                    The class name of the parent table.
+                    Use the class name, not the physical name of the SQL table.
+                    It is common for a dependent table to refer to its parent
+                    only once, but some tables have multiple references to
+                    the same parent table; put these in separate entries in
+                    the <code>$_referenceMap</code> array.
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    <emphasis role="strong">refColumns</emphasis> =>
+                    An array of primary key column names in the parent table.
+                    This array must be in the same order as the array of
+                    columns in the dependent table.
+                    It is common for this to be a single column, but
+                    some tables have multi-column keys.
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    <emphasis role="strong">onDelete</emphasis> =>
+                    The rule for an action to execute if a row is
+                    deleted in the parent table.
+                    See the "<link linkend="zend.db.table.relationships.cascading">
+                    Cascading Write Operations</link>" section.
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    <emphasis role="strong">onUpdate</emphasis> =>
+                    The rule for an action to execute if values in
+                    primary key columns are updated in the parent table.
+                    See the "<link linkend="zend.db.table.relationships.cascading">
+                    Cascading Write Operations</link>" section.
+                </para>
+            </listitem>
+        </itemizedlist>
+
+    </sect2>
+
+    <sect2 id="zend.db.table.relationships.fetching-dependent">
+
+        <title>Fetching a Dependent Rowset</title>
+
+        <para>
+            If you have a Row object as the result of a query on a parent
+            table, you can fetch rows from dependent tables that reference
+            the current row.
+            Use the method:
+        </para>
+
+        <programlisting role="php"><![CDATA[
+$row->findDependentRowset($table, [$rule])
+]]>
+        </programlisting>
+
+
+        <para>
+            This method returns a Zend_Db_Table_Rowset_Abstract object,
+            containing a set of rows from the dependent table
+            <code>$table</code> that refer to the caller row.
+        </para>
+
+        <para>
+            The argument <code>$table</code> is either an object extending
+            Zend_Db_Table_Abstract, or the name of a class that extends
+            Zend_Db_Table_Abstract.  This argument is a dependent table
+            that references the caller table.
+        </para>
+
+        <para>
+            The argument <code>$rule</code> is optional.  It names the
+            key in the <code>$_referenceMap</code> array of the dependent
+            table class.  By default, the first entry in that array 
+            referencing the caller's table is used.
+            But if the dependent table has multiple references to the
+            caller's table, and you need to use one other than the first,
+            you need to specify the key.
+        </para>
+
+        <example id="zend.db.table.relationships.fetching-dependent.example">
+            <title>Fetching a Dependent Rowset</title>
+            <para>
+                In this example, you have a Row object from the table
+                <code>Orders</code>, and you want to know all the
+                <code>LineItems</code> in the current order.
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+
+$ordersTable     = new Orders();
+$ordersRowset    = $ordersTable->find(1234);
+$order1234       = $ordersRowset->current();
+
+$lineItemsRowset = $order1234->findDependentRowset('LineItems');
+
+?>]]>
+            </programlisting>
+        </example>
+
+        <para>
+            You also can get the same query results using a magic method.
+            Zend_Db_Table_Row_Abstract invokes the method:
+            <code>findDependentRowset('&lt;TableClass&gt;', '&lt;Rule&gt;')</code>
+            if you invoke a method on the Row object matching either
+            of the following patterns:
+        </para>
+
+        <programlisting role="php"><![CDATA[
+$row->find<Table>()
+$row->find<TableClass>By<Rule>()
+]]>
+        </programlisting>
+
+        <para>
+            The class names and rule names must match the spelling exactly.
+            No inflection is used.
+        </para>
+
+        <example id="zend.db.table.relationships.fetching-dependent.example">
+            <title>Fetching a Dependent Rowset with the Magic Method</title>
+            <programlisting role="php"><![CDATA[<?php
+
+$ordersTable     = new Orders();
+$ordersRowset    = $ordersTable->find(1234);
+$order1234       = $ordersRowset->current();
+
+$lineItemsRowset = $order1234->findLineItems();
+
+?>]]>
+            </programlisting>
+        </example>
+
+    </sect2>
+
+    <sect2 id="zend.db.table.relationships.fetching-parent">
+
+        <title>Fetching a Parent Row</title>
+
+        <para>
+            If you have a Row object as the result of a query on a dependent
+            table, you can fetch the single row to which the dependent row
+            refers in the parent table.
+            Use the method:
+        </para>
+
+        <programlisting role="php"><![CDATA[
+$row->findParentRow($table, [$rule])
+]]>
+        </programlisting>
+
+        <para>
+            Note that there should be exactly one referenced row, therefore
+            this method returns a Row object, not a Rowset object.
+        </para>
+
+        <para>
+            This method returns a Zend_Db_Table_Row_Abstract
+            containing the single row from the parent table <code>$table</code>,
+            to which the caller Row refers.
+        </para>
+
+        <para>
+            The argument <code>$table</code> is either an object extending
+            Zend_Db_Table_Abstract, or the name of a class that extends
+            Zend_Db_Table_Abstract.  This argument is the parent table
+            to which the caller Row references.
+        </para>
+
+        <para>
+            The argument <code>$rule</code> is optional.  It names the
+            key in the <code>$_referenceMap</code> array of the caller's
+            table class.  By default, the first entry in that array referencing
+            the parent table is used.
+            But if the caller table has multiple references to the
+            parent table, and you need to use one other than the first,
+            you need to specify the key.
+        </para>
+
+        <example id="zend.db.table.relationships.fetching-parent.example">
+            <title>Fetching the Parent Row</title>
+            <para>
+                In this example, you have a Row object from the table
+                <code>LineItems</code>, and you want information
+                from the <code>Products</code> table for the product
+                in the current line-item.
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+
+$lineItemsTable  = new LineItems();
+$lineItemsRowset = $lineItemsTable->fetchAll( <query-condition> );
+$lineItem1       = $lineItemsRowset->current();
+
+$parentOrderRow  = $lineItem1->findParentRow('Orders');
+
+?>]]>
+            </programlisting>
+        </example>
+
+        <para>
+            You also can run the same query using a magic method.
+            Zend_Db_Table_Row_Abstract invokes the method:
+            <code>findParentRow('&lt;TableClass&gt;', '&lt;Rule&gt;')</code>
+            if you call a method on the Row object matching either
+            of the following patterns:
+        </para>
+
+        <programlisting role="php"><![CDATA[
+$row->findParent<TableClass>()
+$row->findParent<TableClass>By<Rule>()
+]]>
+        </programlisting>
+
+        <para>
+            The class names and rule names must match the spelling exactly.
+            No inflection is used.
+        </para>
+
+        <example id="zend.db.table.relationships.fetching-parent.example-magic">
+            <title>Fetching the Parent Row with the Magic Method</title>
+            <programlisting role="php"><![CDATA[<?php
+
+$lineItemsTable  = new LineItems();
+$lineItemsRowset = $lineItemsTable->fetchAll( <query-condition> );
+$lineItem1       = $lineItemsRowset->current();
+
+$parentOrderRow  = $lineItem1->findParentOrders();
+
+?>]]>
+            </programlisting>
+        </example>
+
+    </sect2>
+
+    <sect2 id="zend.db.table.relationships.fetching-many-to-many">
+
+        <title>Fetching a Rowset via a Many-to-many Relationship</title>
+
+        <para>
+            If you have a Row object as the result of a query on one table
+            in a many-to-many relationship, you can fetch
+            corresponding rows in the related table via an intersection table.
+            Use the method:
+        </para>
+
+        <programlisting role="php"><![CDATA[
+$row->findManyToManyRowset($table, $intersectionTable, [$rule1, [$rule2]])
+]]>
+        </programlisting>
+
+        <para>
+            This method returns a Zend_Db_Table_Rowset_Abstract
+            containing rows from the table <code>$table</code>,
+            satisfying the many-to-many relationship.
+            The current Row object is used to find rows in the intersection
+            table, and that is joined to the destination table.
+        </para>
+
+        <para>
+            The argument <code>$table</code> is either an object extending
+            Zend_Db_Table_Abstract, or the name of a class that extends
+            Zend_Db_Table_Abstract.  This argument is the matching table
+            in the many-to-many relationship.
+        </para>
+
+        <para>
+            The argument <code>$intersectionTable</code> is either an object
+            extending Zend_Db_Table_Abstract, or the name of a class that
+            extends Zend_Db_Table_Abstract.  This argument is the intersection
+            table between the two tables in the many-to-many relationship.
+        </para>
+
+        <para>
+            The arguments <code>$rule1</code> and <code>$rule2</code> are
+            optional.  They name keys in the <code>$_referenceMap</code>
+            array of the intersection table class.
+            By default, the first entries in that array matching the
+            caller table and the matching table are used.
+            <code>$rule1</code> is for the entry referencing the caller table,
+            and <code>$rule2</code> is for the entry referencing the matching
+            table.
+            But if the intersection table has multiple references to either
+            table, and you need to use a reference other than the first,
+            you need to specify the keys.
+        </para>
+
+        <example id="zend.db.table.relationships.fetching-many-to-many.example">
+            <title>Fetching a Rowset with the Many-to-many Method</title>
+            <para>
+                In this example, you have a Row object from the table
+                <code>Products</code>, and you want the list of
+                <code>Orders</code> that included that product.
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+
+$productsTable  = new Products();
+$productsRowset = $productsTable->find(9876);
+$product9876    = $productsRowset->current();
+
+$ordersRowset   = $product9876->findManyToManyRowset('Orders', 'LineItems');
+
+?>]]>
+            </programlisting>
+        </example>
+
+        <para>
+            You also can run the same query using a magic method.
+            Zend_Db_Table_Row_Abstract invokes the method:
+            <code>findManyToManyRowset('&lt;TableClass&gt;', '&lt;IntersectionTableClass&gt;', '&lt;Rule1&gt;', '&lt;Rule2&gt;')</code>
+            if you invoke a method on the Row object matching any
+            of the following patterns:
+        </para>
+
+        <programlisting role="php"><![CDATA[
+$row->find<TableClass>Via<IntersectionTableClass>()
+$row->find<TableClass>Via<IntersectionTableClass>By<Rule1>()
+$row->find<TableClass>Via<IntersectionTableClass>By<Rule1>And<Rule2>()
+]]>
+        </programlisting>
+
+        <para>
+            The class names and rule names must match the spelling exactly.
+            No inflection is used.
+        </para>
+
+        <example id="zend.db.table.relationships.fetching-many-to-many.example-magic">
+            <title>Fetching a Rowset with the Magic Many-to-many Method</title>
+            <programlisting role="php"><![CDATA[<?php
+
+$productsTable  = new Products();
+$productsRowset = $productsTable->find(9876);
+$product9876    = $productsRowset->current();
+
+$ordersRowset   = $product9876->findOrdersViaLineItems();
+
+?>]]>
+            </programlisting>
+        </example>
+
+    </sect2>
+
+    <sect2 id="zend.db.table.relationships.cascading">
+
+        <title>Cascading Write Operations</title>
+
+        <para>
+            You can declare cascading operations to execute against
+            a dependent table when you apply an <code>UPDATE</code>
+            or a <code>DELETE</code> to a row in a parent table.
+        </para>
+
+        <para>
+            For example, if you delete a row in the <code>Orders</code> table,
+            you may want rows in the <code>LineItems</code> table to be
+            deleted automatically, if they reference the deleted row in
+            <code>Orders</code>.
+        </para>
+
+        <example id="zend.db.table.relationships.cascading.delete.example">
+            <title>Example of a Cascading Delete</title>
+            <programlisting role="php"><![CDATA[<?php
+
+$ordersTable  = new Orders();
+$ordersRowset = $ordersTable->find(1234);
+$order1234    = $ordersRowset->current();
+
+$orders1234->delete();
+// Automatically cascades to LineItems table
+// and deletes dependent rows.
+
+?>]]>
+            </programlisting>
+        </example>
+
+        <para>
+            Similarly, if you use <code>UPDATE</code> to change the value of a
+            primary key in a parent
+            table, you may want the value in foreign keys of dependent tables
+            to be updated automatically to match the new value, so that
+            such references are kept up to date.
+        </para>
+
+        <para>
+            It's usually not necessary to update the value of a primary key
+            that was generated by a sequence or other mechanism.
+            But if you use a <emphasis>natural key</emphasis> that may change
+            value occasionally, it is more likely that you need to apply
+            cascading updates to dependent tables.
+        </para>
+
+        <para>
+            A better solution is to declare cascading updates and deletes
+            using declarative referential integrity (DRI) syntax in your 
+            database schema.  If your RDBMS technology supports this
+            feature, use it instead of this feature in Zend_Db_Table.
+            The SQL syntax for this is in a <code>REFERENCES</code> clause,
+            appearing as <code>ON UPDATE CASCADE</code> and
+            <code>ON DELETE CASCADE</code>.
+        </para>
+
+        <para>
+            If your RDBMS does not enforce referential integrity constraints,
+            for example, if you use MySQL's MyISAM storage engine, or SQLite,
+            you may find it helpful to declare the cascading operations with
+            Zend_Db_Table.
+        </para>
+
+        <para>
+            To declare a cascading relationship in the Zend_Db_Table,
+            edit the rules in the <code>$_referenceMap</code>.
+            Set the associative array keys <code>'onDelete'</code> and
+            <code>'onUpdate'</code> to the string 'cascade'
+            (or the constant <code>self::CASCADE</code>).
+            Before a row is deleted from the parent table,
+            or its primary key values updated,
+            any rows in the dependent table that refer to the
+            parent's row are deleted or updated first.
+        </para>
+
+        <example id="zend.db.table.relationships.cascading.delete.example">
+            <title>Example Declaration of Cascading Operations</title>
+            <para>
+                In the example below, rows in the <code>LineItems</code> table
+                are automatically deleted if the row in the <code>Orders</code>
+                table to which they refer is deleted.
+                The <code>'onDelete'</code> element of the reference map entry
+                is set to <code>self::CASCADE</code>.
+            </para>
+            <para>
+                No cascading update is done in the example below if the primary
+                key value in the parent class is changed.
+                The <code>'onUpdate'</code> element of the reference map entry
+                is <code>self::RESTRICT</code>.
+                You can get the same result using the value
+                <code>self::NO_ACTION</code>, or by omitting the
+                <code>'onUpdate'</code> entry.
+            </para>
+            <programlisting role="php"><![CDATA[<?php
+
+class LineItems extends Zend_Db_Table_Abstract
+{
+    ...
+    protected $_referenceMap    = array(
+        'Order' => array(
+            'columns'           => array('order_id'),
+            'refTable'          => 'Orders',
+            'refColumns'        => array('order_id'),
+            'onDelete'          => self::CASCADE,
+            'onUpdate'          => self::RESTRICT
+        ),
+        ...
+    );
+}
+
+?>
+]]>
+            </programlisting>
+        </example>
+
+        <sect3 id="zend.db.table.relationships.cascading.notes">
+
+            <title>Notes Regarding Cascading Operations</title>
+
+            <para>
+                <emphasis role="strong">Cascading updates run by Zend_Db_Table are not atomic.</emphasis>
+            </para>
+
+            <para>
+                Cascading updates run by Zend_Db_Table are not atomic
+                operations.
+                This means that if your database implements and enforces
+                referential integrity constraints, a cascading
+                <code>UPDATE</code> executed by a Zend_Db_Table class will
+                conflict with the constraint, and result in a referential
+                integrity violation.
+                You can use cascading <code>UPDATE</code> in Zend_Db_Table
+                <emphasis>only</emphasis> if your database does not enforce
+                the referential integrity constraint for the same inter-table
+                relationship.
+            </para>
+
+            <para>
+                Cascading <code>DELETE</code> suffers less from this problem.
+                You can delete dependent rows safely as a non-atomic action
+                before deleting the parent row that they reference.
+            </para>
+
+            <para>
+                <emphasis role="strong">Cascading operations defined in
+                Zend_Db_Table are run only after operations on
+                Zend_Db_Table.</emphasis>
+            </para>
+
+            <para>
+                Cascading deletes and updates defined in your Zend_Db_Table
+                classes are run only if you execute the <code>save()</code> or
+                <code>delete()</code> methods on the table classes.
+                If you use the <code>update()</code> or <code>delete()</code>
+                methods of the Zend_Db_Adapter class directly, the 
+                cascading operations are not executed.
+                Likewise if you run ad hoc changes against the database
+                in a query tool, cascading operations defined in your
+                Zend_Db_Table classes are not executed.
+            </para>
+
+            <para>
+                It is recommended to declare the cascading referential integrity
+                constraint in your database, using the <code>ON UPDATE
+                CASCADE</code> and <code>ON DELETE CASCADE</code> clauses.
+                Then the cascading behavior will execute no matter what
+                interface you use.
+                If you need the database to perform cascading operations
+                after making updates or deletes in any client interface,
+                you should declare the constraints in your database schema,
+                and not in the Zend_Db_Table class.
+            </para>
+
+            <para>
+                <emphasis role="strong">There is no support for a cascading
+                <code>INSERT</code> operation.</emphasis>
+                You must insert a row to a parent table in one operation,
+                and insert row(s) to a dependent table in a separate operation.
+            </para>
+
+        </sect3>
+
+    </sect2>
+
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
