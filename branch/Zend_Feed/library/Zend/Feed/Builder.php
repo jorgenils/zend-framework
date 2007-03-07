@@ -201,5 +201,44 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
                 throw new Zend_Feed_Exception("you have to set an integer value to the ttl property");
             }
         }
+
+        /* itunes extension */
+        if (isset($this->_data['itunes'])) {
+            /* category validation */
+            if (empty($this->_data['itunes']['category'])) {
+                throw new Zend_Feed_Exception("you have to set at least one itunes category");
+            }
+            if (count($this->_data['itunes']['category']) > 3) {
+                throw new Zend_Feed_Exception("you have to set at most three itunes categories");
+            }
+            foreach ($this->_data['itunes']['category'] as $i => $category) {
+                if (empty($category['main'])) {
+                    throw new Zend_Feed_Exception("you have to set the main category (category #$i)");
+                }
+            }
+
+            /* owner validation */
+            if (!empty($this->_data['itunes']['owner']) && !empty($this->_data['itunes']['owner']['email'])) {
+                Zend::loadClass('Zend_Validate_EmailAddress');
+                $validate = new Zend_Validate_EmailAddress();
+                if (!$validate->isValid($this->_data['itunes']['owner']['email'])) {
+                    throw new Zend_Feed_Exception("you have to set a valid email address into the itunes owner's email property");
+                }
+            }
+
+            /* block validation */
+            if (!empty($this->_data['itunes']['block'])) {
+                if (!in_array(strtolower($this->_data['itunes']['block']), array('yes', 'no'))) {
+                    throw new Zend_Feed_Exception("you have to set yes or no to the itunes block property");
+                }
+            }
+
+            /* explicit validation */
+            if (!empty($this->_data['itunes']['explicit'])) {
+                if (!in_array(strtolower($this->_data['itunes']['explicit']), array('yes', 'no', 'clean'))) {
+                    throw new Zend_Feed_Exception("you have to set yes, no or clean to the itunes explicit property");
+                }
+            }
+        }
     }
 }
