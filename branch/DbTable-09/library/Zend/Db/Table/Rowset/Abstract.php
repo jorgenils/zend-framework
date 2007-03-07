@@ -109,8 +109,7 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
     /**
      * Rewind the Iterator to the first element.
      * Similar to the reset() function for arrays in PHP.
-     * 
-     * @internal Required by interface Iterator.
+     * Required by interface Iterator.
      *
      * @return void
      */
@@ -122,8 +121,7 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
     /**
      * Return the current element.
      * Similar to the current() function for arrays in PHP
-     *
-     * @internal Required by interface Iterator.
+     * Required by interface Iterator.
      *
      * @return mixed current element from the collection
      */
@@ -151,8 +149,7 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
     /**
      * Return the identifying key of the current element.
      * Similar to the key() function for arrays in PHP.
-     * 
-     * @internal Required by interface Iterator.
+     * Required by interface Iterator.
      *
      * @return int
      */
@@ -164,8 +161,7 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
     /**
      * Move forward to next element.
      * Similar to the next() function for arrays in PHP.
-     * 
-     * @internal Required by interface Iterator.
+     * Required by interface Iterator.
      *
      * @return int The next pointer value.
      */
@@ -177,8 +173,7 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
     /**
      * Check if there is a current element after calls to rewind() or next().
      * Used to check if we've iterated to the end of the collection.
-     * 
-     * @internal Required by interface Iterator.
+     * Required by interface Iterator.
      *
      * @return bool False if there's nothing more to iterate over
      */
@@ -199,8 +194,7 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
 
     /**
      * Returns true if $this->count > 0, false otherwise.
-     * 
-     * @internal Required by interface Countable.
+     * Required by interface Countable.
      *
      * @return bool
      */
