@@ -421,29 +421,33 @@ abstract class Zend_Db_Table_Abstract
     { 
         $rowsAffected = 0;
         foreach ($this->_referenceMap as $rule => $map) {
-            if ($map['refTable'] == $parentTableClassname) {
-                switch ($map['onUpdate']) {
-                    case self::CASCADE:
-                        for ($i = 0; $i < count($map['columns']); ++$i) {
-                            $where[] = $this->_db->quoteInto(
-                                $this->_db->quoteIdentifier($map['columns'][$i]) . ' = ?', 
-                                $oldPrimaryKey[$map['refColumns'][$i]]
-                            );
-                        }
-                        $rowsAffected += $this->update($newPrimaryKey, $where); 
-                        break;
-                    case self::NO_ACTION:
-                    case self::RESTRICT:
-                    case self::SET_NULL:
-                    case self::SET_DEFAULT:
-                    default:
-                        // @todo
-                        break;
-                }
+            if ($map['refTable'] != $parentTableClassname) {
+                continue;
+            }
+            if (!isset($map['onUpdate'])) {
+                continue;
+            }
+            switch ($map['onUpdate']) {
+                case self::CASCADE:
+                    for ($i = 0; $i < count($map['columns']); ++$i) {
+                        $where[] = $this->_db->quoteInto(
+                            $this->_db->quoteIdentifier($map['columns'][$i]) . ' = ?', 
+                            $oldPrimaryKey[$map['refColumns'][$i]]
+                        );
+                    }
+                    $rowsAffected += $this->update($newPrimaryKey, $where); 
+                    break;
+                case self::NO_ACTION:
+                case self::RESTRICT:
+                case self::SET_NULL:
+                case self::SET_DEFAULT:
+                default:
+                    // @todo
+                    break;
             }
         }
         return $rowsAffected;
-    } 
+    }
 
     /**
      * Deletes existing rows.
@@ -466,25 +470,29 @@ abstract class Zend_Db_Table_Abstract
     { 
         $rowsAffected = 0;
         foreach ($this->_referenceMap as $rule => $map) {
-            if ($map['reftable'] == $parentTableClassname) {
-                switch ($map['onDelete']) {
-                    case self::CASCADE:
-                        for ($i = 0; $i < count($map['columns']); ++$i) {
-                            $where[] = $this->_db->quoteInto(
-                                $this->_db->quoteIdentifier($map['columns'][$i]) . ' = ?', 
-                                $primaryKey[$map['refColumns'][$i]]
-                            );
-                        }
-                        $rowsAffected += $this->delete($where); 
-                        break;
-                    case self::NO_ACTION:
-                    case self::RESTRICT:
-                    case self::SET_NULL:
-                    case self::SET_DEFAULT:
-                    default:
-                        // @todo
-                        break;
-                }
+            if ($map['reftable'] != $parentTableClassname) {
+                continue;
+            }
+            if (!isset($map['onDelete'])) {
+                continue;
+            }
+            switch ($map['onDelete']) {
+                case self::CASCADE:
+                    for ($i = 0; $i < count($map['columns']); ++$i) {
+                        $where[] = $this->_db->quoteInto(
+                            $this->_db->quoteIdentifier($map['columns'][$i]) . ' = ?', 
+                            $primaryKey[$map['refColumns'][$i]]
+                        );
+                    }
+                    $rowsAffected += $this->delete($where); 
+                    break;
+                case self::NO_ACTION:
+                case self::RESTRICT:
+                case self::SET_NULL:
+                case self::SET_DEFAULT:
+                default:
+                    // @todo
+                    break;
             }
         }
         return $rowsAffected;
