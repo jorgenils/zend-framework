@@ -179,10 +179,15 @@ array(
         <title>Importing a custom data source with Zend_Feed::importBuilder</title>
         <para>
           You can create a Zeed_Feed instance from any data source implementing the Zend_Feed_Builder_Interface interface.
-          You just have to implement the method <code>Zend_Feed_Builder_Interface::getFeedData</code> to be able to use
-          your object with <code>Zend_Feed::importBuilder</code>.
+          You just have to implement the method <code>Zend_Feed_Builder_Interface::getHeader</code> and
+          <code>Zend_Feed_Builder_Interface::getEntries</code>to be able to use your object with
+          <code>Zend_Feed::importBuilder</code>.
           As a simple reference implementation, your can use <code>Zend_Feed_Builder</code>, which takes an array
-          in its constructor, performs some minor validation, and then can be used in the importBuilder() method.
+          in its constructor, performs some minor validation, and then can be used in the <code>importBuilder()</code>
+          method. 
+          <code>Zend_Feed_Builder_Interface::getHeader</code> and <code>Zend_Feed_Builder_Interface::getHeader</code>
+          must return an instance of Zend_Feed_Builder_Header or an array of Zend_Feed_Builder_Entry instances
+          respectively.
         </para>
         <note>
           <code>Zend_Feed_Builder</code> serves as a concrete implementation to demonstrate the usage.
