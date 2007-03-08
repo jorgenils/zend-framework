@@ -319,8 +319,9 @@ class Zend_Feed
     {
         $obj = 'Zend_Feed_' . ucfirst(strtolower($format));
         Zend::loadClass($obj);
+        Zend::loadClass('Zend_Feed_Builder');
 
-        return new $obj(null, null, $data);
+        return new $obj(null, null, new Zend_Feed_Builder($data));
     }
 
     /**
@@ -335,6 +336,6 @@ class Zend_Feed
         $obj = 'Zend_Feed_' . ucfirst(strtolower($format));
         Zend::loadClass($obj);
 
-        return new $obj(null, null, $builder->getFeedData());
+        return new $obj(null, null, $builder);
     }
 }

@@ -66,9 +66,9 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
      *
      * @param string $uri The full URI of the feed to load, or NULL if not retrieved via HTTP or as an array.
      * @param string $string The feed as a string, or NULL if retrieved via HTTP or as an array.
-     * @param array $array The feed as an array or NULL if retrieved as a string or via HTTP.
+     * @param Zend_Feed_Builder_Interface $builder The feed as a builder instance or NULL if retrieved as a string or via HTTP.
      */
-    public function __construct($uri = null, $string = null, $array = null)
+    public function __construct($uri = null, $string = null, $builder = null)
     {
         if ($uri !== null) {
             // Retrieve the feed via HTTP
@@ -86,10 +86,10 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
             $this->__wakeup();
         } else {
             // Generate the feed from the array
-            $this->_checkFeedData($array);
-            $this->_element = new DOMDocument('1.0', $array['charset']);
-            $root = $this->_mapFeedHeaders($array);
-            $this->_mapFeedEntries($root, $array);
+            $header = $builder->getHeader();
+            $this->_element = new DOMDocument('1.0', $header['charset']);
+            $root = $this->_mapFeedHeaders($header);
+            $this->_mapFeedEntries($root, $builder->getEntries());
             $this->_element = $root;
             $this->_buildEntryCache();
         }
@@ -217,22 +217,6 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
     public function valid()
     {
         return (0 <= $this->_entryIndex && $this->_entryIndex < $this->count());
-    }
-
-    /**
-     * Checks the format of the user's data and ensure we can generate a Zend_Feed_Abstract object
-     *
-     * @param array $array the data to check - see Zend_Feed_Interface for array structure
-     * @throws Zend_Feed_Exception
-     */
-    private function _checkFeedData($array)
-    {
-        $mandatory = array('title', 'link', 'lastUpdate', 'charset');
-        foreach ($mandatory as $key) {
-            if (empty($array[$key])) {
-                throw new Zend_Feed_Exception("The key $key can not be empty");
-            }
-        }
     }
 
     /**

@@ -185,10 +185,10 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
 
         if (isset($array['cloud'])) {
             $cloud = $this->_element->createElement('cloud');
-            $cloud->setAttribute('domain', $array['cloud']['domain']);
-            $cloud->setAttribute('port', isset($array['cloud']['port']) ? $array['cloud']['port'] : '80');
-            $cloud->setAttribute('path', $array['cloud']['path']);
-            $cloud->setAttribute('registerProcedure', $array['cloud']['registerProcedure']);
+            $cloud->setAttribute('domain', $array['cloud']['uri']->getHost());
+            $cloud->setAttribute('port', $array['cloud']['uri']->getPort());
+            $cloud->setAttribute('path', $array['cloud']['uri']->getPath());
+            $cloud->setAttribute('registerProcedure', $array['cloud']['procedure']);
             $cloud->setAttribute('protocol', $array['cloud']['protocol']);
             $channel->appendChild($cloud);
         }
@@ -236,7 +236,7 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
      * @param DOMElement $root
      * @param array $array
      */
-    private function _buildiTunes(DOMElement $root, array $array)
+    private function _buildiTunes(DOMElement $root, $array)
     {
         /* author node */
         $author = '';
@@ -364,13 +364,9 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
      */
     protected function _mapFeedEntries(DOMElement $root, $array)
     {
-        if (empty($array['entries'])) {
-            return ;
-        }
-
         Zend_Feed::registerNamespace('content', 'http://purl.org/rss/1.0/modules/content/');
         
-        foreach ($array['entries'] as $dataentry) {
+        foreach ($array as $dataentry) {
             $item = $this->_element->createElement('item');
             
             $title = $this->_element->createElement('title', $dataentry['title']);

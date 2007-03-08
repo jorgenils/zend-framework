@@ -258,10 +258,7 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
      */
     protected function _mapFeedEntries(DOMElement $root, $array)
     {
-        if (empty($array['entries'])) {
-            return ;
-        }
-        foreach ($array['entries'] as $dataentry) {
+        foreach ($array as $dataentry) {
             $entry = $this->_element->createElement('entry');
             
             $id = $this->_element->createElement('id', isset($dataentry['guid']) ? $dataentry['guid'] : $dataentry['link']);

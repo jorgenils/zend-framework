@@ -338,6 +338,10 @@ class Zend_Feed_ImportTest extends PHPUnit_Framework_TestCase
                                                 'enclosure' => array(array('url' => 'http://www.example.com/podcast.mp3',
                                                                            'type' => 'audio/mpeg',
                                                                            'length' => '12216320'
+                                                                           ),
+                                                                     array('url' => 'http://www.example.com/podcast2.mp3',
+                                                                           'type' => 'audio/mpeg',
+                                                                           'length' => '1221632'
                                                                            )
                                                                      )
                                                 ),

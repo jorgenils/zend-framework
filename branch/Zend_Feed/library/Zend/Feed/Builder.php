@@ -19,6 +19,8 @@
  */
 
 require_once 'Zend/Feed/Builder/Interface.php';
+require_once 'Zend/Feed/Builder/Header.php';
+require_once 'Zend/Feed/Builder/Entry.php';
 require_once 'Zend/Feed/Exception.php';
 
 /**
@@ -42,7 +44,119 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
     private $_data;
 
     /**
-     * Constructor
+     * Header of the feed
+     *
+     * @var $_header Zend_Feed_Builder_Header
+     */
+    private $_header;
+    
+    /**
+     * List of the entries of the feed
+     *
+     * @var $_entries array
+     */
+    private $_entries = array();
+
+    /**
+     * Constructor. The $data array must conform to the following format:
+     * <code>
+     *  array( 
+     *  'title'       => 'title of the feed', //required
+     *  'link'        => 'canonical url to the feed', //required
+     *  'lastUpdate'  => 'timestamp of the update date', // optional
+     *  'published'   => 'timestamp of the publication date', //optional
+     *  'charset'     => 'charset', // required
+     *  'description' => 'short description of the feed', //optional
+     *  'author'      => 'author/publisher of the feed', //optional
+     *  'email'       => 'email of the author', //optional
+     *  'webmaster'   => 'email address for person responsible for technical issues' // optional, ignored if atom is used
+     *  'copyright'   => 'copyright notice', //optional
+     *  'image'       => 'url to image', //optional
+     *  'generator'   => 'generator', // optional
+     *  'language'    => 'language the feed is written in', // optional
+     *  'ttl'         => 'how long in minutes a feed can be cached before refreshing', // optional, ignored if atom is used
+     *  'rating'      => 'The PICS rating for the channel.', // optional, ignored if atom is used
+     *  'cloud'       => array(
+     *                    'domain'            => 'domain of the cloud, e.g. rpc.sys.com' // required
+     *                    'port'              => 'port to connect to' // optional, default to 80
+     *                    'path'              => 'path of the cloud, e.g. /RPC2 //required
+     *                    'registerProcedure' => 'procedure to call, e.g. myCloud.rssPleaseNotify' // required
+     *                    'protocol'          => 'protocol to use, e.g. soap or xml-rpc' // required
+     *                    ), a cloud to be notified of updates // optional, ignored if atom is used
+     *  'textInput'   => array(
+     *                    'title'       => 'the label of the Submit button in the text input area' // required,
+     *                    'description' => 'explains the text input area' // required
+     *                    'name'        => 'the name of the text object in the text input area' // required
+     *                    'link'        => 'the URL of the CGI script that processes text input requests' // required
+     *                    ) // a text input box that can be displayed with the feed // optional, ignored if atom is used
+     *  'skipHours'   => array(
+     *                    'hour in 24 format', // e.g 13 (1pm)
+     *                    // up to 24 rows whose value is a number between 0 and 23
+     *                    ) // Hint telling aggregators which hours they can skip // optional, ignored if atom is used
+     *  'skipDays '   => array(
+     *                    'a day to skip', // e.g Monday
+     *                    // up to 7 rows whose value is a Monday, Tuesday, Wednesday, Thursday, Friday, Saturday or Sunday
+     *                    ) // Hint telling aggregators which days they can skip // optional, ignored if atom is used
+     *  'itunes'      => array(
+     *                    'author'       => 'Artist column' // optional, default to the main author value
+     *                    'owner'        => array(
+     *                                        'name' => 'name of the owner' // optional, default to main author value
+     *                                        'email' => 'email of the owner' // optional, default to main email value
+     *                                        ) // Owner of the podcast // optional
+     *                    'image'        => 'album/podcast art' // optional, default to the main image value
+     *                    'subtitle'     => 'short description' // optional, default to the main description value
+     *                    'summary'      => 'longer description' // optional, default to the main description value
+     *                    'block'        => 'Prevent an episode from appearing (yes|no)' // optional
+     *                    'category'     => array(
+     *                                      array('main' => 'main category', // required
+     *                                            'sub'  => 'sub category' // optional
+     *                                        ),
+     *                                        // up to 3 rows
+     *                                        ) // 'Category column and in iTunes Music Store Browse' // required
+     *                    'explicit'     => 'parental advisory graphic (yes|no|clean)' // optional
+     *                    'keywords'     => 'a comma separated list of 12 keywords maximum' // optional
+     *                    'new-feed-url' => 'used to inform iTunes of new feed URL location' // optional
+     *                    ) // Itunes extension data // optional, ignored if atom is used
+     *  'entries'     => array(
+     *                   array(
+     *                    'title'        => 'title of the feed entry', //required
+     *                    'link'         => 'url to a feed entry', //required
+     *                    'description'  => 'short version of a feed entry', // only text, no html, required
+     *                    'guid'         => 'id of the article, if not given link value will used', //optional
+     *                    'content'      => 'long version', // can contain html, optional
+     *                    'lastUpdate'   => 'timestamp of the publication date', // optional
+     *                    'comments'     => 'comments page of the feed entry', // optional
+     *                    'commentRss'   => 'the feed url of the associated comments', // optional
+     *                    'source'       => array(
+     *                                        'title' => 'title of the original source' // required,
+     *                                        'url' => 'url of the original source' // required
+     *                                           ) // original source of the feed entry // optional
+     *                    'category'     => array(
+     *                                      array(
+     *                                        'term' => 'first category label' // required,
+     *                                        'scheme' => 'url that identifies a categorization scheme' // optional 
+     *                                            ), 
+     *                                      array(
+     *                                         //data for the second category and so on
+     *                                           )
+     *                                        ) // list of the attached categories // optional
+     *                    'enclosure'    => array(
+     *                                      array(
+     *                                        'url' => 'url of the linked enclosure' // required
+     *                                        'type' => 'mime type of the enclosure' // optional
+     *                                        'length' => 'length of the linked content in octets' // optional
+     *                                           ),
+     *                                      array(
+     *                                         //data for the second enclosure and so on
+     *                                           )
+     *                                        ) // list of the enclosures of the feed entry // optional 
+     *                   ),
+     *                   array(
+     *                   //data for the second entry and so on
+     *                   )
+     *                 )
+     * );
+     * </code>
      *
      * @param $data array
      * @throws Zend_Feed_Exception
@@ -50,195 +164,197 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
     public function __construct(array $data)
     {
         $this->_data = $data;
-        $this->_validate();
+        $this->_createHeader($data);
+        if (isset($data['entries'])) {
+            $this->_createEntries($data['entries']);
+        }
     }
 
     /**
-     * Returns feed data
+     * Returns an instance of Zend_Feed_Builder_Header
+     * describing the header of the feed
      *
-     * @return array
+     * @return Zend_Feed_Builder_Header
      */
-    public function getFeedData()
+    public function getHeader()
     {
-        return $this->_data;
+        return $this->_header;
     }
 
     /**
-     * Validate the content of the data array
+     * Returns an array of Zend_Feed_Builder_Entry instances
+     * describing the entries of the feed
      *
-     * @throws Zend_Feed_Exception
+     * @return array of Zend_Feed_Builder_Entry
      */
-    private function _validate()
+    public function getEntries()
     {
-        /* general properties */
+        return $this->_entries;
+    }
+
+    /**
+     * Create the Zend_Feed_Builder_Header instance
+     *
+     * @param array $data
+     * @throws Zend_Feed_Builder_Exception
+     */
+    private function _createHeader(array $data)
+    {
         $mandatories = array('title', 'link', 'charset');
         foreach ($mandatories as $mandatory) {
-            if (empty($this->_data[$mandatory])) {
-                throw new Zend_Feed_Exception("you have to set \"$mandatory\" key to a non empty value");
+            if (!isset($data[$mandatory])) {
+                throw new Zend_Feed_Builder_Exception("$mandatory key is missing");
             }
         }
-
-        if (isset($this->_data['email'])) {
-            Zend::loadClass('Zend_Validate_EmailAddress');
-            $validate = new Zend_Validate_EmailAddress();
-            if (!$validate->isValid($this->_data['email'])) {
-                throw new Zend_Feed_Exception("you have to set a valid email address into the email property");
-            }
+        $this->_header = new Zend_Feed_Builder_Header($data['title'], $data['link'], $data['charset']);
+        if (isset($data['lastUpdate'])) {
+            $this->_header->setLastUpdate($data['lastUpdate']);
         }
-
-        /* validate rss specific properties */
-        $this->_validateRssProperties();
-
-        if (!isset($this->_data['entries'])) {
-            throw new Zend_Feed_Exception("you have to set entries key");
+        if (isset($data['published'])) {
+            $this->_header->setPublishedDate($data['published']);
         }
-
-        /* entry properties */
-        foreach ($this->_data['entries'] as $idx => $entry) {
-            $mandatories = array('title', 'link', 'description');
+        if (isset($data['description'])) {
+            $this->_header->setDescription($data['description']);
+        }
+        if (isset($data['author'])) {
+            $this->_header->setAuthor($data['author']);
+        }
+        if (isset($data['email'])) {
+            $this->_header->setEmail($data['email']);
+        }
+        if (isset($data['webmaster'])) {
+            $this->_header->setWebmaster($data['webmaster']);
+        }
+        if (isset($data['copyright'])) {
+            $this->_header->setCopyright($data['copyright']);
+        }
+        if (isset($data['image'])) {
+            $this->_header->setImage($data['image']);
+        }
+        if (isset($data['generator'])) {
+            $this->_header->setGenerator($data['generator']);
+        }
+        if (isset($data['language'])) {
+            $this->_header->setLanguage($data['language']);
+        }
+        if (isset($data['ttl'])) {
+            $this->_header->setTtl($data['ttl']);
+        }
+        if (isset($data['rating'])) {
+            $this->_header->setRating($data['rating']);
+        }
+        if (isset($data['cloud'])) {
+            $mandatories = array('domain', 'path', 'registerProcedure', 'protocol');
             foreach ($mandatories as $mandatory) {
-                if (empty($entry[$mandatory])) {
-                    throw new Zend_Feed_Exception("you have to set \"$mandatory\" key (entry $idx) to a non empty value");
+                if (!isset($data['cloud'][$mandatory])) {
+                    throw new Zend_Feed_Builder_Exception("you have to define $mandatory property of your cloud");
                 }
+            }
+            $uri_str = 'http://' . $data['cloud']['domain'] . $data['cloud']['path'];
+            $this->_header->setCloud($uri_str, $data['cloud']['registerProcedure'], $data['cloud']['protocol']);
+        }
+        if (isset($data['textInput'])) {
+            $mandatories = array('title', 'description', 'name', 'link');
+            foreach ($mandatories as $mandatory) {
+                if (!isset($data['textInput'][$mandatory])) {
+                    throw new Zend_Feed_Builder_Exception("you have to define $mandatory property of your textInput");
+                }
+            }
+            $this->_header->setTextInput($data['textInput']['title'],
+                                         $data['textInput']['description'],
+                                         $data['textInput']['name'],
+                                         $data['textInput']['link']);
+        }
+        if (isset($data['skipHours'])) {
+            $this->_header->setSkipHours($data['skipHours']);
+        }
+        if (isset($data['skipDays'])) {
+            $this->_header->setSkipDays($data['skipDays']);
+        }
+        if (isset($data['itunes'])) {
+            $itunes = new Zend_Feed_Builder_Header_Itunes($data['itunes']['category']);
+            if (isset($data['itunes']['author'])) {
+                $itunes->setAuthor($data['itunes']['author']);
+            }
+            if (isset($data['itunes']['owner'])) {
+                $name = isset($data['itunes']['owner']['name']) ? $data['itunes']['owner']['name'] : '';
+                $email = isset($data['itunes']['owner']['email']) ? $data['itunes']['owner']['email'] : '';
+                $itunes->setOwner($name, $email);
+            }
+            if (isset($data['itunes']['image'])) {
+                $itunes->setImage($data['itunes']['image']);
+            }
+            if (isset($data['itunes']['subtitle'])) {
+                $itunes->setSubtitle($data['itunes']['subtitle']);
+            }
+            if (isset($data['itunes']['summary'])) {
+                $itunes->setSummary($data['itunes']['summary']);
+            }
+            if (isset($data['itunes']['block'])) {
+                $itunes->setBlock($data['itunes']['block']);
+            }
+            if (isset($data['itunes']['explicit'])) {
+                $itunes->setExplicit($data['itunes']['explicit']);
+            }
+            if (isset($data['itunes']['keywords'])) {
+                $itunes->setKeywords($data['itunes']['keywords']);
+            }
+            if (isset($data['itunes']['new-feed-url'])) {
+                $itunes->setNewFeedUrl($data['itunes']['new-feed-url']);
             }
 
-            if (isset($entry['category'])) {
-                /* validate category entries */
-                foreach ($entry['category'] as $i => $category) {
-                    if (empty($category['term'])) {
-                        throw new Zend_Feed_Exception("you have to set \"term\" key (entry $idx, category $i) to a non empty value");
-                    }
-                }
-            }
-
-            if (isset($entry['source'])) {
-                /* validate source property */
-                $mandatories = array('title', 'url');
-                foreach ($mandatories as $mandatory) {
-                    if (empty($entry['source'][$mandatory])) {
-                        throw new Zend_Feed_Exception("you have to set \"$mandatory\" key of the source property (entry $idx) to a non empty value");
-                    }
-                }
-            }
-
-            if (isset($entry['enclosure'])) {
-                /* validate enclosure property */
-                foreach ($entry['enclosure'] as $i => $enclosure) {
-                    if (empty($enclosure['url'])) {
-                        throw new Zend_Feed_Exception("you have to set \"url\" key of the enclosure property (entry $idx, enclosure $i) to a non empty value");
-                    }
-                }
-            }
+            $this->_header->setITunes($itunes);
         }
     }
 
     /**
-     * Validate the rss specific properties of the channel node
+     * Create the array of article entries
      *
-     * @throws Zend_Feed_Exception
+     * @param array $data
+     * @throws Zend_Feed_Builder_Exception
      */
-    private function _validateRssProperties()
+    private function _createEntries(array $data)
     {
-        /* webmaster email */
-        if (isset($this->_data['webmaster'])) {
-            Zend::loadClass('Zend_Validate_EmailAddress');
-            $validate = new Zend_Validate_EmailAddress();
-            if (!$validate->isValid($this->_data['webmaster'])) {
-                throw new Zend_Feed_Exception("you have to set a valid email address into the webmaster property");
-            }
-        }
-
-        /* rss cloud node */
-        if (isset($this->_data['cloud'])) {
-            $mandatories = array('domain', 'path', 'registerProcedure', 'protocol');
+        foreach ($data as $row) {
+            $mandatories = array('title', 'link', 'description');
             foreach ($mandatories as $mandatory) {
-                if (empty($this->_data['cloud'][$mandatory])) {
-                    throw new Zend_Feed_Exception("you have to set \"$mandatory\" key of the cloud property");
+                if (!isset($row[$mandatory])) {
+                    throw new Zend_Feed_Builder_Exception("$mandatory key is missing");
                 }
             }
-        }
-
-        /* rss textInput */
-        if (isset($this->_data['textInput'])) {
-            $mandatories = array('title', 'description', 'name', 'link');
-            foreach ($mandatories as $mandatory) {
-                if (empty($this->_data['textInput'][$mandatory])) {
-                    throw new Zend_Feed_Exception("you have to set \"$mandatory\" key of the textInput property");
+            $entry = new Zend_Feed_Builder_Entry($row['title'], $row['link'], $row['description']);
+            if (isset($row['guid'])) {
+                $entry->setId($row['guid']);
+            }
+            if (isset($row['content'])) {
+                $entry->setContent($row['content']);
+            }
+            if (isset($row['lastUpdate'])) {
+                $entry->setLastUpdate($row['lastUpdate']);
+            }
+            if (isset($row['comments'])) {
+                $entry->setCommentsUrl($row['comments']);
+            }
+            if (isset($row['commentRss'])) {
+                $entry->setCommentsRssUrl($row['commentRss']);
+            }
+            if (isset($row['source'])) {
+                $mandatories = array('title', 'url');
+                foreach ($mandatories as $mandatory) {
+                    if (!isset($row['source'][$mandatory])) {
+                        throw new Zend_Feed_Builder_Exception("$mandatory key of source property is missing");
+                    }
                 }
+                $entry->setSource($row['source']['title'], $row['source']['url']);
             }
-        }
-
-        /* rss skipHours */
-        if (isset($this->_data['skipHours'])) {
-            if (count($this->_data['skipHours']) > 24) {
-                throw new Zend_Feed_Exception("you can not have more than 24 rows in the skipHours property");
+            if (isset($row['category'])) {
+                $entry->setCategories($row['category']);
             }
-            foreach ($this->_data['skipHours'] as $hour) {
-                if ($hour < 0 || $hour > 23) {
-                    throw new Zend_Feed_Exception("$hour has te be between 0 and 23");
-                }
-            }
-        }
-
-        /* rss skipDays */
-        if (isset($this->_data['skipDays'])) {
-            if (count($this->_data['skipDays']) > 7) {
-                throw new Zend_Feed_Exception("you can not have more than 7 rows in the skipDays property");
-            }
-            $days = array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
-            foreach ($this->_data['skipDays'] as $day) {
-                if (!in_array($day, $days)) {
-                    throw new Zend_Feed_Exception("$day is not a valid day");
-                }
-            }
-        }
-
-        /* rss ttl */
-        if (isset($this->_data['ttl'])) {
-            Zend::loadClass('Zend_Validate_Int');
-            $validate = new Zend_Validate_Int();
-            if (!$validate->isValid($this->_data['ttl'])) {
-                throw new Zend_Feed_Exception("you have to set an integer value to the ttl property");
-            }
-        }
-
-        /* itunes extension */
-        if (isset($this->_data['itunes'])) {
-            /* category validation */
-            if (empty($this->_data['itunes']['category'])) {
-                throw new Zend_Feed_Exception("you have to set at least one itunes category");
-            }
-            if (count($this->_data['itunes']['category']) > 3) {
-                throw new Zend_Feed_Exception("you have to set at most three itunes categories");
-            }
-            foreach ($this->_data['itunes']['category'] as $i => $category) {
-                if (empty($category['main'])) {
-                    throw new Zend_Feed_Exception("you have to set the main category (category #$i)");
-                }
+            if (isset($row['enclosure'])) {
+                $entry->setEnclosures($row['enclosure']);
             }
 
-            /* owner validation */
-            if (!empty($this->_data['itunes']['owner']) && !empty($this->_data['itunes']['owner']['email'])) {
-                Zend::loadClass('Zend_Validate_EmailAddress');
-                $validate = new Zend_Validate_EmailAddress();
-                if (!$validate->isValid($this->_data['itunes']['owner']['email'])) {
-                    throw new Zend_Feed_Exception("you have to set a valid email address into the itunes owner's email property");
-                }
-            }
-
-            /* block validation */
-            if (!empty($this->_data['itunes']['block'])) {
-                if (!in_array(strtolower($this->_data['itunes']['block']), array('yes', 'no'))) {
-                    throw new Zend_Feed_Exception("you have to set yes or no to the itunes block property");
-                }
-            }
-
-            /* explicit validation */
-            if (!empty($this->_data['itunes']['explicit'])) {
-                if (!in_array(strtolower($this->_data['itunes']['explicit']), array('yes', 'no', 'clean'))) {
-                    throw new Zend_Feed_Exception("you have to set yes, no or clean to the itunes explicit property");
-                }
-            }
+            $this->_entries[] = $entry;
         }
     }
 }
