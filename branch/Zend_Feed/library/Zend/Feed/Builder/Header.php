@@ -18,6 +18,8 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+require_once 'Zend/Loader.php';
+
 require_once 'Zend/Feed/Builder/Exception.php';
 require_once 'Zend/Feed/Builder/Header/Itunes.php';
 
@@ -109,7 +111,7 @@ class Zend_Feed_Builder_Header extends ArrayObject
      */
     public function setEmail($email)
     {
-        Zend::loadClass('Zend_Validate_EmailAddress');
+        Zend_Loader::loadClass('Zend_Validate_EmailAddress');
         $validate = new Zend_Validate_EmailAddress();
         if (!$validate->isValid($email)) {
             throw new Zend_Feed_Builder_Exception("you have to set a valid email address into the email property");
@@ -176,7 +178,7 @@ class Zend_Feed_Builder_Header extends ArrayObject
      */
     public function setWebmaster($webmaster)
     {
-        Zend::loadClass('Zend_Validate_EmailAddress');
+        Zend_Loader::loadClass('Zend_Validate_EmailAddress');
         $validate = new Zend_Validate_EmailAddress();
         if (!$validate->isValid($webmaster)) {
             throw new Zend_Feed_Builder_Exception("you have to set a valid email address into the webmaster property");
@@ -195,7 +197,7 @@ class Zend_Feed_Builder_Header extends ArrayObject
      */
     public function setTtl($ttl)
     {
-        Zend::loadClass('Zend_Validate_Int');
+        Zend_Loader::loadClass('Zend_Validate_Int');
         $validate = new Zend_Validate_Int();
         if (!$validate->isValid($ttl)) {
             throw new Zend_Feed_Builder_Exception("you have to set an integer value to the ttl property");

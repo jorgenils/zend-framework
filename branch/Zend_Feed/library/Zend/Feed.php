@@ -19,6 +19,8 @@
  */
 
 
+require_once 'Zend/Loader.php';
+
 /**
  * Zend_Feed_Exception
  */
@@ -318,8 +320,8 @@ class Zend_Feed
     public static function importArray(array $data, $format = 'atom')
     {
         $obj = 'Zend_Feed_' . ucfirst(strtolower($format));
-        Zend::loadClass($obj);
-        Zend::loadClass('Zend_Feed_Builder');
+        Zend_Loader::loadClass($obj);
+        Zend_Loader::loadClass('Zend_Feed_Builder');
 
         return new $obj(null, null, new Zend_Feed_Builder($data));
     }
@@ -334,7 +336,7 @@ class Zend_Feed
     public static function importBuilder(Zend_Feed_Builder_Interface $builder, $format = 'atom')
     {
         $obj = 'Zend_Feed_' . ucfirst(strtolower($format));
-        Zend::loadClass($obj);
+        Zend_Loader::loadClass($obj);
 
         return new $obj(null, null, $builder);
     }

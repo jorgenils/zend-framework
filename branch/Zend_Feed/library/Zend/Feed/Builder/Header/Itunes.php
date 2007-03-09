@@ -98,7 +98,7 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     public function setOwner($name = '', $email = '')
     {
         if (!empty($email)) {
-            Zend::loadClass('Zend_Validate_EmailAddress');
+            Zend_Loader::loadClass('Zend_Validate_EmailAddress');
             $validate = new Zend_Validate_EmailAddress();
             if (!$validate->isValid($email)) {
                 throw new Zend_Feed_Builder_Exception("you have to set a valid email address into the itunes owner's email property");
