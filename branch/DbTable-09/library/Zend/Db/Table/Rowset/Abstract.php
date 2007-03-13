@@ -48,6 +48,15 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
     protected $_table;
 
     /**
+     * Connected is true if we have a reference to a live
+     * Zend_Db_Table_Abstract object.
+     * This is false after the Rowset has been deserialized.
+     *
+     * @var boolean
+     */
+    protected $_connected = true;
+
+    /**
      * Zend_Db_Table class name.
      *
      * @var string
@@ -104,6 +113,45 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
     public function __sleep()
     {
         return array('_data', '_tableClass', '_rowClass', '_pointer', '_count', '_rows');
+    }
+
+    /**
+     * Setup to do on wakeup.
+     * A de-serialized Rowset should not be assumed to have access to a live
+     * database connection, so set _connected = false.
+     *
+     * @return void
+     */
+    public function __wakeup()
+    {
+        $this->_connected = false;
+    }
+
+    /**
+     * Set the table object, to re-establish a live connection
+     * to the database for a Rowset that has been de-serialized.
+     *
+     * @param Zend_Db_Table_Abstract $table
+     * @return boolean
+     * @throws Zend_Db_Table_Row_Exception
+     */
+    public function setTable(Zend_Db_Table_Abstract $table)
+    {
+        $this->_table = $table;
+        if ($this->_table->getAdapter() == null) {
+            $this->_connected = false;
+            return false;
+        }
+        $this->_connected = false;
+        // @todo This works only if we have iterated through
+        // the result set once to instantiate the rows.
+        foreach ($this->_rows as $row) {
+            $connected = $row->setTable($table);
+            if ($connected == true) {
+                $this->_connected = true;
+            }
+        }
+        return $this->_connected;
     }
 
     /**

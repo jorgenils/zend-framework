@@ -470,7 +470,7 @@ abstract class Zend_Db_Table_Abstract
     { 
         $rowsAffected = 0;
         foreach ($this->_referenceMap as $rule => $map) {
-            if ($map['reftable'] != $parentTableClassname) {
+            if ($map['refTable'] != $parentTableClassname) {
                 continue;
             }
             if (!isset($map['onDelete'])) {

@@ -30,7 +30,7 @@ abstract class Zend_Db_Table_Row_Abstract
 {
 
     /**
-     * The data for each column in the row (underscore_words => value).
+     * The data for each column in the row (column_name => value).
      *
      * @var array
      */
@@ -50,6 +50,15 @@ abstract class Zend_Db_Table_Row_Abstract
      * @var Zend_Db_Table
      */
     protected $_table = null;
+
+    /**
+     * Connected is true if we have a reference to a live
+     * Zend_Db_Table_Abstract object.
+     * This is false after the Rowset has been deserialized.
+     *
+     * @var boolean
+     */
+    protected $_connected = true;
 
     /**
      * Name of the class of the Zend_Db_Table object.
@@ -88,8 +97,10 @@ abstract class Zend_Db_Table_Row_Abstract
         }
 
         // Retrieve primary keys from table schema
-        $info = $this->_getTable()->info();
-        $this->_primary = (array) $info['primary'];
+        if ($table = $this->_getTable()) {
+            $info = $this->_getTable()->info();
+            $this->_primary = (array) $info['primary'];
+        }
     }
 
     /**
@@ -160,15 +171,60 @@ abstract class Zend_Db_Table_Row_Abstract
     }
 
     /**
+     * Setup to do on wakeup.
+     * A de-serialized Row should not be assumed to have access to a live
+     * database connection, so set _connected = false.
+     *
+     * @return void
+     */
+    public function __wakeup()
+    {
+        $this->_connected = false;
+    }
+
+    /**
+     * Set the table object, to re-establish a live connection
+     * to the database for a Row that has been de-serialized.
+     *
+     * @param Zend_Db_Table_Abstract $table
+     * @return boolean
+     * @throws Zend_Db_Table_Row_Exception
+     */
+    public function setTable(Zend_Db_Table_Abstract $table)
+    {
+        $this->_table = $table;
+        if ($this->_table == null) {
+            $this->_connected = false;
+            return false;
+        }
+        if ($this->_table->getAdapter() == null) {
+            return false;
+        }
+        $info = $this->_table->info();
+        if ($info['cols'] != array_keys($this->_data)) {
+            require_once 'Zend/Db/Table/Row/Exception.php';
+            throw new Zend_Db_Table_Row_Exception('The specified Table does not have the same columns as the Row');
+        }
+        if ($info['primary'] != array_keys($this->_primary)) {
+            require_once 'Zend/Db/Table/Row/Exception.php';
+            throw new Zend_Db_Table_Row_Exception('The specified Table does not have the same primary key as the Row');
+        }
+        $this->_connected = true;
+        return true;
+    }
+
+    /**
      * Saves the properties to the database.
      *
      * This performs an intelligent insert/update, and reloads the
      * properties with fresh data from the table on success.
      *
      * @return integer 0 on failure, 1 on success.
+     * @throws Zend_Db_Table_Row_Exception
      */
     public function save()
     {
+
         // convenience var for the primary key name
         $keys = $this->_getPrimaryKey();
         $values = array_filter($keys);
@@ -248,7 +304,7 @@ abstract class Zend_Db_Table_Row_Abstract
         $result = $this->_getTable()->delete($where);
 
         // reset all fields to null
-        $this->_data = array_combine(array_keys($this->_data), array());
+        $this->_data = array_combine(array_keys($this->_data), array_fill(0, count($this->_data), null));
 
         return $result;
     }
@@ -284,13 +340,9 @@ abstract class Zend_Db_Table_Row_Abstract
      */
     protected function _getTable()
     {
-        if ($this->_table == null) {
-            if (empty($this->_tableClass)) {
-                require_once 'Zend/Db/Table/Row/Exception.php';
-                throw new Zend_Db_Table_Row_Exception('No table class name specified');
-            }
-            // @todo: the Table constructor requires a db adapter in its config argument
-            $this->_table = new $this->_tableClass();
+        if (!$this->_connected) {
+            require_once 'Zend/Db/Table/Row/Exception.php';
+            throw new Zend_Db_Table_Row_Exception('Cannot save a Row unless it is connected');
         }
         return $this->_table;
     }
@@ -390,6 +442,7 @@ abstract class Zend_Db_Table_Row_Abstract
             if ($type == 'object') {
                 $type = get_class($dependentTable);
             }
+            require_once 'Zend/Db/Table/Row/Exception.php';
             throw new Zend_Db_Table_Row_Exception("Dependent table must be a Zend_Db_Table_Abstract, but it is $type");
         }
         $dependentTableClass = get_class($dependentTable);
@@ -420,6 +473,7 @@ abstract class Zend_Db_Table_Row_Abstract
             if ($type == 'object') {
                 $type = get_class($parentTable);
             }
+            require_once 'Zend/Db/Table/Row/Exception.php';
             throw new Zend_Db_Table_Row_Exception("Parent table must be a Zend_Db_Table_Abstract, but it is $type");
         }
         $parentTableClass = get_class($parentTable);
@@ -454,6 +508,7 @@ abstract class Zend_Db_Table_Row_Abstract
             if ($type == 'object') {
                 $type = get_class($intersectionTable);
             }
+            require_once 'Zend/Db/Table/Row/Exception.php';
             throw new Zend_Db_Table_Row_Exception("Intersection table must be a Zend_Db_Table_Abstract, but it is $type");
         }
         $intersectionTableClass = get_class($intersectionTable);
@@ -467,6 +522,7 @@ abstract class Zend_Db_Table_Row_Abstract
             if ($type == 'object') {
                 $type = get_class($matchTable);
             }
+            require_once 'Zend/Db/Table/Row/Exception.php';
             throw new Zend_Db_Table_Row_Exception("Match table is must be a Zend_Db_Table_Abstract, but it is $type");
         }
         $matchTableClass = get_class($matchTable);
