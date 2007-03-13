@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Zend Framework
  *
@@ -16,12 +17,33 @@
  * @package    Zend_Feed
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id$
  */
 
+
+/**
+ * @see Zend_Feed_Builder_Interface
+ */
 require_once 'Zend/Feed/Builder/Interface.php';
+
+
+/**
+ * @see Zend_Feed_Builder_Header
+ */
 require_once 'Zend/Feed/Builder/Header.php';
+
+
+/**
+ * @see Zend_Feed_Builder_Entry
+ */
 require_once 'Zend/Feed/Builder/Entry.php';
+
+
+/**
+ * @see Zend_Feed_Exception
+ */
 require_once 'Zend/Feed/Exception.php';
+
 
 /**
  * A simple implementation of Zend_Feed_Builder_Interface.
@@ -33,7 +55,6 @@ require_once 'Zend/Feed/Exception.php';
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-
 class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
 {
     /**
@@ -49,7 +70,7 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
      * @var $_header Zend_Feed_Builder_Header
      */
     private $_header;
-    
+
     /**
      * List of the entries of the feed
      *
@@ -60,7 +81,7 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
     /**
      * Constructor. The $data array must conform to the following format:
      * <code>
-     *  array( 
+     *  array(
      *  'title'       => 'title of the feed', //required
      *  'link'        => 'canonical url to the feed', //required
      *  'lastUpdate'  => 'timestamp of the update date', // optional
@@ -134,8 +155,8 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
      *                    'category'     => array(
      *                                      array(
      *                                        'term' => 'first category label' // required,
-     *                                        'scheme' => 'url that identifies a categorization scheme' // optional 
-     *                                            ), 
+     *                                        'scheme' => 'url that identifies a categorization scheme' // optional
+     *                                            ),
      *                                      array(
      *                                         //data for the second category and so on
      *                                           )
@@ -149,7 +170,7 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
      *                                      array(
      *                                         //data for the second enclosure and so on
      *                                           )
-     *                                        ) // list of the enclosures of the feed entry // optional 
+     *                                        ) // list of the enclosures of the feed entry // optional
      *                   ),
      *                   array(
      *                   //data for the second entry and so on
@@ -158,8 +179,8 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
      * );
      * </code>
      *
-     * @param $data array
-     * @throws Zend_Feed_Exception
+     * @param  array $data
+     * @return void
      */
     public function __construct(array $data)
     {

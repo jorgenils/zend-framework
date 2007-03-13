@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Zend Framework
  *
@@ -16,16 +17,17 @@
  * @package    Zend_Feed
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id$
  */
 
 
 /**
- * Zend_Feed_Abstract
+ * @see Zend_Feed_Abstract
  */
 require_once 'Zend/Feed/Abstract.php';
 
 /**
- * Zend_Feed_EntryRss
+ * @see Zend_Feed_EntryRss
  */
 require_once 'Zend/Feed/EntryRss.php';
 
@@ -113,24 +115,24 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
     /**
      * Generate the header of the feed when working in write mode
      *
-     * @param array $array the data to use - see Zend_Feed_Interface for array structure
+     * @param  array $array the data to use
      * @return DOMElement root node
      * @internal
      */
     protected function _mapFeedHeaders($array)
     {
         $channel = $this->_element->createElement('channel');
-      
+
         $title = $this->_element->createElement('title', $array['title']);
         $channel->appendChild($title);
-        
+
         $link = $this->_element->createElement('link', $array['link']);
         $channel->appendChild($link);
-        
+
         $description = isset($array['description']) ? $array['description'] : '';
         $description = $this->_element->createElement('description', $description);
         $channel->appendChild($description);
-        
+
         $pubdate = isset($array['lastUpdate']) ? $array['lastUpdate'] : time();
         $pubdate = $this->_element->createElement('pubDate', gmdate('r', $pubdate));
         $channel->appendChild($pubdate);
@@ -138,7 +140,7 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
         if (isset($array['published'])) {
             $lastBuildDate = $this->_element->createElement('lastBuildDate', gmdate('r', $array['published']));
         }
-        
+
         $editor = '';
         if (!empty($array['email'])) {
             $editor .= $array['email'];
@@ -153,12 +155,12 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
         if (isset($array['webmaster'])) {
             $channel->appendChild($this->_element->createElement('webMaster', $array['webmaster']));
         }
-        
+
         if (!empty($array['copyright'])) {
             $copyright = $this->_element->createElement('copyright', $array['copyright']);
             $channel->appendChild($copyright);
         }
-        
+
         if (!empty($array['image'])) {
             $image = $this->_element->createElement('image');
             $url = $this->_element->createElement('url', $array['image']);
@@ -167,10 +169,10 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
             $image->appendChild($imagetitle);
             $imagelink = $this->_element->createElement('link', $array['link']);
             $image->appendChild($imagelink);
-            
+
             $channel->appendChild($image);
         }
-        
+
         $generator = !empty($array['generator']) ? $array['generator'] : 'Zend_Feed';
         $generator = $this->_element->createElement('generator', $generator);
         $channel->appendChild($generator);
@@ -226,7 +228,7 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
         if (isset($array['itunes'])) {
             $this->_buildiTunes($channel, $array);
         }
-        
+
         return $channel;
     }
 
@@ -358,32 +360,32 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
      *    <content:encoded>long version, can contain html</content:encoded>
      * </item>
      *
-     * @param array $array the data to use - see Zend_Feed_Interface for array structure
+     * @param array $array the data to use
      * @param DOMElement $root the root node to use
      * @internal
      */
     protected function _mapFeedEntries(DOMElement $root, $array)
     {
         Zend_Feed::registerNamespace('content', 'http://purl.org/rss/1.0/modules/content/');
-        
+
         foreach ($array as $dataentry) {
             $item = $this->_element->createElement('item');
-            
+
             $title = $this->_element->createElement('title', $dataentry['title']);
             $item->appendChild($title);
-            
+
             $link = $this->_element->createElement('link', $dataentry['link']);
             $item->appendChild($link);
-            
+
             if (isset($dataentry['guid'])) {
                 $guid = $this->_element->createElement('guid', $dataentry['guid']);
                 $item->appendChild($guid);
             }
-            
+
             $description = $this->_element->createElement('description');
             $description->appendChild($this->_element->createCDATASection($dataentry['description']));
             $item->appendChild($description);
-            
+
             if (isset($dataentry['content'])) {
                 $content = $this->_element->createElement('content:encoded');
                 $content->appendChild($this->_element->createCDATASection($dataentry['content']));
@@ -442,7 +444,7 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
 
     /*
      * Override Zend_Feed_Element to include <rss> root node
-     * 
+     *
      * @return string
      */
     public function saveXML()
@@ -451,38 +453,38 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
         $doc = new DOMDocument($this->_element->ownerDocument->version,
                                $this->_element->ownerDocument->actualEncoding);
         $root = $doc->createElement('rss');
-        
+
         // Use rss version 2.0
         $root->setAttribute('version', '2.0');
-        
+
         // Content namespace
         $root->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:content', 'http://purl.org/rss/1.0/modules/content/');
         $root->appendChild($doc->importNode($this->_element, true));
-        
+
         // Append root node
         $doc->appendChild($root);
-        
+
         // Format output
         $doc->formatOutput = true;
 
         return $doc->saveXML();
     }
-    
+
     /**
      * Send feed to a http client with the correct header
      *
-     * @throws Zend_Feed_Exception if headers have already been sent 
+     * @throws Zend_Feed_Exception if headers have already been sent
      * @return void
      */
     public function send()
-    {        
+    {
         if (headers_sent()) {
             throw new Zend_Feed_Exception('Cannot send RSS because headers have already been sent.');
         }
-        
+
         header('Content-type: application/rss+xml; charset: ' . $this->_element->ownerDocument->actualEncoding);
-        
+
         echo $this->saveXML();
-    } 
+    }
 
 }

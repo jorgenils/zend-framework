@@ -1,25 +1,50 @@
 <?php
+
 /**
+ * Zend Framework
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://framework.zend.com/license/new-bsd
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   Zend
  * @package    Zend_Feed
  * @subpackage UnitTests
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id$
  */
 
 
 /**
- * Zend_Feed
+ * @see Zend_Feed
  */
 require_once 'Zend/Feed.php';
-require_once 'Zend/Feed/Builder.php';
+
 
 /**
- * Zend_Http_Client_Adapter_Test 
+ * @see Zend_Feed_Builder
+ */
+require_once 'Zend/Feed/Builder.php';
+
+
+/**
+ * @see Zend_Http_Client_Adapter_Test
  */
 require_once 'Zend/Http/Client/Adapter/Test.php';
 
+
 /**
- * Zend_Http_Client
+ * @see Zend_Http_Client
  */
 require_once 'Zend/Http/Client.php';
+
 
 /**
  * PHPUnit Test Case
@@ -28,16 +53,18 @@ require_once 'PHPUnit/Framework/TestCase.php';
 
 
 /**
+ * @category   Zend
  * @package    Zend_Feed
  * @subpackage UnitTests
- *
+ * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Feed_ImportTest extends PHPUnit_Framework_TestCase
 {
     protected $_client;
-    
+
     protected $_feedDir;
-    
+
     /**
      * HTTP client test adapter
      *
@@ -389,7 +416,7 @@ class Zend_Feed_ImportTest extends PHPUnit_Framework_TestCase
     {
     	$response = new Zend_Http_Response(200, array(), file_get_contents("$this->_feedDir/$filename"));
     	$this->_adapter->setResponse($response);
-    	
+
         try {
             $feed = Zend_Feed::import('http://localhost');
         } catch (Exception $e) {

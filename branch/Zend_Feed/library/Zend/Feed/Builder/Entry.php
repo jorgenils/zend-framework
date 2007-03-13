@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Zend Framework
  *
@@ -16,9 +17,15 @@
  * @package    Zend_Feed
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id$
  */
 
+
+/**
+ * @see Zend_Feed_Builder_Exception
+ */
 require_once 'Zend/Feed/Builder/Exception.php';
+
 
 /**
  * An entry of a custom build feed
@@ -36,9 +43,10 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Create a new builder entry
      *
-     * @param string $title
-     * @param string $link 
-     * @param string $description short version of the entry, no html
+     * @param  string $title
+     * @param  string $link
+     * @param  string $description short version of the entry, no html
+     * @return void
      */
     public function __construct($title, $link, $description)
     {
@@ -51,7 +59,7 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Sets the id/guid of the entry
      *
-     * @param string $id
+     * @param  string $id
      * @return Zend_Feed_Builder_Entry
      */
     public function setId($id)
@@ -63,7 +71,7 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Sets the full html content of the entry
      *
-     * @param string $content
+     * @param  string $content
      * @return Zend_Feed_Builder_Entry
      */
     public function setContent($content)
@@ -75,8 +83,8 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Timestamp of the update date
      *
-     * @param int $lastUpdate
-     * @return Zend_Feed_Builder_Header
+     * @param  int $lastUpdate
+     * @return Zend_Feed_Builder_Entry
      */
     public function setLastUpdate($lastUpdate)
     {
@@ -87,7 +95,7 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Sets the url of the commented page associated to the entry
      *
-     * @param string $comments
+     * @param  string $comments
      * @return Zend_Feed_Builder_Entry
      */
     public function setCommentsUrl($comments)
@@ -99,7 +107,7 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Sets the url of the comments feed link
      *
-     * @param string $commentRss
+     * @param  string $commentRss
      * @return Zend_Feed_Builder_Entry
      */
     public function setCommentsRssUrl($commentRss)
@@ -111,8 +119,8 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Defines a reference to the original source
      *
-     * @param string $title
-     * @param string $url
+     * @param  string $title
+     * @param  string $url
      * @return Zend_Feed_Builder_Entry
      */
     public function setSource($title, $url)
@@ -135,7 +143,7 @@ class Zend_Feed_Builder_Entry extends ArrayObject
      * )
      * </code>
      *
-     * @param array $categories
+     * @param  array $categories
      * @return Zend_Feed_Builder_Entry
      */
     public function setCategories(array $categories)
@@ -149,7 +157,7 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Add a category to the entry
      *
-     * @param array $category see Zend_Feed_Builder_Entry::setCategories for format
+     * @param  array $category see Zend_Feed_Builder_Entry::setCategories() for format
      * @return Zend_Feed_Builder_Entry
      * @throws Zend_Feed_Builder_Exception
      */
@@ -183,7 +191,7 @@ class Zend_Feed_Builder_Entry extends ArrayObject
      * )
      * </code>
      *
-     * @param array $enclosures
+     * @param  array $enclosures
      * @return Zend_Feed_Builder_Entry
      * @throws Zend_Feed_Builder_Exception
      */
@@ -200,12 +208,13 @@ class Zend_Feed_Builder_Entry extends ArrayObject
         return $this;
     }
 
-     /**
+    /**
      * Add an enclosure to the entry
      *
-     * @param array $enclosure see Zend_Feed_Builder_Entry::setEnclosures for format
+     * @param  string $url
+     * @param  string $type
+     * @param  string $length
      * @return Zend_Feed_Builder_Entry
-     * @throws Zend_Feed_Builder_Exception
      */
     public function addEnclosure($url, $type = '', $length = '')
     {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Zend Framework
  *
@@ -16,9 +17,15 @@
  * @package    Zend_Feed
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id$
  */
 
+
+/**
+ * @see Zend_Feed_Builder_Exception
+ */
 require_once 'Zend/Feed/Builder/Exception.php';
+
 
 /**
  * ITunes rss extension
@@ -35,7 +42,8 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     /**
      * Constructor
      *
-     * @param array $categories Categories columns and in iTunes Music Store Browse
+     * @param  array $categories Categories columns and in iTunes Music Store Browse
+     * @return void
      */
     public function __construct(array $categories)
     {
@@ -53,19 +61,18 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
      *      )
      * </code>
      *
-     * @param array $categories
+     * @param  array $categories
      * @return Zend_Feed_Builder_Header_Itunes
      * @throws Zend_Feed_Builder_Exception
      */
     public function setCategories(array $categories)
     {
         $nb = count($categories);
-        if (!$nb || $nb > 3) {
-            if ($nb) {
-                throw new Zend_Feed_Builder_Exception("you have to set at most three itunes categories");
-            } else {
-                throw new Zend_Feed_Builder_Exception("you have to set at least one itunes category");
-            }
+        if (0 === $nb) {
+            throw new Zend_Feed_Builder_Exception("you have to set at least one itunes category");
+        }
+        if ($nb > 3) {
+            throw new Zend_Feed_Builder_Exception("you have to set at most three itunes categories");
         }
         foreach ($categories as $i => $category) {
             if (empty($category['main'])) {
@@ -73,12 +80,13 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
             }
         }
         $this->offsetSet('category', $categories);
+        return $this;
     }
 
     /**
      * Sets the artist value, default to the feed's author value
      *
-     * @param string $author
+     * @param  string $author
      * @return Zend_Feed_Builder_Header_Itunes
      */
     public function setAuthor($author)
@@ -90,8 +98,8 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     /**
      * Sets the owner of the postcast
      *
-     * @param string $name default to the feed's author value
-     * @param string $email default to the feed's email value
+     * @param  string $name default to the feed's author value
+     * @param  string $email default to the feed's email value
      * @return Zend_Feed_Builder_Header_Itunes
      * @throws Zend_Feed_Builder_Exception
      */
@@ -112,7 +120,7 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
      * Sets the album/podcast art picture
      * Default to the feed's image value
      *
-     * @param string $image
+     * @param  string $image
      * @return Zend_Feed_Builder_Header_Itunes
      */
     public function setImage($image)
@@ -125,7 +133,7 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
      * Sets the short description of the podcast
      * Default to the feed's description
      *
-     * @param string $subtitle
+     * @param  string $subtitle
      * @return Zend_Feed_Builder_Header_Itunes
      */
     public function setSubtitle($subtitle)
@@ -138,7 +146,7 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
      * Sets the longer description of the podcast
      * Default to the feed's description
      *
-     * @param string $summary
+     * @param  string $summary
      * @return Zend_Feed_Builder_Header_Itunes
      */
     public function setSummary($summary)
@@ -150,7 +158,7 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     /**
      * Prevent a feed from appearing
      *
-     * @param string $block can be 'yes' or 'no'
+     * @param  string $block can be 'yes' or 'no'
      * @return Zend_Feed_Builder_Header_Itunes
      * @throws Zend_Feed_Builder_Exception
      */
@@ -167,7 +175,7 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     /**
      * Configuration of the parental advisory graphic
      *
-     * @param string $explicit can be 'yes', 'no' or 'clean'
+     * @param  string $explicit can be 'yes', 'no' or 'clean'
      * @return Zend_Feed_Builder_Header_Itunes
      * @throws Zend_Feed_Builder_Exception
      */
@@ -184,7 +192,7 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     /**
      * Sets a comma separated list of 12 keywords maximum
      *
-     * @param string $keywords
+     * @param  string $keywords
      * @return Zend_Feed_Builder_Header_Itunes
      */
     public function setKeywords($keywords)
@@ -196,7 +204,7 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     /**
      * Sets the new feed URL location
      *
-     * @param string $url
+     * @param  string $url
      * @return Zend_Feed_Builder_Header_Itunes
      */
     public function setNewFeedUrl($url)
