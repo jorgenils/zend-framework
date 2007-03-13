@@ -76,6 +76,54 @@ class Zend_Feed_Builder_Header extends ArrayObject
     }
 
     /**
+     * Read only properties accessor
+     *
+     * @param string $name property to read
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        if (!$this->offsetExists($name)) {
+            return NULL;
+        }
+
+        return $this->offsetGet($name);
+    }
+
+    /**
+     * Write properties accessor
+     *
+     * @param string $name name of the property to set
+     * @param mixed $value value to set
+     */
+    public function __set($name, $value)
+    {
+        $this->offsetSet($name, $value);
+    }
+
+    /**
+     * Isset accessor
+     *
+     * @param string $key
+     */
+    public function __isset($key)
+    {
+        return $this->offsetExists($key);
+    }
+
+    /**
+     * Unset accessor
+     *
+     * @param string $key
+     */
+    public function __unset($key)
+    {
+        if ($this->offsetExists($key)) {
+            $this->offsetUnset($key);
+        }
+    }
+
+    /**
      * Timestamp of the update date
      *
      * @param  int $lastUpdate

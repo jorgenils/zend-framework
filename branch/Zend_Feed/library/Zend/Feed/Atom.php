@@ -183,56 +183,56 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
         $feed = $this->_element->createElement('feed');
         $feed->setAttribute('xmlns', 'http://www.w3.org/2005/Atom');
 
-        $id = $this->_element->createElement('id', $array['link']);
+        $id = $this->_element->createElement('id', $array->link);
         $feed->appendChild($id);
 
-        $title = $this->_element->createElement('title', $array['title']);
+        $title = $this->_element->createElement('title', $array->title);
         $feed->appendChild($title);
 
-        if (isset($array['author'])) {
+        if (isset($array->author)) {
             $author = $this->_element->createElement('author');
-            $name = $this->_element->createElement('name', $array['author']);
+            $name = $this->_element->createElement('name', $array->author);
             $author->appendChild($name);
-            if (isset($array['email'])) {
-                $email = $this->_element->createElement('email', $array['email']);
+            if (isset($array->email)) {
+                $email = $this->_element->createElement('email', $array->email);
                 $author->appendChild($email);
             }
             $feed->appendChild($author);
         }
 
-        $updated = isset($array['lastUpdate']) ? $array['lastUpdate'] : time();
+        $updated = isset($array->lastUpdate) ? $array->lastUpdate : time();
         $updated = $this->_element->createElement('updated', date(DATE_ATOM, $updated));
         $feed->appendChild($updated);
 
-        if (isset($array['published'])) {
-            $published = $this->_element->createElement('published', date(DATE_ATOM, $array['published']));
+        if (isset($array->published)) {
+            $published = $this->_element->createElement('published', date(DATE_ATOM, $array->published));
             $feed->appendChild($published);
         }
 
         $link = $this->_element->createElement('link');
         $link->setAttribute('rel', 'self');
-        $link->setAttribute('href', $array['link']);
-        if (isset($array['language'])) {
-            $link->setAttribute('hreflang', $array['language']);
+        $link->setAttribute('href', $array->link);
+        if (isset($array->language)) {
+            $link->setAttribute('hreflang', $array->language);
         }
         $feed->appendChild($link);
 
-        if (isset($array['description'])) {
-            $subtitle = $this->_element->createElement('subtitle', $array['description']);
+        if (isset($array->description)) {
+            $subtitle = $this->_element->createElement('subtitle', $array->description);
             $feed->appendChild($subtitle);
         }
 
-        if (isset($array['copyright'])) {
-            $copyright = $this->_element->createElement('rights', $array['copyright']);
+        if (isset($array->copyright)) {
+            $copyright = $this->_element->createElement('rights', $array->copyright);
             $feed->appendChild($copyright);
         }
 
-        if (isset($array['image'])) {
-            $image = $this->_element->createElement('logo', $array['image']);
+        if (isset($array->image)) {
+            $image = $this->_element->createElement('logo', $array->image);
             $feed->appendChild($image);
         }
 
-        $generator = !empty($array['generator']) ? $array['generator'] : 'Zend_Feed';
+        $generator = !empty($array->generator) ? $array->generator : 'Zend_Feed';
         $generator = $this->_element->createElement('generator', $generator);
         $feed->appendChild($generator);
 
@@ -261,34 +261,34 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
         foreach ($array as $dataentry) {
             $entry = $this->_element->createElement('entry');
 
-            $id = $this->_element->createElement('id', isset($dataentry['guid']) ? $dataentry['guid'] : $dataentry['link']);
+            $id = $this->_element->createElement('id', isset($dataentry->guid) ? $dataentry->guid : $dataentry->link);
             $entry->appendChild($id);
 
-            $title = $this->_element->createElement('title', $dataentry['title']);
+            $title = $this->_element->createElement('title', $dataentry->title);
             $entry->appendChild($title);
 
-            $updated = isset($array['lastUpdate']) ? $array['lastUpdate'] : time();
+            $updated = isset($array->lastUpdate) ? $array->lastUpdate : time();
             $updated = $this->_element->createElement('updated', date(DATE_ATOM, $updated));
             $entry->appendChild($updated);
 
             $link = $this->_element->createElement('link');
             $link->setAttribute('rel', 'alternate');
-            $link->setAttribute('href', $dataentry['link']);
+            $link->setAttribute('href', $dataentry->link);
             $entry->appendChild($link);
 
             $summary = $this->_element->createElement('summary');
-            $summary->appendChild($this->_element->createCDATASection($dataentry['description']));
+            $summary->appendChild($this->_element->createCDATASection($dataentry->description));
             $entry->appendChild($summary);
 
-            if (isset($dataentry['content'])) {
+            if (isset($dataentry->content)) {
                 $content = $this->_element->createElement('content');
                 $content->setAttribute('type', 'html');
-                $content->appendChild($this->_element->createCDATASection($dataentry['content']));
+                $content->appendChild($this->_element->createCDATASection($dataentry->content));
                 $entry->appendChild($content);
             }
 
-            if (isset($dataentry['category'])) {
-                foreach ($dataentry['category'] as $category) {
+            if (isset($dataentry->category)) {
+                foreach ($dataentry->category as $category) {
                     $node = $this->_element->createElement('category');
                     $node->setAttribute('term', $category['term']);
                     if (isset($category['scheme'])) {
@@ -298,18 +298,18 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
                 }
             }
 
-            if (isset($dataentry['source'])) {
+            if (isset($dataentry->source)) {
                 $source = $this->_element->createElement('source');
-                $title = $this->_element->createElement('title', $dataentry['source']['title']);
+                $title = $this->_element->createElement('title', $dataentry->source['title']);
                 $source->appendChild($title);
-                $link = $this->_element->createElement('link', $dataentry['source']['title']);
+                $link = $this->_element->createElement('link', $dataentry->source['title']);
                 $link->setAttribute('rel', 'alternate');
-                $link->setAttribute('href', $dataentry['source']['url']);
+                $link->setAttribute('href', $dataentry->source['url']);
                 $source->appendChild($link);
             }
 
-            if (isset($dataentry['enclosure'])) {
-                foreach ($dataentry['enclosure'] as $enclosure) {
+            if (isset($dataentry->enclosure)) {
+                foreach ($dataentry->enclosure as $enclosure) {
                     $node = $this->_element->createElement('link');
                     $node->setAttribute('rel', 'enclosure');
                     $node->setAttribute('href', $enclosure['url']);
@@ -323,16 +323,16 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
                 }
             }
 
-            if (isset($dataentry['comments'])) {
+            if (isset($dataentry->comments)) {
                 $comments = $this->_element->createElementNS('http://wellformedweb.org/CommentAPI/',
                                                              'wfw:comment',
-                                                             $dataentry['comments']);
+                                                             $dataentry->comments);
                 $entry->appendChild($comments);
             }
-            if (isset($dataentry['commentRss'])) {
+            if (isset($dataentry->commentRss)) {
                 $comments = $this->_element->createElementNS('http://wellformedweb.org/CommentAPI/',
                                                              'wfw:commentRss',
-                                                             $dataentry['commentRss']);
+                                                             $dataentry->commentRss);
                 $entry->appendChild($comments);
             }
 
