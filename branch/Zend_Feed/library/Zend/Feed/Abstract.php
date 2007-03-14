@@ -136,7 +136,6 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
      * searched for on every operation.
      *
      * @return void
-     * @internal
      */
     protected function _buildEntryCache()
     {
@@ -164,7 +163,6 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
      * Required by the Iterator interface.
      *
      * @return void
-     * @internal
      */
     public function rewind()
     {
@@ -174,8 +172,6 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
 
     /**
      * Required by the Iterator interface.
-     *
-     * @internal
      *
      * @return mixed The current row, or null if no rows.
      */
@@ -190,8 +186,6 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
     /**
      * Required by the Iterator interface.
      *
-     * @internal
-     *
      * @return mixed The current row number (starts at 0), or NULL if no rows
      */
     public function key()
@@ -202,8 +196,6 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
 
     /**
      * Required by the Iterator interface.
-     *
-     * @internal
      *
      * @return mixed The next row, or null if no more rows.
      */
@@ -216,21 +208,18 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
     /**
      * Required by the Iterator interface.
      *
-     * @internal
-     *
      * @return boolean Whether the iteration is valid
      */
     public function valid()
     {
-        return (0 <= $this->_entryIndex && $this->_entryIndex < $this->count());
+        return 0 <= $this->_entryIndex && $this->_entryIndex < $this->count();
     }
 
     /**
      * Generate the header of the feed when working in write mode
      *
-     * @param  array $array the data to use - see Zend_Feed_Interface for array structure
+     * @param  array $array the data to use
      * @return DOMElement root node
-     * @internal
      */
     abstract protected function _mapFeedHeaders($array);
 
@@ -238,9 +227,8 @@ abstract class Zend_Feed_Abstract extends Zend_Feed_Element implements Iterator
      * Generate the entries of the feed when working in write mode
      *
      * @param  DOMElement $root the root node to use
-     * @param  array $array the data to use - see Zend_Feed_Interface for array structure
+     * @param  array $array the data to use
      * @return DOMElement root node
-     * @internal
      */
     abstract protected function _mapFeedEntries(DOMElement $root, $array);
 

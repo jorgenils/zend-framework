@@ -216,8 +216,9 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
     /**
      * Create the Zend_Feed_Builder_Header instance
      *
-     * @param array $data
+     * @param  array $data
      * @throws Zend_Feed_Builder_Exception
+     * @return void
      */
     private function _createHeader(array $data)
     {
@@ -331,8 +332,9 @@ class Zend_Feed_Builder implements Zend_Feed_Builder_Interface
     /**
      * Create the array of article entries
      *
-     * @param array $data
+     * @param  array $data
      * @throws Zend_Feed_Builder_Exception
+     * @return void
      */
     private function _createEntries(array $data)
     {

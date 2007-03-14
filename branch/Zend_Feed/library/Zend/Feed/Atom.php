@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Zend Framework
  *
@@ -16,16 +17,17 @@
  * @package    Zend_Feed
  * @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id$
  */
 
 
 /**
- * Zend_Feed_Abstract
+ * @see Zend_Feed_Abstract
  */
 require_once 'Zend/Feed/Abstract.php';
 
 /**
- * Zend_Feed_EntryAtom
+ * @see Zend_Feed_EntryAtom
  */
 require_once 'Zend/Feed/EntryAtom.php';
 
@@ -73,6 +75,8 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
 
     /**
      * Override Zend_Feed_Abstract to set up the $_element and $_entries aliases.
+     *
+     * @return void
      */
     public function __wakeup()
     {
@@ -115,7 +119,7 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
      * $elt->link(): returns the value of the link tag.
      * $elt->link('self'): returns the href from the first <link rel="self"> in the entry.
      *
-     * @param string $rel The "rel" attribute to look for.
+     * @param  string $rel The "rel" attribute to look for.
      * @return mixed
      */
     public function link($rel = null)
@@ -155,7 +159,7 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
      * using foreach ($feed->entries as $entry) or foreach
      * ($feed->entry as $entry).
      *
-     * @param string $var The property to access.
+     * @param  string $var The property to access.
      * @return mixed
      */
     public function __get($var)
@@ -174,9 +178,8 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
     /**
      * Generate the header of the feed when working in write mode
      *
-     * @param array $array the data to use
+     * @param  array $array the data to use
      * @return DOMElement root node
-     * @internal
      */
     protected function _mapFeedHeaders($array)
     {
@@ -252,9 +255,9 @@ class Zend_Feed_Atom extends Zend_Feed_Abstract
      *    <content>long version, can contain html</content>
      * </entry>
      *
-     * @param array $array the data to use
-     * @param DOMElement $root the root node to use
-     * @internal
+     * @param  array      $array the data to use
+     * @param  DOMElement $root  the root node to use
+     * @return void
      */
     protected function _mapFeedEntries(DOMElement $root, $array)
     {

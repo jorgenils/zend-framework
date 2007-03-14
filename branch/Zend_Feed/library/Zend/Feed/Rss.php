@@ -71,6 +71,9 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
 
     /**
      * Override Zend_Feed_Abstract to set up the $_element and $_entries aliases.
+     *
+     * @throws Zend_Feed_Exception
+     * @return void
      */
     public function __wakeup()
     {
@@ -96,7 +99,7 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
      * using foreach ($channel->items as $item) or foreach
      * ($channel->item as $item).
      *
-     * @param string $var The property to access.
+     * @param  string $var The property to access.
      * @return mixed
      */
     public function __get($var)
@@ -117,7 +120,6 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
      *
      * @param  array $array the data to use
      * @return DOMElement root node
-     * @internal
      */
     protected function _mapFeedHeaders($array)
     {
@@ -235,8 +237,9 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
     /**
      * Adds the iTunes extensions to a root node
      *
-     * @param DOMElement $root
-     * @param array $array
+     * @param  DOMElement $root
+     * @param  array $array
+     * @return void
      */
     private function _buildiTunes(DOMElement $root, $array)
     {
@@ -360,9 +363,9 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
      *    <content:encoded>long version, can contain html</content:encoded>
      * </item>
      *
-     * @param array $array the data to use
-     * @param DOMElement $root the root node to use
-     * @internal
+     * @param  DOMElement $root the root node to use
+     * @param  array $array the data to use
+     * @return void
      */
     protected function _mapFeedEntries(DOMElement $root, $array)
     {
@@ -442,7 +445,7 @@ class Zend_Feed_Rss extends Zend_Feed_Abstract
         }
     }
 
-    /*
+    /**
      * Override Zend_Feed_Element to include <rss> root node
      *
      * @return string

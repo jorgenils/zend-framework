@@ -98,7 +98,7 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     /**
      * Sets the owner of the postcast
      *
-     * @param  string $name default to the feed's author value
+     * @param  string $name  default to the feed's author value
      * @param  string $email default to the feed's email value
      * @return Zend_Feed_Builder_Header_Itunes
      * @throws Zend_Feed_Builder_Exception
@@ -216,7 +216,7 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     /**
      * Read only properties accessor
      *
-     * @param string $name property to read
+     * @param  string $name property to read
      * @return mixed
      */
     public function __get($name)
@@ -231,8 +231,9 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     /**
      * Write properties accessor
      *
-     * @param string $name name of the property to set
-     * @param mixed $value value to set
+     * @param  string $name  name of the property to set
+     * @param  mixed  $value value to set
+     * @return void
      */
     public function __set($name, $value)
     {
@@ -242,7 +243,8 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     /**
      * Isset accessor
      *
-     * @param string $key
+     * @param  string $key
+     * @return boolean
      */
     public function __isset($key)
     {
@@ -252,7 +254,8 @@ class Zend_Feed_Builder_Header_Itunes extends ArrayObject
     /**
      * Unset accessor
      *
-     * @param string $key
+     * @param  string $key
+     * @return void
      */
     public function __unset($key)
     {

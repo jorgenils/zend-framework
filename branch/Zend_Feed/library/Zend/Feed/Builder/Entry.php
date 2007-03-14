@@ -59,7 +59,7 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Read only properties accessor
      *
-     * @param string $name property to read
+     * @param  string $name property to read
      * @return mixed
      */
     public function __get($name)
@@ -74,8 +74,9 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Write properties accessor
      *
-     * @param string $name name of the property to set
-     * @param mixed $value value to set
+     * @param  string $name name of the property to set
+     * @param  mixed $value value to set
+     * @return void
      */
     public function __set($name, $value)
     {
@@ -85,7 +86,8 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Isset accessor
      *
-     * @param string $key
+     * @param  string $key
+     * @return boolean
      */
     public function __isset($key)
     {
@@ -95,7 +97,8 @@ class Zend_Feed_Builder_Entry extends ArrayObject
     /**
      * Unset accessor
      *
-     * @param string $key
+     * @param  string $key
+     * @return void
      */
     public function __unset($key)
     {

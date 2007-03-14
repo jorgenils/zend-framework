@@ -78,7 +78,7 @@ class Zend_Feed_Builder_Header extends ArrayObject
     /**
      * Read only properties accessor
      *
-     * @param string $name property to read
+     * @param  string $name property to read
      * @return mixed
      */
     public function __get($name)
@@ -93,8 +93,9 @@ class Zend_Feed_Builder_Header extends ArrayObject
     /**
      * Write properties accessor
      *
-     * @param string $name name of the property to set
-     * @param mixed $value value to set
+     * @param string $name  name of the property to set
+     * @param mixed  $value value to set
+     * @return void
      */
     public function __set($name, $value)
     {
@@ -104,7 +105,8 @@ class Zend_Feed_Builder_Header extends ArrayObject
     /**
      * Isset accessor
      *
-     * @param string $key
+     * @param  string $key
+     * @return boolean
      */
     public function __isset($key)
     {
@@ -114,7 +116,8 @@ class Zend_Feed_Builder_Header extends ArrayObject
     /**
      * Unset accessor
      *
-     * @param string $key
+     * @param  string $key
+     * @return void
      */
     public function __unset($key)
     {
@@ -293,8 +296,8 @@ class Zend_Feed_Builder_Header extends ArrayObject
      * Ignored if atom is used
      *
      * @param  string|Zend_Uri_Http $uri
-     * @param  string $procedure procedure to call, e.g. myCloud.rssPleaseNotify
-     * @param  string $protocol protocol to use, e.g. soap or xml-rpc
+     * @param  string               $procedure procedure to call, e.g. myCloud.rssPleaseNotify
+     * @param  string               $protocol  protocol to use, e.g. soap or xml-rpc
      * @return Zend_Feed_Builder_Header
      * @throws Zend_Feed_Builder_Exception
      */
@@ -319,10 +322,10 @@ class Zend_Feed_Builder_Header extends ArrayObject
      * A text input box that can be displayed with the feed
      * Ignored if atom is used
      *
-     * @param  string $title the label of the Submit button in the text input area
+     * @param  string $title       the label of the Submit button in the text input area
      * @param  string $description explains the text input area
-     * @param  string $name the name of the text object in the text input area
-     * @param  string $link the URL of the CGI script that processes text input requests
+     * @param  string $name        the name of the text object in the text input area
+     * @param  string $link        the URL of the CGI script that processes text input requests
      * @return Zend_Feed_Builder_Header
      */
     public function setTextInput($title, $description, $name, $link)
