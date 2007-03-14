@@ -96,10 +96,16 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
      */
     public function __construct(array $config)
     {
-        $this->_table      = $config['table'];
-        $this->_tableClass = get_class($this->_table);
-        $this->_rowClass   = $config['rowclass'];
-        $this->_data       = $config['data'];
+        if (isset($config['table'])) {
+            $this->_table      = $config['table'];
+            $this->_tableClass = get_class($this->_table);
+        }
+        if (isset($config['rowClass'])) {
+            $this->_rowClass   = $config['rowClass'];
+        }
+        if (isset($config['data'])) {
+            $this->_data       = $config['data'];
+        }
 
         // set the count of rows
         $this->_count = count($this->_data);

@@ -81,7 +81,7 @@ abstract class Zend_Db_Table_Row_Abstract
      * - table       = class name or object of type Zend_Db_Table_Abstract
      * - data        = values of columns in this row.
      *
-     * @param  array $config Array of user-specified config options.
+     * @param  array $config OPTIONAL Array of user-specified config options.
      * @throws Zend_Db_Table_Row_Exception
      */
     public function __construct(array $config = array())

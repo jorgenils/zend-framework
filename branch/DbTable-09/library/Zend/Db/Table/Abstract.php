@@ -161,6 +161,7 @@ abstract class Zend_Db_Table_Abstract
 
             // use an object from the registry?
             if (is_string($db)) {
+                // @todo: change to Zend_Registry::get()
                 $db = Zend::registry($db);
             }
 
@@ -374,8 +375,8 @@ abstract class Zend_Db_Table_Abstract
         // like _referenceMap, etc.
         return array(
             'name'    => $this->_name,
-            'cols'    => $this->_cols,
-            'primary' => $this->_primary,
+            'cols'    => (array) $this->_cols,
+            'primary' => (array) $this->_primary,
         );
     }
 
@@ -578,6 +579,7 @@ abstract class Zend_Db_Table_Abstract
             'rowclass' => $this->_rowClass
         );
 
+        // @todo: change to Zend_Loader::loadClass()
         Zend::loadClass($this->_rowsetClass);
         return new $this->_rowsetClass($data);
     }
@@ -612,6 +614,7 @@ abstract class Zend_Db_Table_Abstract
             'data'    => $row
         );
 
+        // @todo: change to Zend_Loader::loadClass()
         Zend::loadClass($this->_rowClass);
         return new $this->_rowClass($data);
     }
@@ -633,6 +636,7 @@ abstract class Zend_Db_Table_Abstract
             'data'    => $row
         );
 
+        // @todo: change to Zend_Loader::loadClass()
         Zend::loadClass($this->_rowClass);
         return new $this->_rowClass($config);
     }
@@ -641,10 +645,10 @@ abstract class Zend_Db_Table_Abstract
      * Support method for fetching rows.
      *
      * @param string       $type   Whether to fetch 'all' or 'row'.
-     * @param string|array $where  An SQL WHERE clause.
-     * @param string|array $order  An SQL ORDER clause.
-     * @param int          $count  An SQL LIMIT count.
-     * @param int          $offset An SQL LIMIT offset.
+     * @param string|array $where  OPTIONAL An SQL WHERE clause.
+     * @param string|array $order  OPTIONAL An SQL ORDER clause.
+     * @param int          $count  OPTIONAL An SQL LIMIT count.
+     * @param int          $offset OPTIONAL An SQL LIMIT offset.
      * @return mixed               The row results per the Zend_Db_Adapter fetch mode.
      */
     protected function _fetch($type, $where = null, $order = null,
