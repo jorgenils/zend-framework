@@ -135,22 +135,22 @@ class Bugs extends Zend_Db_Table_Abstract
     protected $_referenceMap    = array(
         'Reporter' => array(
             'columns'           => array('reported_by'),
-            'refTable'          => 'Accounts',
+            'refTableClass'     => 'Accounts',
             'refColumns'        => array('account_id')
         ),
         'Engineer' => array(
             'columns'           => array('assigned_to'),
-            'refTable'          => 'Accounts',
+            'refTableClass'     => 'Accounts',
             'refColumns'        => array('account_id')
         ),
         'Verifier' => array(
             'columns'           => array('verified_by'),
-            'refTable'          => 'Accounts',
+            'refTableClass'     => 'Accounts',
             'refColumns'        => array('account_id')
         ),
         'Product' => array(
             'columns'           => array('product_id'),
-            'refTable'          => 'Products',
+            'refTableClass'     => 'Products',
             'refColumns'        => array('product_id')
         )
     );
@@ -212,7 +212,7 @@ class Bugs extends Zend_Db_Table_Abstract
             </listitem>
             <listitem>
                 <para>
-                    <emphasis role="strong">refTable</emphasis> =>
+                    <emphasis role="strong">refTableClass</emphasis> =>
                     The class name of the parent table.
                     Use the class name, not the physical name of the SQL table.
                 </para>
@@ -241,6 +241,12 @@ class Bugs extends Zend_Db_Table_Abstract
                     multi-column key, the order of columns in the 
                     <code>'columns'</code> entry must match the order of
                     columns in the <code>'refColumns'</code> entry.
+                </para>
+                <para>
+                    It is optional to specify this element.
+                    If you don't specify the <code>refColumns</code>,
+                    the column(s) reported as the primary key columns
+                    of the parent table are used by default.
                 </para>
             </listitem>
             <listitem>
@@ -856,7 +862,7 @@ class Bugs extends Zend_Db_Table_Abstract
     protected $_referenceMap    = array(
         'Product' => array(
             'columns'           => array('product_id'),
-            'refTable'          => 'Products',
+            'refTableClass'     => 'Products',
             'refColumns'        => array('product_id'),
             'onDelete'          => self::CASCADE,
             'onUpdate'          => self::RESTRICT
