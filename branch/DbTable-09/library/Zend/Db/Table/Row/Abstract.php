@@ -20,6 +20,11 @@
  */
 
 /**
+ * Zend_Loader
+ */
+require_once 'Zend/Loader.php';
+
+/**
  * @category   Zend
  * @package    Zend_Db
  * @subpackage Table
@@ -283,8 +288,7 @@ abstract class Zend_Db_Table_Row_Abstract
                 $pkOld = $this->_getPrimaryKey(false);
                 $thisClass = get_class($this);
                 foreach ($depTables as $tableClass) {
-                    // @todo change to Zend_Loader::loadClass()
-                    Zend::loadClass($tableClass);
+                    Zend_Loader::loadClass($tableClass);
                     $t = new $tableClass(array('db' => $db));
                     $t->_cascadeUpdate($thisClass, $pkOld, $pkNew);
                 }
@@ -321,8 +325,7 @@ abstract class Zend_Db_Table_Row_Abstract
             $pk = $this->_getPrimaryKey();
             $thisClass = get_class($this);
             foreach ($depTables as $tableClass) {
-                // @todo change to Zend_Loader::loadClass()
-                Zend::loadClass($tableClass);
+                Zend_Loader::loadClass($tableClass);
                 $t = new $tableClass(array('db' => $db));
                 $t->_cascadeDelete($thisClass, $pk);
             }
@@ -493,8 +496,7 @@ abstract class Zend_Db_Table_Row_Abstract
         $db = $this->_getTable()->getAdapter();
 
         if (is_string($dependentTable)) {
-            // @todo change to Zend_Loader::loadClass()
-            Zend::loadClass($dependentTable);
+            Zend_Loader::loadClass($dependentTable);
             $dependentTable = new $dependentTable(array('db' => $db));
         }
         if (! $dependentTable instanceof Zend_Db_Table_Abstract) {
@@ -528,8 +530,7 @@ abstract class Zend_Db_Table_Row_Abstract
         $db = $this->_getTable()->getAdapter();
 
         if (is_string($parentTable)) {
-            // @todo change to Zend_Loader::loadClass()
-            Zend::loadClass($parentTable);
+            Zend_Loader::loadClass($parentTable);
             $parentTable = new $parentTable(array('db' => $db));
         }
         if (! $parentTable instanceof Zend_Db_Table_Abstract) {
@@ -565,8 +566,7 @@ abstract class Zend_Db_Table_Row_Abstract
         $db = $this->_getTable()->getAdapter();
 
         if (is_string($intersectionTable)) {
-            // @todo change to Zend_Loader::loadClass()
-            Zend::loadClass($intersectionTable);
+            Zend_Loader::loadClass($intersectionTable);
             $intersectionTable = new $intersectionTable(array('db' => $db));
         }
         if (! $intersectionTable instanceof Zend_Db_Table_Abstract) {
@@ -580,8 +580,7 @@ abstract class Zend_Db_Table_Row_Abstract
         $intersectionTableClass = get_class($intersectionTable);
 
         if (is_string($matchTable)) {
-            // @todo change to Zend_Loader::loadClass()
-            Zend::loadClass($matchTable);
+            Zend_Loader::loadClass($matchTable);
             $matchTable = new $matchTable(array('db' => $db));
         }
         if (! $matchTable instanceof Zend_Db_Table_Abstract) {

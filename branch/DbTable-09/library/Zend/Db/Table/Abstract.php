@@ -20,14 +20,9 @@
  */
 
 /**
- * Zend_Db_Table_Row
+ * Zend_Db_Adapter_Abstract
  */
-require_once 'Zend/Db/Table/Row.php';
-
-/**
- * Zend_Db_Table_Rowset
- */
-require_once 'Zend/Db/Table/Rowset.php';
+require_once 'Zend/Db/Adapter/Abstract.php';
 
 /**
  * Class for SQL table interface.
@@ -167,8 +162,7 @@ abstract class Zend_Db_Table_Abstract
 
             // use an object from the registry?
             if (is_string($db)) {
-                // @todo: change to Zend_Registry::get()
-                $db = Zend::registry($db);
+                $db = Zend_Registry::get($db);
             }
 
             // save the connection
@@ -306,7 +300,7 @@ abstract class Zend_Db_Table_Abstract
      */
     static public final function setDefaultAdapter(Zend_Db_Adapter_Abstract $db)
     {
-        Zend_Db_Table::$_defaultDb = $db;
+        Zend_Db_Table_Abstract::$_defaultDb = $db;
     }
 
     /**
@@ -520,8 +514,8 @@ abstract class Zend_Db_Table_Abstract
      * The find() method always returns a Rowset object,
      * even if only one row was found.
      *
-     * @param  mixed                The value(s) of the primary key.
-     * @return Zend_Db_Table_Rowset Row(s) matching the criteria.
+     * @param  mixed                         The value(s) of the primary key.
+     * @return Zend_Db_Table_Rowset_Abstract Row(s) matching the criteria.
      * @throws Zend_Db_Table_Exception
      */
     public function find()
@@ -572,11 +566,11 @@ abstract class Zend_Db_Table_Abstract
      *
      * Honors the Zend_Db_Adapter fetch mode.
      *
-     * @param string|array $where  OPTIONAL An SQL WHERE clause.
-     * @param string|array $order  OPTIONAL An SQL ORDER clause.
-     * @param int          $count  OPTIONAL An SQL LIMIT count.
-     * @param int          $offset OPTIONAL An SQL LIMIT offset.
-     * @return Zend_Db_Table_Rowset The row results per the Zend_Db_Adapter fetch mode.
+     * @param string|array $where            OPTIONAL An SQL WHERE clause.
+     * @param string|array $order            OPTIONAL An SQL ORDER clause.
+     * @param int          $count            OPTIONAL An SQL LIMIT count.
+     * @param int          $offset           OPTIONAL An SQL LIMIT offset.
+     * @return Zend_Db_Table_Rowset_Abstract The row results per the Zend_Db_Adapter fetch mode.
      */
     public function fetchAll($where = null, $order = null,
         $count = null, $offset = null)
@@ -587,8 +581,7 @@ abstract class Zend_Db_Table_Abstract
             'rowclass' => $this->_rowClass
         );
 
-        // @todo: change to Zend_Loader::loadClass()
-        Zend::loadClass($this->_rowsetClass);
+        Zend_Loader::loadClass($this->_rowsetClass);
         return new $this->_rowsetClass($data);
     }
 
@@ -597,9 +590,9 @@ abstract class Zend_Db_Table_Abstract
      *
      * Honors the Zend_Db_Adapter_Abstract fetch mode.
      *
-     * @param string|array $where OPTIONAL An SQL WHERE clause.
-     * @param string|array $order OPTIONAL An SQL ORDER clause.
-     * @return Zend_Db_Table_Row The row results per the Zend_Db_Adapter fetch mode.
+     * @param string|array $where         OPTIONAL An SQL WHERE clause.
+     * @param string|array $order         OPTIONAL An SQL ORDER clause.
+     * @return Zend_Db_Table_Row_Abstract The row results per the Zend_Db_Adapter fetch mode.
      */
     public function fetchRow($where = null, $order = null)
     {
@@ -622,8 +615,7 @@ abstract class Zend_Db_Table_Abstract
             'data'    => $row
         );
 
-        // @todo: change to Zend_Loader::loadClass()
-        Zend::loadClass($this->_rowClass);
+        Zend_Loader::loadClass($this->_rowClass);
         return new $this->_rowClass($data);
     }
 
@@ -631,7 +623,7 @@ abstract class Zend_Db_Table_Abstract
      * Fetches a new blank row (not from the database).
      *
      * @param  array|null $defaults User-supplied defaults for a new row
-     * @return Zend_Db_Table_Row
+     * @return Zend_Db_Table_Row_Abstract
      */
     public function fetchNew()
     {
@@ -644,8 +636,7 @@ abstract class Zend_Db_Table_Abstract
             'data'    => $row
         );
 
-        // @todo: change to Zend_Loader::loadClass()
-        Zend::loadClass($this->_rowClass);
+        Zend_Loader::loadClass($this->_rowClass);
         return new $this->_rowClass($config);
     }
 
