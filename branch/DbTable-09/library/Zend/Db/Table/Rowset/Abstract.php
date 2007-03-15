@@ -161,6 +161,17 @@ abstract class Zend_Db_Table_Rowset_Abstract implements Iterator, Countable
     }
 
     /**
+     * Query the class name of the Table object for which this
+     * Rowset was created.
+     *
+     * @return string
+     */
+    public function getTableClass()
+    {
+        return $this->_tableClass;
+    }
+
+    /**
      * Rewind the Iterator to the first element.
      * Similar to the reset() function for arrays in PHP.
      * Required by interface Iterator.

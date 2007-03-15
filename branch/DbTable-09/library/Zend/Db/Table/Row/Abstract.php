@@ -192,25 +192,50 @@ abstract class Zend_Db_Table_Row_Abstract
      */
     public function setTable(Zend_Db_Table_Abstract $table)
     {
-        $this->_table = $table;
-        if ($this->_table == null) {
+        if ($table == null) {
+            $this->_table = null;
             $this->_connected = false;
             return false;
         }
-        if ($this->_table->getAdapter() == null) {
+
+        if ($table->getAdapter() == null) {
             return false;
         }
+
+        $tableClass = get_class($table);
+        if (! $table instanceof $this->_tableClass) {
+            require_once 'Zend/Db/Table/Row/Exception.php';
+            throw new Zend_Db_Table_Row_Exception("The specified Table is of class $tableClass, expecting class to be instance of $this->_tableClass");
+        }
+
+        $this->_table = $table;
+        $this->_tableClass = $tableClass;
+
         $info = $this->_table->info();
+
         if ($info['cols'] != array_keys($this->_data)) {
             require_once 'Zend/Db/Table/Row/Exception.php';
             throw new Zend_Db_Table_Row_Exception('The specified Table does not have the same columns as the Row');
         }
+
         if ($info['primary'] != array_keys($this->_primary)) {
             require_once 'Zend/Db/Table/Row/Exception.php';
             throw new Zend_Db_Table_Row_Exception('The specified Table does not have the same primary key as the Row');
         }
+
         $this->_connected = true;
         return true;
+    }
+
+    /**
+     * Query the class name of the Table object for which this
+     * Row was created.
+     *
+     * @return string
+     */
+    public function getTableClass()
+    {
+        return $this->_tableClass;
     }
 
     /**
@@ -258,6 +283,7 @@ abstract class Zend_Db_Table_Row_Abstract
                 $pkOld = $this->_getPrimaryKey(false);
                 $thisClass = get_class($this);
                 foreach ($depTables as $tableClass) {
+                    // @todo change to Zend_Loader::loadClass()
                     Zend::loadClass($tableClass);
                     $t = new $tableClass(array('db' => $db));
                     $t->_cascadeUpdate($thisClass, $pkOld, $pkNew);
@@ -295,6 +321,7 @@ abstract class Zend_Db_Table_Row_Abstract
             $pk = $this->_getPrimaryKey();
             $thisClass = get_class($this);
             foreach ($depTables as $tableClass) {
+                // @todo change to Zend_Loader::loadClass()
                 Zend::loadClass($tableClass);
                 $t = new $tableClass(array('db' => $db));
                 $t->_cascadeDelete($thisClass, $pk);
@@ -425,15 +452,48 @@ abstract class Zend_Db_Table_Row_Abstract
     }
 
     /**
-     * @param string|Zend_Db_Table_Abstract $dependentTable
-     * @param string                        OPTIONAL $ruleKey
-     * @return Zend_Db_Table_Row            Query result from $dependentTable
+     * Prepares a table reference for lookup.
+     *
+     * Ensures all reference keys are set and properly formatted.
+     *
+     * @param Zend_Db_Table_Abstract $parentTable
+     * @param string                 $tableClass
+     * @param string                 $ruleKey
+     * @return array
+     */
+    protected function _prepareReference(Zend_Db_Table_Abstract $table, $tableClass, $ruleKey)
+    {
+        $map = $table->getReference($tableClass, $ruleKey);
+        
+        if (!is_array($map[Zend_Db_Table_Abstract::COLUMNS])) {
+            $map[Zend_Db_Table_Abstract::COLUMNS] = (array) $map[Zend_Db_Table_Abstract::COLUMNS];
+        }
+        
+        if (!isset($map[Zend_Db_Table_Abstract::REF_COLUMNS])) {
+            $info = $table->info();
+            $map[Zend_Db_Table_Abstract::REF_COLUMNS] = $info['primary'];
+        }
+
+        if (!is_array($map[Zend_Db_Table_Abstract::REF_COLUMNS])) {
+            $map[Zend_Db_Table_Abstract::REF_COLUMNS] = (array) $map[Zend_Db_Table_Abstract::REF_COLUMNS];
+        }
+        
+        return $map;
+    }
+
+    /**
+     * Query a dependent table to retrieve rows matching the current row.
+     *
+     * @param string|Zend_Db_Table_Abstract  $dependentTable
+     * @param string                         OPTIONAL $ruleKey
+     * @return Zend_Db_Table_Rowset_Abstract Query result from $dependentTable
      */ 
     public function findDependentRowset($dependentTable, $ruleKey = null) 
     { 
         $db = $this->_getTable()->getAdapter();
 
         if (is_string($dependentTable)) {
+            // @todo change to Zend_Loader::loadClass()
             Zend::loadClass($dependentTable);
             $dependentTable = new $dependentTable(array('db' => $db));
         }
@@ -447,24 +507,28 @@ abstract class Zend_Db_Table_Row_Abstract
         }
         $dependentTableClass = get_class($dependentTable);
 
-        $map = $dependentTable->getReference($this->_tableClass, $ruleKey);
-        for ($i = 0; $i < count($map['columns']); ++$i) {
-            $cond = $db->quoteIdentifier($map['columns'][$i]) . ' = ?';
-            $where[$cond] = $this->_data[$map['refColumns'][$i]];
+        $map = $this->_prepareReference($dependentTable, $this->_tableClass, $ruleKey);
+
+        for ($i = 0; $i < count($map[Zend_Db_Table_Abstract::COLUMNS]); ++$i) {
+            $cond = $db->quoteIdentifier($map[Zend_Db_Table_Abstract::COLUMNS][$i]) . ' = ?';
+            $where[$cond] = $this->_data[$map[Zend_Db_Table_Abstract::REF_COLUMNS][$i]];
         }
         return $dependentTable->fetchAll($where);
     } 
  
     /**
+     * Query a parent table to retrieve the single row matching the current row.
+     *
      * @param string|Zend_Db_Table_Abstract $parentTable
      * @param string                        OPTIONAL $ruleKey
-     * @return Zend_Db_Table_Row            Query result from $parentTable
+     * @return Zend_Db_Table_Row_Abstract   Query result from $parentTable
      */ 
     public function findParentRow($parentTable, $ruleKey = null) 
     { 
         $db = $this->_getTable()->getAdapter();
 
         if (is_string($parentTable)) {
+            // @todo change to Zend_Loader::loadClass()
             Zend::loadClass($parentTable);
             $parentTable = new $parentTable(array('db' => $db));
         }
@@ -478,20 +542,21 @@ abstract class Zend_Db_Table_Row_Abstract
         }
         $parentTableClass = get_class($parentTable);
 
-        $map = $this->_getTable()->getReference($parentTableClass, $ruleKey);
-        for ($i = 0; $i < count($map['columns']); ++$i) {
-            $cond = $db->quoteIdentifier($map['refColumns'][$i]) . ' = ?';
-            $where[$cond] = $this->_data[$map['columns'][$i]];
+        $map = $this->_prepareReference($this->_getTable(), $parentTableClass, $ruleKey);
+
+        for ($i = 0; $i < count($map[Zend_Db_Table_Abstract::COLUMNS]); ++$i) {
+            $cond = $db->quoteIdentifier($map[Zend_Db_Table_Abstract::REF_COLUMNS][$i]) . ' = ?';
+            $where[$cond] = $this->_data[$map[Zend_Db_Table_Abstract::COLUMNS][$i]];
         }
         return $parentTable->fetchRow($where);
     } 
  
     /**
-     * @param string|Zend_Db_Table_Abstract $matchTable
-     * @param string|Zend_Db_Table_Abstract $intersectionTable
-     * @param string                        OPTIONAL $primaryRefRule
-     * @param string                        OPTIONAL $matchRefRule
-     * @return Zend_Db_Table_Rowset         Query result from $matchTable
+     * @param string|Zend_Db_Table_Abstract  $matchTable
+     * @param string|Zend_Db_Table_Abstract  $intersectionTable
+     * @param string                         OPTIONAL $primaryRefRule
+     * @param string                         OPTIONAL $matchRefRule
+     * @return Zend_Db_Table_Rowset_Abstract Query result from $matchTable
      */ 
     public function findManyToManyRowset( 
         $matchTable, $intersectionTable, 
@@ -500,6 +565,7 @@ abstract class Zend_Db_Table_Row_Abstract
         $db = $this->_getTable()->getAdapter();
 
         if (is_string($intersectionTable)) {
+            // @todo change to Zend_Loader::loadClass()
             Zend::loadClass($intersectionTable);
             $intersectionTable = new $intersectionTable(array('db' => $db));
         }
@@ -514,6 +580,7 @@ abstract class Zend_Db_Table_Row_Abstract
         $intersectionTableClass = get_class($intersectionTable);
 
         if (is_string($matchTable)) {
+            // @todo change to Zend_Loader::loadClass()
             Zend::loadClass($matchTable);
             $matchTable = new $matchTable(array('db' => $db));
         }
@@ -532,10 +599,11 @@ abstract class Zend_Db_Table_Row_Abstract
         $matchInfo = $matchTable->info();
         $matchName = $matchInfo['name'];
 
-        $matchMap = $interTable->getReference($matchTableClass, $matchRefRule);
-        for ($i = 0; $i < count($matchMap['columns']); ++$i) {
-            $interCol = $db->quoteIdentifier($interName) . '.' . $db->quoteIdentifier($matchMap['columns'][$i]);
-            $matchCol = $db->quoteIdentifier($matchName) . '.' . $db->quoteIdentifier($matchMap['refColumns'][$i]);
+        $matchMap = $this->_prepareReference($interTable, $matchTableClass, $matchRefRule);
+
+        for ($i = 0; $i < count($matchMap[Zend_Db_Table_Abstract::COLUMNS]); ++$i) {
+            $interCol = $db->quoteIdentifier($interName) . '.' . $db->quoteIdentifier($matchMap[Zend_Db_Table_Abstract::COLUMNS][$i]);
+            $matchCol = $db->quoteIdentifier($matchName) . '.' . $db->quoteIdentifier($matchMap[Zend_Db_Table_Abstract::REF_COLUMNS][$i]);
             $joinCond[] = "$interCol = $matchCol";
         }
         $joinCond = implode(' AND ', $joinCond);
@@ -544,10 +612,11 @@ abstract class Zend_Db_Table_Row_Abstract
             ->from($interName, array())
             ->join($matchName, $joinCond, '*');
 
-        $callerMap = $interTable->getReference($matchTableClass, $callerRefRule);
-        for ($i = 0; $i < count($callerMap['columns']); ++$i) {
-            $interCol = $db->quoteIdentifier($interName) . '.' . $db->quoteIdentifier($matchMap['columns'][$i]);
-            $value = $this->_data[$callerMap['refColumns'][$i]];
+        $callerMap = $this->_prepareReference($interTable, $matchTbleClass, $callerRefRule);
+
+        for ($i = 0; $i < count($callerMap[Zend_Db_Table_Abstract::COLUMNS]); ++$i) {
+            $interCol = $db->quoteIdentifier($interName) . '.' . $db->quoteIdentifier($matchMap[Zend_Db_Table_Abstract::COLUMNS][$i]);
+            $value = $this->_data[$callerMap[Zend_Db_Table_Abstract::REF_COLUMNS][$i]];
             $select->where("$interCol = ?", $value);
         }
         $stmt = $select->query(Zend_Db::FETCH_ASSOC);

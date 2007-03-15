@@ -29,11 +29,11 @@ class Zend_Db_Table_ZfTestTable2 extends Zend_Db_Table_Abstract
     protected $_primary = array();
     protected $_referenceMap = array(
         'News' => array(
-            'columns'    => array('news_id'),
-            'refTable'   => 'Zend_Db_Table_ZfTestTable',
-            'refColumns' => array('id'),
-            'onDelete'   => self::CASCADE,
-            'onUpdate'   => self::CASCADE
+            self::COLUMNS         => array('news_id'),
+            self::REF_TABLE_CLASS => 'Zend_Db_Table_ZfTestTable',
+            self::REF_COLUMNS     => array('id'),
+            self::ON_DELETE       => self::CASCADE,
+            self::ON_UPDATE       => self::CASCADE
         )
     );
 }

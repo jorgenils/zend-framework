@@ -48,6 +48,12 @@ abstract class Zend_Db_Table_Abstract
     const REFERENCE_MAP    = 'referenceMap';
     const DEPENDENT_TABLES = 'dependentTables';
 
+    const COLUMNS          = 'columns';
+    const REF_TABLE_CLASS  = 'refTableClass';
+    const REF_COLUMNS      = 'refColumns';
+    const ON_DELETE        = 'onDelete';
+    const ON_UPDATE        = 'onUpdate';
+
     const CASCADE          = 'cascade';
     const RESTRICT         = 'restrict';
     const SET_NULL         = 'setNull';
@@ -260,14 +266,14 @@ abstract class Zend_Db_Table_Abstract
                 require_once "Zend/Db/Table/Exception.php";
                 throw new Zend_Db_Table_Exception("No reference rule \"$ruleKey\" from table $thisClass to table $tableClassname");
             }
-            if ($this->_referenceMap[$ruleKey]['refTable'] != $tableClassname) {
+            if ($this->_referenceMap[$ruleKey][self::REF_TABLE_CLASS] != $tableClassname) {
                 require_once "Zend/Db/Table/Exception.php";
                 throw new Zend_Db_Table_Exception("Reference rule \"$ruleKey\" does not reference table $tableClassname");
             }
             return $this->_referenceMap[$ruleKey];
         }
         foreach ($this->_referenceMap as $reference) {
-            if ($reference['refTable'] == $tableClassname) {
+            if ($reference[self::REF_TABLE_CLASS] == $tableClassname) {
                 return $reference;
             }
         }
@@ -422,18 +428,18 @@ abstract class Zend_Db_Table_Abstract
     { 
         $rowsAffected = 0;
         foreach ($this->_referenceMap as $rule => $map) {
-            if ($map['refTable'] != $parentTableClassname) {
+            if ($map[self::REF_TABLE_CLASS] != $parentTableClassname) {
                 continue;
             }
-            if (!isset($map['onUpdate'])) {
+            if (!isset($map[self::ON_UPDATE])) {
                 continue;
             }
-            switch ($map['onUpdate']) {
+            switch ($map[self::ON_UPDATE]) {
                 case self::CASCADE:
-                    for ($i = 0; $i < count($map['columns']); ++$i) {
+                    for ($i = 0; $i < count($map[self::COLUMNS]); ++$i) {
                         $where[] = $this->_db->quoteInto(
-                            $this->_db->quoteIdentifier($map['columns'][$i]) . ' = ?', 
-                            $oldPrimaryKey[$map['refColumns'][$i]]
+                            $this->_db->quoteIdentifier($map[self::COLUMNS][$i]) . ' = ?', 
+                            $oldPrimaryKey[$map[self::REF_COLUMNS][$i]]
                         );
                     }
                     $rowsAffected += $this->update($newPrimaryKey, $where); 
@@ -471,18 +477,18 @@ abstract class Zend_Db_Table_Abstract
     { 
         $rowsAffected = 0;
         foreach ($this->_referenceMap as $rule => $map) {
-            if ($map['refTable'] != $parentTableClassname) {
+            if ($map[self::REF_TABLE_CLASS] != $parentTableClassname) {
                 continue;
             }
-            if (!isset($map['onDelete'])) {
+            if (!isset($map[self::ON_DELETE])) {
                 continue;
             }
-            switch ($map['onDelete']) {
+            switch ($map[self::ON_DELETE]) {
                 case self::CASCADE:
-                    for ($i = 0; $i < count($map['columns']); ++$i) {
+                    for ($i = 0; $i < count($map[self::COLUMNS]); ++$i) {
                         $where[] = $this->_db->quoteInto(
-                            $this->_db->quoteIdentifier($map['columns'][$i]) . ' = ?', 
-                            $primaryKey[$map['refColumns'][$i]]
+                            $this->_db->quoteIdentifier($map[self::COLUMNS][$i]) . ' = ?', 
+                            $primaryKey[$map[self::REF_COLUMNS][$i]]
                         );
                     }
                     $rowsAffected += $this->delete($where); 
@@ -545,7 +551,9 @@ abstract class Zend_Db_Table_Abstract
             }
         }
 
+        $whereOrTerms = array();
         foreach ($whereList as $keyValueSets) {
+            $whereAndTerms = array();
             foreach ($keyValueSets as $keyPosition => $keyValue) {
                 $whereAndTerms[] = $this->_db->quoteInto(
                     $this->_db->quoteIdentifier($keyNames[$keyPosition]) . ' = ?',
@@ -554,7 +562,7 @@ abstract class Zend_Db_Table_Abstract
             }
             $whereOrTerms[] = '(' . implode(' AND ', $whereAndTerms) . ')';
         }
-        $whereClause = '(' . implode(' OR ', $whereAndTerms) . ')';
+        $whereClause = '(' . implode(' OR ', $whereOrTerms) . ')';
 
         return $this->fetchAll($whereClause);
     }
