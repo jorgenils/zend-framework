@@ -1,0 +1,275 @@
+<sect1 id="zend.auth.introduction">
+
+    <title>導入</title>
+
+    <para>
+        Zend_Auth は、認証のための API を提供します。
+        また、一般的な使用例に対応する具象認証アダプタも用意しています。
+    </para>
+
+    <note>
+        <para>
+            Zend_Auth には、
+            <link linkend="zend.auth.adapter.digest">ダイジェスト認証用のアダプタ</link>
+            だけが含まれています。これは、Zend_Auth の考え方を説明するためのシンプルな設計のアダプタです。
+            今後、さらにいろいろなアダプタを開発する予定です。
+            「こんなアダプタがほしい」っていう方はいますか? そんな皆さんは、ぜひ
+            <ulink url="http://framework.zend.com/wiki/x/qx4">投票に参加</ulink>
+            してください。あるいは、
+            <ulink url="http://framework.zend.com/wiki/x/GgE">自分でつくってしまう</ulink>
+            のも大歓迎です!
+        </para>
+    </note>
+
+    <para>
+        Zend_Auth が扱うのはあくまでも <emphasis role="strong">認証 (authentication)</emphasis>
+        であり、<emphasis role="strong">承認 (authorization)</emphasis> ではありません。
+        認証 (authentication) とはつまり、あるエンティティが何者であるのかを示す
+        (識別する) ことです。これを、なんらかの条件にもとづいて行います。
+        承認 (authorization) とは、あるエンティティが他のエンティティに対して
+        アクセスしたり何らかの操作をしたりする権限があるかどうかを判定する処理です。
+        これは Zend_Auth の対象外となります。
+        Zend Framework における認証やアクセス制御の詳細については、
+        <link linkend="zend.acl">Zend_Acl</link> を参照ください。
+    </para>
+
+    <sect2 id="zend.auth.introduction.adapters">
+
+        <title>アダプタ</title>
+
+        <para>
+            Zend_Auth アダプタの使用目的は、
+            LDAP や RDBMS あるいはファイル
+            のような特定の型の認証サービスに対する認証を行うことです。
+            アダプタによってそのオプションや挙動は大きくことなるでしょうが、
+            いくつかの基本処理は、あらゆるアダプタで共通となります。
+            たとえば認証条件 (いわゆる ID) を受け取り、認証を行い、
+            何らかの結果を返すという処理は、すべての Zend_Auth アダプタで共通です。
+        </para>
+
+        <para>
+            各 Zend_Auth 認証アダプタは、<code>Zend_Auth_Adapter_Interface</code>
+            を実装しています。このインターフェイスで定義されているメソッドが
+            <code>authenticate()</code> で、アダプタクラスはこれを実装して認証を行います。
+            各アダプタクラスは、<code>authenticate()</code>
+            をコールする前に準備を済ませておく必要があります。
+            つまり、アダプタ側で用意しなければならない機能としては
+            認証条件 (ユーザ名およびパスワードなど) の取得や
+            アダプタ固有のオプションの設定
+            (データベースのテーブルを使用するアダプタならデータベースへの接続設定など)
+            があるということです。
+        </para>
+
+        <para>
+            以下にあげるのは認証アダプタのサンプルで、
+            これはユーザ名とパスワードを受け取って認証を行います。
+            その他の詳細、例えば認証サービスへの実際の問い合わせなどは、
+            例を簡潔にするため省略しています。
+
+            <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Auth/Adapter/Interface.php';
+
+class MyAuthAdapter implements Zend_Auth_Adapter_Interface
+{
+    /**
+     * 認証用のユーザ名とパスワードを設定します
+     *
+     * @return void
+     */
+    public function __construct($username, $password)
+    {
+        // ...
+    }
+
+    /**
+     * 認証を試みます
+     *
+     * @throws Zend_Auth_Adapter_Exception が、認証処理をできなかった場合に発生します
+     * @return Zend_Auth_Result
+     */
+    public function authenticate()
+    {
+        // ...
+    }
+}]]></programlisting>
+
+            docblock コメントで説明しているとおり、
+            <code>authenticate()</code> は
+            <code>Zend_Auth_Result</code> (あるいは <code>Zend_Auth_Result</code> の派生クラス)
+            のインスタンスを返す必要があります。何らかの理由で認証の問い合わせができなかった場合は、
+            <code>authenticate()</code> は
+            <code>Zend_Auth_Adapter_Exception</code>
+            から派生した例外をスローしなければなりません。
+        </para>
+
+    </sect2>
+
+    <sect2 id="zend.auth.introduction.results">
+
+        <title>結果</title>
+
+        <para>
+            Zend_Auth アダプタは、<code>authenticate()</code> の結果として
+            <code>Zend_Auth_Result</code> のインスタンスを返します。
+            これにより、認証を試みた結果を表します。アダプタのインスタンスを作成した際に
+            <code>Zend_Auth_Result</code> オブジェクトが作成され、
+            以下の三つのメソッドで Zend_Auth アダプタの結果に対する共通の操作ができます。
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        <code>isValid()</code> - その結果が
+                        認証の成功を表している場合にのみ true を返します。
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <code>getIdentity()</code> - 認証を試みた ID 情報を返します。
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <code>getMessages()</code> - 認証に失敗した場合に、
+                        関連するメッセージの配列を返します。
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+
+    </sect2>
+
+    <sect2 id="zend.auth.introduction.persistence">
+
+        <title>ID の永続性</title>
+
+        <para>
+            認証情報 (パスワードなど) を含む認証を要求するのは便利なものですが、
+            リクエストごとにいちいち認証情報を引き回すのではなく、
+            認証済みの ID を保持し続けることも重要です。
+        </para>
+
+        <para>
+            HTTP はステートレスなプロトコルです。しかし、
+            クッキーやセッションといった技術によって、
+            サーバサイドのウェブアプリケーションでも
+            複数リクエスト間でステート (状態) を保持し続けられるようになりました。
+            Zend_Auth は、デフォルトで
+            <link linkend="zend.session">Zend_Session</link> を使用しており、
+            認証に成功した後の ID 情報を PHP のセッションで永続管理するようにしています。
+        </para>
+
+        <para>
+            認証に成功すると、<code>Zend_Auth::authenticate()</code> は
+            認証結果の ID を永続ストレージに保存します。デフォルトでは、
+            <code>Zend_Auth</code> が使用するストレージクラスは
+            <link linkend="zend.session">Zend_Session</link> にもとづいたものとなります。
+            ストレージクラスを変更するには、
+            <code>Zend_Auth::setStorage()</code> でストレージオブジェクトを指定します。
+        </para>
+
+        <para>
+            自動的に永続ストレージに ID を保存するのはまずい場合もあるでしょう。
+            そんな場合は、<code>Zend_Auth</code> クラスを使用せずに
+            アダプタクラスを直接利用します。
+        </para>
+
+    </sect2>
+
+    <sect2 id="zend.auth.introduction.using">
+
+        <title>Zend_Auth の使用法</title>
+
+        <para>
+            Zend_Auth の使用法には、次の二通りがあります。
+            <orderedlist>
+            <listitem>
+                <para>
+                    間接的に <code>Zend_Auth::authenticate()</code> 経由で使用する
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    直接、アダプタの <code>authenticate()</code> メソッドを使用する
+                </para>
+            </listitem>
+            </orderedlist>
+        </para>
+
+        <para>
+            次の例は、Zend_Auth アダプタを間接的に
+            <code>Zend_Auth</code> クラスから使用するものです。
+
+            <programlisting role="php"><![CDATA[<?php
+// Zend_Auth のシングルトンインスタンスへの参照を取得します
+require_once 'Zend/Auth.php';
+$auth = Zend_Auth::getInstance();
+
+// 認証アダプタを設定します
+$authAdapter = new MyAuthAdapter($username, $password);
+
+// 認証を試み、その結果を取得します
+$result = $auth->authenticate($authAdapter);
+
+if (!$result->isValid()) {
+    // 認証に失敗したので、原因を表示します
+    foreach ($result->getMessages() as $message) {
+        echo "$message\n";
+    }
+} else {
+    // 認証に成功しました。ID ($username) がセッションに保存されます
+    // $result->getIdentity() === $auth->getIdentity()
+    // $result->getIdentity() === $username
+}]]></programlisting>
+        </para>
+
+        <para>
+            上の例においてリクエスト内で認証が行われると、
+            認証に成功した際にその ID を取得するのは簡単なことです。
+            <programlisting role="php"><![CDATA[<?php
+$auth = Zend_Auth::getInstance();
+if ($auth->hasIdentity()) {
+    // ID があるのでそれを取得します
+    $identity = $auth->getIdentity();
+}]]></programlisting>
+        </para>
+
+        <para>
+            永続ストレージから認証 ID を削除するには、単純に
+            <code>clearIdentity()</code> メソッドを使用します。
+            これは、アプリケーションの "ログアウト" 処理を実装するためのものです。
+            <programlisting role="php"><![CDATA[<?php
+Zend_Auth::getInstance()->clearIdentity();]]></programlisting>
+        </para>
+
+        <para>
+            自動的に永続ストレージが用いられるのがまずい場合もあるでしょう。
+            そんな場合は、<code>Zend_Auth</code> クラスをバイパスして
+            アダプタクラスを直接使用します。
+            アダプタクラスを直接使用するとは、アダプタオブジェクトの設定と準備を行い、
+            その <code>authenticate()</code> メソッドをコールするということです。
+            アダプタ固有の詳細情報については、各アダプタのドキュメントで説明します。
+            以下の例は、<code>MyAuthAdapter</code> を直接使用するものです。
+
+            <programlisting role="php"><![CDATA[<?php
+// 認証アダプタを設定します
+$authAdapter = new MyAuthAdapter($username, $password);
+
+// 認証を試み、その結果を取得します
+$result = $authAdapter->authenticate();
+
+if (!$result->isValid()) {
+    // 認証に失敗したので、原因を表示します
+    foreach ($result->getMessages() as $message) {
+        echo "$message\n";
+    }
+} else {
+    // 認証に成功しました
+    // $result->getIdentity() === $username
+}]]></programlisting>
+        </para>
+
+    </sect2>
+
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

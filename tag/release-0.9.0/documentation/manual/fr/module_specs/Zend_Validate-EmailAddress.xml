@@ -1,0 +1,80 @@
+<sect1 id="zend.validate.validating_email_addresses">
+
+    <title>Validation d'une adresse email</title>
+
+    <para>
+        Zend_Validate_Email permet de valider une adresse email. Ce validateur éclate d'abord
+        l'adresse email entre partie locale et domaine et essaie de valider ces deux parties
+        conformément aux spécifications des adresses email et des noms de domaine.
+    </para>
+    
+    <para>
+        <emphasis role="strong">Utilisation de base</emphasis>
+    </para>
+    
+    <para>
+        Exemple basique :
+        
+        <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Validate/EmailAddress.php';
+$validateur = new Zend_Validate_EmailAddress();
+if ($validateur->isValid($email)) {
+    // l'email est valide
+} else {
+    // l'email est invalide ; afficher pourquoi
+    foreach ($validateur->getMessages() as $message) {
+        echo "$message\n";
+    }
+}]]></programlisting>
+
+        Ceci validera l'adresse email <code>$email</code> et, en cas d'échec,
+        fournira des messages d'erreur informatifs via <code>$validator->getMessages()</code>.
+        
+    </para>
+    
+    
+    <para>
+        <emphasis role="strong">parties locales complexes</emphasis>
+    </para>    
+    
+    <para>
+        Zend_Validate_Email validera toute adresse email conforme à la RFC2822. Comme par exemple
+        <code>bob@domaine.com</code>, <code>bob+jones@domaine.fr</code>, 
+        <code>"bob@jones"@domaine.com</code> et <code>"bob jones"@domaine.com</code>.
+        
+        Quelques formats d'emails obsolètes ne seront pas validés (comme tout email contenant un
+        retour chariot ou un caractère "\").
+    </para>
+    
+    <para>
+        <emphasis role="strong">Validation de différents types de noms de domaine</emphasis>
+    </para>
+    
+    <para>
+        La partie domaine d'une adresse email est validée via Zend_Validate_Hostname. Par défaut,
+        seules les domaines qualifiés sous la forme <code>domaine.com</code> sont acceptés, même si, il vous est
+        possible d'accepter les adresses IP et les domaines locaux également.
+
+        Afin de réaliser cette opération, il vous faut instancier Zend_Validate_EmailAddress en lui
+        passant un paramètre indiquant le type de nom de domaine à accepter. Les détails sont disponibles
+        dans Zend_Validate_Hostname mais vous trouverez ci-dessous un exemple illustrant comment accepter les noms
+        de domaines qualifiés et les hôtes locaux :
+        
+        <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Validate/EmailAddress.php';
+$validateur = new Zend_Validate_EmailAddress(Zend_Validate_Hostname::ALLOW_DNS | Zend_Validate_Hostname::ALLOW_LOCAL);
+if ($validateur->isValid($email)) {
+    // l'email est valide
+} else {
+    // l'email est invalide ; afficher pourquoi
+    foreach ($validateur->getMessages() as $message) {
+        echo "$message\n";
+    }
+}]]></programlisting>
+
+    </para>
+
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
