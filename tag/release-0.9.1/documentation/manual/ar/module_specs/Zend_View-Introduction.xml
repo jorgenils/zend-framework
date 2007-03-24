@@ -1,0 +1,113 @@
+<sect1 id="zend.view.introduction">
+
+    <title>مقدمة</title>
+    
+    <para>
+        Zend_View عبارة عن class للعمل مع جزء الـ "view" الخاص بالنمط model-view-controller , 
+        أى أنه يتواجد ليفصل عملية العرض "view" عن كل من جزء الـ model و جزء الـ controller , 
+        حيث يوفر نظام من المساعدات "helpers" و فلاتر للخرج "output filters" و وسائل لتجاهل قيم المتغيرات.
+    </para>
+    
+    <para>
+        Zend_View عبارة عن نظام قوالب (مجهول) ; يمكنك أن تستخدم لغة PHP نفسها كنظام قوالب, 
+        أو يمكنك إنشاء نسخة "instance" من أى نظام قوالب و دمجه مع أكواد جزء الـ view خاصتك.
+    </para>
+
+    <para>
+        فى الأساس, إستخدام Zend_View يحدث فى خطوتان هامتان :
+        
+        1. الـ controller خاصتك يقوم بإنشاء نسخة من Zend_View و يقوم بتمرير 
+        متغيرات إلى هذه النسخة .
+        
+        2. الـ controller يأمر Zend_View بأن يقوم بمعالجة view محدد, 
+        بذلك يتم نقل التحكم إلى أكواد الـ view التى تقوم بإنتاج خرج الـ view.
+    </para>
+    
+    <sect2 id="zend.view.introduction.controller">
+        
+        <title>كود الـ Controller</title>
+        
+        <para>
+            كمثال بسيط, دعونا نفترض أن الـ controller خاصتك لديه قائمة ببيانات كتب 
+            و التى نريد أن يتم عرضها (عمل render "تصيير" لها) من خلال view , 
+            جزء الـ controller من الممكن أن يكون بهذا الشكل :
+        </para>
+        
+        <programlisting role="php"><![CDATA[<?php
+// use a model to get the data for book authors and titles.
+$data = array(
+    array(
+        'author' => 'Hernando de Soto',
+        'title' => 'The Mystery of Capitalism'
+    ),
+    array(
+        'author' => 'Henry Hazlitt',
+        'title' => 'Economics in One Lesson'
+    ),
+    array(
+        'author' => 'Milton Friedman',
+        'title' => 'Free to Choose'
+    )
+);
+
+// now assign the book data to a Zend_View instance
+Zend_Loader::loadClass('Zend_View');
+$view = new Zend_View();
+$view->books = $data;
+
+// and render a view script called "booklist.php"
+echo $view->render('booklist.php');
+?>]]>
+        </programlisting>
+        
+    </sect2>
+    
+    <sect2 id="zend.view.introduction.view">
+    
+        <title>كود الـ View</title>
+        
+        <para>
+            الأن نحن نحتاج كود الـ view المرافق لـ "booklist.php", و هو عبارة عن كود PHP عادى 
+            مع وجود إختلاف واحد: أنه يتم تنفيذه داخل مدى "scope" نسخة الـ  Zend_View , 
+            و الذى يعنى أن المتغير this$ فى هذا الكود سيشير إلى الـ properties و الـ methods 
+            الخاصة بهذه النسخة من Zend_View .
+            (المتغيرات التى سيتم تمريرها إلى هذه النسخة من خلال الـ controller ستكون عبارة عن 
+            public properties تابعة لنسخة الـ Zend_View ) , 
+            إذاً كود view بسيط من الممكن أن يكون مثل هذا :
+        </para>
+        
+        <programlisting role="php"><![CDATA[<?php if ($this->books): ?>
+    
+    <!-- A table of some books. -->
+    <table>
+        <tr>
+            <th>Author</th>
+            <th>Title</th>
+        </tr>
+        
+        <?php foreach ($this->books as $key => $val): ?>
+        <tr>
+            <td><?php echo $this->escape($val['author']) ?></td>
+            <td><?php echo $this->escape($val['title']) ?></td>
+        </tr>
+        <?php endforeach; ?>
+        
+    </table>
+    
+<?php else: ?>
+    
+    <p>There are no books to display.</p>
+    
+<?php endif; ?>]]>
+        </programlisting>
+        
+        <para>
+            لاحظ كيف نستخدم الـ method المسمى "()escape" لنقوم بعمل تجاهل لقيم المتغيرات.
+        </para>
+        
+    </sect2>
+    
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

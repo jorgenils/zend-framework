@@ -1,0 +1,208 @@
+<sect1 id="zend.controller.action">
+	<title>Action Controllers</title>
+
+	<sect2 id="zend.controller.action.introduction">
+		<title>Wprowadzenie</title>
+		<para>
+            <code>Zend_Controller_Action</code> jest klasą abstrakcyjną, której
+            możesz użyć do implementacji kontrolerów akcji, których wraz z
+            kontrolerem frontowym użyjesz do budowania aplikacji opartej na 
+            wzorcu Model-View-Controller (MVC).
+		</para>
+
+		<para>
+            Aby użyć klasy Zend_Controller_Action, powinieneś ją rozszerzyć
+            w swoich kontrolerach akcji (lub rozszerzyć ją aby utworzyć swoją
+            własną bazową klasę dla kontrolerów akcji). Najbardziej podstawową
+            operacją jest rozszerzenie tej klasy oraz utworzenie metod akcji,
+            które odpowiadają różnym akcjom jakie ma obsługiwać kontroler na
+            twojej stronie. Obsługa routingu i uruchamiania w Zend_Controller
+            automatycznie przeszuka wszystkie metody twojej klasy, których 
+            nazwa zakończona jest wyrazem 'Action', aby znaleźć odpowiednią 
+            akcję kontrolera.
+        </para>
+
+        <para>
+            Na przykład, załóżmy, że twoja klasa jest zdefiniowana w ten sposób:
+        </para>
+
+        <programlisting role="php"><![CDATA[
+class FooController extends Zend_Controller_Action
+{
+    public function barAction()
+    {
+        // zrób coś
+    }
+
+    public function bazAction()
+    {
+        // zrób coś
+    }
+}
+]]></programlisting>
+            
+        <para>
+            Powyższa klasa FooController (kontroler 'foo') definiuje dwie akcje,
+            'bar' oraz 'baz'.
+        </para>
+
+        <para>
+            Można tu osiągnąć dużo więcej, na przykład: utworzyć własne akcje
+            inicjalizacyjne, utworzyć domyślne akcje do wywołania gdy nie ma
+            określonej akcji (lub określona jest nieprawidłowa), użyć metod 
+            pre- oraz post-dispatch oraz użyć wielu różnych metod pomocników.
+            Ten rozdział jest rozeznaniem w funkcjonalnościach kontrolera akcji.
+        </para>
+    </sect2>
+
+	<sect2 id="zend.controller.action.initialization">
+        <title>Inicjalizacja obiektu</title>
+
+        <para>
+            O ile zawsze możesz nadpisać konstruktor kontrolera akcji, nie 
+            zalecamy tego. Zend_Controller_Action::__construct() przeprowadza
+            kilka ważnych zadań, takich jak zarejestrowanie obiektów żądania i
+            odpowiedzi, oraz przekazanie argumentów wywołania przez kontroler 
+            frontowy. Jeśli musisz nadpisać konstruktor, upewnij się że 
+            wywołasz parent::__construct($request, $response, $invokeArgs).
+        </para>
+
+        <para>
+            Bardziej odpowiednim sposobem skonfigurowania instancji jest użycie
+            metody init(), która jest wywoływana jako ostatnie zadanie konstruktora
+            __construct(). Na przykład jeśli chcesz połączyć się z bazą danych:
+        </para>
+
+        <programlisting role="php"><![CDATA[
+class FooController extends Zend_Controller_Action
+{
+    public function init()
+    {
+        $this->db = Zend_Db::factory('Pdo_Mysql', array(
+            'host'     => 'myhost',
+            'username' => 'user',
+            'password' => 'XXXXXXX',
+            'dbname'   => 'website'
+        ));
+    }
+}
+]]></programlisting>
+
+    </sect2>
+
+    <sect2 id="zend.controller.action.prepostdispatch">
+        <title>Metody Pre-Dispatch oraz Post-Dispatch</title>
+
+        <para>
+            Klasa Zend_Controller_Action definiuje dwie metody, preDispatch() 
+            oraz postDispatch(), które mogą być wywołane przed i po wywołaniu 
+            akcji. Mogą one być użyteczne w wielu sytuacjach: weryfikowanie
+            autentykacji oraz kontroli dostępu ACL odnośnie uruchamianej akcji,
+            (przez wywołanie metody _forward() w metodzie preDispatch(), dzięki 
+            czemu akcja może być pominięta), lub na przykład umieszczenie
+            wygenerowanej zawartości w głównym szablonie (postDispatch()).
+        </para>
+    </sect2>
+
+    <sect2 id="zend.controller.action.accessors">
+        <title>Metody dostępowe</title>
+
+        <para>
+            W obiekcie zarejestrowanych jest wiele obiektów oraz zmiennych i 
+            wszystkie mają metody dostępowe..
+        </para>
+
+        <itemizedlist>
+            <listitem><para>
+                <emphasis>Obiekt żądania</emphasis>: metoda getRequest() może
+                być użyta do odebrania obiektu żądania używanego do wywoływania 
+                akcji.
+            </para></listitem>
+
+            <listitem>
+                <para>
+                    <emphasis>Obiekt odpowiedzi</emphasis>: metoda getResponse() 
+                    może być użyta do odebrania obiektu odpowiedzi 
+                    przechowującego finalną odpowiedź. Niektóre typowe wywołania 
+                    mogą wyglądać tak:
+                </para>
+
+                <programlisting role="php"><![CDATA[
+$this->getResponse()->setHeader('Content-Type', 'text/xml');
+$this->getResponse()->appendBody($content);
+]]></programlisting>
+            </listitem>
+
+            <listitem>
+                <para>
+                    <emphasis>Argumenty wywołania</emphasis>: kontroler frontowy
+                    może przekazać parametry do routera, obiektu uruchamiającego
+                    oraz do kontrolera akcji. Aby je odebrać użyj metody
+                    getInvokeArg($key); alternatywnie pobierz całą listę 
+                    używając metody getInvokeArgs().
+                </para>
+            </listitem>
+
+            <listitem>
+                <para>
+                    <emphasis>Parametry żądania</emphasis>: Obiekt żądania 
+                    przechowuje parametry żądania takie jak dowolne parametry z
+                    tablic _GET lub _POST oraz parametry użytkownika zdefiniowane
+                    w ścieżce adresu URL. Aby je odebrać, użyj metody 
+                    _getParam($key) lub _getAllParams(). Możesz także ustawić
+                    parametry żądania używając metody _setParam(); jest to 
+                    użyteczne gdy przenosimy do innych akcji.
+                </para>
+
+                <para>
+                    Aby sprawdzić czy parametr istnieje czy nie (co jest 
+                    użyteczne przy wywołaniach logicznych), użyj _hasParam($key).
+                </para>
+            </listitem>
+        </itemizedlist>
+    </sect2>
+
+    <sect2 id="zend.controller.action.utilmethods">
+        <title>Metody narzędziowe</title>
+
+        <para>
+            Oprócz metod dostępowych, klasa Zend_Controller_Action posiada kilka 
+            metod narzędziowych używanych do przeprowadzania ważnych zadań 
+            wewnątrz twoich metod akcji (lub wewnątrz metod pre-/post-dispatch).
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>
+                    <emphasis>_forward($action, $controller = null, $module =
+                        null, array $params = null)</emphasis>: 
+                    wykonuje inną akcję. Jeśli zostanie wywołana w metodzie 
+                    preDispatch(), obecnie zażądana akcja zostanie pominięta,
+                    na rzecz nowej akcji. W przeciwnym wypadku, po wykonaniu 
+                    obecnej akcji, będzie wywołana akcja zażądana w metodzie 
+                    _forward().
+                </para>
+            </listitem>
+
+            <listitem>
+                <para>
+                    <emphasis>_redirect($url, $code = 302)</emphasis>: 
+                    przekierowuje do innej lokacji. Ta metoda pobiera URL oraz 
+                    opcjonalny kod stanu HTTP. Przekierowanie jest 
+                    przeprowadzane natychmiast, a wykonywanie aplikacji jest
+                    wstrzymywane.
+                </para>
+
+                <para>
+                    Jeśli podany jest kod stanu, będzie on przekazany 
+                    do komendy PHP header() gdy przekierowanie będzie 
+                    przeprowadzane.
+                </para>
+            </listitem>
+        </itemizedlist>
+    </sect2>
+</sect1>
+
+<!--
+vim:se ts=4 sw=4 et:
+-->
