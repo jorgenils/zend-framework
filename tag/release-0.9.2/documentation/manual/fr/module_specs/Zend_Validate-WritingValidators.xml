@@ -1,0 +1,64 @@
+﻿<sect1 id="zend.validate.writing_validators">
+
+    <title>Ecrire des validateurs</title>
+
+    <para>
+        Zend_Validate fournit un ensemble de validateurs usuels. Inévitablement, les développeurs ont besoin
+        de pouvoir écrire leurs propres validateurs pour des besoins spécifiques. La tâche consistant à
+        écrire des validateurs personnalisés est facilitée en implémentant <code>Zend_Validate_Interface</code>. 
+    </para>
+
+    <para>
+        <code>Zend_Validate_Interface</code> définit deux méthodes, <code>isValid()</code> et 
+        <code>getMessages()</code>, qui peuvent être implémentées par les classes créées.
+        Un objet qui implémente cette interface peut être utilisé comme chaîne de validation via
+        <code>Zend_Validate::addValidator()</code>.
+    </para>
+
+    <para>
+        L'exemple ci-dessous décrit comment écrire un validateur personnalisé :
+
+        <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Validate/Interface.php';
+
+class MonValidateur implements Zend_Validate_Interface
+{
+    protected $_messages = array();
+
+    public function isValid($valeur)
+    {
+        $this->_messages = array();
+
+        // définition de $requirement sur la base des critères de validation
+
+        if (!$requirement) {
+            $this->_messages[] = "Raison de l'échec";
+            return false;
+        }
+
+        return true;
+    }
+
+    public function getMessages()
+    {
+        return $this->_messages;
+    }
+}
+?>]]></programlisting>
+
+    </para>
+
+    <para>
+        Pour ajouter une instance de la classe précédente à une chaîne de validation :
+
+        <programlisting role="php"><![CDATA[<?php
+$validateurChaine = new Zend_Validate();
+$validateurChaine->addValidator(new MonValidateur());
+?>]]></programlisting>
+
+    </para>
+
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
