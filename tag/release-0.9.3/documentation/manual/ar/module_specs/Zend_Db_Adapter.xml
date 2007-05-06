@@ -1,0 +1,432 @@
+<sect1 id="zend.db.adapter">
+
+    <title>Zend_Db_Adapter</title>
+
+    <sect2 id="zend.db.adapter.introduction">
+
+        <title>مقدمة</title>
+
+        <para>
+            <code>Zend_Db_Adapter</code> هو طبقة الـ abstraction لـ API قواعد البيانات 
+            المستخدم فى إطار عمل Zend , و أعتماداً على PDO يمكنك ان تستخدم 
+            <code>Zend_Db_Adapter</code> للأتصال و العمل مع أى من قواعد بيانات 
+            SQL المدعومة و ذلك بأستخدام نفس الـ API , و هذا يشمل كل من 
+            Microsoft SQL Server و MySQL و PostgreSQL و SQLite و أخريات.
+        </para>
+
+        <para>
+            لتقوم بإنشاء نسخة "instance" من <code>Zend_Db_Adapter</code> 
+            لتستخدمه مع قاعدة البيانات خاصتك, ستحتاج إلى إستدعاء 
+            <code>()Zend_Db::factory</code> مع تمرير إسم الـ Adapter 
+            و مصفوفة تحتوى بيانات الأتصال, على سبيل المثال, للأتصال بقاعدة بيانات 
+            MySQL تسمى "camelot" على الـ localhost بأسم المستخدم "malory" :
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+require_once 'Zend/Db.php';
+
+$params = array ('host'     => '127.0.0.1',
+                 'username' => 'malory',
+                 'password' => '******',
+                 'dbname'   => 'camelot');
+
+$db = Zend_Db::factory('PDO_MYSQL', $params);
+
+?>]]></programlisting>
+
+        <para>
+            بنفس الطريقة تقريبا, للأتصال بقاعدة بيانات SQLite تسمى "camelot.sq3" : 
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+require_once 'Zend/Db.php';
+
+$params = array ('dbname' => 'camelot.sq3');
+
+$db = Zend_Db::factory('PDO_SQLITE', $params);
+
+?>]]></programlisting>
+
+        <para>
+            بنفس الطريقة تقريبا, للأتصال بقاعدة بيانات SQLite2 تسمى "camelot.sq2" : 
+            بالنسبة إلى قواعد بيانات sqlite الـ memory-based , لا تقم بتحديد dsnprefix و 
+            إستخدم أسم قاعدة البيانات ":memory:" .
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+require_once 'Zend/Db.php';
+
+$params = array ('dbname' => 'camelot.sq2',
+                 'dsnprefix' => 'sqlite2');
+
+$db = Zend_Db::factory('PDO_SQLITE', $params);
+
+?>]]></programlisting>
+
+        <para>
+            فى كل الحالات, ستتمكن من إستخدام نفس الـ API بدون أى تغيير للتعامل مع قواعد البيانات.
+        </para>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.quoting">
+
+        <title>الـ Quoting للحماية من الـ SQL Injection</title>
+
+        <para>
+            يجب عليك أن تقوم بعمل quoting "تحديد قيم/إقتباس" للبيانات التى سيتم إستخدامها 
+            فى جمل الـ SQL, و ذلك للحماية من هجمات الـ SQL injection , 
+            يوفر <code>Zend_Db_Adapter</code> إثنان من الـ methods 
+            (من خلال كائن الـ PDO الداخلى) لتساعدك فى عمل quoting للقيم.
+        </para>
+
+        <para>
+            اولهم هو الـ method المسمى <code>()quote</code>, 
+            سيقوم بعمل quoting للقيم ذات البعد الواحد لتتمكن من إستخدامها 
+            مع الـ Adapter الخاص بقاعدة البيانات خاصتك ;
+             إن قمت بتمرير مصفوفة , سيتم إرجاع string عبارة عن قيم 
+            المصفوفة مفصول بين كل منها بفصلة, و كل من هذه القيم قد تم 
+            عمل quoting له 
+            (هذا مفيد فى العمليات التى تتطلب قائمة من البرامترات).
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+// create a $db object, assuming Mysql as the adapter.
+
+// quote a scalar
+$value = $db->quote('St John"s Wort');
+// $value is now '"St John\"s Wort"' (note the surrounding quotes)
+
+// quote an array
+$value = $db->quote(array('a', 'b', 'c');
+// $value is now '"a", "b", "c"' (a comma-separated string)
+
+?>]]></programlisting>
+
+        <para>
+            ثانى method هو <code>()quoteInto</code> , 
+            انت تقوم بتمرير string أساس يحتوى على علامة إستفهام تعمل 
+            كـ placeholder , ثم تمرر قيمة احادية البعد أو مصفوفة ليتم عمل 
+            quoting لها و وضع الناتج فى string الأساس, هذه العملية مفيدة 
+            عند إنشاء إستعلامات - على الطاير - , القيم احادية البعد و المصفوفات
+            سيتم معاملتها تماما بنفس الطريقة المتبعة فى <code>()quote</code>.
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+// create a $db object, assuming Mysql as the adapter.
+
+// quote a scalar into a WHERE clause
+$where = $db->quoteInto('id = ?', 1);
+// $where is now 'id = "1"' (note the surrounding quotes)
+
+// quote an array into a WHERE clause
+$where = $db->quoteInto('id IN(?)', array(1, 2, 3));
+// $where is now 'id IN("1", "2", "3")' (a comma-separated string)
+
+?>]]></programlisting>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.queries">
+
+        <title>الإستعلامات المباشرة</title>
+
+        <para>
+            بمجرد أن تنشئ نسخة من <code>Zend_Db_Adapter</code>, 
+            ستتمكن من تنفيذ إستعلامات مباشرة بإستخدام SQL , 
+            سيقوم <code>Zend_Db_Adapter</code> بتمرير هذه 
+            الإستعلامات إلى كائن الـ PDO الموجود داخله, و الذى بدوره يقوم 
+            بتجهيز و تنفيذ هذه الأستعلامات, و بعدها يقوم بإرجاع كائن 
+            PDOStatement إليك لتتعامل مع نتائج الأستعلام (إن وجدت).
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+// create a $db object, and then query the database
+// with a properly-quoted SQL statement.
+$sql = $db->quoteInto(
+    'SELECT * FROM example WHERE date > ?',
+    '2006-01-01'
+);
+$result = $db->query($sql);
+
+// use the PDOStatement $result to fetch all rows as an array
+$rows = $result->fetchAll();
+
+?>]]></programlisting>
+
+        <para>
+            يمكنك أن تربط كل بياناتك بالأستعلام تلقائياً , و هذا يعنى انك
+            من الممكن أن تقوم بإنشاء اكثر من placeholder بأسماء مختلفة 
+            داخل جملة الأستعلام, و بعدها تمرر مصفوفة من البيانات التى 
+            سيتم إحلالها مكان الـ placeholders , و سيتم عمل quoting 
+            لهذه البيانات , بحيث يتوفر تأمين أكبر بالنسبة إلى هجمات الـ 
+            SQL injection .
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+// create a $db object, and then query the database.
+// this time, use placeholder binding.
+$result = $db->query(
+    'SELECT * FROM example WHERE date > :placeholder',
+    array('placeholder' => '2006-01-01')
+);
+
+// use the PDOStatement $result to fetch all rows as an array
+$rows = $result->fetchAll();
+
+?>]]></programlisting>
+
+        <para>
+            إختيارياً, ربما انت تريد ان تقوم بتجهيز و ربط البيانات بجملة الـ SQL يدوياً, 
+            لتتمكن من هذا, إستخدم الـ method المسمى <code>()prepare</code> 
+            ليتم إرجاع نسخة مجهزة من <code>PDOStatement</code> و التى 
+            يمكنك أن تتعامل معها مباشرة.
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+// create a $db object, and then query the database.
+// this time, prepare a PDOStatement for manual binding.
+$stmt = $db->prepare('SELECT * FROM example WHERE date > :placeholder');
+$stmt->bindValue('placeholder', '2006-01-01');
+$stmt->execute();
+
+// use the PDOStatement to fetch all rows as an array
+$rows = $stmt->fetchAll();
+
+?>]]></programlisting>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.transactions">
+
+        <title>الـ Transactions</title>
+
+        <para>
+            حسب الأعدادات الأساسية , يكون PDO 
+            ( و بالطبع <code>Zend_Db_Adapter</code> ) 
+            فى وضعية الـ "auto-commit" أى "التأكيد-التلقائى" , 
+            هذا يعنى أن كل الأستعلامات يتم تأكيدها "commited" بمجرد تنفيذها , 
+            فإن كنت تود أن تقوم بتنفيذ إستعلام داخل عملية transaction , 
+            ببساطة إستدعى الـ method المسمى <code>()beginTransaction</code> , 
+            و بعدها إما تستدعى <code>()commit</code> لتأكيد العملية أو إستدعى 
+            <code>()rollBack</code> للإلغاء العملية, و سيعود 
+            <code>Zend_Db_Adapter</code> إلى وضعية الـ auto-commit إلى 
+            أن تقوم بإستدعاء <code>()beginTransaction</code> مرة ثانية .
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+// create a $db object, and then start a transaction.
+$db->beginTransaction();
+
+// attempt a query.
+// if it succeeds, commit the changes;
+// if it fails, roll back.
+try {
+    $db->query(...);
+    $db->commit();
+} catch (Exception $e) {
+    $db->rollBack();
+    echo $e->getMessage();
+}
+
+?>]]></programlisting>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.insert">
+
+        <title>إدخال صفوف</title>
+
+        <para>
+            للتسهيل, يمكنك أن تستخدم الـ method المسمى <code>()insert</code>
+            لتنشئ جملة INSERT لك و تقوم بربط البيانات التى سيتم إدخالها إليها
+            ( البيانات التى يتم ربطها يتم عمل quoting لها تلقائياً لتحد من هجمات 
+            الـ SQL injection ).
+        </para>
+
+        <para>
+            القيمة التى سيتم ارجاعها <emphasis>ليست</emphasis> أخر ID تم إدخاله, 
+            لأن الجدول ربما لا يحتوى على عمود auto-incremented , لذلك القيمة التى 
+            سيتم إرجاعها هى عدد الصفوف التى تم التأثير عليها (غالبا 1), 
+            إن كنت تريد الـ ID الخاص بأخر صف تم إدخاله, إستدعى الـ method المسمى 
+            <code>()lastInsertId</code> بعد إتمام عملية إدخال البيانات.
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+//
+// INSERT INTO round_table
+//     (noble_title, first_name, favorite_color)
+//     VALUES ("King", "Arthur", "blue");
+//
+
+// create a $db object, and then...
+// the row data to be inserted in column => value format
+$row = array (
+    'noble_title'    => 'King',
+    'first_name'     => 'Arthur',
+    'favorite_color' => 'blue',
+);
+
+// the table into which the row should be inserted
+$table = 'round_table';
+
+// insert the row and get the row ID
+$rows_affected = $db->insert($table, $row);
+$last_insert_id = $db->lastInsertId();
+
+?>]]></programlisting>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.update">
+
+        <title>عمل Update للصفوف</title>
+
+        <para>
+            للتسهيل, يمكنك أن تستخدم الـ method المسمى <code>()update</code>
+            لتنشئ جملة UPDATE لك و تربطها بالبيانات التى سيتم عمل update لها.
+            (البيانات التى سيتم ربطها يتم عمل quoting لها تلقائياً للمساعدة فى الحد من 
+            هجمات الـ SQL injection )
+        </para>
+
+        <para>
+            يمكنك ان توفر شرط WHERE اختيارياً لتحدد أى الصفوف سيتم 
+            عمل update لها . 
+            (لاحظ أن فقرة WHERE ليست براميتر ربط, لذلك يجب عليك أن تقوم 
+            بعمل quoting للقيم المستخدمة فيها بنفسك )
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+//
+// UPDATE round_table
+//     SET favorite_color = "yellow"
+//     WHERE first_name = "Robin";
+//
+
+// create a $db object, and then...
+// the new values to set in the update, in column => value format.
+$set = array (
+    'favorite_color' => 'yellow',
+);
+
+// the table to update
+$table = 'round_table';
+
+// the WHERE clause
+$where = $db->quoteInto('first_name = ?', 'Robin');
+
+// update the table and get the number of rows affected
+$rows_affected = $db->update($table, $set, $where);
+
+?>]]></programlisting>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.delete">
+
+        <title>حذف صفوف</title>
+
+        <para>
+            للتسهيل, يمكنك أن تستخدم الـ method المسمى <code>()delete</code>
+            لتنشئ جملة DELETE لك ,
+            و يمكنك ان توفر شرط WHERE اختيارى لتحدد أى الصفوف يتم حذفها 
+            (لاحظ أن فقرة WHERE ليست براميتر ربط, لذلك يجب عليك أن تقوم 
+            بعمل quoting للقيم المستخدمة فيها بنفسك )
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+//
+// DELETE FROM round_table
+//     WHERE first_name = "Patsy";
+//
+
+// create a $db object, and then...
+// the table to delete from
+$table = 'round_table';
+
+// the WHERE clause
+$where = $db->quoteInto('first_name = ?', 'Patsy');
+
+// update the table and get the number of rows affected
+$rows_affected = $db->delete($table, $where);
+
+?>]]></programlisting>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.fetch">
+
+        <title>جلب الصفوف</title>
+
+        <para>
+            ايضاَ يمكنك أن تنفذ استعلامات مباشرة على قاعدة البيانات بإستخدام الـ method 
+            المسمى <code>()query</code>, غالباً كل ما تحتاج إلى عمله هو ان تختار 
+            الصفوف و تأتى بالنتائج, مجموعة methods الـ ()*fetch تقوم بعمل هذا من أجلك, 
+            لكل من methods الـ ()*fetch , تمرر جملة  SELECT ; و إن كنت تستخدم 
+            placeholders فى الجملة , يمكنك أن تمرر مصفوفة من قيم الربط ليتم عمل 
+            quoting لها و إحلالها فى الجملة , مجموعة methods الـ ()*fetch هم :
+        </para>
+
+        <itemizedlist>
+            <listitem><para><code>()fetchAll</code></para></listitem>
+            <listitem><para><code>()fetchAssoc</code></para></listitem>
+            <listitem><para><code>()fetchCol</code></para></listitem>
+            <listitem><para><code>()fetchOne</code></para></listitem>
+            <listitem><para><code>()fetchPairs</code></para></listitem>
+            <listitem><para><code>()fetchRow</code></para></listitem>
+        </itemizedlist>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+// create a $db object, and then...
+
+// fetch all columns of all rows as a sequential array
+$result = $db->fetchAll(
+    "SELECT * FROM round_table WHERE noble_title = :title",
+    array('title' => 'Sir')
+);
+
+// fetch all columns of all rows as an associative array;
+// the first column is used as the array key.
+$result = $db->fetchAssoc(
+    "SELECT * FROM round_table WHERE noble_title = :title",
+    array('title' => 'Sir')
+);
+
+// fetch the first column of all rows returned
+$result = $db->fetchCol(
+    "SELECT first_name FROM round_table WHERE noble_title = :title",
+    array('title' => 'Sir')
+);
+
+// fetch only the first value
+$result = $db->fetchOne(
+    "SELECT COUNT(*) FROM round_table WHERE noble_title = :title",
+    array('title' => 'Sir')
+);
+
+// fetch a series of key-value pairs; the first column is
+// the array key, the second column is the array value
+$result = $db->fetchPairs(
+    "SELECT first_name, favorite_color FROM round_table WHERE noble_title = :title",
+    array('title' => 'Sir')
+);
+
+// fetch only the first row returned
+$result = $db->fetchRow(
+    "SELECT * FROM round_table WHERE first_name = :name",
+    array('name' => 'Lancelot')
+);
+
+?>]]></programlisting>
+    </sect2>
+
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

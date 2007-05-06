@@ -1,0 +1,155 @@
+<sect1 id="zend.controller.plugins">
+    <title>Wtyczki</title>
+
+    <sect2 id="zend.controller.plugins.introduction">
+        <title>Wprowadzenie</title>
+
+        <para>
+            Architektura kontrolera zawiera także system wtyczek, który pozwala
+            programiście na wykonanie własnego kodu, gdy następują określone
+            zdarzenia w trakcie trwania procesu kontrolera. Kontroler frontowy
+            używa agenta wtyczek jako rejeestru dla wtyczek programisty,
+            a agent wtyczek jest odpowiedzialny za to, że metody zdarzeń są
+            wywoływane dla każdej wtyczki zarejestrowanej w kontrolerze 
+            frontowym.
+        </para>
+
+        <para>
+            Metody zdarzeń są zdefiniowane w klasie abstrakcyjnej
+            <code>Zend_Controller_Plugin_Abstract</code>, z której dziedziczy
+            każda klasa wtyczki:
+
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        <code>routeStartup()</code> jest wywoływana zanim <code>Zend_Controller_Front</code>
+                        zacznie określać parametry żądania na podstawie tras.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <code>routeShutdown()</code> jest wywoływana gdy <code>Zend_Controller_Router</code>
+                        kończy pracę, gdy Zend_Controller_Front wychodzi z routera.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <code>dispatchLoopStartup()</code> jest wywoływana zanim <code>Zend_Controller_Front</code>
+                        wejdzie w pętlę uruchomieniową.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <code>preDispatch()</code> jest wywoływana przed uruchomieniem 
+                        akcji przez <code>Zend_Controller_Dispatcher</code>. Pozwala
+                        to na uzyskanie funkcjonalności proxy lub filtra. Przez
+                        nadpisanie żądania i zresetowanie flagi uruchomienia (poprzez 
+                        <code>Zend_Controller_Request_Abstract::setDispatched(false)</code>),
+                        obecna akcja może zostać ominięta.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <code>postDispatch()</code> jest wywoływana po uruchomieniu
+                        akcji przez <code>Zend_Controller_Dispatcher</code>. Pozwala
+                        to na uzyskanie funkcjonalności proxy lub filtra. Przez
+                        nadpisanie żądania i zresetowanie flagi uruchomienia (poprzez 
+                        <code>Zend_Controller_Request_Abstract::setDispatched(false)</code>), 
+                        może zostać określona nowa akcja do uruchomienia.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <code>dispatchLoopShutdown()</code> jest wywoływana gdy <code>Zend_Controller_Front</code> zakończy pętlę uruchomieniową.
+                    </para>
+                </listitem>
+        </itemizedlist>
+        </para>
+    </sect2>
+
+    <sect2 id="zend.controller.plugins.writing">
+        <title>Pisanie wtyczek</title>
+
+        <para>
+        W celu napisania klasy wtyczki, w prosty sposób rozszerz klasę 
+        abstrakcyjną <code>Zend_Controller_Plugin_Abstract</code>:
+        <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Controller/Plugin/Abstract.php';
+
+class MyPlugin extends Zend_Controller_Plugin_Abstract
+{
+    // ...
+}]]></programlisting>
+        </para>
+        <para>
+        Żadna z metod klasy <code>Zend_Controller_Plugin_Abstract</code> nie jest
+        abstrakcyjna, co oznacza, że nie jest konieczne implementowanie wszystkich
+        dostępnych metod zdarzeń opisanych powyżej. Autor wtyczki może 
+        zaimplementować tylko te metody zdarzeń, które są mu rzeczywiście potrzebne.
+        </para>
+        <para>
+        <code>Zend_Controller_Plugin_Abstract</code> udostępnia także obiekty 
+        żądania i odpowiedzi wtyczkom kontrolera za pomocą metod 
+        <code>getRequest()</code> oraz <code>getResponse()</code>, odpowiednio.
+        </para>
+    </sect2>
+
+    <sect2 id="zend.controller.plugins.using">
+        <title>Użycie wtyczek</title>
+        <para>
+        Klasy wtyczek są rejestrowane za pomocą metody 
+        <code>Zend_Controller_Front::registerPlugin()</code>, aż do momentu 
+        uruchomienia. Poniższy kod pokazuje w jaki sposób wtyczka może być użyta
+        przez kontroler:
+        <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Controller/Front.php';
+require_once 'Zend/Controller/Router.php';
+require_once 'Zend/Controller/Plugin/Abstract.php';
+
+class MyPlugin extends Zend_Controller_Plugin_Abstract
+{
+    public function routeStartup()
+    {
+        $this->getResponse()->appendBody('<p>routeStartup() called</p>');
+    }
+
+    public function routeShutdown($request)
+    {
+        $this->getResponse()->appendBody('<p>routeShutdown() called</p>');
+    }
+
+    public function dispatchLoopStartup($request)
+    {
+        $this->getResponse()->appendBody('<p>dispatchLoopStartup() called</p>');
+    }
+
+    public function preDispatch($request)
+    {
+        $this->getResponse()->appendBody('<p>preDispatch() called</p>');
+    }
+
+    public function postDispatch($request)
+    {
+        $this->getResponse()->appendBody('<p>postDispatch() called</p>');
+    }
+
+    public function dispatchLoopShutdown()
+    {
+        $this->getResponse()->appendBody('<p>dispatchLoopShutdown() called</p>');
+    }
+}
+
+$controller = Zend_Controller_Front::getInstance();
+$controller->setControllerDirectory('/path/to/controllers')
+           ->setRouter(new Zend_Controller_Router())
+           ->registerPlugin(new MyPlugin());
+$response = $controller->dispatch();
+
+echo $response;]]></programlisting>
+        </para>
+    </sect2>
+
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

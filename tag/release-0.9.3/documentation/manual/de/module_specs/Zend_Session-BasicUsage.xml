@@ -1,0 +1,140 @@
+<sect1 id="zend.session.basicusage">
+
+    <title>Grundsätzliche Verwendung</title>
+
+    <para>
+        <code>Zend_Session_Namespace</code> Instanzen stellen die primäre API für das Manipulieren von Session Daten
+        im Zend Framework bereit. Namensräume werden verwendet um alle Session Daten zu kapseln, aber es existiert
+        auch ein Standard Namensraum für jene die nur einen Namensraum für alle Session Daten benötigen.
+        <code>Zend_Session</code> verwendet die Erweiterung ext/session und dessen spezielle superglobale Variable
+        <code>$_SESSION</code> als Speichermechanismus für Session Daten. Wärend <code>$_SESSION</code> im
+        globalen Namensraum von PHP noch immer vorhanden ist, sollten Entwickler davon absehen diese direkt zu
+        verwenden, damit <code>Zend_Session</code> und <code>Zend_Session_Namespace</code> am effizientesten
+        und sichersten Ihre Sammlung von Session relevanten Funktionen bereitstellen können.
+    </para>
+
+    <sect2 id="zend.session.basicexamples">
+
+        <title>Übungs Beispiele</title>
+
+        <para>
+            Wenn kein Namensraum bei der Instanziierung von Zend_Session definiert wurde, werden alle Daten
+            transparent in einem Namensraum gespeichert der "<code>Default</code>" heißt. <code>Zend_Session</code>
+            ist nicht dazu gedacht um direkt mit den Inhalten von Containern der Session Namensräume zu arbeiten.
+            Stattdessen wird <code>Zend_Session_Namespace</code> verwendet. Das folgende Beispiel demonstriert die
+            Verwendung dieses Standard Namensraums und zeigt wie die Anzahl der Zugriffe eines Benutzers auf eine
+            Seite einer Homepage gezählt werden kann. Um dieses Beispiel zu testen, muß der folgende Code in der
+            ZF Bootstrap Datei hinzugefügt werden:
+        </para>
+
+        <example>
+            <title>Seitenzugriffe zählen</title>
+<programlisting role="php">
+<![CDATA[<?php
+    require_once 'Zend/Session.php';
+
+    $defaultNamespace = new Zend_Session_Namespace('Default');
+
+    // verwenden der magischen __isset() Methode in Zend_Session_Namespace:
+    if (isset($defaultNamespace->numberOfPageRequests)) {
+        $defaultNamespace->numberOfPageRequests++; // Das erhöht den Zählen für jeden Seitenaufruf
+    } else {
+        $defaultNamespace->numberOfPageRequests = 1; // Erster Zugriff
+    }
+
+    echo "Seitenzugriffe in dieser Session: ", $defaultNamespace->numberOfPageRequests;
+?>]]></programlisting>
+        </example>
+
+        <para>
+            Eine der vielen Vorteile von Zend_Session_Namespace ergibt sich wenn mehrere Module Zend_Session_Namespace
+            verwenden um Ihre Session Daten zu kapseln. Zend_Session kann ein optionales $namespace Argument im
+            Konstruktor übergeben werden, welches es anderen Komponenten, Modulen und entwickler-spezifischem Code
+            erlaubt sicherzustellen das Ihre Daten durch eine Partition geschützt sind, die zwischen den
+            Datenbereichen die von anderen Komponenten, Modulen und Entwickler-Code bestehen. Die Verwendung von
+            Namensräumen bietet einen effektiven und populären Web um einen Teilbereich von Session Daten vor
+            irrtümlichen Änderungen zu "schützen". Die Namen von Namensräumen sind limitiert auf Zeichenketten
+            welche durch nicht-leere PHP Strings dargestellt werden und welche nicht mit einem Unterstrich-Zeichen
+            ('_') beginnen. Nur Kern-Komponenten welche im Zend Framework beinhaltet sind, sollten Namensräume
+            verwenden die mit 'Zend_' beginnen.
+        </para>
+
+        <example>
+            <title>Neuer Weg: Namensräume verhindern Kollisionen</title>
+<programlisting role="php">
+<![CDATA[<?php
+    // In der Zend_Auth Komponente
+    require_once 'Zend/Session.php';
+    $authNamespace = new Zend_Session_Namespace('Zend_Auth');
+    $authNamespace->user = "meinbenutzername";
+
+    // In einer Web Service Komponente
+    $webServiceNamespace = new Zend_Session_Namespace('Mein_Web_Service');
+    $webServiceNamespace->user = "meinwebbenutzername";
+?>]]></programlisting>
+        </example>
+
+        <para>
+            Das obige Beispiel erzielt den gleichen Effekt wie der folgende Code, ausser das die obigen Session
+            Objekte die Kapselung der Session Daten innerhalb des jeweiligen Namensraumes aufrecht erhält.
+        </para>
+
+        <example>
+            <title>Alter Weg: PHP Session Zugriff</title>
+<programlisting role="php">
+<![CDATA[<?php
+    $_SESSION['Zend_Auth']['user'] = "meinbenutzername";
+    $_SESSION['Some_Web_Service']['user'] = "meinwebbenutzername";
+?>]]></programlisting>
+        </example>
+
+    </sect2>
+
+    <sect2 id="zend.session.iteration">
+
+        <title>Session Namensräume wiederholen</title>
+
+        <para>
+            <code>Zend_Session_Namespace</code> stellt das komplette
+            <ulink url="http://www.php.net/~helly/php/ext/spl/interfaceIteratorAggregate.html">IteratorAggregate Interface</ulink>
+            zur Verfügung, was die Unterstützung der <code>foreach</code> Anweisung beinhält:
+        </para>
+
+        <example>
+            <title>Session wiederholen</title>
+<programlisting role="php">
+<![CDATA[<?php
+    // Zend_Session ist wiederholbar
+    require_once 'Zend/Session.php';
+    $aNamespace = new Zend_Session_Namespace('Einige_Namensräume_Mit_aktuellen_Daten');
+    foreach ($aNamespace as $index => $value) {
+        echo "aNamespace->$index = '$value';\n";
+    }
+?>]]></programlisting>
+        </example>
+
+    </sect2>
+
+    <sect2 id="zend.session.accessors">
+
+        <title>Zugriffsfunktionen für Session Namensräume</title>
+
+        <para>
+            Die gewöhnlichen Zugriffsmethoden sind über die magischen __set(), __unset(), __isset() und __get()
+            Methoden verfügbar. Die magischen Methoden sollten nicht direkt verwendet werden, ausser innerhalb einer
+            Subklasse von Zend_Session. Stattdessen können normale Operationen verwendet werden, um diese magischen
+            Methoden aufzurufen:
+        </para>
+
+        <example>
+            <title>Zugriff auf Session Daten</title>
+<programlisting role="php">
+<![CDATA[<?php
+            $object->property = $value; echo
+            (isset($object->property) ? 'set' : 'unset');
+?>]]></programlisting>
+        </example>
+
+    </sect2>
+
+</sect1>

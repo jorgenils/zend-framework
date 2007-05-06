@@ -1,0 +1,73 @@
+<sect1 id="zend.gdata.exception">
+    <title>Gdata の例外の捕捉</title>
+
+    <para>
+        <code>Zend_Gdata_Exception</code> は、Zend_Gdata
+        がスローする例外の基底クラスです。Zend_Gdata_Exception
+        を捕捉すれば、Zend_Gdata がスローする例外をすべて処理できます。
+    </para>
+
+    <programlisting role="php"><![CDATA[<?php
+try {
+    $client = Zend_Gdata_ClientLogin::getHttpClient($username, $password);
+} catch(Zend_Gdata_Exception $ex) {
+    // ユーザに例外の内容を報告します
+    die($ex->getMessage());
+}
+?>]]></programlisting>
+
+    <para>
+        Zend_Gdata では、次のようなサブクラスを使用しています。
+
+        <itemizedlist>
+            <listitem>
+                <para>
+                    <code>Zend_Gdata_AuthException</code>
+                    は、ユーザアカウントの認証情報が無効であることを表します。
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    <code>Zend_Gdata_BadMethodCallException</code>
+                    は、そのサービスがサポートしていないメソッドがコールされたことを表します。
+                    たとえば、CodeSearch サービスは <code>post()</code>
+                    をサポートしていません。
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    <code>Zend_Gdata_HttpException</code>
+                    は、HTTP リクエストに失敗したことを表します。
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    <code>Zend_Gdata_InvalidArgumentException</code>
+                    は、アプリケーションで設定した値が、その状況は無効であることを表します。
+                    たとえば、Calendar の visibility に "banana" を指定したり、blog の名前を指定せずに
+                    Blogger のフィードを取得しようとしたりといった場合があてはまります。
+                </para>
+            </listitem>
+        </itemizedlist>
+    </para>
+
+    <para>
+        これらのサブクラスを使用することで、それぞれの例外に固有の処理をすることができます。
+        これらの例外サブクラスが、それぞれ Zend_Gdata のどのメソッドからスローされるのかについては
+        API ドキュメントを参照ください。
+    </para>
+
+    <programlisting role="php"><![CDATA[<?php
+try {
+    $client = Zend_Gdata_ClientLogin::getHttpClient($username, $password);
+} catch(Zend_Gdata_AuthException $authEx) {
+    // ユーザの認証情報が無効なので、
+    // もう一度認証をさせるなどの処理が適当でしょう
+    ...
+} catch(Zend_Gdata_HttpException $httpEx) {
+    // Google Data サーバに接続できません
+    die($httpEx->getMessage);
+}
+?>]]></programlisting>
+
+</sect1>

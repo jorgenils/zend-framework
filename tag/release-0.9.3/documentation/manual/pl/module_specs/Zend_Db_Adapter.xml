@@ -1,0 +1,477 @@
+<sect1 id="zend.db.adapter">
+
+    <title>Zend_Db_Adapter</title>
+
+    <sect2 id="zend.db.adapter.introduction">
+
+        <title>Wprowadzenie</title>
+
+        <para>
+            <code>Zend_Db_Adapter</code> jest uniwersalnym interfejsem dostępu 
+            do baz danych dla Zend Framework. Bazuje on na PDO. Używając interfejsu
+            <code>Zend_Db_Adapter</code> możesz połączyć się z dowolnym wspieranym
+            systemem bazodanowym używając tego samego API. Wspierane systemy to
+            między innymi Microsoft SQL Server, MySQL, PostgreSQL, SQLite, i inne.
+        </para>
+
+        <para>Aby utworzyć instancję interfejsu <code>Zend_Db_Adapter</code> dla
+        określonego systemu bazodanowego, musisz wywołać metodę <code>Zend_Db::factory()</code> 
+        przekazując jej nazwę systemu bazodanowego oraz tablicę parametrów potrzebnych 
+        do połączenia. Na przykład, aby połączyć się z bazą MySQL nazwaną "camelot" 
+        znajdującą się pod adresem lokalnym, jako użytkownik "malory" możesz zrobić tak:</para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+require_once 'Zend/Db.php';
+
+$params = array ('host'     => '127.0.0.1',
+                 'username' => 'malory',
+                 'password' => '******',
+                 'dbname'   => 'camelot');
+
+$db = Zend_Db::factory('PDO_MYSQL', $params);
+
+?>]]></programlisting>
+
+        <para>
+            Podobnie, aby połączyć się z bazą SQLite nazwaną "camelot.sq3":
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+require_once 'Zend/Db.php';
+
+$params = array ('dbname' => 'camelot.sq3');
+
+$db = Zend_Db::factory('PDO_SQLITE', $params);
+
+?>]]></programlisting>
+
+        <para>
+            Podobnie, aby połączyć się z bazą danych SQLite2 o nazwie "camelot.sq2":
+            Dla bazy sqlite opartej na pamięci nie określaj prefiksu dsn i użyj bazy
+            danych o nazwie ":memory:".
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+require_once 'Zend/Db.php';
+
+$params = array ('dbname' => 'camelot.sq2',
+                 'dsnprefix' => 'sqlite2');
+
+$db = Zend_Db::factory('PDO_SQLITE', $params);
+
+?>]]></programlisting>
+
+        <para>
+            W każdym z tych przypadków będziesz mógł używać takiego samego API
+            aby tworzyć zapytania do bazy.
+        </para>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.quoting">
+
+        <title>Zapobieganie atakom SQL Injection</title>
+
+        <para>
+            Powinieneś zawsze cytować wartości, które będą użyte w wyrażeniu SQL;
+            zapobiega to atakom SQL Injection. <code>Zend_Db_Adapter</code> zapewnia
+            dwie metody (poprzez obiekt PDO) aby pomóc Ci manualnie cytować wartości.
+        </para>
+
+        <para>
+            Pierwsza z nich to metoda <code>quote()</code>. Zacytuje ona wartość
+            skalarną odpowiednio dla twojego adaptera bazy danych; jeśli spróbujesz
+            cytować tablicę, metoda zwróci łańcuch znaków zawierający wartości
+            elementów tablicy oddzielone przecinkami. Każda wartość zostanie
+            odpowiednio zacytowana. (Jest to użyteczne dla funkcji przyjmujących
+            parametr w postaci listy).
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+// tworzymy obiekt $db, zakładając, że adapter to Mysql
+
+// cytujemy łańcuch znaków
+$value = $db->quote('St John"s Wort');
+// $value ma teraz wartość '"St John\"s Wort"' (zwróć uwagę na otaczające ją cudzysłowy)
+
+// cytujemy tablicę
+$value = $db->quote(array('a', 'b', 'c');
+// $value ma teraz wartość '"a", "b", "c"' (elementy tablicy oddzielone przecinkami)
+
+?>]]></programlisting>
+
+        <para>
+            Druga metoda to <code>quoteInto()</code>. Przekazujesz do niej podstawowy
+            łańcuch znaków ze znacznikiem w postaci znaku zapytania, a następnie
+            jedną wartość skalarną lub tablicę która ma być wstawiona. Jest to
+            użyteczne przy tworzeniu zapytań i warunków po kolei. Wartości 
+            skalarne i tablice działają tak samo jak w metodzie <code>quote()</code>.
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+// tworzymy obiekt $db, zakładając, że adapter to Mysql
+
+// cytujemy łańcuch znaków dla warunku WHERE
+$where = $db->quoteInto('id = ?', 1);
+// $where ma teraz wartość 'id = "1"' (zwróć uwagę na otaczające ją cudzysłowy)
+
+// cytujemy tablicę dla warunku WHERE
+$where = $db->quoteInto('id IN(?)', array(1, 2, 3));
+// $where ma teraz wartość 'id IN("1", "2", "3")' (elementy tablicy oddzielone przecinkami)
+
+?>]]></programlisting>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.queries">
+
+        <title>Bezpośrednie zapytania</title>
+
+        <para>
+            Gdy posiadasz instancję <code>Zend_Db_Adapter</code>, możesz wykonywać
+            zapytania bezpośrednio jako SQL. <code>Zend_Db_Adapter</code> przekazuje
+            te zapytania do obiektu PDO, który je przygotowuje i wykonuje, a następnie
+            zwraca Ci obiekt PDOStatement abyś mógł manipulować danymi wynikowymi 
+            (jeśli jekieś są).
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+// tworzymy obiekt $db, a następnie wykonujemy
+// odpowiednio zacytowane zapytanie SQL.
+$sql = $db->quoteInto(
+    'SELECT * FROM example WHERE date > ?',
+    '2006-01-01'
+);
+$result = $db->query($sql);
+
+// używamy PDOStatement aby pobrać wszystkie wiersze w postaci tablicy
+$rows = $result->fetchAll();
+
+?>]]></programlisting>
+
+        <para>
+            Możesz dołączać dane do zapytania automatycznie. Oznacza to, że 
+            możesz użyć dowolną ilość nazwanych znaczników w zapytaniu, a następnie
+            przekazać tablicę danych które odpowiadają tym znacznikom. Odpowiadające
+            wartości są automtycznie cytowane, lepiej zabezpieczając przed
+            atakami SQL injection.
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+// tworzymy obiekt $db, a następnie wykonujemy zapytanie
+// tym razem używając podmieniania znaczników
+$result = $db->query(
+    'SELECT * FROM example WHERE date > :placeholder',
+    array('placeholder' => '2006-01-01')
+);
+
+// używamy PDOStatement aby pobrać wszystkie wiersze w postaci tablicy
+$rows = $result->fetchAll();
+
+?>]]></programlisting>
+
+        <para>
+            Opcjonalnie możesz przygotować i dołączyć dane do zapytań SQL ręcznie.
+            Aby to zrobić użyj metody <code>prepare()</code> aby otrzymać 
+            przygotowane zapytanie <code>PDOStatement</code>, przy którym możesz 
+            bezpośrednio manipulować.
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+// tworzymy obiekt $db, a następnie wykonujemy zapytanie
+// tym razem przygotowujemy PDOStatement do ręcznego dołączania.
+$stmt = $db->prepare('SELECT * FROM example WHERE date > :placeholder');
+$stmt->bindValue('placeholder', '2006-01-01');
+$stmt->execute();
+
+// używamy PDOStatement aby pobrać wszystkie wiersze w postaci tablicy
+$rows = $stmt->fetchAll();
+
+?>]]></programlisting>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.transactions">
+
+        <title>Transakcje</title>
+
+        <para>
+            Domyślnie, PDO (a więc i <code>Zend_Db_Adapter</code>) działają w trybie
+            "auto-commit". Oznacza to, że wszystkie zapytania są realizowane natychmiast
+            po ich wykonaniu. Jeśli chcesz je wykonać wewnątrz transakcji, w prosty sposób
+            wywołak metodę <code>beginTransaction()</code>, a następnie <code>commit()</code>
+            aby zrealizować zapytania lub <code>rollBack()</code> aby je cofnąć.
+            <code>Zend_Db_Adapter</code> wraca wtedy do trybu "auto-commit" dopóki
+            znów nie wywołasz metody <code>beginTransaction()</code>.
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+// utwórz obiekt $db, a następnie rozpocznij transakcję
+$db->beginTransaction();
+
+// próbujemy wykonać zapytanie
+// jeśli uda się, zatwierdzamy zapytanie;
+// jeśli nie uda się, cofamy zapytanie.
+try {
+    $db->query(...);
+    $db->commit();
+} catch (Exception $e) {
+    $db->rollBack();
+    echo $e->getMessage();
+}
+
+?>]]></programlisting>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.insert">
+
+        <title>Wstawianie wierszy</title>
+
+        <para>
+            Dla wygody możesz użyć metody <code>insert()</code>, która utworzy
+            zapytanie INSERT oraz dołączy do niego dane, które mają wstawione.
+            (Dołączone dane zostaną automatycznie zacytowane aby pomóc zapobiegać
+            atakom SQL injection.)
+        </para>
+
+        <para>
+            Zwracana wartość <emphasis>nie</emphasis> jest ostatnio wstawionym 
+            numerem ID, ponieważ tabela nie musi posiadać automatycznie inkrementowanej
+            kolumny;  zwracana wartość jest liczbą wstawionych wierszy (najczęściej 1). 
+            Jeśli chcesz otrzymać wartość ID ostatnio wstawionego rekordu, wywołaj 
+            metodę <code>lastInsertId()</code> po wstawieniu rekordu.
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+//
+// INSERT INTO round_table
+//     (noble_title, first_name, favorite_color)
+//     VALUES ("King", "Arthur", "blue");
+//
+
+// tworzymy obiekt $db, a następnie...
+// dane do wstawienia w postaci nazwa_kolumny => wartość
+$row = array (
+    'noble_title'    => 'King',
+    'first_name'     => 'Arthur',
+    'favorite_color' => 'blue',
+);
+
+// nazwa tabeli do której ma być wstawiony wiersz
+$table = 'round_table';
+
+// wstawiamy wiersz i pobieramy jego ID
+$rows_affected = $db->insert($table, $row);
+$last_insert_id = $db->lastInsertId();
+
+?>]]></programlisting>
+    </sect2>
+
+    <sect2 id="zend.db.adapter.update">
+
+        <title>Aktualizowanie wierszy</title>
+
+        <para>
+            Dla wygody możesz użyć metody <code>update()</code>, która utworzy
+            zapytanie UPDATE oraz dołączy do niego dane które mają być uaktualnione.
+            (Dołączone dane zostaną automatycznie zacytowane aby pomóc zapobiegać
+            atakom SQL injection.)
+        </para>
+
+        <para>
+            Możesz przekazać do metody opcjonalny warunek WHERE aby określić, 
+            które wiersze chcesz zaktualizować.
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+
+//
+// UPDATE round_table
+//     SET favorite_color = "yellow"
+//     WHERE first_name = "Robin";
+//
+
+// tworzymy obiekt $db, a następnie...
+// dane do aktualizowania w postaci nazwa_kolumny => wartość
+$set = array (
+    'favorite_color' => 'yellow',
+);
+
+// nazwa tabeli w której ma być aktualizowany wiersz
+$table = 'round_table';
+
+// warunek WHERE
+$where = $db->quoteInto('first_name = ?', 'Robin');
+
+// uaktualniamy tabelę i pobieramy liczbę uaktualnionych wierszy
+$rows_affected = $db->update($table, $set, $where);
+
+?>]]></programlisting>
+
+        <para>
+            Jeśli masz kilka warunków WHERE, które powinny być dołączone do 
+            zapytania UPDATE, możesz przekazać tablicę tych warunków do metody 
+            <code>update()</code>. Takie warunki zostaną połączone za pomocą 
+            operatora AND. Łączenie warunków za pomocą operatora OR musi być 
+            przeprowadzone ręcznie:
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+$set = array('favorite_color' => 'yellow');
+
+// kilka warunków połączonych za pomocą AND
+$where   = array(
+    $db->quoteInto('first_name = ?', $firstName),
+    $db->quoteInto('noble_title = ?', $nobleTitle)
+    );
+$count   = $db->update('round_table', $set, $where);
+
+// kilka warunków połączonych za pomocą OR
+$firstNameOne = $db->quote($firstNameOne);
+$firstNameTwo = $db->quote($firstNameTwo);
+$where        = "first_name = $firstNameOne OR first_name = $firstNameTwo";
+$count        = $db->update('round_table', $set, $where);
+
+?>]]></programlisting>
+
+        <note>
+            <para>
+                Wartości i identyfikatory użyte w warunkach WHERE nie są 
+                automatycznie cytowane. Jeśli masz wartości lub identyfikatory
+                wymagające cytowania, powinieneś sam to zrobić. Użyj metod 
+                <code>quote()</code>, <code>quoteInto()</code>, oraz 
+                <code>quoteIdentifier()</code> adaptera bazy danych.
+            </para>
+        </note>
+
+    </sect2>
+
+    <sect2 id="zend.db.adapter.delete">
+
+        <title>Usuwanie wierszy</title>
+
+        <para>
+            Dla wygody możesz użyć metody <code>delete()</code>, która utworzy
+            zapytanie DELETE; możesz przekazać do metody opcjonalny warunek 
+            WHERE aby określić, które wiersze chcesz usunąć. (Zauważ, że 
+            warunek WHERE nie jest dołączanym parametrem, więc musisz sam 
+            zacytować jego wartości.)
+        </para>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+//
+// DELETE FROM round_table
+//     WHERE first_name = "Patsy";
+//
+
+// tworzymy obiekt $db, a następnie...
+// nazwa tabeli z której usuwamy wiersz
+$table = 'round_table';
+
+// warunek WHERE
+$where = $db->quoteInto('first_name = ?', 'Patsy');
+
+// usuwamy wiersz i pobieramy liczbę usuniętych wierszy
+$rows_affected = $db->delete($table, $where);
+
+?>]]></programlisting>
+
+        <para>
+            Tak jak w metodzie 
+            <link linkend="zend.db.adapter.update"><code>update()</code></link>,
+            możesz użyć tablicy warunków WHERE dla argumentu <code>$where</code> 
+            metody <code>delete()</code>.
+        </para>
+
+        <note>
+            <para>
+                Wartości i identyfikatory użyte w warunkach WHERE nie są 
+                automatycznie cytowane. Jeśli masz wartości lub identyfikatory
+                wymagające cytowania, powinieneś sam to zrobić. Użyj metod 
+                <code>quote()</code>, <code>quoteInto()</code>, oraz 
+                <code>quoteIdentifier()</code> adaptera bazy danych.
+            </para>
+        </note>
+
+    </sect2>
+
+    <sect2 id="zend.db.adapter.fetch">
+
+        <title>Pobieranie wierszy</title>
+
+        <para>
+            Chociaż możesz wykonać zapytanie bezpośrednio za pomocą metody 
+            <code>query()</code>, często wszystko czego potrzebujesz to wybrać
+            wiersze i pobrać wyniki. Seria metod <code>fetch*()</code> robi to
+            dla ciebie. Do każdej z metod <code>fetch*()</code>, przekazujesz 
+            zapytanie SQL SELECT; jeśli użyjesz nazwanych znaczników w zapytaniu, 
+            możesz przekazać tablicę wartości, które mają być zacytowane i 
+            zamienione w zapytaniu. Metody <code>fetch*()</code> to:
+        </para>
+
+        <itemizedlist>
+            <listitem><para><code>fetchAll()</code></para></listitem>
+            <listitem><para><code>fetchAssoc()</code></para></listitem>
+            <listitem><para><code>fetchCol()</code></para></listitem>
+            <listitem><para><code>fetchOne()</code></para></listitem>
+            <listitem><para><code>fetchPairs()</code></para></listitem>
+            <listitem><para><code>fetchRow()</code></para></listitem>
+        </itemizedlist>
+
+        <programlisting role="php"><![CDATA[<?php
+	
+// tworzymy obiekt $db, a następnie...
+
+// pobieramy wszystkie kolumny wszystkich wierszy jako sekwencyjną tablicę
+$result = $db->fetchAll(
+    "SELECT * FROM round_table WHERE noble_title = :title",
+    array('title' => 'Sir')
+);
+
+// pobieramy wszystkie kolumny wszystkich wierszy jako tablicę
+// asocjacyjną; pierwsza kolumna jest używana jako klucz tablicy
+$result = $db->fetchAssoc(
+    "SELECT * FROM round_table WHERE noble_title = :title",
+    array('title' => 'Sir')
+);
+
+// pobieramy pierwszą kolumnę wszystkich zwróconych wierszy
+$result = $db->fetchCol(
+    "SELECT first_name FROM round_table WHERE noble_title = :title",
+    array('title' => 'Sir')
+);
+
+// pobieramy tylko pierwszą zwróconą wartość
+$result = $db->fetchOne(
+    "SELECT COUNT(*) FROM round_table WHERE noble_title = :title",
+    array('title' => 'Sir')
+);
+
+// pobieramy serię par klucz-wartość; pierwsza kolumna jest
+// kluczem tablicy, a druga jest wartością
+$result = $db->fetchPairs(
+    "SELECT first_name, favorite_color FROM round_table WHERE noble_title = :title",
+    array('title' => 'Sir')
+);
+
+// pobieramy tylko pierwszy zwrócony wiersz
+$result = $db->fetchRow(
+    "SELECT * FROM round_table WHERE first_name = :name",
+    array('name' => 'Lancelot')
+);
+
+?>]]></programlisting>
+    </sect2>
+
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
