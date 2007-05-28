@@ -1,0 +1,59 @@
+<sect1 id="zend.filter.introduction">
+
+    <title>Introduction</title>
+
+    <para>
+        Le composant Zend_Filter fournit un ensemble de filtres de données usuels. Il fournit également
+        un mécanisme simple de chaînage par lequel plusieurs filtres peuvent être appliqués à une donnée
+        dans un ordre défini.
+    </para>
+
+    <para>
+        <emphasis role="strong">Qu'est-ce qu'un filtre ?</emphasis>
+    </para>
+
+    <para>
+        Généralement parlant, une filtre est utilisé pour supprimer les parties non désirées de ce qui lui est 
+        soumis tout en laissant passer la partie désiré. Dans ce cas de figure, un filtre 
+        est une opération qui restitue une partie de la donnée soumise. Ce type de filtrage est utile pour les
+        applications web : suppression des données soumises non conformes, élimination des espaces inutiles, etc.  
+    </para>
+
+    <para>
+        Cette définition simple d'un filtre peut être étendue pour inclure des transformations généralisées aux 
+        données soumises. Une transformation communément requise dans les applications web consiste à échapper les
+        entités HTML. Ainsi, si un champ de formulaire est automatiquement transmis et contient des données
+        non vérifiées (provenant par exemple d'un navigateur web), ces données doivent être expurgées de leurs
+        entités HTML ou bien contenir uniquement des entités HTML échappées, de manière à se garantir contre les
+        comportements non désirés et les vulnérabilités de sécurité. Afin d'assurer cette opération, les entités
+        HTML qui sont présentes dans les données saisies doivent être soit supprimées soit échappées. Naturellement,
+        l'approche adéquate dépend du contexte. Un fitre de suppression des entités HTML opère dans le contexte
+        défini plus haut : une opération produisant un sous-ensemble à partir d'une donnée soumise. Cependant, 
+        un filtre échappant les entités HTML transforme la valeur entrée (par exemple, "<code>&amp;</code>" sera
+        transformé en "<code>&amp;amp;</code>". Permettre de telles choses est important pour les développeurs 
+        web et "filtrer" dans le contexte d'utilisation de Zend_Filter consiste à réaliser des transformations
+        sur les donnée soumises.
+    </para>
+
+    <para>
+        Cette définition du filtrage fournit les fondations pour <code>Zend_Filter_Interface</code>, qui ne
+        nécessite qu'une seule méthode nommée <code>filter()</code> pour être implémenté par une classe de
+        filtrage.
+    </para>
+
+    <para>
+        Un exemple simple ci-dessous démontre l'usage d'un filtre sur les caractères esperluette (<code>&amp;</code>,
+        'ampersand' en anglais) et guillemet double (<code>&quot;</code>) :
+
+        <programlisting role="php"><![CDATA[<?php
+require_once 'Zend/Filter/HtmlEntities.php';
+$htmlEntities = new Zend_Filter_HtmlEntities();
+echo $htmlEntities->filter('&'); // &amp;
+echo $htmlEntities->filter('"'); // &quot;]]></programlisting>
+
+    </para>
+
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

@@ -1,0 +1,232 @@
+<sect1 id="zend.controller.dispatcher">
+    <title>Der Dispatcher</title>
+
+    <sect2 id="zend.controller.dispatcher.overview">
+        <title>Überblick</title>
+
+        <para>
+            Dispatching ist der Prozess, das Request Objekt
+            <code>Zend_Controller_Request_Abstract</code> zu übernehmen, die dort enthaltenen
+            Modul, Controller und Aktion Namen sowie die optionalen Parameter zu extrahieren und
+            dann den Controller zu instanzieren und die Aktion dieses Controllers aufzurufen.
+            Wenn kein Modul, kein Controller oder keine Aktion gefunden wurde, werden dafür
+            Standardwerte verwendet.  <code>Zend_Controller_Dispatcher_Standard</code> legt
+            <code>index</code> für beide als Standardwert fest, aber erlaubt dem Entwickler auch,
+            diese durch Verwendung der <code>setDefaultController()</code>, 
+            <code>setDefaultAction()</code> und <code>setDefaultModule()</code> Methoden zu
+            verändern.
+        </para>
+
+        <para>
+            Dispatching läuft innerhalb einer Schleife im Front Controller ab. Vor dem Dispatching
+            fragt der Front Controller den Request ab, um benutzerspezifizierte Werte für Modul,
+            Controller, Aktion und optionale Parameter zu finden. Dann startet er die Dispatch 
+            Schleife, um die Anfrage zu verarbeiten. 
+        </para>
+
+        <para>
+            Zu Beginn jeden Durchlaufes setzt er im Request Objekt einen Schalter, der angibt, dass
+            die Aktion verarbeitet worden ist. Wenn eine Aktion oder ein pre/postDispatch Plugin
+            diesen Schalter zurücksetzt, wird die Dispatch Schleife fortgesetzt und versucht, die
+            neue Anfrage zu verarbeiten. Durch Ändern des Controllers und / oder der Aktion im 
+            Request Objekt und Zuürcksetzen des Verarbeitungsstatus, kann der Entwickler eine zu 
+            durchlaufende Anfragekette definieren.
+        </para>
+
+        <para>
+            Die Controller Methode, die solch eine Verarbeitung kontrolliert lautet
+            <code>_forward()</code>; rufe diese Methode von einer beliebigen pre/postDispatch()
+            oderAktionsmethode auf und übergebe Aktion, Controller, Modul und beliebige optionale
+            Parameter, die du zur neuen Aktion übersenden möchtest:
+        </para>
+        
+        <programlisting role="php"><![CDATA[<?php
+public function fooAction()
+{
+    // forward to another action in the current controller and module:
+    $this->_forward('bar', null, null, array('baz' => 'bogus'));
+}
+
+public function barAction()
+{
+    // forward to an action in another controller, FooController::bazAction(),
+    // in the current module:
+    $this->_forward('baz', 'foo', null, array('baz' => 'bogus'));
+}
+
+public function bazAction()
+{
+    // forward to an action in another controller in another module,
+    // Foo_BarController::bazAction():
+    $this->_forward('baz', 'bar', 'foo', array('baz' => 'bogus'));
+}
+?>]]></programlisting>
+    </sect2>
+
+    <sect2 id="zend.controller.dispatcher.subclassing">
+        <title>Subclassing the Dispatcher</title>
+
+        <para>
+            <code>Zend_Controller_Front</code> ruft zuerst den Router auf, um die erste Aktion 
+            für den Request zu ermitteln. Danach startet es die Dispatch Schleife, welche
+            den Dispatcher aufruft, um die Aktion zu verarbeiten.
+        </para>
+
+        <para>
+            The dispatcher needs a variety of data in order to do its work - it
+            needs to know how to format controller and action names, where to
+            look for controller class files, whether or not a provided module
+            name is valid, and an API for determining if a given request is even
+            dispatchable based on the other information available.
+        </para>
+
+        <para>
+            <code>Zend_Controller_Dispatcher_Interface</code> defines the
+            following methods as required for any dispatcher implementation:
+        </para>
+
+        <programlisting role="php"><![CDATA[
+interface Zend_Controller_Dispatcher_Interface
+{
+    /**
+     * Format a string into a controller class name.
+     *
+     * @param string $unformatted
+     * @return string
+     */
+    public function formatControllerName($unformatted);
+
+    /**
+     * Format a string into an action method name.
+     *
+     * @param string $unformatted
+     * @return string
+     */
+    public function formatActionName($unformatted);
+
+    /**
+     * Determine if a request is dispatchable
+     *
+     * @param  Zend_Controller_Request_Abstract $request
+     * @return boolean
+     */
+    public function isDispatchable(Zend_Controller_Request_Abstract $request);
+
+    /**
+     * Set a user parameter (via front controller, or for local use)
+     * 
+     * @param string $name 
+     * @param mixed $value 
+     * @return Zend_Controller_Dispatcher_Interface
+     */
+    public function setParam($name, $value);
+
+    /**
+     * Set an array of user parameters
+     * 
+     * @param array $params 
+     * @return Zend_Controller_Dispatcher_Interface
+     */
+    public function setParams(array $params);
+
+    /**
+     * Retrieve a single user parameter
+     * 
+     * @param string $name 
+     * @return mixed
+     */
+    public function getParam($name);
+
+    /**
+     * Retrieve all user parameters
+     * 
+     * @return array
+     */
+    public function getParams();
+
+    /**
+     * Clear the user parameter stack, or a single user parameter
+     *
+     * @param null|string|array single key or array of keys for params to clear
+     * @return Zend_Controller_Dispatcher_Interface
+     */
+    public function clearParams($name = null);
+
+    /**
+     * Set the response object to use, if any
+     * 
+     * @param Zend_Controller_Response_Abstract|null $response 
+     * @return void
+     */
+    public function setResponse(Zend_Controller_Response_Abstract $response = null);
+
+    /**
+     * Retrieve the response object, if any
+     * 
+     * @return Zend_Controller_Response_Abstract|null
+     */
+    public function getResponse();
+
+    /**
+     * Add a controller directory to the controller directory stack
+     * 
+     * @param string $path 
+     * @param string $args
+     * @return Zend_Controller_Dispatcher_Interface
+     */
+    public function addControllerDirectory($path, $args = null);
+
+    /**
+     * Set the directory (or directories) where controller files are stored
+     *
+     * @param string|array $dir 
+     * @return Zend_Controller_Dispatcher_Interface
+     */
+    public function setControllerDirectory($path);
+
+    /**
+     * Return the currently set directory(ies) for controller file lookup
+     * 
+     * @return array
+     */
+    public function getControllerDirectory();
+
+    /**
+     * Dispatch a request to a (module/)controller/action.
+     *
+     * @param  Zend_Controller_Request_Abstract $request
+     * @param  Zend_Controller_Response_Abstract $response
+     * @return Zend_Controller_Request_Abstract|boolean
+     */
+    public function dispatch(Zend_Controller_Request_Abstract $request, Zend_Controller_Response_Abstract $response);
+
+    /**
+     * Whether or not a given module is valid
+     * 
+     * @param string $module 
+     * @return boolean
+     */
+    public function isValidModule($module);
+}
+?>]]></programlisting>
+
+        <para>
+            In most cases, however, you should simply extend the abstract class
+            <code>Zend_Controller_Dispatcher_Abstract</code>, in which each of
+            these have already been defined, or
+            <code>Zend_Controller_Dispatcher_Standard</code> to modify
+            functionality of the standard dispatcher.
+        </para>
+
+        <para>
+            Possible reasons to subclass the dispatcher include a desire to
+            use a different class or method naming schema in your action
+            controllers, or a desire to use a different dispatching paradigm
+            such as dispatching to action files under controller directories
+            (instead of dispatching to class methods).
+        </para>
+    </sect2>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->

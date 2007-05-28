@@ -1,0 +1,15 @@
+﻿<sect1 id="zend.service.introduction">
+    <title>Introduction</title>
+    <para>
+        <code>Zend_Service</code> est une classe abstraite qui sert de fondation à l'implémentation des services web, comme SOAP ou REST.
+    </para>
+    <para>
+        <code>Zend_Service</code> offre un support pour tout service web basé sur REST à travers <link linkend="zend.rest.client"><code>Zend_Rest_Client</code></link>.
+    </para>
+    <para>
+        En plus d'être capable d'étendre <code>Zend_Service</code> et d'utiliser <code>Zend_Rest_Client</code> pour des services web basé sur REST, Zend fournit un support pour les services web populaires tels que <link linkend="zend.service.akismet">Akismet</link>, <link linkend="zend.service.amazon">Amazon</link>, <link linkend="zend.service.flickr">Flickr</link>, et <link linkend="zend.service.yahoo">Yahoo!</link>. D'autres devraient être ajoutés prochainement.
+    </para>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
