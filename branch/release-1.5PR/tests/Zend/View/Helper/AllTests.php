@@ -9,9 +9,12 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 require_once 'Zend/View/Helper/ActionTest.php';
 require_once 'Zend/View/Helper/DeclareVarsTest.php';
 require_once 'Zend/View/Helper/DoctypeTest.php';
+require_once 'Zend/View/Helper/FieldsetTest.php';
 require_once 'Zend/View/Helper/FormCheckboxTest.php';
+require_once 'Zend/View/Helper/FormErrorsTest.php';
 require_once 'Zend/View/Helper/FormLabelTest.php';
 require_once 'Zend/View/Helper/FormSelectTest.php';
+require_once 'Zend/View/Helper/FormTest.php';
 require_once 'Zend/View/Helper/FormTextTest.php';
 require_once 'Zend/View/Helper/HeadLinkTest.php';
 require_once 'Zend/View/Helper/HeadMetaTest.php';
@@ -20,6 +23,7 @@ require_once 'Zend/View/Helper/HeadStyleTest.php';
 require_once 'Zend/View/Helper/HeadTitleTest.php';
 require_once 'Zend/View/Helper/HtmlListTest.php';
 require_once 'Zend/View/Helper/InlineScriptTest.php';
+require_once 'Zend/View/Helper/JsonTest.php';
 require_once 'Zend/View/Helper/LayoutTest.php';
 require_once 'Zend/View/Helper/PartialTest.php';
 require_once 'Zend/View/Helper/PartialLoopTest.php';
@@ -51,9 +55,12 @@ class Zend_View_Helper_AllTests
         $suite->addTestSuite('Zend_View_Helper_ActionTest');
         $suite->addTestSuite('Zend_View_Helper_DeclareVarsTest');
         $suite->addTestSuite('Zend_View_Helper_DoctypeTest');
+        $suite->addTestSuite('Zend_View_Helper_FieldsetTest');
         $suite->addTestSuite('Zend_View_Helper_FormCheckboxTest');
+        $suite->addTestSuite('Zend_View_Helper_FormErrorsTest');
         $suite->addTestSuite('Zend_View_Helper_FormLabelTest');
         $suite->addTestSuite('Zend_View_Helper_FormSelectTest');
+        $suite->addTestSuite('Zend_View_Helper_FormTest');
         $suite->addTestSuite('Zend_View_Helper_FormTextTest');
         $suite->addTestSuite('Zend_View_Helper_HeadLinkTest');
         $suite->addTestSuite('Zend_View_Helper_HeadMetaTest');
@@ -62,6 +69,7 @@ class Zend_View_Helper_AllTests
         $suite->addTestSuite('Zend_View_Helper_HeadTitleTest');
         $suite->addTestSuite('Zend_View_Helper_HtmlListTest');
         $suite->addTestSuite('Zend_View_Helper_InlineScriptTest');
+        $suite->addTestSuite('Zend_View_Helper_JsonTest');
         $suite->addTestSuite('Zend_View_Helper_LayoutTest');
         $suite->addTestSuite('Zend_View_Helper_PartialTest');
         $suite->addTestSuite('Zend_View_Helper_PartialLoopTest');
@@ -70,7 +78,7 @@ class Zend_View_Helper_AllTests
         $suite->addTestSuite('Zend_View_Helper_Placeholder_RegistryTest');
         $suite->addTestSuite('Zend_View_Helper_Placeholder_StandaloneContainerTest');
         $suite->addTestSuite('Zend_View_Helper_UrlTest');
-        
+
         return $suite;
     }
 }
