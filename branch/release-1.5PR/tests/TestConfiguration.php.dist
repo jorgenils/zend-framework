@@ -40,6 +40,36 @@ define('TESTS_ZEND_AUTH_ADAPTER_DBTABLE_PDO_SQLITE_ENABLED', false);
 define('TESTS_ZEND_AUTH_ADAPTER_DBTABLE_PDO_SQLITE_DATABASE', ':memory:');
 
 /**
+ * Zend_Auth_Adapter_Ldap online tests
+ */
+define('TESTS_ZEND_AUTH_ADAPTER_LDAP_ONLINE_ENABLED', false);
+
+/**
+ * Zend_Ldap online tests
+ */
+define('TESTS_ZEND_LDAP_ONLINE_ENABLED', false);
+
+/* These largely map to the options described in the Zend_Ldap and
+ * Zend_Auth_Adapter_Ldap documentation.
+ * [pls change these values in SVN to match the primary test env if necessary]
+ */
+define('TESTS_ZEND_LDAP_HOST', 'localhost');
+//define('TESTS_ZEND_LDAP_PORT', 389);
+//define('TESTS_ZEND_LDAP_USE_SSL', false);
+define('TESTS_ZEND_LDAP_USERNAME', 'CN=someUser,DC=example,DC=com');
+define('TESTS_ZEND_LDAP_PRINCIPAL_NAME', 'someUser@example.com');
+define('TESTS_ZEND_LDAP_PASSWORD', null);
+define('TESTS_ZEND_LDAP_BIND_REQUIRES_DN', true);
+define('TESTS_ZEND_LDAP_BASE_DN', 'OU=Sales,DC=example,DC=com');
+//define('TESTS_ZEND_LDAP_ACCOUNT_FILTER_FORMAT', '(&(objectClass=posixAccount)(uid=%s))');
+define('TESTS_ZEND_LDAP_ACCOUNT_DOMAIN_NAME', 'example.com');
+define('TESTS_ZEND_LDAP_ACCOUNT_DOMAIN_NAME_SHORT', 'EXAMPLE');
+/* Must be creds for account other than the default above
+ */
+define('TESTS_ZEND_LDAP_ALT_USERNAME', 'anotherUser');
+define('TESTS_ZEND_LDAP_ALT_PASSWORD', null);
+
+/**
  * Zend_Cache
  *
  * TESTS_ZEND_CACHE_SQLITE_ENABLED    => sqlite extension has to be enabled
@@ -62,6 +92,16 @@ define('TESTS_ZEND_CACHE_MEMCACHED_PERSISTENT', true);
  *                                        dispatcher
  */
 define('TESTS_ZEND_CONTROLLER_DISPATCHER_OB', false);
+
+/**
+ * Zend_Db_Adapter_Firebird and Zend_Db_Adapter_Pdo_Firebird
+ *
+ */
+define('TESTS_ZEND_DB_ADAPTER_FIREBIRD_ENABLED',  true);
+define('TESTS_ZEND_DB_ADAPTER_FIREBIRD_HOSTNAME', '127.0.0.1');
+define('TESTS_ZEND_DB_ADAPTER_FIREBIRD_USERNAME', 'sysdba');
+define('TESTS_ZEND_DB_ADAPTER_FIREBIRD_PASSWORD', 'masterkey');
+define('TESTS_ZEND_DB_ADAPTER_FIREBIRD_DATABASE', 'TEST');
 
 /**
  * Zend_Db_Adapter_Pdo_Mysql and Zend_Db_Adapter_Mysqli
@@ -217,8 +257,8 @@ define('TESTS_ZEND_GDATA_SPREADSHEETS_WORKSHEETID', 'default');
 define('TESTS_ZEND_GDATA_CALENDAR_ONLINE_ENABLED', false);
 
 /*
- * This is the fully-qualified domain name for a domiain hosted using 
- * Google Apps. This domain must be registered with Google Apps and 
+ * This is the fully-qualified domain name for a domiain hosted using
+ * Google Apps. This domain must be registered with Google Apps and
  * have API access enabled.  This should be a TEST domain only.
  */
 define('TESTS_ZEND_GDATA_GAPPS_ONLINE_ENABLED', false);

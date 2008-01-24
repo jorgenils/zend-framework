@@ -44,16 +44,6 @@ define('TESTS_ZEND_DB_ADAPTER_PDO_ODBC_PASSWORD', null);
 define('TESTS_ZEND_DB_ADAPTER_PDO_ODBC_DATABASE', null);
 
 /**
- * Zend_Db_Adapter_Firebird and Zend_Db_Adapter_Pdo_Firebird
- *
- */
-define('TESTS_ZEND_DB_ADAPTER_FIREBIRD_ENABLED',  true);
-define('TESTS_ZEND_DB_ADAPTER_FIREBIRD_HOSTNAME', '127.0.0.1');
-define('TESTS_ZEND_DB_ADAPTER_FIREBIRD_USERNAME', 'sysdba');
-define('TESTS_ZEND_DB_ADAPTER_FIREBIRD_PASSWORD', 'masterkey');
-define('TESTS_ZEND_DB_ADAPTER_FIREBIRD_DATABASE', 'TEST');
-
-/**
  * Zend_Locale tests
  *
  * If the TESTS_ZEND_LOCALE_FORMAT_SETLOCALE property below is a valid,
@@ -69,36 +59,6 @@ define('TESTS_ZEND_DB_ADAPTER_FIREBIRD_DATABASE', 'TEST');
 //define('TESTS_ZEND_LOCALE_FORMAT_SETLOCALE', 'fr');
 //define('TESTS_ZEND_LOCALE_FORMAT_SETLOCALE', 'fr_FR@euro');
 define('TESTS_ZEND_LOCALE_FORMAT_SETLOCALE', false);
-
-/**
- * Zend_Auth_Adapter_Ldap online tests
- */
-define('TESTS_ZEND_AUTH_ADAPTER_LDAP_ONLINE_ENABLED', false);
-
-/**
- * Zend_Ldap online tests
- */
-define('TESTS_ZEND_LDAP_ONLINE_ENABLED', false);
-
-/* These largely map to the options described in the Zend_Ldap and
- * Zend_Auth_Adapter_Ldap documentation.
- * [pls change these values in SVN to match the primary test env if necessary]
- */
-define('TESTS_ZEND_LDAP_HOST', 'localhost');
-//define('TESTS_ZEND_LDAP_PORT', 389);
-//define('TESTS_ZEND_LDAP_USE_SSL', false);
-define('TESTS_ZEND_LDAP_USERNAME', 'CN=someUser,DC=example,DC=com');
-define('TESTS_ZEND_LDAP_PRINCIPAL_NAME', 'someUser@example.com');
-define('TESTS_ZEND_LDAP_PASSWORD', null);
-define('TESTS_ZEND_LDAP_BIND_REQUIRES_DN', true);
-define('TESTS_ZEND_LDAP_BASE_DN', 'OU=Sales,DC=example,DC=com');
-//define('TESTS_ZEND_LDAP_ACCOUNT_FILTER_FORMAT', '(&(objectClass=posixAccount)(uid=%s))');
-define('TESTS_ZEND_LDAP_ACCOUNT_DOMAIN_NAME', 'example.com');
-define('TESTS_ZEND_LDAP_ACCOUNT_DOMAIN_NAME_SHORT', 'EXAMPLE');
-/* Must be creds for account other than the default above
- */
-define('TESTS_ZEND_LDAP_ALT_USERNAME', 'anotherUser');
-define('TESTS_ZEND_LDAP_ALT_PASSWORD', null);
 
 /**
  * PHPUnit Code Coverage / Test Report
