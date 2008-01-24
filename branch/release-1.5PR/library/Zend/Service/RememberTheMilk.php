@@ -24,132 +24,132 @@
 /**
  * @see Zend_Service_Exception
  */
-require 'Zend/Service/Exception.php';
+require_once 'Zend/Service/Exception.php';
 
 /**
  * @see Zend_Date
  */
-require 'Zend/Date.php';
+require_once 'Zend/Date.php';
 
 /**
  * @see Zend_Json
  */
-require 'Zend/Json.php';
+require_once 'Zend/Json.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Argument
  */
-require 'Zend/Service/RememberTheMilk/Argument.php';
+require_once 'Zend/Service/RememberTheMilk/Argument.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_ArgumentList
  */
-require 'Zend/Service/RememberTheMilk/ArgumentList.php';
+require_once 'Zend/Service/RememberTheMilk/ArgumentList.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Contact
  */
-require 'Zend/Service/RememberTheMilk/Contact.php';
+require_once 'Zend/Service/RememberTheMilk/Contact.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_ContactList
  */
-require 'Zend/Service/RememberTheMilk/ContactList.php';
+require_once 'Zend/Service/RememberTheMilk/ContactList.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Error
  */
-require 'Zend/Service/RememberTheMilk/Error.php';
+require_once 'Zend/Service/RememberTheMilk/Error.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_ErrorList
  */
-require 'Zend/Service/RememberTheMilk/ErrorList.php';
+require_once 'Zend/Service/RememberTheMilk/ErrorList.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Group
  */
-require 'Zend/Service/RememberTheMilk/Group.php';
+require_once 'Zend/Service/RememberTheMilk/Group.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_GroupList
  */
-require 'Zend/Service/RememberTheMilk/GroupList.php';
+require_once 'Zend/Service/RememberTheMilk/GroupList.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_List
  */
-require 'Zend/Service/RememberTheMilk/List.php';
+require_once 'Zend/Service/RememberTheMilk/List.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_ListList
  */
-require 'Zend/Service/RememberTheMilk/ListList.php';
+require_once 'Zend/Service/RememberTheMilk/ListList.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Method
  */
-require 'Zend/Service/RememberTheMilk/Method.php';
+require_once 'Zend/Service/RememberTheMilk/Method.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Note
  */
-require 'Zend/Service/RememberTheMilk/Note.php';
+require_once 'Zend/Service/RememberTheMilk/Note.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_NoteList
  */
-require 'Zend/Service/RememberTheMilk/NoteList.php';
+require_once 'Zend/Service/RememberTheMilk/NoteList.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Request
  */
-require 'Zend/Service/RememberTheMilk/Request.php';
+require_once 'Zend/Service/RememberTheMilk/Request.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Settings
  */
-require 'Zend/Service/RememberTheMilk/Settings.php';
+require_once 'Zend/Service/RememberTheMilk/Settings.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Task
  */
-require 'Zend/Service/RememberTheMilk/Task.php';
+require_once 'Zend/Service/RememberTheMilk/Task.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_TaskList
  */
-require 'Zend/Service/RememberTheMilk/TaskList.php';
+require_once 'Zend/Service/RememberTheMilk/TaskList.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_TaskSeries
  */
-require 'Zend/Service/RememberTheMilk/TaskSeries.php';
+require_once 'Zend/Service/RememberTheMilk/TaskSeries.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_TaskSeriesList
  */
-require 'Zend/Service/RememberTheMilk/TaskSeriesList.php';
+require_once 'Zend/Service/RememberTheMilk/TaskSeriesList.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Time
  */
-require 'Zend/Service/RememberTheMilk/Time.php';
+require_once 'Zend/Service/RememberTheMilk/Time.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Timezone
  */
-require 'Zend/Service/RememberTheMilk/Timezone.php';
+require_once 'Zend/Service/RememberTheMilk/Timezone.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_TimezoneList
  */
-require 'Zend/Service/RememberTheMilk/TimezoneList.php';
+require_once 'Zend/Service/RememberTheMilk/TimezoneList.php';
 
 /**
  * @see Zend_Service_RememberTheMilk_Token
  */
-require 'Zend/Service/RememberTheMilk/Token.php';
+require_once 'Zend/Service/RememberTheMilk/Token.php';
 
 /**
  * @category   Zend
