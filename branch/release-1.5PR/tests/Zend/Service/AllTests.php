@@ -74,6 +74,10 @@ require_once 'Zend/Service/Delicious/AllTests.php';
  */
 require_once 'Zend/Service/Flickr/AllTests.php';
 
+/**
+ * @see Zend_Service_RememberTheMilkTest
+ */
+require_once 'Zend/Service/RememberTheMilkTest.php';
 
 /**
  * @see Zend_Service_SimpyTest
@@ -125,6 +129,7 @@ class Zend_Service_AllTests
         $suite->addTest(Zend_Service_Audioscrobbler_AllTests::suite());
         $suite->addTest(Zend_Service_Delicious_AllTests::suite());
         $suite->addTest(Zend_Service_Flickr_AllTests::suite());
+        $suite->addTestSuite('Zend_Service_RememberTheMilkTest');
         if (defined('TESTS_ZEND_SERVICE_SIMPY_ENABLED') && constant('TESTS_ZEND_SERVICE_SIMPY_ENABLED')) {
             $suite->addTestSuite('Zend_Service_SimpyTest');
         } else {
