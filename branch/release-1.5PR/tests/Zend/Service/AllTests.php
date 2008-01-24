@@ -89,6 +89,10 @@ require_once 'Zend/Service/SimpyTest.php';
  */
 require_once 'Zend/Service/StrikeIron/AllTests.php';
 
+/**
+ * @see Zend_Service_Technorati_AllTests
+ */
+require_once 'Zend/Service/Technorati/AllTests.php';
 
 /**
  * @see Zend_Service_Yahoo_AllTests
@@ -136,6 +140,7 @@ class Zend_Service_AllTests
             $suite->addTestSuite('Zend_Service_SimpyTest_Skip');
         }
         $suite->addTest(Zend_Service_StrikeIron_AllTests::suite());
+        $suite->addTest(Zend_Service_Technorati_AllTests::suite());
         $suite->addTest(Zend_Service_Yahoo_AllTests::suite());
 
         return $suite;
