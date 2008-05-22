@@ -1,0 +1,51 @@
+<!-- BEGIN: forum/views/scripts/indexDisplay.phtml -->
+    <title>ZFDemo | Forum Topic | <?php echo $this->topicName ?></title>
+</head>
+<!-- STAGE 6: Render results in response to request. -->
+<!-- Presentation model is accessed using "$this->" syntax. -->
+<body>
+<div style="float:right"><small>(Your timezone is: <?php echo $this->timezone ?>)</small></div>
+<h3><?php echo $this->now ?> - Welcome <span style="color:maroon"><?php echo $this->username ?></span></h3>
+
+<?php if ($this->posts): ?>
+
+    <h3>Forum posts for topic: <?php echo $this->topicName ?></h3>
+    <table cellpadding=3 cellspacing=3 border=3 style='white-space: nowrap;'>
+        <tr>
+            <th>User</th>
+            <th>Country</th>
+            <th># posts</th>
+            <th>Posted On</th>
+            <th>Last Modified</th>
+            <th>Subject</th>
+            <th>Post</th>
+        </tr>
+<?php
+        foreach($this->posts as $post) {
+            if ($this->hide && !$post->is_visible) {
+                echo "<tr><td colspan=\"7\">hidden</td></tr>\n";
+            } else {
+                echo "<tr>\n";
+                echo "<td>", $this->escape($post['user']->username), "</td>\n";
+                echo "<td>", $this->escape($post->country), "</td>\n";
+                echo "<td>", $this->escape(Zend_Locale_Format::toNumber($post['user']->post_count)), "</td>\n";
+                echo "<td>", $post['creation_time'], "</td>\n";
+                echo "<td>", $post['modification_time'], "</td>\n";
+                echo "<td>", $this->escape($post['subject']), "</td>\n";
+                echo "<td>", $this->escape($post['content']), "</td>\n";
+                echo "</tr>\n";
+            }
+        }
+?>
+    </table>
+
+    Forum Actions:
+    <a href="<?php echo $this->baseUrl ?>/forum/submissions/postForm/topic/<?php echo $this->topicId ?>">Add a Post</a> |
+    <a href="<?php echo $this->baseUrl ?>/forum/admin_posts/index/topic/<?php echo $this->topicId ?>">Admin</a>
+
+<?php else: ?>
+
+    <p>No posts for topic id <?php echo $this->topicId ?>.</p>
+
+<?php endif; ?>
+<!-- END: forum/views/scripts/indexDisplay.phtml -->

@@ -1,0 +1,89 @@
+~/tmp $ mkdir zf-newtests
+
+~/tmp $ cd zf-newtests/
+
+~/tmp/zf-newtests $ svn co http://framework.zend.com/svn/framework/trunk/library/ ./library/
+
+~/tmp/zf-newtests $ svn co http://www.ralphschindler.com/subversion/Zend_UnitTests/ ./newtests/
+
+~/tmp/zf-newtests $ cd newtests/
+
+~/tmp/zf-newtests/newtests $ php ZFTestManager.php --list-suites
+Zend Framework - Unit Test Runner and Manager Script
+built on PHPUnit 3.0.0alpha19 by Sebastian Bergmann.
+
+  Zend
+  Zend_Http
+  Zend_Mail
+  Zend_Controller
+  Zend_Filter
+  Zend_Db_Adapter_Pdo
+  Zend_Mime
+  Zend_Uri
+  Zend_Feed
+  Zend_Cache
+  Zend_Config
+  Zend_Json
+  Zend_View
+
+~/tmp/zf-newtests/newtests $ php ZFTestManager.php --help
+Zend Framework - Unit Test Runner and Manager Script
+built on PHPUnit 3.0.0alpha19 by Sebastian Bergmann.
+
+Usage:
+  ZFTestManager [options] - if installed in a bin with path to php.
+  php ZFTestManager.php [options] - from unit test directory.
+
+  * With no options, ZFTestManager will run all found tests.
+  * All tests must pass with error reporting set at E_ALL | E_STRICT.
+  * All tests must pass COMPLETELY in ISOLATION before commiting.
+
+Options:
+  --list-suites            Prints a hierarchical list of suites for testing.
+  --new-suite <name>       Create a new suite at the <name> location.
+  --suite-filter <filter>  Where filter is: 
+                              Zend_Suite - run this suite and its sub-suites. 
+                              @Zend_Suite - run only this suite.               
+                              Zend_Suite::MyTestCase - run only this TestCase in this suite. 
+  --test-filter <filter>   Where filter is a regex of the test cases you wish to run.
+  --help                   Prints this usage information.
+  --version                Prints the version and exits.
+
+  -d key[=value]           Sets a php.ini value.
+
+~/tmp/zf-newtests/newtests $ php ZFTestManager.php   
+Zend Framework - Unit Test Runner and Manager Script
+built on PHPUnit 3.0.0alpha19 by Sebastian Bergmann.
+
+.........................................
+.........................................
+.........................................
+.........................................
+.........................................
+.............
+
+Time: 00:01
+
+OK (218 tests)
+
+~/tmp/zf-newtests/newtests $ php ZFTestManager.php --suite-filter Zend_Config
+Zend Framework - Unit Test Runner and Manager Script
+built on PHPUnit 3.0.0alpha19 by Sebastian Bergmann.
+
+.....................................
+
+Time: 00:00
+
+OK (37 tests)
+
+
+~/tmp/zf-newtests/newtests $ php ZFTestManager.php --suite-filter Zend_Config --test-filter ini
+Zend Framework - Unit Test Runner and Manager Script
+built on PHPUnit 3.0.0alpha19 by Sebastian Bergmann.
+
+....
+
+Time: 00:00
+
+OK (4 tests)
+

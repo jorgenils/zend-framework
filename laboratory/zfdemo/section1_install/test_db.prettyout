@@ -1,0 +1,44 @@
++-------------------+------------------+------+-----+-------------------+----------------+
+| Field             | Type             | Null | Key | Default           | Extra          |
++-------------------+------------------+------+-----+-------------------+----------------+
+| posts_id          | int(10) unsigned | NO   | PRI | NULL              | auto_increment |
+| modification_time | timestamp        | NO   |     | CURRENT_TIMESTAMP |                |
+| creation_time     | timestamp        | YES  |     | NULL              |                |
+| user_id           | int(10) unsigned | NO   | MUL |                   |                |
+| topic_id          | int(10) unsigned | NO   |     |                   |                |
+| attachment_id     | int(10) unsigned | YES  |     | NULL              |                |
+| content           | text             | NO   |     |                   |                |
++-------------------+------------------+------+-----+-------------------+----------------+
++-------------------+------------------+------+-----+-------------------+----------------+
+| Field             | Type             | Null | Key | Default           | Extra          |
++-------------------+------------------+------+-----+-------------------+----------------+
+| posts_id          | int(10) unsigned | NO   | PRI | NULL              | auto_increment |
+| modification_time | timestamp        | NO   |     | CURRENT_TIMESTAMP |                |
+| creation_time     | timestamp        | YES  |     | NULL              |                |
+| user_id           | int(10) unsigned | NO   | MUL |                   |                |
+| topic_id          | int(10) unsigned | NO   |     |                   |                |
+| attachment_id     | int(10) unsigned | YES  |     | NULL              |                |
+| content           | text             | NO   |     |                   |                |
++-------------------+------------------+------+-----+-------------------+----------------+
++-------------------+------------------+------+-----+-------------------+----------------+
+| Field             | Type             | Null | Key | Default           | Extra          |
++-------------------+------------------+------+-----+-------------------+----------------+
+| posts_id          | int(10) unsigned | NO   | PRI | NULL              | auto_increment |
+| modification_time | timestamp        | NO   |     | CURRENT_TIMESTAMP |                |
+| creation_time     | timestamp        | YES  |     | NULL              |                |
+| user_id           | int(10) unsigned | NO   | MUL |                   |                |
+| topic_id          | int(10) unsigned | NO   |     |                   |                |
+| attachment_id     | int(10) unsigned | YES  |     | NULL              |                |
+| content           | text             | NO   |     |                   |                |
++-------------------+------------------+------+-----+-------------------+----------------+
++-------------------+------------------+------+-----+-------------------+----------------+
+| Field             | Type             | Null | Key | Default           | Extra          |
++-------------------+------------------+------+-----+-------------------+----------------+
+| posts_id          | int(10) unsigned | NO   | PRI | NULL              | auto_increment |
+| modification_time | timestamp        | NO   |     | CURRENT_TIMESTAMP |                |
+| creation_time     | timestamp        | YES  |     | NULL              |                |
+| user_id           | int(10) unsigned | NO   | MUL |                   |                |
+| topic_id          | int(10) unsigned | NO   |     |                   |                |
+| attachment_id     | int(10) unsigned | YES  |     | NULL              |                |
+| content           | text             | NO   |     |                   |                |
++-------------------+------------------+------+-----+-------------------+----------------+

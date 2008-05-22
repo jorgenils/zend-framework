@@ -1,0 +1,6 @@
+For ZFApp to work properly you need two libraries in this directory:
+
+smarty/ -> The latest Smarty Framework
+ZLib/ -> The latest ZFramework
+
+

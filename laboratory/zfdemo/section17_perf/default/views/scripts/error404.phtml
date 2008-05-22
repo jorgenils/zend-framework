@@ -1,0 +1,17 @@
+<!-- BEGIN: default/views/scripts/error404.phtml -->
+Sorry, the page you requested was not found.
+
+<p>Design Tip: In general, custom 404 error pages, like this one, should explain to the reader what is wrong, provide help information, show navigational help like a sitemap, and display a search box, contact links, or whatever the reader is most likely to need. Remember readers generally do not expect to see this page, so this page should help them quickly work past the problem.</p>
+
+<?php if ($this->showLog): ?>
+    <p>To confirm this page was sent correctly as a 404 HTTP response, try using the <a href="http://addons.mozilla.org/firefox/3829/">Live HTTP Headers Plugin for Firefox</a>.  After installing, look for "Live HTTP Header" menu item near the bottom of the "Tools" menu.</p>
+<?php endif; ?>
+
+<h3>Request Object</h3>
+
+<p>To help debug the problem, here is the request object that failed to complete dispatching.  Additional information may be found in the ZFDemo debug log:  "zfdemo/<?php echo $this->sectionName ?>/data/zfdemo.log"</p>
+
+<pre>
+<?php echo $this->request; ?>
+</pre>
+<!-- END: default/views/scripts/error404.phtml -->

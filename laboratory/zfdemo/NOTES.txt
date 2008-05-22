@@ -1,0 +1,33 @@
+The following issues are not directly related to the Zend Framework,
+but affect the design or implementation of the demo tutorial.
+
+* 1. Content-type, Charset, DOCTYPE
+
+The combination of HTTP headers, DOCTYPE, <html>, and <meta> tags
+were carefully chosen to negotiate a complex situation:
+
+http://www.w3.org/International/tutorials/tutorial-char-enc/
+http://www.w3.org/International/O-charset
+http://www.w3.org/TR/xhtml1/#guidelines
+http://www.w3.org/2003/01/xhtml-mimetype/content-negotiation
+http://wiki.splitbrain.org/wiki:tips:xhtml_strict
+
+Our goals:
++ user agents use only standards-mode rendering
+  -i.e. avoid quirks-mode rendering by user agents!
++ UTF-8 support for the majority of browsers
++ avoid the use and need for the HTTP "Vary:" header
+
+Conclusions:
++ Thus, we can not use an XML declaration before the DOCTYPE,
+since IE would then render in quirks-mode.
+
++ A meta tag must be used to insure the character set and content-
+type is not lost when a user saves a web page (e.g. to disk),
+or sends a copy of the web page to a tool (e.g. XHTML validator).
+
++ Since we have little control over users' web servers,
+the "Content-type" header must be used and set to
+"text/html; charset=utf-8", even though the information
+is duplicated in a meta tag, and is only helpful if
+the web server is configured to send a different content-type.

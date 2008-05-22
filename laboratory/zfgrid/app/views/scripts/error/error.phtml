@@ -1,0 +1,39 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" dir="ltr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <link rel="shortcut icon" href="<?= $this->url()?>images/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" type="text/css" href="<?= $this->url()?>css/screen.css" media="all" />
+    <title>Error</title>
+</head>
+<body>
+    <h1>An error occurred</h1>
+    <? if ($this->exceptionMessage): ?>
+    <p>An exception occurred:</p>
+    <h2><?= $this->exceptionMessage ?></h2>
+    <? else: ?>
+    <p>An error occurred; please try again later.</p>
+    <? endif; ?>
+</body>
+</html>
+<!--
+ - Zend Framework
+ -
+ - LICENSE
+ -
+ - This source file is subject to the new BSD license that is bundled
+ - with this package in the file LICENSE.txt.
+ - It is also available through the world-wide-web at this URL:
+ - http://framework.zend.com/license/new-bsd
+ - If you did not receive a copy of the license and are unable to
+ - obtain it through the world-wide-web, please send an email
+ - to license@zend.com so we can send you a copy immediately.
+ -
+ - @category   Zend
+ - @package    Zend_Grid
+ - @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+ - @license    http://framework.zend.com/license/new-bsd     New BSD License
+ - @version    $Id: TestHelper.php 4528 2007-04-17 23:10:47Z darby $
+ -->

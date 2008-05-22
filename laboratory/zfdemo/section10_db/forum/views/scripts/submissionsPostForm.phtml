@@ -1,0 +1,21 @@
+<!-- BEGIN: forum/views/scripts/submissionsPostForm.phtml -->
+    <title>ZFDemo | Add Forum Post</title>
+</head>
+<!-- STAGE 6: Render results in response to request. -->
+<!-- Presentation model is accessed using "$this->" syntax. -->
+<body>
+<h3><?php echo $this->now ?> - Welcome <span style="color:maroon"><?php echo $this->username ?></span></h3>
+
+<form method="post" action="<?php echo $this->baseUrl ?>/forum/submissions/submitForm">
+<input type="hidden" name="topic" value="<?php echo $this->topicId ?>" />
+<br />
+<pre>
+Subject: <input type="text" name="subject" />
+
+Body   : <textarea name="body" rows="5" cols="50">
+</textarea>
+
+         <input type="submit" value="Add Post" />
+</pre>
+</form>
+<!-- END: forum/views/scripts/submissionsPostForm.phtml -->

@@ -1,0 +1,17 @@
+<!-- BEGIN: default/views/scripts/indexIndex.phtml -->
+<h1>Welcome to the ZF Demo: <?php echo $this->sectionName ?></h1>
+<div style="float:right"><a href="<?php echo $this->baseUrl ?>/index/reset">Resest/Load/Restore DB (<span style="color:red"><b>deletes</b></span> all changes and posts)</a></div>
+<ol>
+<li><a href="<?php echo $this->baseUrl ?>/forum/">Forums</a></li>
+<li><a href="<?php echo $this->baseUrl ?>/logon/">Login</a></li>
+<li><a href="<?php echo $this->baseUrl ?>/forum/admin_posts/index/topic/1">Administration Example: Posts</a></li>
+<li><a href="<?php echo $this->baseUrl ?>/forum/admin_posts">Administration Example: Topics</a></li>
+<li><a href="<?php echo $this->baseUrl ?>/bogusController/">Example 1: Test a bad link (see a custom 404 Error page). Default module. Bogus controller. Index action. (No BoguscontrollerController.php)</a></li>
+<li><a href="<?php echo $this->baseUrl ?>/bogusController/someAction/">Example 2: Test a bad link (see a custom 404 Error page). Default module. Bogus controller. Not index action. (No BoguscontrollerController.php)</a></li>
+<li><a href="<?php echo $this->baseUrl ?>/bogusModule/someController/someAction">Example 3: Test a bad link (see a custom 404 Error page). Bogus module.</a></li>
+<li><a href="<?php echo $this->baseUrl ?>/index/send500">Example 4: Test a link yielding a 500 HTTP response.</a></li>
+<li><a href="<?php echo $this->baseUrl ?>/forum/bogusController/someAction/">Example 5: Test a bad link (see a custom 404 Error page). Forum module. Bogus controller. Not index action. (No unauthorized access to unknown controllers.)</a></li>
+<li><a href="http://framework.zend.com/wiki/display/ZFDEV/Tutorial">Online Tutorial</a></li>
+</ol>
+
+<!-- END: default/views/scripts/indexIndex.phtml -->

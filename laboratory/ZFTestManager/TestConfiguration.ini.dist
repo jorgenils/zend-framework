@@ -1,0 +1,50 @@
+
+
+[ZFTestManager]
+
+; Other Optional Settings
+; library_path = "../path/to/library/"
+; report_directory = "./reports/"
+
+
+[Zend_Cache]
+
+; Disabled due to ZF-437
+; disabled = true
+
+;;; Memcache Options
+; memcache_host = 127.0.0.1
+; memcache_port = 11211
+; memcache_persistent = true
+
+
+[Zend_Db_Adapter_Pdo]
+
+;;; MsSQL Login Information
+; mssql_hostname = 
+; mssql_username = 
+; mssql_password = 
+; mssql_database = 
+
+;;; MySQL Login Information
+; mysql_hostname = 
+; mysql_username = 
+; mysql_password = 
+; mysql_database = 
+
+;;; SQLite Login Information
+; sqlite_username = 
+; sqlite_password = 
+; sqlite_database = 
+
+
+[Zend_Http]
+
+; request_uri = http://www.zend.com/
+
+
+[Zend_Mail]
+
+; Disabled due to multiple errors (this testcase/testsuite has never been previously run)
+disabled = true
+

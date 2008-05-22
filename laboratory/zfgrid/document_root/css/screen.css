@@ -1,0 +1,12 @@
+tr.rowHead {
+    border-bottom: 1px solid #eee;
+    background-color: #ccf;
+}
+tr.rowEven {
+    border-bottom: 1px solid #eee;
+    background-color: #eee;
+}
+tr.rowOdd {
+    border-bottom: 1px solid #eee;
+    background-color: #fff;
+}

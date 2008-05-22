@@ -1,0 +1,31 @@
+# Zend Framework 1.0 - Basic MVC/Database example application
+#
+# Use Apache's Rewrite Engine to make sure that all requests 
+# to this directory are served by your MVC application.
+# Except static resources like images and stylesheets.
+#
+
+RewriteEngine on
+RewriteBase /zfgrid/
+RewriteRule !\.(pdf|php|js|ico|txt|gif|jpg|png|css|rss|zip|tar\.gz)$ index.php
+
+
+#
+# Zend Framework
+#
+# LICENSE
+#
+# This source file is subject to the new BSD license that is bundled
+# with this package in the file LICENSE.txt.
+# It is also available through the world-wide-web at this URL:
+# http://framework.zend.com/license/new-bsd
+# If you did not receive a copy of the license and are unable to
+# obtain it through the world-wide-web, please send an email
+# to license@zend.com so we can send you a copy immediately.
+#
+# @category   Zend
+# @package    UnitTests
+# @copyright  Copyright (c) 2005-2007 Zend Technologies USA Inc. (http://www.zend.com)
+# @license    http://framework.zend.com/license/new-bsd     New BSD License
+# @version    $Id: TestHelper.php 4528 2007-04-17 23:10:47Z darby $
+#

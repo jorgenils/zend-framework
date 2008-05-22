@@ -1,0 +1,55 @@
+ZFApp Preview Release Installation/Usage instructions
+---------------------------------------------------------
+
+Welcome to the ZFApp Preview Release. While functional as a framework, there are still some
+things that need to get automated and cleaned up properly so installation is a little more
+painful then it needs to be. This doc will guide you through that.
+
+Here are the steps:
+
+1) Extract the tarball (you probably just did that)
+
+2) Copy the entire ZFApp directory to where you would like your new ZFApp application to
+   be installed..
+
+    $ cp -R ZFApp/ /usr/local/apache/htdocs/ZFBlog
+
+3) Download and Smarty and copy the distribution into ZFBlog/lib/smarty
+
+4) Download ZFramework, and copy the library itself (starting with the dir that has Zend.php)
+   into ZFBlog/lib/Zlib. 
+
+** Note: As an alternative you can simply symlink these dependencies
+
+5) Execute the appgen.php script and give it the name of your application. 
+
+    $ php appgen.php ZFBlog
+
+   This script is really cheap at the moment, but basically what it does is
+   configure a series of constants in the sources of the ZFApp to their real
+   values.. i.e. replaces %APP_INC_DIR% with /usr/local/apache/htdocs/ZFBlog/include,
+   etc.. This is one of those bits that needs a better implementation
+
+6) Give write access to your web server for the %INSTALL_DIR%/webtmp directory and
+   all of its subdirs:
+
+   $ chgrp -R nobody /usr/local/apache/htdocs/ZFBlog/webtmp
+   $ chmod -R 775 /usr/local/apache/htdocs/ZFBlog/webtmp
+
+   (This is another part of the installation process that requires future automation)
+
+7) Set up Apache by setting DocumentRoot to %INSTALL_DIR%/www/ and make sure the
+   AllowOverride configuration directive is set to "All"
+
+
+That's it! Once you've done that you can point your browser to the server and you'll see
+a welcome screen for ZFApp if things went right. From here, you can start using the
+framework.
+
+A few helpful hints to get started:
+-----------------------------------
+
+See the included ZFApp_Intro.ppt Powerpoint
+
+
+

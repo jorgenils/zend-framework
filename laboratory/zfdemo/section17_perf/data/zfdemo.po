@@ -1,0 +1,230 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: ZFDemo\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2007-04-10 10:07-0800\n"
+"Last-Translator: Gavin <gavin@zend.om>\n"
+"Language-Team: ZF <framework.zend.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: UNITED STATES\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: C:\\gavin\\home\\lighttpd\\zf\\zfdemo\\section17_perf\\data\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:76
+#: ../bootstrap.php:76
+msgid "STAGE 1 failed (Initializations / Loading Configuration)"
+msgstr "STAGE 1 failed (Initializations / Loading Configuration)"
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:91
+#: ../bootstrap.php:91
+msgid "STAGE 2-6 failed (Find the right action and execute it.)"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:97
+#: ../bootstrap.php:97
+msgid "STAGE 7 failed (Render results in response to request.)"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:347
+#: ../bootstrap.php:357
+msgid "An additional error occurred while trying to use the error action controller."
+msgstr ""
+
+#: ../bootstrap.php:363
+msgid "ERROR Too many reroutes. Controllers stuck in loop?"
+msgstr ""
+
+#: ../bootstrap.php:484
+#, php-format
+msgid "CRITICAL reroute() destination unusable (type \"%1$s\")"
+msgstr ""
+
+#: ../bootstrap.php:491
+msgid "CRITICAL reroute() destination module missing"
+msgstr ""
+
+#: ../bootstrap.php:494
+msgid "CRITICAL reroute() destination controller missing"
+msgstr ""
+
+#: ../bootstrap.php:497
+msgid "CRITICAL reroute() destination action missing"
+msgstr ""
+
+#: ../bootstrap.php:554
+#: ../bootstrap.php:564
+msgid "DEBUG Request is local."
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:571
+#: ../bootstrap.php:595
+msgid "ERROR when processing"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:592
+#: ../bootstrap.php:610
+#, fuzzy, php-format
+msgid "ERROR Unable to find controller class \"%1$s\"."
+msgstr "ERROR: Unable to find controller file '%1\\$s'."
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:592
+#: ../bootstrap.php:614
+#, fuzzy, php-format
+msgid "ERROR Unable to find controller file \"%1$s\"."
+msgstr "ERROR: Unable to find controller file '%1\\$s'."
+
+#: ../bootstrap.php:646
+msgid ""
+"View script paths =\\n"
+"    "
+msgstr ""
+
+#: ../bootstrap.php:651
+#, php-format
+msgid "Unknown Exception on line #%1$d! "
+msgstr ""
+
+#: ../bootstrap.php:669
+msgid "ERROR corrupt installation, can not find \"dump.php\"."
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:667
+#: ../bootstrap.php:705
+msgid "database missing tables: "
+msgstr "database missing tables: "
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:731
+#: ../bootstrap.php:769
+msgid "An error occured while processing your request:"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:733
+#: ../bootstrap.php:771
+msgid "EXIT"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:772
+#: ../bootstrap.php:810
+msgid "rest not shown"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/bootstrap.php:831
+#: ../bootstrap.php:879
+msgid "ZF Demo Debug Log"
+msgstr ""
+
+#: ../bootstrap.php:1042
+msgid "ERROR Dispatching failed to complete for: '"
+msgstr ""
+
+#: ../bootstrap.php:1222
+msgid "ERROR Looping detected in preDispatch()."
+msgstr ""
+
+#: ../bootstrap.php:1229
+msgid "ERROR Too many reroutes in preDispatch(). Looping?"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/default/controllers/IndexController.php:44
+#: ../default/controllers/IndexController.php:85
+msgid "Example action to test sending a HTTP 500 response"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/default/controllers/LogonController.php:58
+#: ../default/controllers/LogonController.php:58
+msgid "already have authentication id, showing logout form"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/default/controllers/LogonController.php:61
+#: ../default/controllers/LogonController.php:61
+msgid "no authentication id, showing login form"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/default/controllers/LogonController.php:143
+#: ../default/controllers/LogonController.php:143
+msgid "currently authenticated, showing logout form"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/forum/controllers/IndexController.php:31
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/forum/controllers/TopicsController.php:32
+#: ../forum/controllers/IndexController.php:31
+#: ../forum/controllers/TopicsController.php:32
+msgid " Hello world!"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/forum/controllers/SorryController.php:33
+#: ../forum/controllers/SorryController.php:33
+msgid "Sorry, an unknown error has occurred."
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/forum/controllers/SubmissionsController.php:37
+#: ../forum/controllers/SubmissionsController.php:37
+msgid "ERROR: invalid topic id"
+msgstr ""
+
+#: ../forum/controllers/Admin/PostsController.php:61
+#: ../forum/controllers/Admin/TopicsController.php:50
+msgid "INFO BEGIN editAction()"
+msgstr ""
+
+#: ../forum/controllers/Admin/PostsController.php:69
+#, php-format
+msgid "INFO deleting post id #%1$d"
+msgstr ""
+
+#: ../forum/controllers/Admin/PostsController.php:87
+#, php-format
+msgid "INFO post id %1$d visibility set to %2$d"
+msgstr ""
+
+#: ../forum/controllers/Admin/PostsController.php:123
+#: ../forum/controllers/Admin/TopicsController.php:112
+msgid "ERROR END editAction() - failed"
+msgstr ""
+
+#: ../forum/controllers/Admin/PostsController.php:126
+#: ../forum/controllers/Admin/TopicsController.php:115
+msgid "NOTICE END editAction() - succeeded"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/forum/controllers/Admin/PostsController.php:52
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/forum/controllers/Admin/TopicsController.php:54
+#: ../forum/controllers/Admin/PostsController.php:140
+#: ../forum/controllers/Admin/TopicsController.php:129
+msgid "unknown admin action requested: "
+msgstr ""
+
+#: ../forum/controllers/Admin/TopicsController.php:58
+#, php-format
+msgid "INFO deleting topic id #%1$d"
+msgstr ""
+
+#: ../forum/controllers/Admin/TopicsController.php:75
+#, php-format
+msgid "INFO topic id %1$d visibility set to %2$d"
+msgstr ""
+
+#: ../forum/models/tableGateway/Posts.php:220
+#, php-format
+msgid "CRITICAL User id \"%1$s\" post count could not be incremented for post id \"%2$s\"."
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/lib/ZFDemo_Mail_Transport_File.php:79
+#: ../lib/ZFDemo_Mail_Transport_File.php:79
+msgid "Unable to send mail"
+msgstr ""
+
+# C:\gavin\home\lighttpd\zf\zfdemo\section17_perf/lib/Controller/Action.php:72
+#: ../lib/Controller/Action.php:72
+msgid "' does not implement Zend_View_Interface."
+msgstr ""
+
+#: ../lib/Controller/Action.php:83
+#, php-format
+msgid "Missing base view directory (\"%1$s\""
+msgstr ""
+

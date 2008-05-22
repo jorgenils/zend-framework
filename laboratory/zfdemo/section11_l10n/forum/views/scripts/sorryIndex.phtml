@@ -1,0 +1,16 @@
+<!-- BEGIN: forum/views/scripts/sorryIndex.phtml -->
+    <title>ZFDemo | Forum Module | Sorry, a problem occurred.</title>
+</head>
+<!-- STAGE 6: Render results in response to request. -->
+<!-- Presentation model is accessed using "$this->" syntax. -->
+<body>
+
+<p>
+    We are sorry, but there is a problem for this request:</br>
+    <?php echo $this->orig ?>
+</p>
+
+<p><?php echo $this->error ?></p>
+
+<p><a href="<?php echo $this->baseUrl ?>">Continue</a></p>
+<!-- END: forum/views/scripts/sorryIndex.phtml -->

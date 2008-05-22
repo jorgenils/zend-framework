@@ -1,0 +1,5 @@
+php_value include_path "%APP_INC_DIR%:%ZLIB_INC_DIR%:%SMARTY_INC_DIR%:%ZFLIB_INC_DIR%:."
+php_value html_errors 0
+
+RewriteEngine on
+RewriteRule !\.(js|ico|txt|gif|jpg|png|css|rss)$ index.php

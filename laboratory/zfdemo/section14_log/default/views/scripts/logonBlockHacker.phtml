@@ -1,0 +1,9 @@
+<!-- BEGIN: default/views/scripts/logonBlockHacker.phtml -->
+<p>Error: Too many login attempts.</p>
+<p>Login access temporarily suspended for <?php echo $this->lockout ?> seconds.</p>
+<p>
+Reader excercise: Increase security by implementing
+temporary ban on login from IP for this username.
+Wait for <b><?php echo $this->lockout ?></b> seconds before pressing the Reload button.
+</p>
+<!-- END: default/views/scripts/logonBlockHacker.phtml -->

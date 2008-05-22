@@ -1,0 +1,56 @@
+<!-- BEGIN: forum/views/scripts/admin_postsDisplay.phtml -->
+    <title>ZFDemo | ADMIN Forum Posts | <?php echo $this->topicName ?></title>
+</head>
+<!-- STAGE 6: Render results in response to request. -->
+<!-- Presentation model is accessed using "$this->" syntax. -->
+<body>
+<div style="float:right"><small>(Your timezone is: <?php echo $this->timezone ?>)</small></div>
+<h3><?php echo $this->now ?> - Welcome <span style="color:maroon"><?php echo $this->username ?></span></h3>
+
+<?php if ($this->posts): ?>
+
+    <h3>Forum posts for topic: <?php echo $this->topicName ?></h3>
+    <form method="post" action="<?php echo $this->baseUrl ?>/forum/admin_posts/edit">
+    <table cellpadding=3 cellspacing=3 border=3 style='white-space: nowrap;'>
+        <tr>
+            <th>User</th>
+            <th>Country</th>
+            <th># posts</th>
+            <th>Posted On</th>
+            <th>Last Modified</th>
+            <th>Visible to<br />anonymous viewers?</th>
+            <th>Delete?</th>
+            <th>Subject</th>
+            <th>Post</th>
+        </tr>
+<?php
+        foreach($this->posts as $post) {
+            echo "<tr>\n";
+            echo "<td>", $this->escape($post['user']->username), "</td>\n";
+            echo "<td>", $this->escape($post->country), "</td>\n";
+            // Note the use of the "helper" function to format the number for display, although
+            // for most users, the difference only becomes visible when there are more than one thousand posts.
+            echo "<td>", $this->escape(Zend_Locale_Format::toNumber($post['user']->post_count)), "</td>\n";
+            echo "<td>", $post['creation_time'], "</td>\n";
+            echo "<td>", $post['modification_time'], "</td>\n";
+            echo "<td align='center'><input type='checkbox' name='visible",
+                $post['post_id'], "' ", $post['is_visible'] ? 'checked':'', " /></td>\n";
+            echo "<td align='center'><input type='checkbox' name='delete",
+                $post['post_id'], "' /></td>\n";
+            echo "<td>", $this->escape($post['subject']), "</td>\n";
+            echo "<td>", $this->escape($post['content']), "</td>\n";
+            echo "</tr>\n";
+        }
+?>
+    </table>
+    <br />
+    <input type="hidden" name="topicId" value="<?php echo $this->topicId ?>" />
+    <input type="submit">
+    </form>
+
+<?php else: ?>
+
+    <p>No posts for topic id <?php echo $this->topicId ?>.</p>
+
+<?php endif; ?>
+<!-- END: forum/views/scripts/admin_postsDisplay.phtml -->

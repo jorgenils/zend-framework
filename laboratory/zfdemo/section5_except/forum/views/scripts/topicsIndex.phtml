@@ -1,0 +1,46 @@
+<!-- BEGIN: forum/views/scripts/topicsIndex.phtml -->
+    <title>ZFDemo | Forum Topic List</title>
+</head>
+<!-- STAGE 6: Render results in response to request. -->
+<!-- Presentation model is accessed using "$this->" syntax. -->
+<body>
+<div style="float:right"><small>(Your timezone is: <?php echo $this->timezone ?>)</small></div>
+<h3><?php echo $this->now ?> - Welcome <span style="color:maroon"><?php echo $this->username ?></span></h3>
+
+<?php if ($this->topics): ?>
+
+    <table cellpadding=3 cellspacing=3 border=3 style='white-space: nowrap;'>
+        <caption>Forum Topics</caption>
+        <tr>
+            <th>Topic</th>
+            <th>User</th>
+            <th>Country</th>
+            <th># posts</th>
+            <th>Posted On</th>
+            <th>Last Modified</th>
+        </tr>
+<?php
+        foreach($this->topics as $topic) {
+            if ($this->hide && !$topic->is_visible) {
+                echo "<tr><td colspan=\"6\">hidden</td></tr>\n";
+            } else {
+                echo "<tr>\n";
+                echo "<td><a href=\"", $this->topicUrl, "/", $topic['topic_id'], "\">",
+                     $this->escape($topic['topic_name']), "</a></td>\n";
+                echo "<td>", $this->escape($topic['user']->username), "</td>\n";
+                echo "<td>", $this->escape($topic->country), "</td>\n";
+                echo "<td>", $this->escape(Zend_Locale_Format::toNumber($topic['user']->post_count)), "</td>\n";
+                echo "<td>", $topic['creation_time'], "</td>\n";
+                echo "<td>", $topic['modification_time'], "</td>\n";
+                echo "</tr>\n";
+            }
+        }
+?>
+    </table>
+
+<?php else: ?>
+
+    <p>No posts for topic id <?php echo $this->topicId ?>.</p>
+
+<?php endif; ?>
+<!-- END: forum/views/scripts/topicsIndex.phtml -->

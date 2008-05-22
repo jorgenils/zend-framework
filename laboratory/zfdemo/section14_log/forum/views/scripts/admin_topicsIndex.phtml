@@ -1,0 +1,52 @@
+<!-- BEGIN: forum/views/scripts/admin_topicsIndex.phtml -->
+    <title>ZFDemo | ADMIN Forum Topics</title>
+</head>
+<!-- STAGE 6: Render results in response to request. -->
+<!-- Presentation model is accessed using "$this->" syntax. -->
+<body>
+<div style="float:right"><small>(Your timezone is: <?php echo $this->timezone ?>)</small></div>
+<h3><?php echo $this->now ?> - Welcome <span style="color:maroon"><?php echo $this->username ?></span></h3>
+
+<?php if ($this->topics): ?>
+
+    <form method="post" action="<?php echo $this->baseUrl ?>/forum/admin_topics/edit">
+    <table cellpadding=3 cellspacing=3 border=3 style='white-space: nowrap;'>
+        <caption>Forum Topics</caption>
+        <tr>
+            <th>Visible to<br />anonymous viewers?</th>
+            <th>Delete?</th>
+            <th>Topic</th>
+            <th>User</th>
+            <th>Country</th>
+            <th># posts</th>
+            <th>Posted On</th>
+            <th>Last Modified</th>
+        </tr>
+<?php
+        foreach($this->topics as $topic) {
+            echo "<tr>\n";
+            echo "<td align='center'><input type='checkbox' name='visible",
+                $topic['topic_id'], "' ", $topic['is_visible'] ? 'checked':'', "></td>\n";
+            echo "<td align='center'><input type='checkbox' name='delete",
+                $topic['topic_id'], "'></td>\n";
+            echo "<td><a href=\"", $this->topicUrl, "/", $topic['topic_id'], "\">",
+                 $this->escape($topic['topic_name']), "</a></td>\n";
+            echo "<td>", $this->escape($topic['user']->username), "</td>\n";
+            echo "<td>", $this->escape($topic->country), "</td>\n";
+            echo "<td>", $this->escape(Zend_Locale_Format::toNumber($topic['user']->post_count)), "</td>\n";
+            echo "<td>", $topic['creation_time'], "</td>\n";
+            echo "<td>", $topic['modification_time'], "</td>\n";
+            echo "</tr>\n";
+        }
+?>
+    </table>
+    <br />
+    <input type="submit">
+    </form>
+
+<?php else: ?>
+
+    <p>No topics found!</p>
+
+<?php endif; ?>
+<!-- END: forum/views/scripts/admin_topicsIndex.phtml -->

@@ -1,0 +1,70 @@
+<!-- BEGIN: default/views/scripts/loginForm.phtml -->
+</head>
+<body>
+<h1>Welcome to the ZF Demo: <?php echo $this->sectionName ?></h1>
+<?php if (!empty($this->origPathInfo)): ?>
+<p>
+    When trying to access &quot;<b><?php echo $this->origRequestUri ?></b>&quot;, a problem arose:
+</p>
+<div style='margin: 0 15px 15px 15px; padding:5px; border: 1px dashed red; width:auto; float:left'>
+    <?php echo $this->rerouteToReason ?>
+</div>
+<div style='clear:both'></div>
+<?php endif; ?>
+
+<?php
+if (isset($this->resultCode)) {
+    switch($this->resultCode) {
+        case false:
+            if (ZFDemo::isLocalRequest()) {
+                $msg = $this->exception;
+            } else {
+                $msg = $this->exception->getMessage();
+            }
+            break;
+        case Zend_Auth_Result::FAILURE:
+            $msg = 'general failure';
+            break;
+
+        case Zend_Auth_Result::FAILURE_IDENTITY_NOT_FOUND:
+            $msg = 'Failure due to identity not being found.';
+            break;
+
+        case Zend_Auth_Result::FAILURE_IDENTITY_AMBIGUOUS:
+            $msg = 'Failure due to identity being ambiguous.';
+            break;
+
+        case Zend_Auth_Result::FAILURE_CREDENTIAL_INVALID:
+            $msg = 'Failure due to invalid credentials.';
+            break;
+
+        case Zend_Auth_Result::FAILURE_UNCATEGORIZED:
+            $msg = 'Failure due to uncategorized reasons.';
+            break;
+
+        case Zend_Auth_Result::SUCCESS:
+            $msg = 'Authentication success.';
+            break;
+
+        default:
+            $msg = 'Unknown authentication result code!';
+            break;
+    }
+    echo '<p style="color:maroon">Authentication result: ',$msg,'</p>';
+}
+?>
+<form>
+<?php if (!empty($this->origPathInfo)): ?>
+<input type="hidden" name="origPathInfo" value="<?php echo $this->escape($this->origPathInfo); ?>">
+<?php endif; ?>
+<input type="text" name="username" value="admin"> Username (pre-configured names: admin, mod, member, gavin)
+<br />
+<br />
+<input type="text" name="password" value="adminpass"> Password (clear text on purpose)
+<br />
+Hint: Passwords all match: "&lt;username&gt;pass"
+<br />
+<br />
+<input type="submit">
+</form>
+<!-- END: default/views/scripts/loginForm.phtml -->
