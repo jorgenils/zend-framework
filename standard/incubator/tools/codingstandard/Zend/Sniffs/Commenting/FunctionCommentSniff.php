@@ -542,6 +542,9 @@ class Zend_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sni
             $spaceBeforeComment = 10000;
             $longestType        = 0;
             $longestVar         = 0;
+            if (count($this->commentParser->getThrows()) !== 0) {
+            	$isSpecialMethod = false;
+            }
 
             foreach ($params as $param) {
 

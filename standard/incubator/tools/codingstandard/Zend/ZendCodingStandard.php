@@ -287,9 +287,18 @@ class PHP_CodeSniffer_Standards_Zend_ZendCodingStandard extends
  * if ((ss = a) or
  *     (ww = b))
  *
- * Optional descriptions should begin with the Description "(optional)"
+ * Optional descriptions should begin with the Description "(Optional)"
  * @param string $variable (Optional) my variable
  *
  * Error on @throws tag when no exception is thrown
  * Error on @throws tag in false order
+ * Check if there is a @throws for all exceptions... one throw per exception
+ *
+ * Check Array notation:
+ * array('xxx', 'ccc'); // single line
+ * array('x',   'ccc',  // multiple line each element under each other
+ *       'ddd', 'fff');
+ * array('xxx' => 'xx', 'ccc' => 'cc'); // single line with key
+ * array('x'   => 'x',   'cc'  => 'c',  // multiple line each element under each other with key
+ *       'ddd' => 'ddd', 'fff' => 'ff');
  */

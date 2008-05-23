@@ -113,10 +113,13 @@ class Zend_Sniffs_Files_IncludingFileSniff implements PHP_CodeSniffer_Sniff
         }
         if ($inCondition === true) {
             // We are inside a conditional statement. We need an include_once.
-            if ($tokenCode === T_REQUIRE_ONCE) {
-                $error  = 'File is being conditionally included; ';
-                $error .= 'use "include_once" instead';
-                $phpcsFile->addError($error, $stackPtr);
+            $nextNew = $phpcsFile->findNext(array(T_NEW), ($stackPtr + 1));
+            if ($tokens[$nextNew]['line'] !== ($tokens[$stackPtr]['line'] + 1)) {
+                if ($tokenCode === T_REQUIRE_ONCE) {
+                    $error  = 'File is being conditionally included; ';
+                    $error .= 'use "include_once" instead';
+                    $phpcsFile->addError($error, $stackPtr);
+                }
             }
         } else {
             // We are unconditionally including, we need a require_once.
