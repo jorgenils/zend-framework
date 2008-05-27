@@ -111,7 +111,7 @@ stage-files:
 	    echo "Staging directory already exists ($(ZF_STAGE_DIR))" ; \
 	else \
 	    mkdir -p $(ZF_STAGE_DIR) ; \
-	    (cd $(ZF_EXPORT_DIR) && rsync --archive --delete --exclude-from="../exclude-files" ./ ../$(ZF_STAGE_DIR)) ; \
+	    (cd $(ZF_EXPORT_DIR) && rsync --archive --delete --exclude-from="../exclude-files-fw" ./ ../$(ZF_STAGE_DIR)) ; \
 	fi
 	@echo "...Done staging files."
 
