@@ -42,11 +42,11 @@ error_reporting( E_ALL | E_STRICT );
  * Determine the root, library, and tests directories of the framework
  * distribution.
  */
-$zfRoot        = dirname(dirname(dirname(__FILE__)));
-$zfIncLibrary  = $zfRoot . DIRECTORY_SEPARATOR . 'incubator' . DIRECTORY_SEPARATOR . 'library';
-$zfIncTests    = $zfRoot . DIRECTORY_SEPARATOR . 'incubator' . DIRECTORY_SEPARATOR . 'tests';
-$zfCoreLibrary = $zfRoot . DIRECTORY_SEPARATOR . 'library';
-$zfCoreTests   = $zfRoot . DIRECTORY_SEPARATOR . 'tests';
+$zfRoot        = dirname(__FILE__) . '/../..';
+$zfIncLibrary  = $zfRoot . '/incubator/library';
+$zfIncTests    = $zfRoot . '/incubator/tests';
+$zfCoreLibrary = $zfRoot . '/trunk/library';
+$zfCoreTests   = $zfRoot . '/trunk/tests';
 
 /*
  * Prepend the Zend Framework library/ and tests/ directories to the
