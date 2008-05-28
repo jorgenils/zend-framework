@@ -1,0 +1,48 @@
+#!/bin/sh
+
+if [ $# != 2 ] && [ $# != 3 ]; then
+    echo 1>&2 "Usage: ./create-tag <branchname> <tagname> [<revision number>]"
+    echo 1>&2
+    echo 1>&2 "tag standard/tags/release-<tagname> will be created using standard/branches/release-<branchname> branch with specified"
+    echo 1>&2 "revision number (or using latest revision if revision number is omitted"
+    exit 128
+fi
+
+
+SOURCE_BRANCH=http://framework.zend.com/svn/framework/standard/branches/release-$1
+SOURCE_REVISION_NUMBER=$3
+
+RELEASE_NUMBER=$2
+TARGET_TAG=http://framework.zend.com/svn/framework/standard/tags/release-$RELEASE_NUMBER
+
+
+svn mkdir $TARGET_TAG
+
+#TAG_REVISION=????   get created tag revision number
+
+echo "Create makefiles using created release tag..."
+sed -e 's/\[REVISION_NUMBER\]/$TAG_REVISION/' \
+    < Makefile-FW.src \
+    > Makefile-FW.temp
+sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
+    < Makefile-FW.temp \
+    > Makefile-FW
+rm Makefile-FW.temp
+
+sed -e 's/\[REVISION_NUMBER\]/$TAG_REVISION/' \
+    < Makefile-Gdata.src \
+    > Makefile-Gdata.temp
+sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
+    < Makefile-Gdata.temp \
+    > Makefile-Gdata
+rm Makefile-Gdata.temp
+
+sed -e 's/\[REVISION_NUMBER\]/$TAG_REVISION/' \
+    < Makefile-InfoCard.src \
+    > Makefile-InfoCard.temp
+sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
+    < Makefile-InfoCard.temp \
+    > Makefile-InfoCard
+rm Makefile-InfoCard.temp
+
+exit 0
