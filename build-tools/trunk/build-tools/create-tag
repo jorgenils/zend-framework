@@ -11,16 +11,110 @@ fi
 
 SOURCE_BRANCH=http://framework.zend.com/svn/framework/standard/branches/release-$1
 SOURCE_REVISION_NUMBER=$3
+if [ "$SOURCE_REVISION_NUMBER" == "" ]; then
+    echo "Retrieving revision number for $SOURCE_BRANCH branch..."
+    SOURCE_REVISION_NUMBER=$(svn info $SOURCE_BRANCH|grep -o "^Revision: [0-9]*" | sed -e "s/Revision: //")
+
+    if [ "$SOURCE_REVISION_NUMBER" == "" ]; then
+        echo 1>&2 "Retrieving revision number for '$SOURCE_BRANCH' branch failed."
+        echo 1>&2 "None changes was made for the repository."
+        exit 129
+    fi
+
+    echo "Done. Used revision number is '$SOURCE_REVISION_NUMBER'."
+fi
+
+
 
 RELEASE_NUMBER=$2
 TARGET_TAG=http://framework.zend.com/svn/framework/standard/tags/release-$RELEASE_NUMBER
+TARGET_TAG_FOLDER=release-$RELEASE_NUMBER
+
+echo "Creating tag folder..."
+svn mkdir $TARGET_TAG -m "Create tag folder for ZF $RELEASE_NUMBER"
+if [ $? != 0 ]; then
+    echo 1>&2 "Error occured while tag folder creation."
+    exit 130
+fi
+
+rm -rf $TARGET_TAG_FOLDER
+
+echo "Checking out tag folder to teh local drive..."
+svn co $TARGET_TAG
+if [ $? != 0 ]; then
+    echo 1>&2 "Error occured while tag folder retrieving. Only tag folder was created within repository."
+    exit 131
+fi
+
+cd $TARGET_TAG_FOLDER
+
+echo "Copying documentation from the trunk..."
+svn cp -r $SOURCE_REVISION_NUMBER http://framework.zend.com/svn/framework/standard/trunk/documentation  documentation
+if [ $? != 0 ]; then
+    echo 1>&2 "Error occured while copying documentation folder. Only tag folder was created within repository."
+    exit 132
+fi
+
+echo "Copying demos folder from the specified release branch ($SOURCE_BRANCH)..."
+svn cp -r $SOURCE_REVISION_NUMBER $SOURCE_BRANCH/demos demos
+if [ $? != 0 ]; then
+    echo 1>&2 "Error occured while copying demos folder. Only tag folder was created within repository."
+    exit 133
+fi
+
+echo "Copying library folder from the specified release branch ($SOURCE_BRANCH)..."
+svn cp -r $SOURCE_REVISION_NUMBER $SOURCE_BRANCH/library library
+if [ $? != 0 ]; then
+    echo 1>&2 "Error occured while copying library folder. Only tag folder was created within repository."
+    exit 134
+fi
+
+echo "Copying tests folder from the specified release branch ($SOURCE_BRANCH)..."
+svn cp -r $SOURCE_REVISION_NUMBER $SOURCE_BRANCH/tests tests
+if [ $? != 0 ]; then
+    echo 1>&2 "Error occured while copying tests folder. Only tag folder was created within repository."
+    exit 135
+fi
+
+echo "Copying INSTALL.txt file from the specified release branch ($SOURCE_BRANCH)..."
+svn cp -r $SOURCE_REVISION_NUMBER $SOURCE_BRANCH/INSTALL.txt INSTALL.txt
+if [ $? != 0 ]; then
+    echo 1>&2 "Error occured while copying INSTALL.txt file. Only tag folder was created within repository."
+    exit 136
+fi
+
+echo "Copying LICENSE.txt file from the specified release branch ($SOURCE_BRANCH)..."
+svn cp -r $SOURCE_REVISION_NUMBER $SOURCE_BRANCH/LICENSE.txt LICENSE.txt
+if [ $? != 0 ]; then
+    echo 1>&2 "Error occured while copying LICENSE.txt file. Only tag folder was created within repository."
+    exit 137
+fi
+
+echo "Copying README.txt file from the specified release branch ($SOURCE_BRANCH)..."
+svn cp -r $SOURCE_REVISION_NUMBER $SOURCE_BRANCH/README.txt README.txt
+if [ $? != 0 ]; then
+    echo 1>&2 "Error occured while copying README.txt file. Only tag folder was created within repository."
+    exit 138
+fi
 
 
-svn mkdir $TARGET_TAG
+echo "Committing copied data to the repository..."
+svn commit -m "Create tag for ZF $RELEASE_NUMBER"
+if [ $? != 0 ]; then
+    echo 1>&2 "Error occured while ZF $RELEASE_NUMBER tag creation. Check repository state or remove tag folder."
+    exit 133
+fi
 
-#TAG_REVISION=????   get created tag revision number
+cd ..
+echo ""
+echo "!!!!!  Don't forget to remove $TARGET_TAG_FOLDER folder when you don't need it."
+echo ""
 
-echo "Create makefiles using created release tag..."
+echo "Retrieving revision number of just created release tag..."
+TAG_REVISION=$(svn info $TARGET_TAG|grep -o "^Revision: [0-9]*" | sed -e "s/Revision: //")
+
+
+echo "Create makefiles..."
 sed -e 's/\[REVISION_NUMBER\]/$TAG_REVISION/' \
     < Makefile-FW.src \
     > Makefile-FW.temp
@@ -45,4 +139,7 @@ sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
     > Makefile-InfoCard
 rm Makefile-InfoCard.temp
 
+echo "Done.
+
 exit 0
+
