@@ -1,0 +1,57 @@
+#!/bin/sh
+
+if [ $# != 1 ] && [ $# != 2 ]; then
+    echo 1>&2 "Usage: ./use-tag <tagname> [<revision number>]"
+    echo 1>&2
+    echo 1>&2 "'use-tag' utility should be used for generating makefiles for already existing release tag"
+    echo 1>&2 "E.g. if it was already created early and updated becouse of some reasons"
+    echo 1>&2 "standard/tags/release-<tagname> tag with specified revision number will be used"
+    echo 1>&2 "If revision number is omitted then latest revision will be used"
+    exit 128
+fi
+
+RELEASE_NUMBER=$1
+TARGET_TAG=http://framework.zend.com/svn/framework/standard/tags/release-$RELEASE_NUMBER
+
+TAG_REVISION=$2
+if [ "$TAG_REVISION" == "" ]; then
+    echo "Retrieving revision number for $TARGET_TAG tag..."
+    TAG_REVISION=$(svn info $TARGET_TAG|grep -o "^Revision: [0-9]*" | sed -e "s/Revision: //")
+
+    if [ "$TAG_REVISION" == "" ]; then
+        echo 1>&2 "Retrieving revision number for '$TARGET_TAG' tag failed."
+        exit 129
+    fi
+
+    echo "Done. Used revision number is '$TAG_REVISION'."
+fi
+
+echo "Create makefiles..."
+sed -e "s/\[REVISION_NUMBER\]/$TAG_REVISION/" \
+    < Makefile-FW.src \
+    > Makefile-FW.temp
+sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
+    < Makefile-FW.temp \
+    > Makefile-FW
+rm Makefile-FW.temp
+
+sed -e "s/\[REVISION_NUMBER\]/$TAG_REVISION/" \
+    < Makefile-Gdata.src \
+    > Makefile-Gdata.temp
+sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
+    < Makefile-Gdata.temp \
+    > Makefile-Gdata
+rm Makefile-Gdata.temp
+
+sed -e "s/\[REVISION_NUMBER\]/$TAG_REVISION/" \
+    < Makefile-InfoCard.src \
+    > Makefile-InfoCard.temp
+sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
+    < Makefile-InfoCard.temp \
+    > Makefile-InfoCard
+rm Makefile-InfoCard.temp
+
+echo "Done."
+
+exit 0
+

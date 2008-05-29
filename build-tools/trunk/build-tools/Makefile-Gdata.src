@@ -47,7 +47,7 @@ PHPDOC=phpdoc
 # from which the release should be created, relative to the repository
 # location (e.g., tag/release-1.0.3).
 ZF_SVN_REVISION=[REVISION_NUMBER]
-ZF_SVN_DIR=tag/release-[RELEASE_NUMBER]
+ZF_SVN_DIR=tags/release-[RELEASE_NUMBER]
 
 # ZF_VERSION is the release version string to build.  This is added
 # to the VERSION.txt file, and is also used for the name of the
@@ -72,7 +72,7 @@ SVN=svn
 SVN_USER=
 SVN_PASS=
 
-ZF_SVN_URL=http://framework.zend.com/svn/framework/$(ZF_SVN_DIR)
+ZF_SVN_URL=http://framework.zend.com/svn/framework/standard/$(ZF_SVN_DIR)
 ZF_EXPORT_DIR=./ZendFramework-export-$(ZF_SVN_REVISION)
 GDATA_PRODUCT_NAME=Zend Gdata
 GDATA_PRODUCTNAME=ZendGdata

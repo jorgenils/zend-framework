@@ -4,7 +4,7 @@ if [ $# != 2 ] && [ $# != 3 ]; then
     echo 1>&2 "Usage: ./create-tag <branchname> <tagname> [<revision number>]"
     echo 1>&2
     echo 1>&2 "tag standard/tags/release-<tagname> will be created using standard/branches/release-<branchname> branch with specified"
-    echo 1>&2 "revision number (or using latest revision if revision number is omitted"
+    echo 1>&2 "revision number (or using latest revision if revision number is omitted)"
     exit 128
 fi
 
@@ -115,7 +115,7 @@ TAG_REVISION=$(svn info $TARGET_TAG|grep -o "^Revision: [0-9]*" | sed -e "s/Revi
 
 
 echo "Create makefiles..."
-sed -e 's/\[REVISION_NUMBER\]/$TAG_REVISION/' \
+sed -e "s/\[REVISION_NUMBER\]/$TAG_REVISION/" \
     < Makefile-FW.src \
     > Makefile-FW.temp
 sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
@@ -123,7 +123,7 @@ sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
     > Makefile-FW
 rm Makefile-FW.temp
 
-sed -e 's/\[REVISION_NUMBER\]/$TAG_REVISION/' \
+sed -e "s/\[REVISION_NUMBER\]/$TAG_REVISION/" \
     < Makefile-Gdata.src \
     > Makefile-Gdata.temp
 sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
@@ -131,7 +131,7 @@ sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
     > Makefile-Gdata
 rm Makefile-Gdata.temp
 
-sed -e 's/\[REVISION_NUMBER\]/$TAG_REVISION/' \
+sed -e "s/\[REVISION_NUMBER\]/$TAG_REVISION/" \
     < Makefile-InfoCard.src \
     > Makefile-InfoCard.temp
 sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
@@ -139,7 +139,7 @@ sed -e "s/\[RELEASE_NUMBER\]/$RELEASE_NUMBER/" \
     > Makefile-InfoCard
 rm Makefile-InfoCard.temp
 
-echo "Done.
+echo "Done."
 
 exit 0
 
