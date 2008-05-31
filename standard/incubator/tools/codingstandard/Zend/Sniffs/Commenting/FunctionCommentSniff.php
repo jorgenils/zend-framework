@@ -176,8 +176,8 @@ class Zend_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sni
         $this->processParams($commentStart, $commentEnd);
         $this->processSince($commentStart, $commentEnd);
         $this->processSees($commentStart);
-        $this->processReturn($commentStart, $commentEnd);
         $this->processThrows($commentStart);
+        $this->processReturn($commentStart, $commentEnd);
 
         // Check for a comment description.
         $short = $comment->getShortComment();
@@ -268,6 +268,19 @@ class Zend_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sni
                 $firstTag++;
             }
 
+            $cnt = 99;
+            foreach ($tagOrder as $tag => $content) {
+            	if ($content === 'param') {
+            		if ($cnt < $tag) {
+                        $error = 'The @since tag is in the wrong order; the tag follows @param (if used)';
+                        $this->currentFile->addError($error, $errorPos);
+            		}
+            	}
+            	if ($content === 'since') {
+            		$cnt = $tag;
+            	}
+            }
+
             $this->_tagIndex = $firstTag;
             $index           = array_keys($this->commentParser->getTagOrders(), 'since');
             if (count($index) > 1) {
@@ -277,7 +290,7 @@ class Zend_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sni
             }
 
             if ($index[0] !== $firstTag) {
-                $error = 'The @since tag is in the wrong order; the tag preceds @see (if used) or @return';
+                $error = 'The @since tag is in the wrong order; the tag preceds @see (if used), @throws (if used) and @return';
                 $this->currentFile->addError($error, $errorPos);
             }
 
@@ -325,6 +338,7 @@ class Zend_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sni
                         $error = 'The @see tag is in the wrong order; the tag follows @since (if used) or @param';
                         $this->currentFile->addError($error, $errorPos);
                     }
+                } else if ($index[$i] !== $this->_tagIndex) {
                 }
 
                 $content = $see->getContent();

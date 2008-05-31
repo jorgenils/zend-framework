@@ -92,8 +92,9 @@ class Zend_Sniffs_WhiteSpace_FunctionSpacingSniff implements PHP_CodeSniffer_Sni
             }
         }
 
-        if (($tokens[$closer+2]['content'] == '}') or ($tokens[$closer+3]['content'] == '}') or
-            ($tokens[$closer+4]['content'] == '}')) {
+        if ((array_key_exists($closer + 2, $tokens) and ($tokens[$closer+2]['content'] == '}')) or
+            (array_key_exists($closer + 3, $tokens) and ($tokens[$closer+3]['content'] == '}')) or
+            (array_key_exists($closer + 4, $tokens) and ($tokens[$closer+4]['content'] == '}'))) {
             if ($tokens[$closer + 2]['content'] !== '}' ) {
                 $phpcsFile->addError("Expected 0 blank lines after last function; $foundLines found", $closer + 1);
         	}

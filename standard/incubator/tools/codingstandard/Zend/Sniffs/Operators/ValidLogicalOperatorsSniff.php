@@ -40,9 +40,8 @@ class Zend_Sniffs_Operators_ValidLogicalOperatorsSniff implements PHP_CodeSniffe
     public function register()
     {
         return array(
-                T_LOGICAL_AND,
-                T_LOGICAL_OR,
-                T_LOGICAL_XOR
+                T_BOOLEAN_AND,
+                T_BOOLEAN_OR
                );
     }
 
@@ -58,11 +57,9 @@ class Zend_Sniffs_Operators_ValidLogicalOperatorsSniff implements PHP_CodeSniffe
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
-
         $replacements = array(
                          '&&' => 'and',
-                         '||' => 'or',
-                         '^'  => 'xor'
+                         '||' => 'or'
                         );
 
         $operator = $tokens[$stackPtr]['content'];
@@ -71,7 +68,7 @@ class Zend_Sniffs_Operators_ValidLogicalOperatorsSniff implements PHP_CodeSniffe
         }
 
         $replacement = $replacements[$operator];
-        $error       = "Logical operator \"$operator\" is prohibited; use \"$replacement\" instead";
+        $error       = "Boolean operator \"$operator\" is prohibited; use \"$replacement\" instead";
         $phpcsFile->addError($error, $stackPtr);
 
     }

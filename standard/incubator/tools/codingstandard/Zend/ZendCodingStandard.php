@@ -292,7 +292,9 @@ class PHP_CodeSniffer_Standards_Zend_ZendCodingStandard extends
  *
  * Error on @throws tag when no exception is thrown
  * Error on @throws tag in false order
+ * On @throws BEFORE @return
  * Check if there is a @throws for all exceptions... one throw per exception
+ * Fix the order of all function tags !!!!
  *
  * Check Array notation:
  * array('xxx', 'ccc'); // single line
