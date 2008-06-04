@@ -27,27 +27,35 @@ require_once 'Zend/Server/Abstract.php';
 require_once 'Zend/Uri.php';
 
 class Zend_Soap_AutoDiscover extends Zend_Server_Abstract implements Zend_Server_Interface {
-  	/**
-	 * @var Zend_Soap_Wsdl
-	 */
+    /**
+     * @var Zend_Soap_Wsdl
+     */
     private $_wsdl = null;
-    
+
     /**
      * @var Zend_Server_Reflection
      */
     private $_reflection = null;
-    
+
     /**
      * @var array
      */
     private $_functions = array();
+
+    /**
+     * @var boolean
+     */
+    private $_extractComplexTypes;
     
     /**
      * Constructor
+     * 
+     * @param boolean $extractComplexTypes
      */
-    public function __construct()
+    public function __construct($extractComplexTypes = true)
     {
-    	$this->_reflection = new Zend_Server_Reflection();
+        $this->_reflection = new Zend_Server_Reflection();
+        $this->_extractComplexTypes = $extractComplexTypes;
     }
     
     /**
@@ -59,45 +67,47 @@ class Zend_Soap_AutoDiscover extends Zend_Server_Abstract implements Zend_Server
      */
     public function setClass($class, $namespace = '', $argv = null)
     {
-    	$uri = Zend_Uri::factory('http://'  .$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']);
+        $uri = Zend_Uri::factory('http://'  .$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']);
 
-    	$wsdl = new Zend_Soap_Wsdl($class, $uri);
-    	
-    	$port = $wsdl->addPortType($class . 'Port');
+        $wsdl = new Zend_Soap_Wsdl($class, $uri, $this->_extractComplexTypes);
+        
+        $port = $wsdl->addPortType($class . 'Port');
         $binding = $wsdl->addBinding($class . 'Binding', 'tns:' .$class. 'Port');
         
         $wsdl->addSoapBinding($binding, 'rpc');
         $wsdl->addService($class . 'Service', $class . 'Port', 'tns:' . $class . 'Binding', $uri);
-		foreach ($this->_reflection->reflectClass($class)->getMethods() as $method) {
+        foreach ($this->_reflection->reflectClass($class)->getMethods() as $method) {
             /* <wsdl:portType>'s */
-			$portOperation = $wsdl->addPortOperation($port, $method->getName(), 'tns:' .$method->getName(). 'Request', 'tns:' .$method->getName(). 'Response');
-			if (strlen($desc) > 0) {
-				//$wsdl->addDocumentation($portOperation, $desc);
-				/* </wsdl:portType>'s */
-			}
-			$this->_functions[] = $method->getName();
-
-			foreach ($method->getPrototypes() as $prototype) {
-				$args = array();
-				foreach ($prototype->getParameters() as $param) {
-					$args[$param->getName()] = self::getType($param->getType());
-				}
-				$message = $wsdl->addMessage($method->getName() . 'Request', $args);
-				$desc = $method->getDescription();
-				if (strlen($desc) > 0) {
-					//$wsdl->addDocumentation($message, $desc);
-				}
-				if ($prototype->getReturnType() != "void") {
-					$message = $wsdl->addMessage($method->getName() . 'Response', array($method->getName() . 'Return' => self::getType($prototype->getReturnType())));
-				}
+            $portOperation = $wsdl->addPortOperation($port, $method->getName(), 'tns:' .$method->getName(). 'Request', 'tns:' .$method->getName(). 'Response');
+            $desc = $method->getDescription();
+            if (strlen($desc) > 0) {
+                /** @todo check, what should be done for portoperation documentation */
+                //$wsdl->addDocumentation($portOperation, $desc);
+            }
+            /* </wsdl:portType>'s */
             
-	            /* <wsdl:binding>'s */
-	            $operation = $wsdl->addBindingOperation($binding, $method->getName(),  array('use' => 'encoded', 'encodingStyle' => "http://schemas.xmlsoap.org/soap/encoding/"), array('use' => 'encoded', 'encodingStyle' => "http://schemas.xmlsoap.org/soap/encoding/"));
-	            $wsdl->addSoapOperation($binding, $uri->getUri() . '#' .$method->getName());
-	            /* </wsdl:binding>'s */
-			}
-		}
-		$this->_wsdl = $wsdl;
+            $this->_functions[] = $method->getName();
+
+            foreach ($method->getPrototypes() as $prototype) {
+                $args = array();
+                foreach ($prototype->getParameters() as $param) {
+                    $args[$param->getName()] = $wsdl->getType($param->getType());
+                }
+                $message = $wsdl->addMessage($method->getName() . 'Request', $args);
+                if (strlen($desc) > 0) {
+                    //$wsdl->addDocumentation($message, $desc);
+                }
+                if ($prototype->getReturnType() != "void") {
+                    $message = $wsdl->addMessage($method->getName() . 'Response', array($method->getName() . 'Return' => $wsdl->getType($prototype->getReturnType())));
+                }
+
+                /* <wsdl:binding>'s */
+                $operation = $wsdl->addBindingOperation($binding, $method->getName(),  array('use' => 'encoded', 'encodingStyle' => "http://schemas.xmlsoap.org/soap/encoding/"), array('use' => 'encoded', 'encodingStyle' => "http://schemas.xmlsoap.org/soap/encoding/"));
+                $wsdl->addSoapOperation($binding, $uri->getUri() . '#' .$method->getName());
+                /* </wsdl:binding>'s */
+            }
+        }
+        $this->_wsdl = $wsdl;
     }
     
     /**
@@ -108,64 +118,64 @@ class Zend_Soap_AutoDiscover extends Zend_Server_Abstract implements Zend_Server
      */
     public function addFunction($function, $namespace = '')
     {
-    	static $port;
-    	static $operation;
-    	static $binding;
-    	
-    	if (!is_array($function)) {
-    		$function = (array) $function;
-    	}
-    	
-    	$uri = Zend_Uri::factory('http://'  .$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']);
+        static $port;
+        static $operation;
+        static $binding;
+        
+        if (!is_array($function)) {
+            $function = (array) $function;
+        }
+        
+        $uri = Zend_Uri::factory('http://'  .$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']);
 
-    	if (!($this->_wsdl instanceof Zend_Soap_Wsdl)) {
-	    	$parts = explode('.', basename($_SERVER['SCRIPT_NAME']));
-	    	$name = $parts[0];
-	    	$wsdl = new Zend_Soap_Wsdl($name, $uri);
-	    	
-	    	$port = $wsdl->addPortType($name . 'Port');
-	        $binding = $wsdl->addBinding($name . 'Binding', 'tns:' .$name. 'Port');
-	        
-	        $wsdl->addSoapBinding($binding, 'rpc');
-	        $wsdl->addService($name . 'Service', $name . 'Port', 'tns:' . $name . 'Binding', $uri);
-    	} else {
-    		$wsdl = $this->_wsdl;
-    	}
-    	
-    	foreach ($function as $func) {
-    		$method = $this->_reflection->reflectFunction($func);
-			foreach ($method->getPrototypes() as $prototype) {
-				$args = array();
-				foreach ($prototype->getParameters() as $param) {
-					$args[$param->getName()] = self::getType($param->getType());
-				}
-				$message = $wsdl->addMessage($method->getName() . 'Request', $args);
-				$desc = $method->getDescription();
-				if (strlen($desc) > 0) {
-					//$wsdl->addDocumentation($message, $desc);
-				}
-				if ($prototype->getReturnType() != "void") {
-					$message = $wsdl->addMessage($method->getName() . 'Response', array($method->getName() . 'Return' => self::getType($prototype->getReturnType())));
-				}
-				 /* <wsdl:portType>'s */
-           		$portOperation = $wsdl->addPortOperation($port, $method->getName(), 'tns:' .$method->getName(). 'Request', 'tns:' .$method->getName(). 'Response');
-	            if (strlen($desc) > 0) {
-	                //$wsdl->addDocumentation($portOperation, $desc);
-	            }
-           		/* </wsdl:portType>'s */
+        if (!($this->_wsdl instanceof Zend_Soap_Wsdl)) {
+            $parts = explode('.', basename($_SERVER['SCRIPT_NAME']));
+            $name = $parts[0];
+            $wsdl = new Zend_Soap_Wsdl($name, $uri, $this->_extractComplexTypes);
             
-	            /* <wsdl:binding>'s */
-	            $operation = $wsdl->addBindingOperation($binding, $method->getName(),  array('use' => 'encoded', 'encodingStyle' => "http://schemas.xmlsoap.org/soap/encoding/"), array('use' => 'encoded', 'encodingStyle' => "http://schemas.xmlsoap.org/soap/encoding/"));
-	            $wsdl->addSoapOperation($binding, $uri->getUri() . '#' .$method->getName());
-	            /* </wsdl:binding>'s */
-			
-				$this->_functions[] = $method->getName();
-				
-				// We will only add one prototype
-				break;
-			}
-    	}
-		$this->_wsdl = $wsdl;
+            $port = $wsdl->addPortType($name . 'Port');
+            $binding = $wsdl->addBinding($name . 'Binding', 'tns:' .$name. 'Port');
+            
+            $wsdl->addSoapBinding($binding, 'rpc');
+            $wsdl->addService($name . 'Service', $name . 'Port', 'tns:' . $name . 'Binding', $uri);
+        } else {
+            $wsdl = $this->_wsdl;
+        }
+        
+        foreach ($function as $func) {
+            $method = $this->_reflection->reflectFunction($func);
+            foreach ($method->getPrototypes() as $prototype) {
+                $args = array();
+                foreach ($prototype->getParameters() as $param) {
+                    $args[$param->getName()] = $wsdl->getType($param->getType());
+                }
+                $message = $wsdl->addMessage($method->getName() . 'Request', $args);
+                $desc = $method->getDescription();
+                if (strlen($desc) > 0) {
+                    //$wsdl->addDocumentation($message, $desc);
+                }
+                if ($prototype->getReturnType() != "void") {
+                    $message = $wsdl->addMessage($method->getName() . 'Response', array($method->getName() . 'Return' => $wsdl->getType($prototype->getReturnType())));
+                }
+                 /* <wsdl:portType>'s */
+                   $portOperation = $wsdl->addPortOperation($port, $method->getName(), 'tns:' .$method->getName(). 'Request', 'tns:' .$method->getName(). 'Response');
+                if (strlen($desc) > 0) {
+                    //$wsdl->addDocumentation($portOperation, $desc);
+                }
+                   /* </wsdl:portType>'s */
+            
+                /* <wsdl:binding>'s */
+                $operation = $wsdl->addBindingOperation($binding, $method->getName(),  array('use' => 'encoded', 'encodingStyle' => "http://schemas.xmlsoap.org/soap/encoding/"), array('use' => 'encoded', 'encodingStyle' => "http://schemas.xmlsoap.org/soap/encoding/"));
+                $wsdl->addSoapOperation($binding, $uri->getUri() . '#' .$method->getName());
+                /* </wsdl:binding>'s */
+            
+                $this->_functions[] = $method->getName();
+                
+                // We will only add one prototype
+                break;
+            }
+        }
+        $this->_wsdl = $wsdl;
     }
     
     /**
@@ -177,7 +187,7 @@ class Zend_Soap_AutoDiscover extends Zend_Server_Abstract implements Zend_Server
      */
     public function fault($fault = null, $code = null)
     {
-    	
+        
     }
     
     /**
@@ -187,10 +197,10 @@ class Zend_Soap_AutoDiscover extends Zend_Server_Abstract implements Zend_Server
      */
     public function handle($request = false)
     {
-    	if (!headers_sent()) {
-    		header('Content-Type: text/xml');
-    	}
-    	$this->_wsdl->dump();
+        if (!headers_sent()) {
+            header('Content-Type: text/xml');
+        }
+        $this->_wsdl->dump();
     }
     
     /**
@@ -200,7 +210,7 @@ class Zend_Soap_AutoDiscover extends Zend_Server_Abstract implements Zend_Server
      */
     public function getFunctions()
     {
-    	return $this->_functions;	
+        return $this->_functions;    
     }
     
     /**
@@ -211,7 +221,7 @@ class Zend_Soap_AutoDiscover extends Zend_Server_Abstract implements Zend_Server
      */
     public function loadFunctions($definition)
     {
-    	
+        
     }
     
     /**
@@ -231,38 +241,15 @@ class Zend_Soap_AutoDiscover extends Zend_Server_Abstract implements Zend_Server
      * @param string $type PHP Type to get the XSD type for
      * @return string
      */
-    static function getType($type)
+    public function getType($type)
     {
-        switch ($type) {
-            case 'string':
-            case 'str':
-                return 'xsd:string';
-                break;
-            case 'int':
-            case 'integer':
-                return 'xsd:int';
-                break;
-            case 'float':
-            case 'double':
-                return 'xsd:float';
-                break;
-            case 'boolean':
-            case 'bool':
-                return 'xsd:boolean';
-                break;
-            case 'array':
-                return 'soap-enc:Array';
-                break;
-            case 'object':
-                return 'xsd:struct';
-                break;
-            case 'mixed':
-                return 'xsd:anyType';
-                break;
-            case 'void':
-                return '';
-            default:
-                return 'xsd:anyType';
+        if (!($this->_wsdl instanceof Zend_Soap_Wsdl)) {
+            /** @todo Exception throwing may be more correct */
+
+            // WSDL is not defined yet, so we can't recognize type in context of current service
+            return '';
+        } else {
+            return $this->_wsdl->getType($type);
         }
     }
 }

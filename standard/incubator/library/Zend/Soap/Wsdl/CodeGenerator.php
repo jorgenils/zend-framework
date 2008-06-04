@@ -76,7 +76,7 @@ class Zend_Soap_Wsdl_CodeGenerator {
             $php_code .= " */\n\n";
         }
         if (!isset(self::$wsdl->name)) {
-        	$classname = 'SoapService';
+            $classname = 'SoapService';
         } else {
             $classname = self::$wsdl->name;
         }                
