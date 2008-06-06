@@ -16,7 +16,7 @@
  * @package    Zend_Queue
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Queue.php 2005 2008-03-07 16:15:54Z jplock $
+ * @version    $Id$
  */
 
 /**
@@ -27,8 +27,8 @@
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-abstract class Zend_Queue {
-
+abstract class Zend_Queue
+{
     /**
      * Use the TIMEOUT constant in the config of a Zend_Queue_Adapter.
      */
