@@ -17,7 +17,7 @@
  * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Abstract.php 2006 2008-03-08 18:24:52Z jplock $
+ * @version    $Id$
  */
 
 /**
@@ -36,7 +36,6 @@ require_once 'Zend/Queue.php';
  */
 abstract class Zend_Queue_Adapter_Abstract
 {
-
     /**
      * User-provided configuration
      *

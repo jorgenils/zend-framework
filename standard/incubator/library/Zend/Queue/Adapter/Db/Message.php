@@ -32,8 +32,8 @@ require_once 'Zend/Db/Table/Abstract.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Queue_Adapter_Db_Message extends Zend_Db_Table_Abstract {
-
+class Zend_Queue_Adapter_Db_Message extends Zend_Db_Table_Abstract
+{
     /**
      * @var string
      */

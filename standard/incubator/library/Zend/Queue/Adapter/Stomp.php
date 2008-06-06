@@ -17,7 +17,7 @@
  * @subpackage Adapter
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Array.php 2005 2008-03-07 16:15:54Z jplock $
+ * @version    $Id$
  */
 
 /**
@@ -34,8 +34,8 @@ require_once 'Zend/Queue/Adapter/Abstract.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Queue_Adapter_Stomp extends Zend_Queue_Adapter_Abstract implements Countable {
-
+class Zend_Queue_Adapter_Stomp extends Zend_Queue_Adapter_Abstract implements Countable
+{
     const DEFAULT_SCHEME = 'tcp';
     const DEFAULT_HOST = '127.0.0.1';
     const DEFAULT_PORT = 61613;

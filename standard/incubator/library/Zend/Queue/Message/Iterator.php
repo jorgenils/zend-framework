@@ -17,7 +17,7 @@
  * @subpackage Message
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Queue.php 2000 2008-03-04 05:13:30Z jplock $
+ * @version    $Id$
  */
 
 /**
