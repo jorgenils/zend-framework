@@ -12,15 +12,15 @@
     <para>
         There are three configurations for SOAP applications where Zend Framework may be utilized:
         <orderedlist>
-        	<listitem>
-        		<simpara>SOAP server PHP application &lt;---&gt; SOAP client PHP application</simpara>
-        	</listitem>
-        	<listitem>
-        		<simpara>SOAP server non-PHP application &lt;---&gt; SOAP client PHP application</simpara>
-        	</listitem>
-        	<listitem>
-        		<simpara>SOAP server PHP application &lt;---&gt; SOAP client non-PHP application</simpara>
-        	</listitem>
+            <listitem>
+                <simpara>SOAP server PHP application &lt;---&gt; SOAP client PHP application</simpara>
+            </listitem>
+            <listitem>
+                <simpara>SOAP server non-PHP application &lt;---&gt; SOAP client PHP application</simpara>
+            </listitem>
+            <listitem>
+                <simpara>SOAP server PHP application &lt;---&gt; SOAP client non-PHP application</simpara>
+            </listitem>
         </orderedlist>
     </para>
     
@@ -48,12 +48,12 @@
     <para>
         There are two ways for using Zend Framework for SOAP server application:     
         <itemizedlist>
-        	<listitem>
-        		<para>Use separated class.</para>
-        	</listitem>
-        	<listitem>
-        		<para>Use set of functions</para>
-        	</listitem>
+            <listitem>
+                <para>Use separated class.</para>
+            </listitem>
+            <listitem>
+                <para>Use set of functions</para>
+            </listitem>
         </itemizedlist>
     </para>
 
@@ -67,8 +67,8 @@
 
 
     <para>
-    	Here is an example of common usage of the autodiscovery functionality:
-	    <programlisting role="php"><![CDATA[<?php
+        Here is an example of common usage of the autodiscovery functionality:
+        <programlisting role="php"><![CDATA[<?php
 require_once 'Zend/Soap/AutoDiscover.php';
 
 class My_SoapServer_Class {

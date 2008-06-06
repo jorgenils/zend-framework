@@ -41,6 +41,7 @@
     <chapter id="zend.soap.autodiscovery">
         <title>Zend_Soap_AutoDiscovery</title>
         <xi:include href="module_specs/Zend_Soap_AutoDiscovery-Introduction.xml" />
+        <xi:include href="module_specs/Zend_Soap_AutoDiscovery-ClassDiscovering.xml" />
     </chapter>
 
     <appendix id="appendix.copyright">
