@@ -14,10 +14,10 @@
  *
  * @category   Zend
  * @package    Zend_Service
- * @subpackage Amazon_s3
- * @copyright  Copyright (c) 2006 Zend Technologies USA Inc. (http://www.zend.com)
+ * @subpackage Amazon_S3
+ * @copyright  Copyright (c) 2005-2008, Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: PayPal.php 126 2007-06-21 20:23:05Z shahar $
+ * @version    $Id$
  */
 
 /**
@@ -31,31 +31,30 @@ require_once 'Zend/Http/Client.php';
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Amazon_S3
- * @copyright  Copyright (c) 2006 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2008, Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Service_Amazon_S3
 {
-
-    /**
-     * @var boolean
-     */
-    public static $debug = false;
-
     /**
      * @var string Amazon Access Key
      */
-    public static $access_key = null;
+    public static $accessKey = null;
 
     /**
      * @var string Amazon Secret Key
      */
-    public static $secret_key = null;
+    public static $secretKey = null;
+
+    /**
+     * @var Zend_Log
+     */
+    public static $logger = null;
 
     /**
      * @var boolean Write the buffer on fflush()?
      */
-    private $_write_buffer = false;
+    private $_writeBuffer = false;
 
     /**
      * @var integer Current read/write position
@@ -65,23 +64,24 @@ class Zend_Service_Amazon_S3
     /**
      * @var integer Total size of the object as returned by S3 (Content-length)
      */
-    private $_object_size = 0;
+    private $_objectSize = 0;
 
     /**
      * @var string File name to interact with
      */
-    private $_object_name = null;
+    private $_objectName = null;
 
     /**
      * @var string Current read/write buffer
      */
-    private $_object_buffer = null;
+    private $_objectBuffer = null;
 
     /**
      * @var array Available buckets
      */
-    private $_bucket_list = array();
+    private $_bucketList = array();
 
+    const STREAM_ID = 's3://';
     const S3_ENDPOINT = 'http://s3.amazonaws.com';
     const S3_ACL_PRIVATE = 'private';
     const S3_ACL_PUBLIC_READ = 'public-read';
@@ -97,23 +97,34 @@ class Zend_Service_Amazon_S3
      */
     public static function setKeys($access_key, $secret_key)
     {
-        self::$access_key = $access_key;
-        self::$secret_key = $secret_key;
+        self::$accessKey = $access_key;
+        self::$secretKey = $secret_key;
+    }
+
+    /**
+     * Set the logging mechanism
+     *
+     * @param  Zend_Log $logger
+     * @return void
+     */
+    public static function setLogger(Zend_Log $logger)
+    {
+        self::$logger = $logger;
     }
 
     /**
      * Open the stream
      *
-     * @param  string $path
-     * @param  string $mode
+     * @param  string  $path
+     * @param  string  $mode
      * @param  integer $options
-     * @param  string $opened_path
+     * @param  string  $opened_path
      * @return boolean
      */
     public function stream_open($path, $mode, $options, $opened_path)
     {
-        if (self::$debug) {
-            echo "stream_open($path, $mode, $options, $opened_path)<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("stream_open($path, $mode, $options, $opened_path)", Zend_Log::DEBUG);
         }
 
         // If we open the file for writing, just return true. Create the file
@@ -131,11 +142,11 @@ class Zend_Service_Amazon_S3
             case 'x+':
             case 'xb':
             case 'xb+':
-                $this->_object_name = $path;
-                $this->_object_buffer = null;
-                $this->_object_size = 0;
+                $this->_objectName = $path;
+                $this->_objectBuffer = null;
+                $this->_objectSize = 0;
                 $this->_position = 0;
-                $this->_write_buffer = true;
+                $this->_writeBuffer = true;
                 return true;
                 break;
         }
@@ -143,11 +154,11 @@ class Zend_Service_Amazon_S3
         // Otherwise, just see if the file exists or not
         $response = $this->_makeRequest('HEAD', $path);
         if ($response->getStatus() == 200) {
-            $this->_object_name = $path;
+            $this->_objectName = $path;
+            $this->_objectBuffer = null;
+            $this->_objectSize = $response->getHeader('Content-length');
             $this->_position = 0;
-            $this->_object_size = $response->getHeader('Content-length');
-            $this->_write_buffer = false;
-            $this->_object_buffer = null;
+            $this->_writeBuffer = false;
             return true;
         }
         return false;
@@ -160,14 +171,15 @@ class Zend_Service_Amazon_S3
      */
     public function stream_close()
     {
-        if (self::$debug) {
-            echo "stream_close()<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log('stream_close()', Zend_Log::DEBUG);
         }
-        $this->_object_name = null;
-        $this->_object_buffer = null;
-        $this->_object_size = 0;
+
+        $this->_objectName = null;
+        $this->_objectBuffer = null;
+        $this->_objectSize = 0;
         $this->_position = 0;
-        $this->_write_buffer = false;
+        $this->_writeBuffer = false;
     }
 
     /**
@@ -178,34 +190,39 @@ class Zend_Service_Amazon_S3
      */
     public function stream_read($count)
     {
-        if (self::$debug) {
-            echo "stream_read($count)<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("stream_read($count)", Zend_Log::DEBUG);
         }
 
-        if (!$this->_object_name) {
+        if (!$this->_objectName) {
             return false;
         }
 
         $range_start = $this->_position;
         $range_end = $this->_position+$count;
 
-        // Only fetch more data from S3 if the range end position is greater
-        // than the size of the current object buffer AND if the range end position
-        // is less than or equal to the object's size returned by S3
-        if (($range_end > strlen($this->_object_buffer)) && ($range_end <= $this->_object_size)) {
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("Range: $range_start-$range_end", Zend_Log::DEBUG);
+        }
+
+        // Only fetch more data from S3 if we haven't fetched any data yet (postion=0)
+        // OR, the range end position is greater than the size of the current object
+        // buffer AND if the range end position is less than or equal to the object's
+        // size returned by S3
+        if (($this->_position == 0) || (($range_end > strlen($this->_objectBuffer)) && ($range_end <= $this->_objectSize))) {
 
             $headers = array(
                 'Range' => "$range_start-$range_end"
             );
 
-            $response = $this->_makeRequest('GET', $this->_object_name, $headers);
+            $response = $this->_makeRequest('GET', $this->_objectName, $headers);
 
             if ($response->getStatus() == 200) {
-                $this->_object_buffer .= $response->getBody();
+                $this->_objectBuffer .= $response->getBody();
             }
         }
 
-        $data = substr($this->_object_buffer, $this->_position, $count);
+        $data = substr($this->_objectBuffer, $this->_position, $count);
         $this->_position += strlen($data);
         return $data;
     }
@@ -218,16 +235,16 @@ class Zend_Service_Amazon_S3
      */
     public function stream_write($data)
     {
-        if (self::$debug) {
-            echo "stream_write($data)<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("stream_write($data)", Zend_Log::DEBUG);
         }
 
-        if (!$this->_object_name) {
+        if (!$this->_objectName) {
             return 0;
         }
         $len = strlen($data);
-        $this->_object_buffer .= $data;
-        $this->_object_size += $len;
+        $this->_objectBuffer .= $data;
+        $this->_objectSize += $len;
         return $len;
     }
 
@@ -238,15 +255,15 @@ class Zend_Service_Amazon_S3
      */
     public function stream_eof()
     {
-        if (self::$debug) {
-            echo "stream_eof<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log('stream_eof()', Zend_Log::DEBUG);
         }
 
-        if (!$this->_object_name) {
+        if (!$this->_objectName) {
             return true;
         }
 
-        return ($this->_position >= $this->_object_size);
+        return ($this->_position >= $this->_objectSize);
     }
 
     /**
@@ -256,9 +273,10 @@ class Zend_Service_Amazon_S3
      */
     public function stream_tell()
     {
-        if (self::$debug) {
-            echo "stream_tell()<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log('stream_tell()', Zend_Log::DEBUG);
         }
+
         return $this->_position;
     }
 
@@ -271,8 +289,8 @@ class Zend_Service_Amazon_S3
      */
     public function stream_seek($offset, $whence)
     {
-        if (self::$debug) {
-            echo "stream_seek($offset, $whence)<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("stream_seek($offset, $whence)", Zend_Log::DEBUG);
         }
 
         switch ($whence) {
@@ -282,7 +300,7 @@ class Zend_Service_Amazon_S3
                 break;
             case SEEK_END:
                 // Set position to end-of-file plus $offset
-                $new_pos = $this->_object_size + $offset;
+                $new_pos = $this->_objectSize + $offset;
                 break;
             case SEEK_SET:
             default:
@@ -290,7 +308,7 @@ class Zend_Service_Amazon_S3
                 $new_pos = $offset;
                 break;
         }
-        $ret = ($new_pos >= 0 && $new_pos <= $this->_object_size);
+        $ret = ($new_pos >= 0 && $new_pos <= $this->_objectSize);
         if ($ret) {
             $this->_position = $new_pos;
         }
@@ -304,35 +322,35 @@ class Zend_Service_Amazon_S3
      */
     public function stream_flush()
     {
-        if (self::$debug) {
-            echo "stream_flush()<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log('stream_flush()', Zend_Log::DEBUG);
         }
 
         // If the stream wasn't opened for writing, just return false
-        if (!$this->_write_buffer) {
+        if (!$this->_writeBuffer) {
             return false;
         }
 
         $headers = array(
-            'Content-MD5'  => base64_encode(md5($this->_object_buffer, true)),
-            'Content-type' => self::getMimeType($this->_object_name),
+            'Content-MD5'  => base64_encode(md5($this->_objectBuffer, true)),
+            'Content-type' => self::getMimeType($this->_objectName),
             'Expect'       => '100-continue'
         );
 
-        $response = $this->_makeRequest('PUT', $this->_object_name, $headers);
+        $response = $this->_makeRequest('PUT', $this->_objectName, $headers);
 
         // Check the MD5 Etag returned by S3 against and MD5 of the buffer
         if ($response->getStatus() == 200) {
             // It is escaped by double quotes for some reason
             $etag = str_replace('"', '', $response->getHeader('Etag'));
 
-            if ($etag == md5($this->_object_buffer)) {
-                $this->_object_buffer = null;
+            if ($etag == md5($this->_objectBuffer)) {
+                $this->_objectBuffer = null;
                 return true;
             }
         }
 
-        $this->_object_buffer = null;
+        $this->_objectBuffer = null;
         return false;
     }
 
@@ -343,8 +361,8 @@ class Zend_Service_Amazon_S3
      */
     public function stream_stat()
     {
-        if (self::$debug) {
-            echo "stream_stat()<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log('stream_stat()', Zend_Log::DEBUG);
         }
 
         $stat = array();
@@ -381,8 +399,8 @@ class Zend_Service_Amazon_S3
      */
     public function unlink($path)
     {
-        if (self::$debug) {
-            echo "unlink($path)<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("unlink($path)", Zend_Log::DEBUG);
         }
 
         $response = $this->_makeRequest('DELETE', $path);
@@ -400,8 +418,8 @@ class Zend_Service_Amazon_S3
      */
     public function rename($path_from, $path_to)
     {
-        if (self::$debug) {
-            echo "rename($path_from, $path_to)<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("rename($path_from, $path_to)", Zend_Log::DEBUG);
         }
 
         // Renaming isn't supported, always return false
@@ -418,8 +436,8 @@ class Zend_Service_Amazon_S3
      */
     public function mkdir($path, $mode, $options)
     {
-        if (self::$debug) {
-            echo "mkdir($path, $mode, $options)<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("mkdir($path, $mode, $options)", Zend_Log::DEBUG);
         }
 
         $response = $this->_makeRequest('PUT', $path);
@@ -436,8 +454,8 @@ class Zend_Service_Amazon_S3
      */
     public function rmdir($path, $options)
     {
-        if (self::$debug) {
-            echo "rmdir($path, $options)<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("rmdir($path, $options)", Zend_Log::DEBUG);
         }
 
         $response = $this->_makeRequest('DELETE', $path);
@@ -455,24 +473,24 @@ class Zend_Service_Amazon_S3
      */
     public function dir_opendir($path, $options)
     {
-        if (self::$debug) {
-            echo "dir_opendir($path, $options)<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("dir_opendir($path, $options)", Zend_Log::DEBUG);
         }
 
         $response = $this->_makeRequest('GET', $path);
 
         $xml = new SimpleXMLElement($response->getBody());
 
-        $this->_bucket_list = array();
+        $this->_bucketList = array();
         // If we don't give a path, return an array of buckets available
         if ($path == 's3://') {
             foreach ($xml->Buckets->Bucket as $bucket) {
-                $this->_bucket_list[] = (string)$bucket->Name;
+                $this->_bucketList[] = (string)$bucket->Name;
             }
         }
         else { // Otherwise list the objects in the buckets
             foreach ($xml->ListBucketResult as $object) {
-                $this->_bucket_list[] = (string)$object;
+                $this->_bucketList[] = (string)$object;
             }
         }
 
@@ -488,8 +506,8 @@ class Zend_Service_Amazon_S3
      */
     public function url_stat($path, $flags)
     {
-        if (self::$debug) {
-            echo "url_stat($path, $flags)<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("url_stat($path, $flags)", Zend_Log::DEBUG);
         }
 
         $stat = array();
@@ -525,13 +543,13 @@ class Zend_Service_Amazon_S3
      */
     public function dir_readdir()
     {
-        if (self::$debug) {
-            echo "dir_readdir()<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log('dir_readdir()', Zend_Log::DEBUG);
         }
 
-        $object = current($this->_bucket_list);
+        $object = current($this->_bucketList);
         if ($object !== false) {
-            next($this->_bucket_list);
+            next($this->_bucketList);
         }
         return $object;
     }
@@ -543,11 +561,11 @@ class Zend_Service_Amazon_S3
      */
     public function dir_rewinddir()
     {
-        if (self::$debug) {
-            echo "dir_rewinddir()<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log('dir_rewinddir()', Zend_Log::DEBUG);
         }
 
-        reset($this->_bucket_list);
+        reset($this->_bucketList);
         return true;
     }
 
@@ -558,11 +576,11 @@ class Zend_Service_Amazon_S3
      */
     public function dir_closedir()
     {
-        if (self::$debug) {
-            echo "dir_closedir()<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log('dir_closedir()', Zend_Log::DEBUG);
         }
 
-        $this->_bucket_list = array();
+        $this->_bucketList = array();
         return true;
     }
 
@@ -583,7 +601,7 @@ class Zend_Service_Amazon_S3
         }
 
         // Strip off the beginning s3:// (assuming this is the scheme used)
-        if (strpos($path, 's3://') !== false) {
+        if (strpos($path, self::STREAM_ID) !== false) {
             $path = substr($path, 5);
         }
 
@@ -597,18 +615,19 @@ class Zend_Service_Amazon_S3
             $client = new Zend_Http_Client(self::S3_ENDPOINT.'/'.$path);
             $client->setHeaders($headers);
 
-            if (($method == 'PUT') && ($this->_object_buffer !== null)) {
+            if (($method == 'PUT') && ($this->_objectBuffer !== null)) {
                 if (!isset($headers['Content-type'])) {
                     $headers['Content-type'] = self::getMimeType($path);
                 }
-                $client->setRawData($this->_object_buffer, $headers['Content-type']);
+                $client->setRawData($this->_objectBuffer, $headers['Content-type']);
             }
 
             $response = $client->request($method);
 
-            if (self::$debug) {
-                Zend_Debug::dump($client->getLastRequest());
+            if (self::$logger instanceof Zend_Log) {
+                self::$logger->log($client->getLastRequest(), Zend_Log::INFO);
                 Zend_Debug::dump($client->getLastResponse());
+                //self::$logger->log($response, Zend_Log::INFO);
             }
 
             $response_code = $response->getStatus();
@@ -617,7 +636,9 @@ class Zend_Service_Amazon_S3
             if ($response_code >= 500 && $response_code < 600 && $retry_count <= 5) {
                 $retry = true;
                 $retry_count++;
-                echo $response_code, ' : retrying ', $action, ' request (', $retry_count, ')', "\n<br />\n";
+                if (self::$logger instanceof Zend_Log) {
+                    self::$logger->log($response_code.' : retrying '.$method.' request ('.$retry_count.')', Zend_Log::INFO);
+                }
                 sleep($retry_count / 4 * $retry_count);
             }
             else if ($response_code == 307) {
@@ -701,8 +722,8 @@ class Zend_Service_Amazon_S3
             $sig_str .= '?torrent';
         }
 
-        $signature = base64_encode(hash_hmac('sha1', utf8_encode($sig_str), self::$secret_key, true));
-        $headers['Authorization'] = 'AWS '.self::$access_key.':'.$signature;
+        $signature = base64_encode(hash_hmac('sha1', utf8_encode($sig_str), self::$secretKey, true));
+        $headers['Authorization'] = 'AWS '.self::$accessKey.':'.$signature;
 
         return $sig_str;
     }
@@ -861,8 +882,8 @@ class Zend_Service_Amazon_S3
                 break;
         }
 
-        if (self::$debug) {
-            echo "getMimeType($path)[$ext] = $content_type<br/>";
+        if (self::$logger instanceof Zend_Log) {
+            self::$logger->log("getMimeType($path)[$ext] = $content_type", Zend_Log::DEBUG);
         }
 
         return $content_type;
