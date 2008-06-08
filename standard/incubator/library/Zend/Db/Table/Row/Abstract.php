@@ -185,7 +185,6 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
             require_once 'Zend/Db/Table/Row/Exception.php';
             throw new Zend_Db_Table_Row_Exception("Specified column \"$columnName\" is not in the row");
         }
-        $this->notify('getColumn', $this, $columnName);
         return $this->_data[$columnName];
     }
 
@@ -206,7 +205,6 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
         }
         $this->_data[$columnName] = $value;
         $this->_modifiedFields[$columnName] = true;
-        $this->notify('setColumn', $this, $columnName, $value);
     }
 
     /**
@@ -297,33 +295,17 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
         $method = array_shift($args) . 'Row';
         $ret    = count($plugins);
 
-        switch ($method) {
-            case 'getColumnRow':
-            case 'setColumnRow':
-                $cnt = count($args);
-                if ($cnt < 3) {
-                    $args = $args + array_fill(0, 3 - $cnt, null);
-                }
-                list ($row, $columnName, $value) = $args;
-                foreach ($plugins as $plugin) {
-                    $value = $plugin->getColumn($row, $columnName, $value);
-                }
-                return $value;
+        foreach ($plugins as $plugin) {
+            if (!method_exists($plugin, $method)) {
+                $class = get_class($plugin);
+                require_once 'Zend/Db/Table/Row/Exception.php';
+                throw new Zend_Db_Table_Row_Exception("Cannot notify non-existing event '{$method}' in plugin '{$class}'");
+            }
+            $result = call_user_func_array(array($plugin, $method), $args);
+            if ($result === false) {
+                $ret = false;
                 break;
-
-            default:
-                foreach ($plugins as $plugin) {
-                    if (!method_exists($plugin, $method)) {
-                        $class = get_class($plugin);
-                        require_once 'Zend/Db/Table/Row/Exception.php';
-                        throw new Zend_Db_Table_Row_Exception("Cannot notify non-existing event '{$method}' in plugin '{$class}'");
-                    }
-                    $result = call_user_func_array(array($plugin, $method), $args);
-                    if ($result === false) {
-                        $ret = false;
-                        break;
-                    }
-                }
+            }
         }
 
         return $ret;

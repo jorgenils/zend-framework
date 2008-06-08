@@ -336,34 +336,4 @@ abstract class Zend_Db_Table_Plugin_Abstract implements Zend_Db_Table_Plugin_Int
     public function postDeleteRow(Zend_Db_Table_Row_Abstract $row)
     {}
 
-    /**
-     * Override getter for column values to allow for value substitution.
-     *
-     * @param Zend_Db_Table_Row_Abstract $row
-     * @param string $columnName
-     * @param mixed $value
-     * @return mixed
-     */
-    public function getColumn(Zend_Db_Table_Row_Abstract $row, $columnName, $value = null)
-    {
-        if ($value === null) {
-            $value = $row->{$columnName};
-        }
-        return $value;
-    }
-
-    /**
-     * Override setter for column values to allow for value substitution.
-     *
-     * @param Zend_Db_Table_Row_Abstract $row
-     * @param string $columnName
-     * @param mixed $value
-     * @return mixed
-     */
-    public function setColumn(Zend_Db_Table_Row_Abstract $row, $columnName, $value = null)
-    {
-        $row->{$columnName} = $value;
-        return $value;
-    }
-
 }
