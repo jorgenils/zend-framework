@@ -86,4 +86,7 @@ interface Zend_Db_Table_Plugin_Interface
 
     public function preDeleteRow(Zend_Db_Table_Row_Abstract $row);
     public function postDeleteRow(Zend_Db_Table_Row_Abstract $row);
+
+    public function getColumn(Zend_Db_Table_Row_Abstract $row, $columnName, $value);
+    public function setColumn(Zend_Db_Table_Row_Abstract $row, $columnName, $value);
 }

@@ -818,34 +818,12 @@ abstract class Zend_Db_Table_Abstract implements SplSubject
     /**
      * Notify plugins of an event
      *
-     * @return integer|boolean|null Returns number of plugins notified, false if notification is cancelled or null if none exist
+     * @return integer|boolean Returns number of plugins notified or false if none exist
      */
     public function notify()
     {
-        $plugins = Zend_Db_Table_Plugin_Broker::getPlugins($this);
-
-        if (!$plugins) {
-            return null;
-        }
-
-        $args   = func_get_args();
-        $method = array_shift($args) . 'Table';
-        $ret    = count($plugins);
-
-        foreach ($plugins as $plugin) {
-            if (!method_exists($plugin, $method)) {
-                $class = get_class($plugin);
-                require_once 'Zend/Db/Table/Row/Exception.php';
-                throw new Zend_Db_Table_Row_Exception("Cannot notify non-existing event '{$method}' in plugin '{$class}'");
-            }
-            $result = call_user_func_array(array($plugin, $method), $args);
-            if ($result === false) {
-                $ret = false;
-                break;
-            }
-        }
-
-        return $ret;
+        $args = func_get_args();
+        return Zend_Db_Table_Plugin_Broker::notify($this, 'Table', $args);
     }
 
     /**

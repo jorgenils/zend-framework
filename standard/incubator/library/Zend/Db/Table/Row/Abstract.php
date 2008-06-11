@@ -40,6 +40,9 @@ require_once 'Zend/Loader.php';
 abstract class Zend_Db_Table_Row_Abstract implements SplSubject
 {
 
+    const STACK_GET = 'get';
+    const STACK_SET = 'set';
+
     /**
      * The data for each column in the row (column_name => value).
      * The keys must match the physical names of columns in the
@@ -65,6 +68,21 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
      * @var array
      */
     protected $_modifiedFields = array();
+
+    /**
+     * This is used as a stack when iterating through plugin events for the row columns.
+     *
+     * @var array
+     */
+    protected $_stackData = array(
+        self::STACK_GET => array(),
+        self::STACK_SET => array()
+    );
+
+    protected $_stackType = array(
+        'getColumn' => self::STACK_GET,
+        'setColumn' => self::STACK_SET
+    );
 
     /**
      * Zend_Db_Table_Abstract parent class or instance.
@@ -180,12 +198,21 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
      */
     public function __get($columnName)
     {
+        $tableClass = $this->getTableClass();
         $columnName = $this->_transformColumn($columnName);
         if (!array_key_exists($columnName, $this->_data)) {
             require_once 'Zend/Db/Table/Row/Exception.php';
             throw new Zend_Db_Table_Row_Exception("Specified column \"$columnName\" is not in the row");
         }
-        return $this->_data[$columnName];
+        $value = $this->_data[$columnName];
+        if (!isset($this->_stackData[self::STACK_GET][$columnName])) {
+            $this->_stack(self::STACK_GET, $columnName, true);
+            foreach (Zend_Db_Table_Plugin_Broker::getPlugins($tableClass) as $plugin) {
+                $value = $plugin->getColumn($this, $columnName, $value);
+            }
+            $this->_stack(self::STACK_GET, $columnName, false);
+        }
+        return $value;
     }
 
     /**
@@ -198,10 +225,22 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
      */
     public function __set($columnName, $value)
     {
+        $tableClass = $this->getTableClass();
         $columnName = $this->_transformColumn($columnName);
         if (!array_key_exists($columnName, $this->_data)) {
             require_once 'Zend/Db/Table/Row/Exception.php';
             throw new Zend_Db_Table_Row_Exception("Specified column \"$columnName\" is not in the row");
+        }
+        if (!isset($this->_stackData[self::STACK_SET][$columnName])) {
+            $this->_stack(self::STACK_SET, $columnName, true);
+            foreach (Zend_Db_Table_Plugin_Broker::getPlugins($tableClass) as $plugin) {
+                $plugin->setColumn($this, $columnName, $value);
+                if (property_exists($this, $columnName)) {
+                    $value = $this->{$columnName};
+                    unset($this->{$columnName});
+                }
+            }
+            $this->_stack(self::STACK_SET, $columnName, false);
         }
         $this->_data[$columnName] = $value;
         $this->_modifiedFields[$columnName] = true;
@@ -285,30 +324,8 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
      */
     public function notify()
     {
-        $plugins = Zend_Db_Table_Plugin_Broker::getPlugins($this->getTable());
-
-        if (!$plugins) {
-            return false;
-        }
-
-        $args   = func_get_args();
-        $method = array_shift($args) . 'Row';
-        $ret    = count($plugins);
-
-        foreach ($plugins as $plugin) {
-            if (!method_exists($plugin, $method)) {
-                $class = get_class($plugin);
-                require_once 'Zend/Db/Table/Row/Exception.php';
-                throw new Zend_Db_Table_Row_Exception("Cannot notify non-existing event '{$method}' in plugin '{$class}'");
-            }
-            $result = call_user_func_array(array($plugin, $method), $args);
-            if ($result === false) {
-                $ret = false;
-                break;
-            }
-        }
-
-        return $ret;
+        $args = func_get_args();
+        return Zend_Db_Table_Plugin_Broker::notify($this->getTable(), 'Row', $args);
     }
 
     /**
@@ -432,7 +449,9 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
          * Otherwise it is an UPDATE.
          */
 
-        $this->notify('preSave', $this);
+        if ($this->notify('preSave', $this) === false) {
+            return false;
+        }
         if (empty($this->_cleanData)) {
             $result = $this->_doInsert();
         } else {
@@ -460,7 +479,9 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
         /**
          * Run pre-INSERT logic
          */
-        $this->notify('preInsert', $this);
+        if ($this->notify('preInsert', $this) === false) {
+            return 0;
+        }
         $this->_insert();
 
         /**
@@ -524,7 +545,9 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
         /**
          * Run pre-UPDATE logic
          */
-        $this->notify('preUpdate', $this);
+        if ($this->notify('preUpdate', $this) === false) {
+            return 0;
+        }
         $this->_update();
 
         /**
@@ -610,7 +633,9 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
         /**
          * Execute pre-DELETE logic
          */
-        $this->notify('preDelete', $this);
+        if ($this->notify('preDelete', $this) === false) {
+            return 0;
+        }
         $this->_delete();
 
         /**
@@ -859,6 +884,27 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
         return $map;
     }
 
+    public function _stack($type, $args, $state)
+    {
+        if (!array_key_exists($type, $this->_stackData)) {
+            require_once 'Zend/Db/Table/Row/Exception.php';
+            throw new Zend_Db_Table_Row_Exception('No stack exists for "' . $type . '"');
+        }
+
+        if (!isset($args[1])) {
+            require_once 'Zend/Db/Table/Row/Exception.php';
+            throw new Zend_Db_Table_Row_Exception('No column name has been provided');
+        }
+
+        $columnName = $args[1];
+
+        if ($state === true) {
+            $this->_stackData[$type][$columnName] = $state;
+        } elseif (array_key_exists($columnName, $this->_stackData[$type])) {
+            unset($this->_stackData[$type][$columnName]);
+        }
+    }
+
     /**
      * Query a dependent table to retrieve rows matching the current row.
      *
@@ -1086,7 +1132,7 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
     protected function __call($method, array $args)
     {
         $matches = array();
-        
+
         if (count($args) && $args[0] instanceof Zend_Db_Table_Select) {
             $select = $args[0];
         } else {

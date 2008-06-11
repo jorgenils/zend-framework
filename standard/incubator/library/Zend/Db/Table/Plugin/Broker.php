@@ -190,6 +190,39 @@ class Zend_Db_Table_Plugin_Broker
 
         return false;
     }
+
+    /**
+     * Notify plugins of an event
+     * 
+     * @param  Zend_Loader_PluginLoader_Interface $loader 
+     */
+    static public function notify($className = null, $suffix = null, Array &$args = array())
+    {
+        $plugins = Zend_Db_Table_Plugin_Broker::getPlugins($className);
+
+        if (!$plugins) {
+            return false;
+        }
+
+        $method     = array_shift($args);
+        $ret        = count($plugins);
+        $stack      = false;
+
+        foreach ($plugins as $plugin) {
+            $class = get_class($plugin);
+            if (!method_exists($plugin, $method . $suffix)) {
+                require_once 'Zend/Db/Table/Row/Exception.php';
+                throw new Zend_Db_Table_Row_Exception("Cannot notify non-existing event '{$method}' in plugin '{$class}'");
+            }
+            $result = call_user_func_array(array($plugin, $method . $suffix), $args);
+            if ($result === false) {
+                $ret = false;
+                break;
+            }
+        }
+
+        return $ret;
+    }
     
     /**
      * Set plugin loader
