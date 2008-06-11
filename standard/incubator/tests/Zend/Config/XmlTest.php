@@ -52,6 +52,8 @@ class Zend_Config_XmlTest extends PHPUnit_Framework_TestCase
         $this->_xmlFileOneTopLevelStringConfig = dirname(__FILE__) . '/_files/onetoplevelstring.xml';
         $this->_nonReadableConfig = dirname(__FILE__) . '/_files/nonreadable.xml';
         $this->_xmlFileSameNameKeysConfig = dirname(__FILE__) . '/_files/array.xml';
+        $this->_xmlFileShortParamsOneConfig = dirname(__FILE__) . '/_files/shortparamsone.xml';
+        $this->_xmlFileShortParamsTwoConfig = dirname(__FILE__) . '/_files/shortparamstwo.xml';
     }
 
     public function testLoadSingleSection()
@@ -170,12 +172,12 @@ class Zend_Config_XmlTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('three', $config->two->three);
         $this->assertEquals('five', $config->two->four->five);
         $this->assertEquals('three', $config->six->three);
-        
+
         $config = new Zend_Config_Xml($this->_xmlFileOneTopLevelStringConfig);
         $this->assertEquals('one', $config->one);
         $config = new Zend_Config_Xml($this->_xmlFileOneTopLevelStringConfig, 'one');
         $this->assertEquals('one', $config->one);
-        
+
     }
 
     public function testZF2285_MultipleKeysOfTheSameName()
@@ -186,7 +188,7 @@ class Zend_Config_XmlTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('4', $config->three->four->{1});
         $this->assertEquals('5', $config->three->four->{0}->five);
     }
-    
+
     public function testZF2437_ArraysWithMultipleChildren()
     {
         $config = new Zend_Config_Xml($this->_xmlFileSameNameKeysConfig, null);
@@ -198,4 +200,23 @@ class Zend_Config_XmlTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('3', $config->six->seven->{2}->nine);
     }
 
+    public function testShortParamsOne()
+    {
+        $config = new Zend_Config_Xml($this->_xmlFileShortParamsOneConfig, 'all');
+        $this->assertEquals('all', $config->hostname);
+        $this->assertEquals('thisname', $config->name);
+        $this->assertEquals('username', $config->db->user);
+        $this->assertEquals('live', $config->db->name);
+        $this->assertEquals('multi', $config->one->two->three);
+    }
+
+    public function testShortParamsTwo()
+    {
+        $config = new Zend_Config_Xml($this->_xmlFileShortParamsTwoConfig, 'all');
+        $this->assertEquals('all', $config->hostname);
+        $this->assertEquals('thisname', $config->name);
+        $this->assertEquals('username', $config->db->user);
+        $this->assertEquals('live', $config->db->name);
+        $this->assertEquals('multi', $config->one->two->three);
+    }
 }
