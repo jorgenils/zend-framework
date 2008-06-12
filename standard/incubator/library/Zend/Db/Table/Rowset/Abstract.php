@@ -206,7 +206,7 @@ abstract class Zend_Db_Table_Rowset_Abstract implements SeekableIterator, Counta
     public function notify()
     {
         $args = func_get_args();
-        return Zend_Db_Table_Plugin_Broker::notify($this->getTable(), 'Row', $args);
+        return Zend_Db_Table_Plugin_Broker::notify($this->getTable(), 'Rowset', $args);
     }
 
     /**
