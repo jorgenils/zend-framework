@@ -234,10 +234,12 @@ abstract class Zend_Db_Table_Row_Abstract implements SplSubject
         if (!isset($this->_stackData[self::STACK_SET][$columnName])) {
             $this->_stack(self::STACK_SET, $columnName, true);
             foreach (Zend_Db_Table_Plugin_Broker::getPlugins($tableClass) as $plugin) {
-                $plugin->setColumn($this, $columnName, $value);
+                $result = $plugin->setColumn($this, $columnName, $value);
                 if (property_exists($this, $columnName)) {
                     $value = $this->{$columnName};
                     unset($this->{$columnName});
+                } elseif ($value !== null) {
+                    $value = $result;
                 }
             }
             $this->_stack(self::STACK_SET, $columnName, false);
