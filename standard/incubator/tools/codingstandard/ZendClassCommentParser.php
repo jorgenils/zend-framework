@@ -35,53 +35,40 @@ if (class_exists('PHP_CodeSniffer_CommentParser_ClassCommentParser', true) === f
  */
 class PHP_CodeSniffer_Standards_ZendClassCommentParser extends PHP_CodeSniffer_CommentParser_ClassCommentParser
 {
-
     /**
-     * The package element of this class.
+     * The package element of this class
      *
      * @var SingleElement
      */
     private $_uses = null;
 
-
     /**
-     * Returns the allowed tags withing a class comment.
+     * Returns the allowed tags withing a class comment
      *
-     * @return array(string => int)
+     * @return array
      */
-    protected function getAllowedTags()
+    public function getAllowedTags()
     {
-        return array(
-                'category'   => false,
-                'package'    => true,
-                'subpackage' => true,
-                'uses'       => false,
-                'copyright'  => true,
-                'license'    => false,
-                'version'    => true,
-               );
-
-    }//end getAllowedTags()
-
+        return array('category'   => false, 'package'    => true,  'subpackage' => true, 'uses'       => false,
+                     'copyright'  => true,  'license'    => false, 'version'    => true);
+    }
 
     /**
-     * Parses the uses tag of this class comment.
+     * Parses the uses tag of this class comment
      *
-     * @param array $tokens The tokens that comprise this tag.
-     *
+     * @param  array|string $tokens The tokens that comprise this tag
      * @return PHP_CodeSniffer_CommentParser_PairElement
      */
-    protected function parseUses($tokens)
+    public function parseUses($tokens)
     {
-        $uses          = new PHP_CodeSniffer_CommentParser_SingleElement($this->previousElement, $tokens, 'uses', $this->phpcsFile);
+        $uses          = new PHP_CodeSniffer_CommentParser_SingleElement($this->previousElement, $tokens,
+                                                                         'uses', $this->phpcsFile);
         $this->_uses[] = $uses;
         return $uses;
-
-    }//end parseLicense()
-
+    }
 
     /**
-     * Returns the use of this class comment.
+     * Returns the use of this class comment
      *
      * @return PHP_CodeSniffer_CommentParser_PairElement
      */
@@ -89,7 +76,4 @@ class PHP_CodeSniffer_Standards_ZendClassCommentParser extends PHP_CodeSniffer_C
     {
         return $this->_uses;
     }
-
-}//end class
-
-?>
+}

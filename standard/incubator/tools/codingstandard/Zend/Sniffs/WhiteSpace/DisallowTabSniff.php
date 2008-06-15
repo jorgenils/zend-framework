@@ -20,7 +20,7 @@
  */
 
 /**
- * Zend_Sniffs_WhiteSpace_DisallowTabIndentSniff.
+ * Zend_Sniffs_WhiteSpace_DisallowTabIndentSniff
  *
  * Checks if tabs are used and errors if any are found
  *
@@ -32,7 +32,7 @@
 class Zend_Sniffs_WhiteSpace_DisallowTabSniff implements PHP_CodeSniffer_Sniff
 {
     /**
-     * Returns an array of tokens this test wants to listen for.
+     * Returns an array of tokens this test wants to listen for
      *
      * @return array
      */
@@ -49,11 +49,10 @@ class Zend_Sniffs_WhiteSpace_DisallowTabSniff implements PHP_CodeSniffer_Sniff
     }
 
     /**
-     * Processes this test, when one of its tokens is encountered.
+     * Processes this test, when one of its tokens is encountered
      *
-     * @param PHP_CodeSniffer_File $phpcsFile All the tokens found in the document.
-     * @param int                  $stackPtr  The position of the current token in
-     *                                        the stack passed in $tokens.
+     * @param  PHP_CodeSniffer_File $phpcsFile All the tokens found in the document
+     * @param  integer              $stackPtr  The position of the current token in the stack passed in $tokens
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
@@ -64,7 +63,5 @@ class Zend_Sniffs_WhiteSpace_DisallowTabSniff implements PHP_CodeSniffer_Sniff
             $error = 'Spaces must be used to indent lines; tabs are not allowed';
             $phpcsFile->addError($error, $stackPtr);
         }
-
     }
-
 }

@@ -20,9 +20,9 @@
  */
 
 /**
- * Zend_Sniffs_PHP_DisallowShortOpenTagSniff.
+ * Zend_Sniffs_PHP_DisallowShortOpenTagSniff
  *
- * Makes sure that shorthand PHP open tags are not used.
+ * Makes sure that shorthand PHP open tags are not used
  *
  * @category  Zend
  * @package   Zend_CodingStandard
@@ -32,7 +32,7 @@
 class Zend_Sniffs_PHP_DisallowShortOpenTagSniff implements PHP_CodeSniffer_Sniff
 {
     /**
-     * Returns an array of tokens this test wants to listen for.
+     * Returns an array of tokens this test wants to listen for
      *
      * @return array
      */
@@ -45,21 +45,20 @@ class Zend_Sniffs_PHP_DisallowShortOpenTagSniff implements PHP_CodeSniffer_Sniff
     }
 
     /**
-     * Processes this test, when one of its tokens is encountered.
+     * Processes this test, when one of its tokens is encountered
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file being scanned.
-     * @param int                  $stackPtr  The position of the current token in the
-     *                                        stack passed in $tokens.
+     * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned
+     * @param  integer              $stackPtr  The position of the current token in the stack passed in $tokens
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
         // If short open tags are off, then any short open tags will be converted
-        // to inline_html tags so we can just ignore them.
-        // If its on, then we want to ban the use of them.
+        // to inline_html tags so we can just ignore them
+        // If its on, then we want to ban the use of them
         $option = ini_get('short_open_tag');
 
-        // Ini_get returns a string "0" if short open tags is off.
+        // Ini_get returns a string "0" if short open tags is off
         if ($option === '0') {
             return;
         }
@@ -68,9 +67,8 @@ class Zend_Sniffs_PHP_DisallowShortOpenTagSniff implements PHP_CodeSniffer_Sniff
         $openTag = $tokens[$stackPtr];
 
         if ($openTag['content'] === '<?') {
-            $error = 'Short PHP opening tag used. Found "'.$openTag['content'].'" Expected "<?php".';
+            $error = 'Short PHP opening tag used. Found "' . $openTag['content'] . '" Expected "<?php".';
             $phpcsFile->addError($error, $stackPtr);
         }
     }
-
 }

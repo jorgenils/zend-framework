@@ -34,14 +34,13 @@ if (class_exists('Generic_Sniffs_Formatting_MultipleStatementAlignmentSniff', tr
  * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Sniffs_Formatting_MultipleStatementAlignmentSniff extends Generic_Sniffs_Formatting_MultipleStatementAlignmentSniff
+class Zend_Sniffs_Formatting_MultipleStatementAlignmentSniff
+extends Generic_Sniffs_Formatting_MultipleStatementAlignmentSniff
 {
-
     /**
      * If true, an error will be thrown; otherwise a warning.
      *
-     * @var bool
+     * @var boolean
      */
-    protected $error = true;
-
+    public $error = true;
 }

@@ -36,25 +36,24 @@ if (class_exists('Generic_Sniffs_Files_LineLengthSniff', true) === false) {
  */
 class Zend_Sniffs_Files_LineLengthSniff implements PHP_CodeSniffer_Sniff
 {
-
     /**
-     * The limit that the length of a line should not exceed.
+     * The limit that the length of a line should not exceed
      *
-     * @var int
+     * @var integer
      */
-    protected $lineLimit = 100;
+    public $lineLimit = 120;
 
     /**
-     * The limit that the length of a line must not exceed.
+     * The limit that the length of a line must not exceed
      *
-     * Set to zero (0) to disable.
+     * Set to zero (0) to disable
      *
-     * @var int
+     * @var integer
      */
-    protected $absoluteLineLimit = 120;
+    public $absoluteLineLimit = 120;
 
     /**
-     * Returns an array of tokens this test wants to listen for.
+     * Returns an array of tokens this test wants to listen for
      *
      * @return array
      */
@@ -65,19 +64,17 @@ class Zend_Sniffs_Files_LineLengthSniff implements PHP_CodeSniffer_Sniff
     }
 
     /**
-     * Processes this test, when one of its tokens is encountered.
+     * Processes this test, when one of its tokens is encountered
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file being scanned.
-     * @param int                  $stackPtr  The position of the current token in the
-     *                                        stack passed in $tokens.
-     *
+     * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned
+     * @param  integer              $stackPtr  The position of the current token in the stack passed in $tokens
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
 
-        // Make sure this is the first open tag.
+        // Make sure this is the first open tag
         $previousOpenTag = $phpcsFile->findPrevious(array(T_OPEN_TAG), ($stackPtr - 1));
         if ($previousOpenTag !== false) {
             return;
@@ -95,17 +92,18 @@ class Zend_Sniffs_Files_LineLengthSniff implements PHP_CodeSniffer_Sniff
 
                 // If the content is a CVS or SVN id in a version tag, or it is
                 // a license tag with a name and URL, there is nothing the
-                // developer can do to shorten the line, so don't throw errors.
+                // developer can do to shorten the line, so don't throw errors
                 // Also the copyright tag should be only on one line and will be ignored
-                if (preg_match('|@version[^\$]+\$Id|', $currentLineContent) === 0 &&
-                    preg_match('|@license|', $currentLineContent) === 0 &&
+                if (preg_match('|@version[^\$]+\$Id|', $currentLineContent) === 0 and
+                    preg_match('|@license|', $currentLineContent) === 0 and
                     preg_match('|@copyright|', $currentLineContent) === 0) {
                     $lineLength = strlen($currentLineContent);
-                    if ($this->absoluteLineLimit > 0 && $lineLength > $this->absoluteLineLimit) {
-                        $error = 'Line exceeds maximum limit of '.$this->absoluteLineLimit." characters; contains $lineLength characters";
+                    if ($this->absoluteLineLimit > 0 and $lineLength > $this->absoluteLineLimit) {
+                        $error = 'Line exceeds maximum limit of ' . $this->absoluteLineLimit
+                               . " characters; contains $lineLength characters";
                         $phpcsFile->addError($error, ($tokenCount - 1));
                     } else if ($lineLength > $this->lineLimit) {
-                        $warning = 'Line exceeds '.$this->lineLimit." characters; contains $lineLength characters";
+                        $warning = 'Line exceeds ' . $this->lineLimit . " characters; contains $lineLength characters";
                         $phpcsFile->addWarning($warning, ($tokenCount - 1));
                     }
                 }
@@ -115,5 +113,4 @@ class Zend_Sniffs_Files_LineLengthSniff implements PHP_CodeSniffer_Sniff
             }
         }
     }
-
 }

@@ -32,7 +32,6 @@
  */
 class Zend_Sniffs_Functions_ValidDefaultValueSniff implements PHP_CodeSniffer_Sniff
 {
-
     /**
      * Returns an array of tokens this test wants to listen for.
      *
@@ -44,11 +43,10 @@ class Zend_Sniffs_Functions_ValidDefaultValueSniff implements PHP_CodeSniffer_Sn
     }
 
     /**
-     * Processes this test, when one of its tokens is encountered.
+     * Processes this test, when one of its tokens is encountered
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file being scanned.
-     * @param int                  $stackPtr  The position of the current token in the
-     *                                        stack passed in $tokens.
+     * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned
+     * @param  integer              $stackPtr  The position of the current token in the stack passed in $tokens
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
@@ -58,14 +56,15 @@ class Zend_Sniffs_Functions_ValidDefaultValueSniff implements PHP_CodeSniffer_Sn
         $argStart = $tokens[$stackPtr]['parenthesis_opener'];
         $argEnd   = $tokens[$stackPtr]['parenthesis_closer'];
 
-        // Flag for when we have found a default in our arg list.
-        // If there is a value without a default after this, it is an error.
+        // Flag for when we have found a default in our arg list
+        // If there is a value without a default after this, it is an error
         $defaultFound = false;
 
         $nextArg = $argStart;
-        while (($nextArg = $phpcsFile->findNext(T_VARIABLE, ($nextArg + 1), $argEnd)) !== false) {
+        $nextArg = $phpcsFile->findNext(T_VARIABLE, ($nextArg + 1), $argEnd);
+        while ($nextArg !== false) {
             $argHasDefault = self::_argHasDefault($phpcsFile, $nextArg);
-            if (($argHasDefault === false) && ($defaultFound === true)) {
+            if (($argHasDefault === false) and ($defaultFound === true)) {
                 $error  = 'Arguments with default values must be at the end';
                 $error .= ' of the argument list';
                 $phpcsFile->addError($error, $nextArg);
@@ -75,17 +74,17 @@ class Zend_Sniffs_Functions_ValidDefaultValueSniff implements PHP_CodeSniffer_Sn
             if ($argHasDefault === true) {
                 $defaultFound = true;
             }
+
+            $nextArg = $phpcsFile->findNext(T_VARIABLE, ($nextArg + 1), $argEnd);
         }
     }
 
     /**
-     * Returns true if the passed argument has a default value.
+     * Returns true if the passed argument has a default value
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file being scanned.
-     * @param int                  $argPtr    The position of the argument
-     *                                        in the stack.
-     *
-     * @return bool
+     * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned
+     * @param  integer              $argPtr    The position of the argument in the stack
+     * @return boolean
      */
     private static function _argHasDefault(PHP_CodeSniffer_File $phpcsFile, $argPtr)
     {
@@ -97,5 +96,4 @@ class Zend_Sniffs_Functions_ValidDefaultValueSniff implements PHP_CodeSniffer_Sn
 
         return true;
     }
-
 }

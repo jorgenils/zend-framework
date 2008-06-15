@@ -39,23 +39,24 @@ if (class_exists('PHP_CodeSniffer_CommentParser_MemberCommentParser', true) === 
 class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standards_AbstractVariableSniff
 {
     /**
-     * The header comment parser for the current file.
+     * The header comment parser for the current file
      *
-     * @var PHP_CodeSniffer_Comment_Parser_ClassCommentParser
+     * @var PHP_CodeSniffer_Comment_Parser_ClassCommentParser $commentParser
      */
-    protected $commentParser = null;
+    public $commentParser = null;
 
     /**
      * Fix for spacing
+     *
+     * @var integer $space
      */
-    protected $space = 1;
+    public $space = 1;
 
     /**
-     * Called to process class member vars.
+     * Called to process class member vars
      *
-     * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned.
-     * @param  integer              $stackPtr  The position of the current token
-     *                                         in the stack passed in $tokens.
+     * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned
+     * @param  integer              $stackPtr  The position of the current token in the stack passed in $tokens
      * @return void
      */
     public function processMemberVar(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
@@ -67,16 +68,16 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
                               T_DOC_COMMENT,
                              );
 
-        // Extract the var comment docblock.
+        // Extract the var comment docblock
         $commentEnd = $phpcsFile->findPrevious($commentToken, ($stackPtr - 3));
-        if ($commentEnd !== false && $tokens[$commentEnd]['code'] === T_COMMENT) {
+        if ($commentEnd !== false and $tokens[$commentEnd]['code'] === T_COMMENT) {
             $phpcsFile->addError('You must use "/**" style comments for a variable comment', $stackPtr);
             return;
-        } else if ($commentEnd === false || $tokens[$commentEnd]['code'] !== T_DOC_COMMENT) {
+        } else if ($commentEnd === false or $tokens[$commentEnd]['code'] !== T_DOC_COMMENT) {
             $phpcsFile->addError('Missing variable doc comment', $stackPtr);
             return;
         } else {
-            // Make sure the comment we have found belongs to us.
+            // Make sure the comment we have found belongs to us
             $commentFor = $phpcsFile->findNext(array(T_VARIABLE, T_CLASS, T_INTERFACE), ($commentEnd + 1));
             if ($commentFor !== $stackPtr) {
                 $phpcsFile->addError('Missing variable doc comment', $stackPtr);
@@ -87,7 +88,7 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
         $commentStart = ($phpcsFile->findPrevious(T_DOC_COMMENT, ($commentEnd - 1), null, true) + 1);
         $comment      = $phpcsFile->getTokensAsString($commentStart, ($commentEnd - $commentStart + 1));
 
-        // Parse the header comment docblock.
+        // Parse the header comment docblock
         try {
             $this->commentParser = new PHP_CodeSniffer_CommentParser_MemberCommentParser($comment, $phpcsFile);
             $this->commentParser->parse();
@@ -104,16 +105,16 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
             return;
         }
 
-        // Check for a comment description.
+        // Check for a comment description
         $short = $comment->getShortComment();
         if (trim($short) === '') {
             $error = 'Missing short description in variable doc comment';
             $phpcsFile->addError($error, $commentStart);
         } else {
-            // No extra newline before short description.
+            // No extra newline before short description
             $newlineCount = 0;
             $newlineSpan  = strspn($short, $phpcsFile->eolChar);
-            if ($short !== '' && $newlineSpan > 0) {
+            if ($short !== '' and $newlineSpan > 0) {
                 $line  = ($newlineSpan > 1) ? 'newlines' : 'newline';
                 $error = "Extra $line found before variable comment short description";
                 $phpcsFile->addError($error, ($commentStart + 1));
@@ -121,7 +122,7 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
 
             $newlineCount = (substr_count($short, $phpcsFile->eolChar) + 1);
 
-            // Exactly one blank line between short and long description.
+            // Exactly one blank line between short and long description
             $long = $comment->getLongComment();
             if (empty($long) === false) {
                 $between        = $comment->getWhiteSpaceBetween();
@@ -140,7 +141,7 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
                 }
             }
 
-            // Short description must be single line and end with a full stop.
+            // Short description must be single line and end with a full stop
             $testShort = trim($short);
             $lastChar  = $testShort[(strlen($testShort) - 1)];
             if (substr_count($testShort, $phpcsFile->eolChar) !== 0) {
@@ -154,7 +155,7 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
             }
         }
 
-        // Exactly one blank line before tags.
+        // Exactly one blank line before tags
         $tags = $this->commentParser->getTagOrders();
         if (count($tags) > 1) {
             $newlineSpan = $comment->getNewlineAfter();
@@ -163,24 +164,26 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
                 if (isset($long) and ($long !== '')) {
                     $newlineCount += (substr_count($long, $phpcsFile->eolChar) - $newlineSpan + 1);
                 }
-                if (!isset($newlineCount)) {
+
+                if (isset($newlineCount) === false) {
                     $phpcsFile->addError($error, $commentStart);
                 } else {
                     $phpcsFile->addError($error, ($commentStart + $newlineCount));
                 }
-                $short = rtrim($short, $phpcsFile->eolChar.' ');
+
+                $short = rtrim($short, $phpcsFile->eolChar . ' ');
             }
         }
 
-        // Check for unknown/deprecated tags.
+        // Check for unknown/deprecated tags
         $unknownTags = $this->commentParser->getUnknown();
         foreach ($unknownTags as $errorTag) {
-            // Unknown tags are not parsed, do not process further.
+            // Unknown tags are not parsed, do not process further
             $error = "@$errorTag[tag] tag is not allowed in variable comment";
             $phpcsFile->addWarning($error, ($commentStart + $errorTag['line']));
         }
 
-        // Check each tag.
+        // Check each tag
         $this->processSince($commentStart, $commentEnd);
         $this->processVar($commentStart, $commentEnd);
         $this->processSees($commentStart);
@@ -188,13 +191,13 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
     }
 
     /**
-     * Process the var tag.
+     * Process the var tag
      *
-     * @param  integer $commentStart The position in the stack where the comment started.
-     * @param  integer $commentEnd   The position in the stack where the comment ended.
+     * @param  integer $commentStart The position in the stack where the comment started
+     * @param  integer $commentEnd   The position in the stack where the comment ended
      * @return void
      */
-    protected function processVar($commentStart, $commentEnd)
+    public function processVar($commentStart, $commentEnd)
     {
         $var = $this->commentParser->getVar();
 
@@ -229,7 +232,7 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
             $spacing = substr_count($var->getWhitespaceBeforeContent(), ' ');
             if ($spacing !== $this->space) {
                 $error  = '@var tag indented incorrectly. ';
-                $error .= "Expected " . $this->space . " spaces but found $spacing.";
+                $error .= 'Expected ' . $this->space . " spaces but found $spacing.";
                 $this->currentFile->addError($error, $errorPos);
             }
         } else {
@@ -240,21 +243,22 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
     }
 
     /**
-     * Process the since tag.
+     * Process the since tag
      *
-     * @param  integer $commentStart The position in the stack where the comment started.
-     * @param  integer $commentEnd   The position in the stack where the comment ended.
+     * @param  integer $commentStart The position in the stack where the comment started
+     * @param  integer $commentEnd   The position in the stack where the comment ended
      * @return void
      */
-    protected function processSince($commentStart, $commentEnd)
+    public function processSince($commentStart, $commentEnd)
     {
-        $since = $this->commentParser->getSince();
+        $commentEnd = 0;
+        $since      = $this->commentParser->getSince();
         if ($since !== null) {
-        	$this->space = 3;
-            $errorPos  = ($commentStart + $since->getLine());
-            $foundTags = $this->commentParser->getTagOrders();
-            $index     = array_keys($foundTags, 'since');
-            $var       = array_keys($foundTags, 'var');
+            $this->space = 3;
+            $errorPos    = ($commentStart + $since->getLine());
+            $foundTags   = $this->commentParser->getTagOrders();
+            $index       = array_keys($foundTags, 'since');
+            $var         = array_keys($foundTags, 'var');
 
             if (count($index) > 1) {
                 $error = 'Only 1 @since tag is allowed in variable comment';
@@ -262,8 +266,8 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
                 return;
             }
 
-            // Only check order if there is one var tag in variable comment.
-            if (count($var) === 1 && $index[0] !== 2) {
+            // Only check order if there is one var tag in variable comment
+            if (count($var) === 1 and $index[0] !== 2) {
                 $error = 'The order of @since tag is wrong in variable comment';
                 $this->currentFile->addError($error, $errorPos);
             }
@@ -290,12 +294,12 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
     }
 
     /**
-     * Process the see tags.
+     * Process the see tags
      *
-     * @param  integer $commentStart The position in the stack where the comment started.
+     * @param  integer $commentStart The position in the stack where the comment started
      * @return void
      */
-    protected function processSees($commentStart)
+    public function processSees($commentStart)
     {
         $sees = $this->commentParser->getSees();
         if (empty($sees) === false) {
@@ -311,7 +315,7 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
                 $spacing = substr_count($see->getWhitespaceBeforeContent(), ' ');
                 if ($spacing !== $this->space) {
                     $error  = '@see tag indented incorrectly. ';
-                    $error .= "Expected " . $this->space . " spaces but found $spacing.";
+                    $error .= 'Expected ' . $this->space . " spaces but found $spacing.";
                     $this->currentFile->addError($error, $errorPos);
                 }
             }
@@ -326,8 +330,10 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
      * @param  integer              $stackPtr  The position where the double quoted string was found
      * @return void
      */
-    protected function processVariable(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function processVariable(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
+        $phpcsFile = 0;
+        $stackPtr  = 0;
         return;
     }
 
@@ -339,8 +345,10 @@ class Zend_Sniffs_Commenting_VariableCommentSniff extends PHP_CodeSniffer_Standa
      * @param  integer              $stackPtr  The position where the double quoted string was found
      * @return void
      */
-    protected function processVariableInString(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function processVariableInString(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
+        $phpcsFile = 0;
+        $stackPtr  = 0;
         return;
     }
 }

@@ -1,62 +1,59 @@
 <?php
 /**
- * Zend_Sniffs_Debug_CodeAnalyzerSniff.
+ * Zend Framework
  *
- * PHP version 5
+ * LICENSE
  *
- * @category  PHP
- * @package   PHP_CodeSniffer
- * @author    Holger Kral <holger.kral@zend.com>
- * @author    Greg Sherwood <gsherwood@squiz.net>
- * @copyright 2006 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   CVS: $Id: CodeAnalyzerSniff.php,v 1.3 2008/02/19 00:38:00 squiz Exp $
- * @link      http://pear.php.net/package/PHP_CodeSniffer
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://framework.zend.com/license/new-bsd
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category  Zend
+ * @package   Zend_CodingStandard
+ * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd     New BSD License
+ * @version   $Id: $
  */
 
 /**
- * Zend_Sniffs_Debug_CodeAnalyzerSniff.
+ * Zend_Sniffs_Debug_CodeAnalyzerSniff
  *
- * Runs the Zend Code Analyzer (from Zend Studio) on the file.
+ * Runs the Zend Code Analyzer (from Zend Studio) on the file
  *
- * @category  PHP
- * @package   PHP_CodeSniffer
- * @author    Holger Kral <holger.kral@zend.com>
- * @author    Greg Sherwood <gsherwood@squiz.net>
- * @copyright 2006 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   Release: 1.1.0a1
- * @link      http://pear.php.net/package/PHP_CodeSniffer
+ * @category  Zend
+ * @package   Zend_CodingStandard
+ * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Sniffs_Debug_CodeAnalyzerSniff implements PHP_CodeSniffer_Sniff
 {
-
-
     /**
      * Returns the token types that this sniff is interested in.
      *
-     * @return array(int)
+     * @return array
      */
     public function register()
     {
         return array(T_OPEN_TAG);
 
-    }//end register()
-
+    }
 
     /**
-     * Processes the tokens that this sniff is interested in.
+     * Processes the tokens that this sniff is interested in
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file where the token was found.
-     * @param int                  $stackPtr  The position in the stack where
-     *                                        the token was found.
-     *
+     * @param  PHP_CodeSniffer_File $phpcsFile The file where the token was found
+     * @param  integer              $stackPtr  The position in the stack where the token was found
+     * @throws PHP_CodeSniffer_Exception On error initialising Zend_Code_Analyser
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
         // Because we are analyzing the whole file in one step, execute this method
-        // only on first occurence of a T_OPEN_TAG.
+        // only on first occurence of a T_OPEN_TAG
         $prevOpenTag = $phpcsFile->findPrevious(T_OPEN_TAG, ($stackPtr - 1));
         if ($prevOpenTag !== false) {
             return;
@@ -71,24 +68,24 @@ class Zend_Sniffs_Debug_CodeAnalyzerSniff implements PHP_CodeSniffer_Sniff
 
         // In the command, 2>&1 is important because the code analyzer sends its
         // findings to stderr. $output normally contains only stdout, so using 2>&1
-        // will pipe even stderr to stdout.
-        $cmd = $analyzerPath.' '.$fileName.' 2>&1';
+        // will pipe even stderr to stdout
+        $cmd = $analyzerPath . ' ' . $fileName . ' 2>&1';
 
-        // There is the possibility to pass "--ide" as an option to the analyzer.
-        // This would result in an output format which would be easier to parse.
+        // There is the possibility to pass "--ide" as an option to the analyzer
+        // This would result in an output format which would be easier to parse
         // The problem here is that no cleartext error messages are returnwd; only
-        // error-code-labels. So for a start we go for cleartext output.
+        // error-code-labels. So for a start we go for cleartext output
         $exitCode = exec($cmd, $output, $retval);
 
-        // $exitCode is the last line of $output if no error occures, on error it
-        // is numeric. Try to handle various error conditions and provide useful
-        // error reporting.
-        if (is_numeric($exitCode) === true && $exitCode > 0) {
+        // The last line of $output is $exitCode if no error occures, on error it
+        // is numeric. Try to handle various error conditions and provide useful error reporting
+        if (is_numeric($exitCode) === true and $exitCode > 0) {
             if (is_array($output) === true) {
                 $msg = join('\n', $output);
             }
 
-            throw new PHP_CodeSniffer_Exception("Failed invoking ZendCodeAnalyzer, exitcode was [$exitCode], retval was [$retval], output was [$msg]");
+            throw new PHP_CodeSniffer_Exception("Failed invoking ZendCodeAnalyzer, exitcode was [$exitCode], "
+                                              . "retval was [$retval], output was [$msg]");
         }
 
         if (is_array($output) === true) {
@@ -100,15 +97,15 @@ class Zend_Sniffs_Debug_CodeAnalyzerSniff implements PHP_CodeSniffer_Sniff
                 // > Zend Code Analyzer 1.2.2
                 // > Analyzing <filename>...
                 // So skip these...
-                $res = eregi("^.+\(line ([0-9]+)\):(.+)$", $finding, $regs);
-                if ($regs === null || $res === false) {
+                $res = eregi('^.+\(line ([0-9]+)\):(.+)$', $finding, $regs);
+                if ($regs === null or $res === false) {
                     continue;
                 }
 
-                // Find the token at the start of the line.
+                // Find the token at the start of the line
                 $lineToken = null;
                 foreach ($tokens as $ptr => $info) {
-                    if ($info['line'] == $regs[1]) {
+                    if ($info['line'] === $regs[1]) {
                         $lineToken = $ptr;
                         break;
                     }
@@ -117,10 +114,7 @@ class Zend_Sniffs_Debug_CodeAnalyzerSniff implements PHP_CodeSniffer_Sniff
                 if ($lineToken !== null) {
                     $phpcsFile->addWarning(trim($regs[2]), $ptr);
                 }
-            }//end foreach
-        }//end if
-
-    }//end process()
-
-}//end class
-?>
+            }
+        }
+    }
+}

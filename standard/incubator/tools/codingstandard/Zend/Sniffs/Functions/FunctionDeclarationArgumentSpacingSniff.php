@@ -1,6 +1,6 @@
 <?php
 /**
- * Zend Framework Coding Standard
+ * Zend Framework
  *
  * LICENSE
  *
@@ -31,9 +31,8 @@
  */
 class Zend_Sniffs_Functions_FunctionDeclarationArgumentSpacingSniff implements PHP_CodeSniffer_Sniff
 {
-
     /**
-     * Returns an array of tokens this test wants to listen for.
+     * Returns an array of tokens this test wants to listen for
      *
      * @return array
      */
@@ -41,16 +40,13 @@ class Zend_Sniffs_Functions_FunctionDeclarationArgumentSpacingSniff implements P
     {
         return array(T_FUNCTION);
 
-    }//end register()
-
+    }
 
     /**
-     * Processes this test, when one of its tokens is encountered.
+     * Processes this test, when one of its tokens is encountered
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file being scanned.
-     * @param int                  $stackPtr  The position of the current token in the
-     *                                        stack passed in $tokens.
-     *
+     * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned
+     * @param  integer              $stackPtr  The position of the current token in the stack passed in $tokens
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
@@ -63,44 +59,46 @@ class Zend_Sniffs_Functions_FunctionDeclarationArgumentSpacingSniff implements P
 
         $nextParam = $openBracket;
         $params    = array();
-        while (($nextParam = $phpcsFile->findNext(T_VARIABLE, ($nextParam + 1), $closeBracket)) !== false) {
-
+        $nextParam = $phpcsFile->findNext(T_VARIABLE, ($nextParam + 1), $closeBracket);
+        while ($nextParam !== false) {
             $nextToken = $phpcsFile->findNext(T_WHITESPACE, ($nextParam + 1), ($closeBracket + 1), true);
-            if (($nextToken === false) && ($tokens[($nextParam + 1)]['code'] === T_CLOSE_PARENTHESIS)) {
+            if (($nextToken === false) and ($tokens[($nextParam + 1)]['code'] === T_CLOSE_PARENTHESIS)) {
                 break;
             }
 
             $nextCode = $tokens[$nextToken]['code'];
             if ($nextCode === T_EQUAL) {
-                // Check parameter default spacing.
+                // Check parameter default spacing
                 $content = $tokens[($nextParam + 1)]['content'];
-                if ($content !== " ") {
+                if ($content !== ' ') {
                     $gap = strlen($content);
-                	if ($gap === 1) {
-                		$gap = 0;
-                	}
+                    if ($gap === 1) {
+                        $gap = 0;
+                    }
+
                     $arg   = $tokens[$nextParam]['content'];
                     $error = "Expected 1 space between argument \"$arg\" and equals sign; $gap found";
                     $phpcsFile->addError($error, $nextToken);
                 }
 
                 $content = $tokens[($nextToken + 1)]['content'];
-                if ($content !== " ") {
-                	if ($tokens[($nextToken + 1)]['code'] !== T_WHITESPACE) {
-                		$gap = 0;
-                	} else {
+                if ($content !== ' ') {
+                    if ($tokens[($nextToken + 1)]['code'] !== T_WHITESPACE) {
+                        $gap = 0;
+                    } else {
                         $gap = strlen($content);
                     }
+
                     $arg   = $tokens[$nextParam]['content'];
                     $error = "Expected 1 space between default value and equals sign for argument \"$arg\"; $gap found";
                     $phpcsFile->addError($error, $nextToken);
                 }
             }
 
-            // Find and check the comma (if there is one).
+            // Find and check the comma (if there is one)
             $nextComma = $phpcsFile->findNext(T_COMMA, ($nextParam + 1), $closeBracket);
             if ($nextComma !== false) {
-                // Comma found.
+                // Comma found
                 if ($tokens[($nextComma - 1)]['code'] === T_WHITESPACE) {
                     $space = strlen($tokens[($nextComma - 1)]['content']);
                     $arg   = $tokens[$nextParam]['content'];
@@ -109,8 +107,7 @@ class Zend_Sniffs_Functions_FunctionDeclarationArgumentSpacingSniff implements P
                 }
             }
 
-            // Take references into account when expecting the
-            // location of whitespace.
+            // Take references into account when expecting the location of whitespace
             if ($phpcsFile->isReference(($nextParam - 1)) === true) {
                 $whitespace = $tokens[($nextParam - 2)];
             } else {
@@ -118,13 +115,13 @@ class Zend_Sniffs_Functions_FunctionDeclarationArgumentSpacingSniff implements P
             }
 
             if (empty($params) === false) {
-                // This is not the first argument in the function declaration.
+                // This is not the first argument in the function declaration
                 $arg = $tokens[$nextParam]['content'];
 
                 if ($whitespace['code'] === T_WHITESPACE) {
                     $gap = strlen($whitespace['content']);
 
-                    // Before we throw an error, make sure there is no type hint.
+                    // Before we throw an error, make sure there is no type hint
                     $comma     = $phpcsFile->findPrevious(T_COMMA, ($nextParam - 1));
                     $nextToken = $phpcsFile->findNext(T_WHITESPACE, ($comma + 1), null, true);
                     if ($phpcsFile->isReference($nextToken) === true) {
@@ -132,8 +129,7 @@ class Zend_Sniffs_Functions_FunctionDeclarationArgumentSpacingSniff implements P
                     }
 
                     if ($nextToken !== $nextParam) {
-                        // There was a type hint, so check the spacing between
-                        // the hint and the variable as well.
+                        // There was a type hint, so check the spacing between the hint and the variable as well
                         $hint = $tokens[$nextToken]['content'];
 
                         if ($gap !== 1) {
@@ -154,18 +150,18 @@ class Zend_Sniffs_Functions_FunctionDeclarationArgumentSpacingSniff implements P
                     } else if ($gap !== 1) {
                         $error = "Expected 1 space between comma and argument \"$arg\"; $gap found";
                         $phpcsFile->addError($error, $nextToken);
-                    }//end if
+                    }
                 } else {
                     $error = "Expected 1 space between comma and argument \"$arg\"; 0 found";
                     $phpcsFile->addError($error, $nextToken);
-                }//end if
+                }
             } else {
-                // First argument in function declaration.
+                // First argument in function declaration
                 if ($whitespace['code'] === T_WHITESPACE) {
                     $gap = strlen($whitespace['content']);
                     $arg = $tokens[$nextParam]['content'];
 
-                    // Before we throw an error, make sure there is no type hint.
+                    // Before we throw an error, make sure there is no type hint
                     $bracket   = $phpcsFile->findPrevious(T_OPEN_PARENTHESIS, ($nextParam - 1));
                     $nextToken = $phpcsFile->findNext(T_WHITESPACE, ($bracket + 1), null, true);
                     if ($phpcsFile->isReference($nextToken) === true) {
@@ -173,8 +169,7 @@ class Zend_Sniffs_Functions_FunctionDeclarationArgumentSpacingSniff implements P
                     }
 
                     if ($nextToken !== $nextParam) {
-                        // There was a type hint, so check the spacing between
-                        // the hint and the variable as well.
+                        // There was a type hint, so check the spacing between the hint and the variable as well
                         $hint = $tokens[$nextToken]['content'];
 
                         if ($gap !== 1) {
@@ -191,15 +186,15 @@ class Zend_Sniffs_Functions_FunctionDeclarationArgumentSpacingSniff implements P
                         $error = "Expected 0 spaces between opening bracket and argument \"$arg\"; $gap found";
                         $phpcsFile->addError($error, $nextToken);
                     }
-                }//end if
-            }//end if
+                }
+            }
 
             $params[] = $nextParam;
-
-        }//end while
+            $nextParam = $phpcsFile->findNext(T_VARIABLE, ($nextParam + 1), $closeBracket);
+        }
 
         if (empty($params) === true) {
-            // There are no parameters for this function.
+            // There are no parameters for this function
             if (($closeBracket - $openBracket) !== 1) {
                 $space = strlen($tokens[($closeBracket - 1)]['content']);
                 $error = "Expected 0 spaces between brackets of function declaration; $space found";
@@ -212,10 +207,5 @@ class Zend_Sniffs_Functions_FunctionDeclarationArgumentSpacingSniff implements P
             $error     = "Expected 0 spaces between argument \"$arg\" and closing bracket; $gap found";
             $phpcsFile->addError($error, $closeBracket);
         }
-
-    }//end process()
-
-
-}//end class
-
-?>
+    }
+}

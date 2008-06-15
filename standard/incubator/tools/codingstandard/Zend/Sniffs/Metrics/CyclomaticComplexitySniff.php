@@ -20,39 +20,31 @@
  */
 
 /**
- * Zend_Sniffs_Files_ClosingTagSniff
+ * Zend_Sniffs_WhiteSpace_ControlStructureSpacingSniff
  *
- * Checks that the file does not include a closing tag
- * Wether at file end nor inline for output purposes
+ * Checks the cyclomatic complexity (McCabe) for functions
+ * The cyclomatic complexity (also called McCabe code metrics)
+ * indicates the complexity within a function by counting
+ * the different paths the function includes.
  *
  * @category  Zend
  * @package   Zend_CodingStandard
  * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Sniffs_Files_ClosingTagSniff implements PHP_CodeSniffer_Sniff
+class Zend_Sniffs_Metrics_CyclomaticComplexitySniff extends Generic_Sniffs_Metrics_CyclomaticComplexitySniff
 {
     /**
-     * Returns an array of tokens this test wants to listen for.
+     * A complexity higher than this value will throw a warning
      *
-     * @return array
+     * @var integer
      */
-    public function register()
-    {
-        return array(T_CLOSE_TAG);
-
-    }
+    public $complexity = 25;
 
     /**
-     * Processes this sniff, when one of its tokens is encountered.
+     * A complexity higer than this value will throw an error
      *
-     * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned.
-     * @param  integer              $stackPtr  The position of the current token in the stack passed in $tokens.
-     * @return void
+     * @var integer
      */
-    public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
-    {
-        $error = 'A closing tag is not permitted within a PHP file';
-        $phpcsFile->addError($error, $stackPtr);
-    }
+    public $absoluteComplexity = 25;
 }

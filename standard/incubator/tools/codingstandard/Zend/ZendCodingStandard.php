@@ -1,6 +1,6 @@
 <?php
 /**
- * Zend Framework Coding Standard
+ * Zend Framework
  *
  * LICENSE
  *
@@ -118,7 +118,8 @@ if (class_exists('PHP_CodeSniffer_Standards_CodingStandard', true) === false) {
  *
  * METRICS
  * -------
- * NestingLevelSniff Checks the nesting level for methods
+ * CyclomaticComplexitySniff Checks the cyclomatic complexity (McCabe) for functions
+ * NestingLevelSniff         Checks the nesting level for methods
  *
  * NAMINGCONVENTIONS SNIFFS
  * ------------------------
@@ -203,10 +204,8 @@ if (class_exists('PHP_CodeSniffer_Standards_CodingStandard', true) === false) {
  * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
-class PHP_CodeSniffer_Standards_Zend_ZendCodingStandard extends
-      PHP_CodeSniffer_Standards_CodingStandard
+class PHP_CodeSniffer_Standards_Zend_ZendCodingStandard extends PHP_CodeSniffer_Standards_CodingStandard
 {
-
     /**
      * Return a list of external sniffs to include with the Zend Framework standard
      *
@@ -267,28 +266,23 @@ class PHP_CodeSniffer_Standards_Zend_ZendCodingStandard extends
             'Squiz/Sniffs/Strings/DoubleQuoteUsageSniff.php',
             'Squiz/Sniffs/Strings/EchoedStringsSniff.php',
             'Squiz/Sniffs/WhiteSpace/CastSpacingSniff.php',
-            'Squiz/Sniffs/WhiteSpace/ControlStructureSpacingSniff.php',
             'Squiz/Sniffs/WhiteSpace/FunctionOpeningBraceSpaceSniff.php',
             'Squiz/Sniffs/WhiteSpace/LanguageConstructSpacingSniff.php',
             'Squiz/Sniffs/WhiteSpace/ObjectOperatorSpacingSniff.php',
-            'Squiz/Sniffs/WhiteSpace/OperatorSpacingSniff.php',
             'Squiz/Sniffs/WhiteSpace/ScopeKeywordSpacingSniff.php',
             'Generic/Sniffs/WhiteSpace/ScopeIndentSniff.php',
             'Squiz/Sniffs/WhiteSpace/SemicolonSpacingSniff.php',
-            'Squiz/Sniffs/WhiteSpace/SuperfluousWhitespaceSniff.php',
+            'Squiz/Sniffs/WhiteSpace/SuperfluousWhitespaceSniff.php'
         );
     }
 }
 
 /**
  * TODO:
- *
- * if / foreach / for / function - when linebreak indended to equality sign or 1 after the opening brace
- * if ((ss = a) or
- *     (ww = b))
- *
  * Optional descriptions should begin with the Description "(Optional)"
  * @param string $variable (Optional) my variable
+ *
+ * Return value: If returns self/own object check for text "Provides a fluent interface"
  *
  * Error on @throws tag when no exception is thrown
  * Error on @throws tag in false order
@@ -303,4 +297,11 @@ class PHP_CodeSniffer_Standards_Zend_ZendCodingStandard extends
  * array('xxx' => 'xx', 'ccc' => 'cc'); // single line with key
  * array('x'   => 'x',   'cc'  => 'c',  // multiple line each element under each other with key
  *       'ddd' => 'ddd', 'fff' => 'ff');
+ *
+ * Add type hint "resource" for files
+ *
+ * Bracket calculations... also >> or <<...
+ *
+ * Do not allow multiple assignments in a for/while/foreach loop
+ * for ($a = 1, $b = 2; $a == 2, $b == 2;)
  */

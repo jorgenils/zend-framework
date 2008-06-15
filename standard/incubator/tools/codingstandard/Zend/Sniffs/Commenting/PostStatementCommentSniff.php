@@ -20,9 +20,9 @@
  */
 
 /**
- * Zend_Sniffs_Commenting_PostStatementCommentSniff.
+ * Zend_Sniffs_Commenting_PostStatementCommentSniff
  *
- * Checks to ensure that there are no comments after statements.
+ * Checks to ensure that there are no comments after statements
  *
  * @category  Zend
  * @package   Zend_CodingStandard
@@ -32,7 +32,7 @@
 class Zend_Sniffs_Commenting_PostStatementCommentSniff implements PHP_CodeSniffer_Sniff
 {
     /**
-     * Returns an array of tokens this test wants to listen for.
+     * Returns an array of tokens this test wants to listen for
      *
      * @return array
      */
@@ -42,11 +42,11 @@ class Zend_Sniffs_Commenting_PostStatementCommentSniff implements PHP_CodeSniffe
     }
 
     /**
-     * Processes this sniff, when one of its tokens is encountered.
+     * Processes this sniff, when one of its tokens is encountered
      *
-     * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned.
+     * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned
      * @param  integer              $stackPtr  The position of the current token in the
-     *                                         stack passed in $tokens.
+     *                                         stack passed in $tokens
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
@@ -67,5 +67,4 @@ class Zend_Sniffs_Commenting_PostStatementCommentSniff implements PHP_CodeSniffe
         $error = 'Comments may not appear after statements or brackets';
         $phpcsFile->addError($error, $stackPtr);
     }
-
 }

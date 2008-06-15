@@ -32,18 +32,14 @@
  */
 class Zend_Sniffs_Classes_ClassFileNameSniff implements PHP_CodeSniffer_Sniff
 {
-
     /**
-     * Returns an array of tokens this test wants to listen for.
+     * Returns an array of tokens this test wants to listen for
      *
      * @return array
      */
     public function register()
     {
-        return array(
-                T_CLASS,
-                T_INTERFACE
-               );
+        return array(T_CLASS, T_INTERFACE);
     }
 
     /**
@@ -56,8 +52,8 @@ class Zend_Sniffs_Classes_ClassFileNameSniff implements PHP_CodeSniffer_Sniff
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
-        $tokens    = $phpcsFile->getTokens();
-        $decName   = $phpcsFile->findNext(T_STRING, $stackPtr);
+        $tokens  = $phpcsFile->getTokens();
+        $decName = $phpcsFile->findNext(T_STRING, $stackPtr);
 
         $fileName  = dirname($phpcsFile->getFilename());
         $fileName  = substr($fileName, (strrpos($fileName, DIRECTORY_SEPARATOR . 'Zend') + 1));
@@ -66,13 +62,13 @@ class Zend_Sniffs_Classes_ClassFileNameSniff implements PHP_CodeSniffer_Sniff
 
         $className = $fileName;
         $className = substr($className, strpos($className, '_'));
-        $className = substr($className, strpos($className, DIRECTORY_SEPARATOR) + 1);
+        $className = substr($className, (strpos($className, DIRECTORY_SEPARATOR) + 1));
 
         $fileName  = str_replace(DIRECTORY_SEPARATOR, '_', $fileName);
         $className = str_replace(DIRECTORY_SEPARATOR, '_', $className);
 
         if (strpos($fileName, '__') === false) {
-        	$className = $fileName;
+            $className = $fileName;
         }
 
         if (($tokens[$decName]['content'] !== $fileName) and ($tokens[$decName]['content'] !== $className)) {
@@ -82,7 +78,5 @@ class Zend_Sniffs_Classes_ClassFileNameSniff implements PHP_CodeSniffer_Sniff
             $error .= $className . '".';
             $phpcsFile->addError($error, $stackPtr);
         }
-
     }
-
 }

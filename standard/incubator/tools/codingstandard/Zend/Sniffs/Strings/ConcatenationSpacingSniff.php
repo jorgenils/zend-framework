@@ -32,9 +32,8 @@
  */
 class Zend_Sniffs_Strings_ConcatenationSpacingSniff implements PHP_CodeSniffer_Sniff
 {
-
     /**
-     * Returns an array of tokens this test wants to listen for.
+     * Returns an array of tokens this test wants to listen for
      *
      * @return array
      */
@@ -44,11 +43,10 @@ class Zend_Sniffs_Strings_ConcatenationSpacingSniff implements PHP_CodeSniffer_S
     }
 
     /**
-     * Processes this test, when one of its tokens is encountered.
+     * Processes this test, when one of its tokens is encountered
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file being scanned.
-     * @param int                  $stackPtr  The position of the current token in the
-     *                                        stack passed in $tokens.
+     * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned
+     * @param  integer              $stackPtr  The position of the current token in the stack passed in $tokens
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
@@ -60,14 +58,16 @@ class Zend_Sniffs_Strings_ConcatenationSpacingSniff implements PHP_CodeSniffer_S
         $error    = false;
 
         if ($tokens[($stackPtr - 1)]['code'] !== T_WHITESPACE) {
-            $error     = true;
+            $error = true;
         }
+
         $expected .= trim(substr($tokens[($stackPtr - 1)]['content'], -5)) . ' ' . $tokens[$stackPtr]['content'];
         $found    .= substr($tokens[($stackPtr - 1)]['content'], -5) . $tokens[$stackPtr]['content'];
 
         if ($tokens[($stackPtr + 1)]['code'] !== T_WHITESPACE) {
-            $error     = true;
+            $error = true;
         }
+
         $expected .= ' ' . trim(substr($tokens[($stackPtr + 1)]['content'], 0, 5));
         $found    .= substr($tokens[($stackPtr + 1)]['content'], 0, 6);
 
@@ -82,7 +82,5 @@ class Zend_Sniffs_Strings_ConcatenationSpacingSniff implements PHP_CodeSniffer_S
             $message = "Concat operator must be surrounded by one space. Found \"$found\"; expected \"$expected\"";
             $phpcsFile->addError($message, $stackPtr);
         }
-
     }
-
 }

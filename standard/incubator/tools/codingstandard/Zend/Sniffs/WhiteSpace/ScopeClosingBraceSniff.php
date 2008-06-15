@@ -39,14 +39,13 @@ class Zend_Sniffs_WhiteSpace_ScopeClosingBraceSniff implements PHP_CodeSniffer_S
     public function register()
     {
         return PHP_CodeSniffer_Tokens::$scopeOpeners;
-    }//end register()
+    }
 
     /**
-     * Processes this test, when one of its tokens is encountered.
+     * Processes this test, when one of its tokens is encountered
      *
-     * @param PHP_CodeSniffer_File $phpcsFile All the tokens found in the document.
-     * @param int                  $stackPtr  The position of the current token in the
-     *                                        stack passed in $tokens.
+     * @param  PHP_CodeSniffer_File $phpcsFile All the tokens found in the document
+     * @param  integer              $stackPtr  The position of the current token in the stack passed in $tokens
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
@@ -89,20 +88,20 @@ class Zend_Sniffs_WhiteSpace_ScopeClosingBraceSniff implements PHP_CodeSniffer_S
         // Check now that the closing brace is lined up correctly.
         $braceIndent   = $tokens[$scopeEnd]['column'];
         $isBreakCloser = ($tokens[$scopeEnd]['code'] === T_BREAK);
-        if (in_array($tokens[$stackPtr]['code'], array(T_CASE, T_DEFAULT)) === true && $isBreakCloser === true) {
+        if (in_array($tokens[$stackPtr]['code'], array(T_CASE, T_DEFAULT)) === true and $isBreakCloser === true) {
             // BREAK statements should be indented 4 spaces from the
             // CASE or DEFAULT statement.
             if ($braceIndent !== ($startColumn + 4)) {
-                $error = 'Break statement indented incorrectly; expected '.($startColumn + 3).' spaces, found '.($braceIndent - 1);
+                $error = 'Break statement indented incorrectly; expected ' . ($startColumn + 3)
+                       . ' spaces, found ' . ($braceIndent - 1);
                 $phpcsFile->addError($error, $scopeEnd);
             }
         } else {
             if ($braceIndent !== $startColumn) {
-                $error = 'Closing brace indented incorrectly; expected '.($startColumn - 1).' spaces, found '.($braceIndent - 1);
+                $error = 'Closing brace indented incorrectly; expected ' . ($startColumn - 1)
+                       . ' spaces, found ' . ($braceIndent - 1);
                 $phpcsFile->addError($error, $scopeEnd);
             }
         }
-
-    }//end process()
-
-}//end class
+    }
+}

@@ -1,46 +1,47 @@
 <?php
 /**
- * Verifies that class members are spaced correctly.
+ * Zend Framework
  *
- * PHP version 5
+ * LICENSE
  *
- * @category  PHP
- * @package   PHP_CodeSniffer
- * @author    Greg Sherwood <gsherwood@squiz.net>
- * @author    Marc McIntyre <mmcintyre@squiz.net>
- * @copyright 2006 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   CVS: $Id: MemberVarSpacingSniff.php,v 1.4 2007/07/27 05:36:26 squiz Exp $
- * @link      http://pear.php.net/package/PHP_CodeSniffer
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://framework.zend.com/license/new-bsd
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category  Zend
+ * @package   Zend_CodingStandard
+ * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd     New BSD License
+ * @version   $Id: $
  */
-
 if (class_exists('PHP_CodeSniffer_Standards_AbstractVariableSniff', true) === false) {
     throw new PHP_CodeSniffer_Exception('Class PHP_CodeSniffer_Standards_AbstractVariableSniff not found');
 }
 
 /**
+ * Zend_Sniffs_WhiteSpace_MemberVarSpacingSniff
+ *
  * Verifies that class members are spaced correctly.
  *
- * @category  PHP
- * @package   PHP_CodeSniffer
- * @author    Greg Sherwood <gsherwood@squiz.net>
- * @author    Marc McIntyre <mmcintyre@squiz.net>
- * @copyright 2006 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   Release: 1.1.0RC1
- * @link      http://pear.php.net/package/PHP_CodeSniffer
+ * @category  Zend
+ * @package   Zend_CodingStandard
+ * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Sniffs_WhiteSpace_MemberVarSpacingSniff extends PHP_CodeSniffer_Standards_AbstractVariableSniff
 {
     /**
      * Processes the function tokens within the class.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file where this token was found.
-     * @param int                  $stackPtr  The position where the token was found.
-     *
+     * @param  PHP_CodeSniffer_File $phpcsFile The file where this token was found.
+     * @param  integer              $stackPtr  The position where the token was found.
      * @return void
      */
-    protected function processMemberVar(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function processMemberVar(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
 
@@ -57,7 +58,8 @@ class Zend_Sniffs_WhiteSpace_MemberVarSpacingSniff extends PHP_CodeSniffer_Stand
                 // If this is a WHITESPACE token, and the token right before
                 // it is a DOC_COMMENT, then it is just the newline after the
                 // member var's comment, and can be skipped.
-                if ($tokens[$i]['code'] === T_WHITESPACE && in_array($tokens[($i - 1)]['code'], PHP_CodeSniffer_Tokens::$commentTokens) === true) {
+                if ($tokens[$i]['code'] === T_WHITESPACE and
+                    in_array($tokens[($i - 1)]['code'], PHP_CodeSniffer_Tokens::$commentTokens) === true) {
                     continue;
                 }
 
@@ -73,51 +75,44 @@ class Zend_Sniffs_WhiteSpace_MemberVarSpacingSniff extends PHP_CodeSniffer_Stand
         } else {
             $prevContent = $phpcsFile->findPrevious(array(T_WHITESPACE, T_DOC_COMMENT), $prevLineToken, null, true);
             $foundLines  = ($tokens[$prevLineToken]['line'] - $tokens[$prevContent]['line']);
-        }//end if
+        }
 
-        if ($tokens[$prevContent]['content'] == '{') {
-        	if ($foundLines !== 0) {
+        if ($tokens[$prevContent]['content'] === '{') {
+            if ($foundLines !== 0) {
                 $phpcsFile->addError("Expected 0 blank line before member var; $foundLines found", $stackPtr);
             }
         } else if ($foundLines !== 1) {
             $phpcsFile->addError("Expected 1 blank line before member var; $foundLines found", $stackPtr);
         }
-
-    }//end processMemberVar()
-
+    }
 
     /**
-     * Processes normal variables.
+     * Processes normal variables
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file where this token was found.
-     * @param int                  $stackPtr  The position where the token was found.
-     *
+     * @param  PHP_CodeSniffer_File $phpcsFile The file where this token was found
+     * @param  integer              $stackPtr  The position where the token was found
      * @return void
      */
-    protected function processVariable(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function processVariable(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
-        // We don't care about normal variables.
+        // We don't care about normal variables
+        $phpcsFile = 0;
+        $stackPtr  = 0;
         return;
-
-    }//end processVariable()
-
+    }
 
     /**
-     * Processes variables in double quoted strings.
+     * Processes variables in double quoted strings
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file where this token was found.
-     * @param int                  $stackPtr  The position where the token was found.
-     *
+     * @param  PHP_CodeSniffer_File $phpcsFile The file where this token was found
+     * @param  integer              $stackPtr  The position where the token was found
      * @return void
      */
-    protected function processVariableInString(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
+    public function processVariableInString(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
-        // We don't care about normal variables.
+        // We don't care about normal variables
+        $phpcsFile = 0;
+        $stackPtr  = 0;
         return;
-
-    }//end processVariableInString()
-
-
-}//end class
-
-?>
+    }
+}

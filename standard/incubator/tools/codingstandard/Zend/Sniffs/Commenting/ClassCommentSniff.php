@@ -34,13 +34,12 @@ if (class_exists('PHP_CodeSniffer_Standards_ZendClassCommentParser', true) === f
  */
 class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
 {
-
     /**
      * Comment type
      *
      * @var string
      */
-    public $type = "";
+    public $type = '';
 
     /**
      * Returns an array of tokens this test wants to listen for
@@ -56,36 +55,32 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
      * Processes this test, when one of its tokens is encountered
      *
      * @param  PHP_CodeSniffer_File $phpcsFile The file being scanned
-     * @param  integer              $stackPtr  The position of the current token
-     *                                         in the stack passed in $tokens
+     * @param  integer              $stackPtr  The position of the current token in the stack passed in $tokens
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
         $this->currentFile = $phpcsFile;
 
-        $tokens = $phpcsFile->getTokens();
-        $type   = strtolower($tokens[$stackPtr]['content']);
-        $find   = array (
-                   T_ABSTRACT,
-                   T_WHITESPACE,
-                   T_FINAL,
-                  );
+        $tokens     = $phpcsFile->getTokens();
+        $type       = strtolower($tokens[$stackPtr]['content']);
+        $find       = array (T_ABSTRACT, T_WHITESPACE, T_FINAL);
         $this->type = $type;
 
         // Extract the class comment docblock
         $commentEnd = $phpcsFile->findPrevious($find, ($stackPtr - 1), null, true);
 
-        if ($commentEnd !== false && $tokens[$commentEnd]['code'] === T_COMMENT) {
+        if ($commentEnd !== false and $tokens[$commentEnd]['code'] === T_COMMENT) {
             $phpcsFile->addError("You must use \"/**\" style comments for a $type comment", $stackPtr);
             return;
-        } else if ($commentEnd === false || $tokens[$commentEnd]['code'] !== T_DOC_COMMENT) {
+        } else if ($commentEnd === false or $tokens[$commentEnd]['code'] !== T_DOC_COMMENT) {
             $phpcsFile->addError("Missing $type doc comment", $stackPtr);
             return;
         }
 
         $commentStart = ($phpcsFile->findPrevious(T_DOC_COMMENT, ($commentEnd - 1), null, true) + 1);
-        $commentNext  = $phpcsFile->findPrevious(T_WHITESPACE, ($commentEnd + 1), $stackPtr, false, $phpcsFile->eolChar);
+        $commentNext  = $phpcsFile->findPrevious(T_WHITESPACE, ($commentEnd + 1),
+                                                 $stackPtr, false, $phpcsFile->eolChar);
 
         // Distinguish file and class comment
         $prevClassToken = $phpcsFile->findPrevious(T_CLASS, ($stackPtr - 1));
@@ -96,9 +91,11 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
                 $prevComment = $phpcsFile->findPrevious(T_DOC_COMMENT, ($prevNonComment - 1));
                 if ($prevComment === false) {
                     // There is only 1 doc comment between open tag and class token
-                    $newlineToken = $phpcsFile->findNext(T_WHITESPACE, ($commentEnd + 1), $stackPtr, false, $phpcsFile->eolChar);
+                    $newlineToken = $phpcsFile->findNext(T_WHITESPACE, ($commentEnd + 1), $stackPtr,
+                                                         false, $phpcsFile->eolChar);
                     if ($newlineToken !== false) {
-                        $newlineToken = $phpcsFile->findNext(T_WHITESPACE, ($newlineToken + 1), $stackPtr, false, $phpcsFile->eolChar);
+                        $newlineToken = $phpcsFile->findNext(T_WHITESPACE, ($newlineToken + 1), $stackPtr,
+                                                             false, $phpcsFile->eolChar);
                         if ($newlineToken !== false) {
                             // Blank line between the class and the doc block
                             // The doc block is most likely a file comment
@@ -113,7 +110,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
                 if ($prevTokenEnd !== false) {
                     $blankLineBefore = 0;
                     for ($i = ($prevTokenEnd + 1); $i < $commentStart; $i++) {
-                        if ($tokens[$i]['code'] === T_WHITESPACE && $tokens[$i]['content'] === $phpcsFile->eolChar) {
+                        if ($tokens[$i]['code'] === T_WHITESPACE and $tokens[$i]['content'] === $phpcsFile->eolChar) {
                             $blankLineBefore++;
                         }
                     }
@@ -123,7 +120,6 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
                         $phpcsFile->addError($error, ($commentStart - 1));
                     }
                 }
-
             }
         }
 
@@ -141,7 +137,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
 
         $comment = $this->commentParser->getComment();
         if (is_null($comment) === true) {
-            $error = ucfirst($type).' doc comment is empty';
+            $error = ucfirst($type) . ' doc comment is empty';
             $phpcsFile->addError($error, $commentStart);
             return;
         }
@@ -157,7 +153,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
         // No extra newline before short description
         $newlineCount = 0;
         $newlineSpan  = strspn($short, $phpcsFile->eolChar);
-        if ($short !== '' && $newlineSpan > 0) {
+        if ($short !== '' and $newlineSpan > 0) {
             $line  = ($newlineSpan > 1) ? 'newlines' : 'newline';
             $error = "Extra $line found before $type comment short description";
             $phpcsFile->addError($error, ($commentStart + 1));
@@ -221,8 +217,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
         }
 
         // Check each tag
-        $this->processTags($commentStart, $commentEnd);
-
+        $this->_processTags($commentStart, $commentEnd);
     }
 
     /**
@@ -232,7 +227,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
      * @param  integer $commentEnd   The position in the stack where the comment ended
      * @return void
      */
-    protected function processTags($commentStart, $commentEnd)
+    protected function _processTags($commentStart, $commentEnd)
     {
         // Tags in correct order and related info
         $tags = array(
@@ -264,12 +259,14 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
                  'since'      => array(
                                   'required'       => false,
                                   'allow_multiple' => false,
-                                  'order_text'     => 'follows @see (if used) or @uses (if used) or @subpackage (if used) or @package',
+                                  'order_text'     => 'follows @see (if used) or @uses (if used) or @subpackage '
+                                                    . '(if used) or @package',
                                  ),
                  'copyright'  => array(
                                   'required'       => true,
                                   'allow_multiple' => false,
-                                  'order_text'     => 'follows @since (if used) or @see (if used) or @uses (if used) or @subpackage (if used) or @package',
+                                  'order_text'     => 'follows @since (if used) or @see (if used) or @uses (if used) '
+                                                    . 'or @subpackage (if used) or @package',
                                  ),
                  'license'    => array(
                                   'required'       => true,
@@ -297,9 +294,8 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
         }
 
         foreach ($tags as $tag => $info) {
-
             // Required tag missing
-            if ($info['required'] === true && in_array($tag, $foundTags) === false) {
+            if ($info['required'] === true and in_array($tag, $foundTags) === false) {
                 $error = "Missing @$tag tag in " . $this->type . 'comment';
                 $this->currentFile->addError($error, $commentEnd);
                 continue;
@@ -313,7 +309,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
 
             $getMethod  = 'get' . $tagName;
             $tagElement = $this->commentParser->$getMethod();
-            if (is_null($tagElement) === true || empty($tagElement) === true) {
+            if (is_null($tagElement) === true or empty($tagElement) === true) {
                 continue;
             }
 
@@ -322,16 +318,16 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
                 $errorPos = ($commentStart + $tagElement->getLine());
             }
 
-            // Get the tag order.
+            // Get the tag order
             $foundIndexes = array_keys($foundTags, $tag);
 
             if (count($foundIndexes) > 1) {
-                // Multiple occurance not allowed.
+                // Multiple occurance not allowed
                 if ($info['allow_multiple'] === false) {
-                    $error = "Only 1 @$tag tag is allowed in a " . $this->type . 'comment';
+                    $error = 'Only 1 @$tag tag is allowed in a ' . $this->type . 'comment';
                     $this->currentFile->addError($error, $errorPos);
                 } else {
-                    // Make sure same tags are grouped together.
+                    // Make sure same tags are grouped together
                     $i     = 0;
                     $count = $foundIndexes[0];
                     foreach ($foundIndexes as $index) {
@@ -347,11 +343,11 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
                 }
             }
 
-            // Check tag order.
+            // Check tag order
             if ($foundIndexes[0] > $orderIndex) {
                 $orderIndex = $foundIndexes[0];
             } else {
-                if (is_array($tagElement) === true && empty($tagElement) === false) {
+                if (is_array($tagElement) === true and empty($tagElement) === false) {
                     $errorPos += $tagElement[0]->getLine();
                 }
 
@@ -360,7 +356,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
                 $this->currentFile->addError($error, $errorPos);
             }
 
-            // Store the indentation for checking.
+            // Store the indentation for checking
             $len = strlen($tag);
             if ($len > $longestTag) {
                 $longestTag = $len;
@@ -370,20 +366,20 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
                 foreach ($tagElement as $key => $element) {
                     $indentation[] = array(
                                       'tag'   => $tag,
-                                      'space' => $this->getIndentation($tag, $element),
+                                      'space' => $this->_getIndentation($tag, $element),
                                       'line'  => $element->getLine(),
                                      );
                 }
             } else {
                 $indentation[] = array(
                                   'tag'   => $tag,
-                                  'space' => $this->getIndentation($tag, $tagElement),
+                                  'space' => $this->_getIndentation($tag, $tagElement),
                                  );
             }
 
-            $method = 'process' . $tagName;
+            $method = '_process' . $tagName;
             if (method_exists($this, $method) === true) {
-                // Process each tag if a method is defined.
+                // Process each tag if a method is defined
                 call_user_func(array($this, $method), $errorPos);
             } else {
                 if (is_array($tagElement) === true) {
@@ -397,7 +393,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
         }
 
         foreach ($indentation as $indentInfo) {
-            if ($indentInfo['space'] !== 0 && $indentInfo['space'] !== ($longestTag + 1)) {
+            if ($indentInfo['space'] !== 0 and $indentInfo['space'] !== ($longestTag + 1)) {
                 $expected     = (($longestTag - strlen($indentInfo['tag'])) + 1);
                 $space        = ($indentInfo['space'] - strlen($indentInfo['tag']));
                 $error        = "@$indentInfo[tag] tag comment indented incorrectly. ";
@@ -417,13 +413,13 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
     }
 
     /**
-     * Get the indentation information of each tag.
+     * Get the indentation information of each tag
      *
-     * @param  string                                   $tagName    The name of the doc comment element.
-     * @param  PHP_CodeSniffer_CommentParser_DocElement $tagElement The doc comment element.
+     * @param  string $tagName    The name of the doc comment element
+     * @param  string $tagElement The doc comment element
      * @return string
      */
-    protected function getIndentation($tagName, $tagElement)
+    protected function _getIndentation($tagName, $tagElement)
     {
         if ($tagElement instanceof PHP_CodeSniffer_CommentParser_SingleElement) {
             if ($tagElement->getContent() !== '') {
@@ -440,12 +436,12 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
     }
 
     /**
-     * Process the category tag.
+     * Process the category tag
      *
-     * @param  integer $errorPos The line number where the error occurs.
+     * @param  integer $errorPos The line number where the error occurs
      * @return void
      */
-    protected function processCategory($errorPos)
+    protected function _processCategory($errorPos)
     {
         $category = $this->commentParser->getCategory();
         if ($category !== null) {
@@ -464,7 +460,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
      * @param  integer $errorPos The line number where the error occurs
      * @return void
      */
-    protected function processPackage($errorPos)
+    protected function _processPackage($errorPos)
     {
         $package = $this->commentParser->getPackage();
         if ($package !== null) {
@@ -497,7 +493,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
      * @param  integer $errorPos The line number where the error occurs
      * @return void
      */
-    protected function processSubpackage($errorPos)
+    protected function _processSubpackage($errorPos)
     {
         $subpackage = $this->commentParser->getSubpackage();
         if ($subpackage !== null) {
@@ -525,14 +521,14 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
     }
 
     /**
-     * Process the uses tag.
+     * Process the uses tag
      *
-     * @param  integer $errorPos The line number where the error occurs.
+     * @param  integer $errorPos The line number where the error occurs
      * @return void
      */
-    protected function processUses($errorPos)
+    protected function _processUses($errorPos)
     {
-        $uses = $this->commentParser->getUses();
+        $uses = $this->commentParser->_getUses();
         if ($uses !== null) {
             foreach ($uses as $use) {
                 $content = $use->getContent();
@@ -564,11 +560,11 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
      * @param  integer $errorPos The line number where the error occurs
      * @return void
      */
-    protected function processSee($errorPos)
+    protected function _processSee($errorPos)
     {
         $sees = $this->commentParser->getSee();
         if ($sees !== null) {
-            foreach($sees as $see) {
+            foreach ($sees as $see) {
                 $content = $see->getContent();
                 if ($content !== '') {
                     if (PHP_CodeSniffer::isUnderscoreName($content) !== true) {
@@ -599,7 +595,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
      * @param  integer $errorPos The line number where the error occurs
      * @return void
      */
-    protected function processSince($errorPos)
+    protected function _processSince($errorPos)
     {
         $since = $this->commentParser->getSince();
         if ($since !== null) {
@@ -623,7 +619,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
      * @param  integer $errorPos The line number where the error occurs
      * @return void
      */
-    protected function processCopyrights($errorPos)
+    protected function _processCopyrights($errorPos)
     {
         $copyrights = $this->commentParser->getCopyrights();
         if (count($copyrights) > 1) {
@@ -639,12 +635,12 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
     }
 
     /**
-     * Process the license tag.
+     * Process the license tag
      *
-     * @param  integer $errorPos The line number where the error occurs.
+     * @param  integer $errorPos The line number where the error occurs
      * @return void
      */
-    protected function processLicense($errorPos)
+    protected function _processLicense($errorPos)
     {
         $license = $this->commentParser->getLicense();
         if ($license !== null) {
@@ -663,7 +659,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
      * @param  integer $errorPos The line number where the error occurs
      * @return void
      */
-    protected function processDepreciated($errorPos)
+    protected function _processDepreciated($errorPos)
     {
         $depr = $this->commentParser->getDepreciated();
         if ($depr !== null) {
@@ -683,10 +679,9 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
     /**
      * Process the depreciated tag
      *
-     * @param  integer $errorPos The line number where the error occurs
      * @return void
      */
-    protected function getUses()
+    protected function _getUses()
     {
         $uses = $this->commentParser->getSee();
         if ($uses !== null) {
@@ -713,5 +708,4 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
             }
         }
     }
-
 }

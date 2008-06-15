@@ -34,12 +34,10 @@ if (class_exists('Generic_Sniffs_Metrics_NestingLevelSniff', true) === false) {
  */
 class Zend_Sniffs_Metrics_NestingLevelSniff extends Generic_Sniffs_Metrics_NestingLevelSniff
 {
-
     /**
      * A nesting level higher than this value will throw an error.
      *
-     * @var int
+     * @var integer
      */
-    protected $absoluteNestingLevel = 5;
-
+    public $absoluteNestingLevel = 5;
 }

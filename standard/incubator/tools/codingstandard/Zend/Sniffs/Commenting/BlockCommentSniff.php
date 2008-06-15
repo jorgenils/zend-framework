@@ -31,39 +31,34 @@
  */
 class Zend_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
 {
-
     /**
-     * Returns an array of tokens this test wants to listen for.
+     * Returns an array of tokens this test wants to listen for
      *
      * @return array
      */
     public function register()
     {
-        return array(
-                T_COMMENT,
-                T_DOC_COMMENT,
-               );
-    }//end register()
+        return array(T_COMMENT, T_DOC_COMMENT);
+    }
 
     /**
-     * Processes this test, when one of its tokens is encountered.
+     * Processes this test, when one of its tokens is encountered
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The current file being scanned.
-     * @param int                  $stackPtr  The position of the current token in the
-     *                                        stack passed in $tokens.
+     * @param  PHP_CodeSniffer_File $phpcsFile The current file being scanned
+     * @param  integer              $stackPtr  The position of the current token in the stack passed in $tokens
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
 
-        // If its an inline comment return.
+        // If its an inline comment return
         if (substr($tokens[$stackPtr]['content'], 0, 2) !== '/*') {
             return;
         }
 
-        // If this is a function/class/interface doc block comment, skip it.
-        // We are only interested in inline doc block comments.
+        // If this is a function/class/interface doc block comment, skip it
+        // We are only interested in inline doc block comments
         if ($tokens[$stackPtr]['code'] === T_DOC_COMMENT) {
             $nextToken = $phpcsFile->findNext(PHP_CodeSniffer_Tokens::$emptyTokens, ($stackPtr + 1), null, true);
             $ignore    = array(
@@ -91,8 +86,9 @@ class Zend_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
         $nextComment  = $stackPtr;
         $lastLine     = $tokens[$stackPtr]['line'];
 
-        // Construct the comment into an array.
-        while (($nextComment = $phpcsFile->findNext($tokens[$stackPtr]['code'], ($nextComment + 1), null, false)) !== false) {
+        // Construct the comment into an array
+        $nextComment = $phpcsFile->findNext($tokens[$stackPtr]['code'], ($nextComment + 1), null, false);
+        while ($nextComment !== false) {
             if (($tokens[$nextComment]['line'] - 1) !== $lastLine) {
                 // Not part of the block.
                 break;
@@ -100,10 +96,11 @@ class Zend_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
 
             $lastLine       = $tokens[$nextComment]['line'];
             $commentLines[] = $nextComment;
+            $nextComment    = $phpcsFile->findNext($tokens[$stackPtr]['code'], ($nextComment + 1), null, false);
         }
 
         if (count($commentLines) <= 2) {
-            // Small comment. Can't be right.
+            // Small comment. Can't be right
             if (count($commentLines) === 1) {
                 $error = 'Single line block comment not allowed; use inline ("// text") comment instead';
                 $phpcsFile->addError($error, $stackPtr);
@@ -120,7 +117,7 @@ class Zend_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
         }
 
         $content = trim($tokens[$stackPtr]['content']);
-        if ($content !== '/*' && $content !== '/**') {
+        if ($content !== '/*' and $content !== '/**') {
             $error = 'Block comment text must start on a new line';
             $phpcsFile->addError($error, $stackPtr);
             return;
@@ -128,12 +125,12 @@ class Zend_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
 
         $starColumn = $tokens[$stackPtr]['column'];
 
-        // Make sure first line isn't blank.
+        // Make sure first line isn't blank
         if (trim($tokens[$commentLines[1]]['content']) === '') {
             $error = 'Empty line not allowed at start of comment';
             $phpcsFile->addError($error, $commentLines[1]);
         } else {
-            // Check indentation of first line.
+            // Check indentation of first line
             $content      = $tokens[$commentLines[1]]['content'];
             $commentText  = ltrim($content);
             $leadingSpace = (strlen($content) - strlen($commentText));
@@ -155,20 +152,20 @@ class Zend_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
             }
         }
 
-        // Check that each line of the comment is indented past the star.
+        // Check that each line of the comment is indented past the star
         foreach ($commentLines as $line) {
             $leadingSpace = (strlen($tokens[$line]['content']) - strlen(ltrim($tokens[$line]['content'])));
             // First and last lines (comment opener and closer) are handled seperately.
-            if (($line === $commentLines[(count($commentLines) - 1)]) || ($line === $commentLines[0])) {
+            if (($line === $commentLines[(count($commentLines) - 1)]) or ($line === $commentLines[0])) {
                 continue;
             }
 
-            // First comment line was handled above.
+            // First comment line was handled above
             if ($line === $commentLines[1]) {
                 continue;
             }
 
-            // If it's empty, continue.
+            // If it's empty, continue
             if (trim($tokens[$line]['content']) === '') {
                 continue;
             }
@@ -187,10 +184,10 @@ class Zend_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
             }
         }
 
-        // Finally, test the last line is correct.
+        // Finally, test the last line is correct
         $lastIndex = (count($commentLines) - 1);
         $content   = trim($tokens[$commentLines[$lastIndex]]['content']);
-        if ($content !== '*/' && $content !== '**/') {
+        if ($content !== '*/' and $content !== '**/') {
             $error = 'Comment closer must be on a new line';
             $phpcsFile->addError($error, $commentLines[$lastIndex]);
         } else {
@@ -203,10 +200,9 @@ class Zend_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
                 $error     = "Last line of comment aligned incorrectly; expected $expected but found $leadingSpace";
                 $phpcsFile->addError($error, $commentLines[$lastIndex]);
             }
-
         }
 
-        // Check that the lines before and after this comment are blank.
+        // Check that the lines before and after this comment are blank
         $contentBefore = $phpcsFile->findPrevious(T_WHITESPACE, ($stackPtr - 1), null, true);
         if ($tokens[$contentBefore]['code'] === T_OPEN_CURLY_BRACKET) {
             if (($tokens[$stackPtr]['line'] - $tokens[$contentBefore]['line']) < 1) {
@@ -226,7 +222,5 @@ class Zend_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
             $error = 'Empty line after block comment not allowed';
             $phpcsFile->addError($error, $commentCloser);
         }
-
     }
-
 }
