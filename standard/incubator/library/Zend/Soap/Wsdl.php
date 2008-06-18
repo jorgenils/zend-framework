@@ -21,6 +21,7 @@
 
 require_once 'Zend/Server/Exception.php';
 
+
 class Zend_Soap_Wsdl {
     /**
      * @var object DomDocument Instance
@@ -348,10 +349,10 @@ class Zend_Soap_Wsdl {
     public function addTypes($types)
     {
         if ($types instanceof DomDocument) {
-            $dom = $this->_wsdl->importNode($types->documentElement);
+            $dom = $this->_dom->importNode($types->documentElement);
             $this->_wsdl->appendChild($types->documentElement);
         } elseif ($types instanceof DomNode || $types instanceof DomElement || $types instanceof DomDocumentFragment ) {
-            $dom = $this->_wsdl->importNode($types);
+            $dom = $this->_dom->importNode($types);
             $this->_wsdl->appendChild($dom);
         }
     }
