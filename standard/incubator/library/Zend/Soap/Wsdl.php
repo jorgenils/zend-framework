@@ -103,7 +103,7 @@ class Zend_Soap_Wsdl {
      *                     The array is constructed like: 'name of part' => 'part xml schema data type'
      * @return object The new message's XML_Tree_Node for use in {@link function addDocumentation}
      */
-    public function &addMessage($name, $parts)
+    public function addMessage($name, $parts)
     {
         $message = $this->_dom->createElement('message');
         
@@ -129,7 +129,7 @@ class Zend_Soap_Wsdl {
      * @param string $name portType element's name
      * @return object The new portType's XML_Tree_Node for use in {@link function addPortOperation} and {@link function addDocumentation}
      */
-    public function &addPortType($name)
+    public function addPortType($name)
     {
         $portType = $this->_dom->createElement('portType');
         $portType->setAttribute('name', $name);
@@ -141,14 +141,14 @@ class Zend_Soap_Wsdl {
     /**
      * Add an {@link http://www.w3.org/TR/wsdl#_request-response operation} element to a portType element
      *
-     * @param object &$portType a portType XML_Tree_Node, from {@link function addPortType}
+     * @param object $portType a portType XML_Tree_Node, from {@link function addPortType}
      * @param string $name Operation name
      * @param string $input Input Message
      * @param string $output Output Message
      * @param string $fault Fault Message
      * @return object The new operation's XML_Tree_Node for use in {@link function addDocumentation}
      */
-    public function &addPortOperation(&$portType, $name, $input = false, $output = false, $fault = false)
+    public function addPortOperation($portType, $name, $input = false, $output = false, $fault = false)
     {
         $operation = $this->_dom->createElement('operation');
         $operation->setAttribute('name', $name);
@@ -181,7 +181,7 @@ class Zend_Soap_Wsdl {
      * @param string $type name of the portType to bind
      * @return object The new binding's XML_Tree_Node for use with {@link function addBindingOperation} and {@link function addDocumentation}
      */
-    public function &addBinding($name, $portType)
+    public function addBinding($name, $portType)
     {
         $binding = $this->_dom->createElement('binding');
         $binding->setAttribute('name', $name);
@@ -195,13 +195,13 @@ class Zend_Soap_Wsdl {
     /**
      * Add an operation to a binding element
      *
-     * @param object &$binding A binding XML_Tree_Node returned by {@link function addBinding}
+     * @param object $binding A binding XML_Tree_Node returned by {@link function addBinding}
      * @param array $input An array of attributes for the input element, allowed keys are: 'use', 'namespace', 'encodingStyle'. {@link http://www.w3.org/TR/wsdl#_soap:body More Information}
      * @param array $output An array of attributes for the output element, allowed keys are: 'use', 'namespace', 'encodingStyle'. {@link http://www.w3.org/TR/wsdl#_soap:body More Information}
      * @param array $fault An array of attributes for the fault element, allowed keys are: 'name', 'use', 'namespace', 'encodingStyle'. {@link http://www.w3.org/TR/wsdl#_soap:body More Information}
      * @return object The new Operation's XML_Tree_Node for use with {@link function addSoapOperation} and {@link function addDocumentation}
      */
-    public function &addBindingOperation(&$binding, $name, $input = false, $output = false, $fault = false)
+    public function addBindingOperation($binding, $name, $input = false, $output = false, $fault = false)
     {
         $operation = $this->_dom->createElement('operation');
         $operation->setAttribute('name', $name);
@@ -247,12 +247,12 @@ class Zend_Soap_Wsdl {
     /**
      * Add a {@link http://www.w3.org/TR/wsdl#_soap:binding SOAP binding} element to a Binding element
      *
-     * @param object &$binding A binding XML_Tree_Node returned by {@link function addBinding}
+     * @param object $binding A binding XML_Tree_Node returned by {@link function addBinding}
      * @param string $style binding style, possible values are "rpc" (the default) and "document"
      * @param string $transport Transport method (defaults to HTTP)
      * @return boolean
      */
-    public function addSoapBinding(&$binding, $style = 'document', $transport = 'http://schemas.xmlsoap.org/soap/http')
+    public function addSoapBinding($binding, $style = 'document', $transport = 'http://schemas.xmlsoap.org/soap/http')
     {
         $soap_binding = $this->_dom->createElement('soap:binding');
         $soap_binding->setAttribute('style', $style);
@@ -266,11 +266,11 @@ class Zend_Soap_Wsdl {
     /**
      * Add a {@link http://www.w3.org/TR/wsdl#_soap:operation SOAP operation} to an operation element
      *
-     * @param object &$operation An operation XML_Tree_Node returned by {@link function addBindingOperation}
+     * @param object $operation An operation XML_Tree_Node returned by {@link function addBindingOperation}
      * @param string $soap_action SOAP Action
      * @return boolean
      */
-    public function addSoapOperation(&$binding, $soap_action)
+    public function addSoapOperation($binding, $soap_action)
     {
         if ($soap_action instanceof Zend_Uri_Http) {
             $soap_action = $soap_action->getUri();
@@ -292,7 +292,7 @@ class Zend_Soap_Wsdl {
      * @param string $location SOAP Address for the service
      * @return object The new service's XML_Tree_Node for use with {@link function addDocumentation}
      */
-    public function &addService($name, $port_name, $binding, $location)
+    public function addService($name, $port_name, $binding, $location)
     {
         if ($location instanceof Zend_Uri_Http) {
             $location = $location->getUri();
