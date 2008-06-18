@@ -92,8 +92,8 @@ class Zend_Soap_Wsdl {
      * Add a {@link http://www.w3.org/TR/wsdl#_messages message} element to the WSDL
      *
      * @param string $name Name for the {@link http://www.w3.org/TR/wsdl#_messages message}
-     * @param array An array of {@link http://www.w3.org/TR/wsdl#_message parts}
-     * The array is constructed like: 'name of part' => 'part xml schema data type'
+     * @param array $parts An array of {@link http://www.w3.org/TR/wsdl#_message parts}
+     *                     The array is constructed like: 'name of part' => 'part xml schema data type'
      * @return object The new message's XML_Tree_Node for use in {@link function addDocumentation}
      */
 
