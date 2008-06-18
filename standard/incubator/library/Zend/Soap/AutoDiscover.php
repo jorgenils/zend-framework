@@ -26,6 +26,12 @@ require_once 'Zend/Server/Exception.php';
 require_once 'Zend/Server/Abstract.php';
 require_once 'Zend/Uri.php';
 
+/**
+ * Zend_Soap_AutoDiscover
+ * 
+ * @category   Zend
+ * @package    Zend_Soap
+ */
 class Zend_Soap_AutoDiscover extends Zend_Server_Abstract implements Zend_Server_Interface {
     /**
      * @var Zend_Soap_Wsdl

@@ -19,6 +19,12 @@
  * @version    $Id$
  */
 
+/**
+ * Zend_Soap_Wsdl_Parser_Result
+ * 
+ * @category   Zend
+ * @package    Zend_Soap
+ */
 class Zend_Soap_Wsdl_Parser_Result {
     
     public $wsdl_file = '';

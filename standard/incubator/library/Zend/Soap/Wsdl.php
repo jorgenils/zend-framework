@@ -22,6 +22,12 @@
 require_once 'Zend/Server/Exception.php';
 
 
+/**
+ * Zend_Soap_Wsdl
+ * 
+ * @category   Zend
+ * @package    Zend_Soap
+ */
 class Zend_Soap_Wsdl {
     /**
      * @var object DomDocument Instance
@@ -97,7 +103,6 @@ class Zend_Soap_Wsdl {
      *                     The array is constructed like: 'name of part' => 'part xml schema data type'
      * @return object The new message's XML_Tree_Node for use in {@link function addDocumentation}
      */
-
     public function &addMessage($name, $parts)
     {
         $message = $this->_dom->createElement('message');
@@ -124,7 +129,6 @@ class Zend_Soap_Wsdl {
      * @param string $name portType element's name
      * @return object The new portType's XML_Tree_Node for use in {@link function addPortOperation} and {@link function addDocumentation}
      */
-
     public function &addPortType($name)
     {
         $portType = $this->_dom->createElement('portType');
@@ -144,7 +148,6 @@ class Zend_Soap_Wsdl {
      * @param string $fault Fault Message
      * @return object The new operation's XML_Tree_Node for use in {@link function addDocumentation}
      */
-
     public function &addPortOperation(&$portType, $name, $input = false, $output = false, $fault = false)
     {
         $operation = $this->_dom->createElement('operation');
@@ -178,7 +181,6 @@ class Zend_Soap_Wsdl {
      * @param string $type name of the portType to bind
      * @return object The new binding's XML_Tree_Node for use with {@link function addBindingOperation} and {@link function addDocumentation}
      */
-
     public function &addBinding($name, $portType)
     {
         $binding = $this->_dom->createElement('binding');
@@ -199,7 +201,6 @@ class Zend_Soap_Wsdl {
      * @param array $fault An array of attributes for the fault element, allowed keys are: 'name', 'use', 'namespace', 'encodingStyle'. {@link http://www.w3.org/TR/wsdl#_soap:body More Information}
      * @return object The new Operation's XML_Tree_Node for use with {@link function addSoapOperation} and {@link function addDocumentation}
      */
-
     public function &addBindingOperation(&$binding, $name, $input = false, $output = false, $fault = false)
     {
         $operation = $this->_dom->createElement('operation');
@@ -251,7 +252,6 @@ class Zend_Soap_Wsdl {
      * @param string $transport Transport method (defaults to HTTP)
      * @return boolean
      */
-
     public function addSoapBinding(&$binding, $style = 'document', $transport = 'http://schemas.xmlsoap.org/soap/http')
     {
         $soap_binding = $this->_dom->createElement('soap:binding');
@@ -270,7 +270,6 @@ class Zend_Soap_Wsdl {
      * @param string $soap_action SOAP Action
      * @return boolean
      */
-
     public function addSoapOperation(&$binding, $soap_action)
     {
         if ($soap_action instanceof Zend_Uri_Http) {
@@ -293,7 +292,6 @@ class Zend_Soap_Wsdl {
      * @param string $location SOAP Address for the service
      * @return object The new service's XML_Tree_Node for use with {@link function addDocumentation}
      */
-
     public function &addService($name, $port_name, $binding, $location)
     {
         if ($location instanceof Zend_Uri_Http) {
@@ -324,7 +322,6 @@ class Zend_Soap_Wsdl {
      * @param string $document Human readable documentation for the node
      * @return boolean
      */
-
     public function addDocumentation($input_node, $documenation)
     {
         if ($input_node === $this) {
@@ -345,7 +342,6 @@ class Zend_Soap_Wsdl {
      *
      * @param object $types A DomDocument|DomNode|DomElement|DomDocumentFragment with all the XML Schema types defined in it
      */
-
     public function addTypes($types)
     {
         if ($types instanceof DomDocument) {
@@ -362,7 +358,6 @@ class Zend_Soap_Wsdl {
      *
      * @return string WSDL as XML
      */
-
     public function toXML()
     {
            return $this->_dom->saveXML();
@@ -373,7 +368,6 @@ class Zend_Soap_Wsdl {
      *
      * @return object DomDocum ent
      */
-     
     public function toDomDocument()
     {
         return $this->_dom;
@@ -384,7 +378,6 @@ class Zend_Soap_Wsdl {
      *
      * @return boolean
      */
-
     public function dump($filename = false)
     {
         if (!$filename) {

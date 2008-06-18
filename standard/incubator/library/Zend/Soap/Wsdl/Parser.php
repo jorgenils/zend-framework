@@ -21,6 +21,12 @@
 
 require_once 'Zend/Soap/Wsdl/Parser/Result.php';
 
+/**
+ * Zend_Soap_Wsdl_Parser
+ * 
+ * @category   Zend
+ * @package    Zend_Soap
+ */
 class Zend_Soap_Wsdl_Parser {
     /**
      * @var SimpleXML object for the WSDL document being parsed

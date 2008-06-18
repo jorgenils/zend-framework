@@ -21,6 +21,12 @@
 
 require_once 'Zend/Soap/Wsdl/Parser.php';
 
+/**
+ * Zend_Soap_Wsdl_CodeGenerator
+ * 
+ * @category   Zend
+ * @package    Zend_Soap
+ */
 class Zend_Soap_Wsdl_CodeGenerator {
    
     /**
