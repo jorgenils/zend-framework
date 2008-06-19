@@ -1,0 +1,155 @@
+<sect1 id="zend.soap.wsdl">
+    <title>WSDL</title>
+    
+    <note>
+        <para>
+            <code>Zend_Soap_Wsdl</code> class is used by Zend_Soap component internally to operate with WSDL
+            documents. Nevertheless, you could also use functionality provided by this class for your own needs. 
+        </para>
+        <para>
+            If you don't plan to do this, you can skip this documentation section.
+        </para>
+    </note>
+    
+    <sect2 id="zend.soap.wsdl.constructor">
+        <title><code>Zend_Soap_Wsdl</code> constructor.</title>
+	    <para>
+	        <code>Zend_Soap_Wsdl</code> constructor takes three parameters:
+	        <orderedlist>
+	            <listitem>
+	                <simpara><code>$name</code> - name of the Web Service being described.</simpara>
+	            </listitem>
+	            <listitem>
+	                <simpara>
+	                    <code>$uri</code> - URI where the WSDL will be available 
+	                    (could also be a reference to the file in the filesystem.)
+	                </simpara>
+	            </listitem>
+	            <listitem>
+	                <simpara>
+	                    <code>$extractComplexTypes</code> - optional flag used to identify that complex types (objects)
+	                    should be extracted.
+	                </simpara>
+	            </listitem>
+	        </orderedlist>
+	    </para>
+    </sect2>
+    
+    
+    <sect2 id="zend.soap.wsdl.addmessage">
+        <title><code>addMessage()</code> method.</title>
+	    <para>
+	        <code>addMessage($name, $parts)</code> method adds new message description to the WSDL document 
+	        (/definitions/message element).
+	    </para>
+        <para>
+            Each message correspond to methods in terms of <code>Zend_Soap_Server</code> and 
+            <code>Zend_Soap_Client</code> functionality.
+        </para>
+	    <para>
+	       <code>$name</code> parameter represents message name.
+	    </para>
+        <para>
+           <code>$parts</code> parameter is an array of message parts which describe SOAP call parameters.
+           It's an associative array: 'part name' (SOAP call parameter name) =&gt; 'part type'.
+        </para>
+        <para>
+            Type mapping management is performrd using <code>addTypes()</code>, <code>addTypes()</code> and
+            <code>addComplexType()</code> methods (see below). 
+        </para>
+        <note>
+            <para>
+                Messages parts can use either 'element' or 'type' attribute for typing 
+                (see <ulink url="http://www.w3.org/TR/wsdl#_messages"/>).
+            </para>
+            <para>
+                'element' attribute must refer to a corresponding element of data type definition. 'type' attribute refers 
+                to a corresponding complexType entry.
+            </para>
+            <para>
+                All standard XSD types have both 'element' and 'complexType' definitions 
+                (see <ulink url="http://schemas.xmlsoap.org/soap/encoding/"/>).
+            </para>
+            <para>
+                All non-standard types, which may be added using <code>Zend_Soap_Wsdl::addComplexType()</code> method, are
+                described using 'complexType' node of '/definitions/types/schema/' section of WSDL document.
+            </para>
+            <para>
+                So <code>addMessage()</code> method always uses 'type' attribute to describe types.
+            </para>
+        </note>
+    </sect2>
+    
+    <sect2>
+        <title><code>addPortType()</code> method.</title>
+        <para>
+            <code>addPortType($name)</code> method adds new port type to the WSDL document 
+            (/definitions/portType) with the specified port type name.
+        </para>
+        <para>
+            It joins a set of Web Service methods defined in terms of Zend_Soap implementation.
+        </para>
+        <para>
+            See <ulink url="http://www.w3.org/TR/wsdl#_porttypes"/> for the details.
+        </para>
+    </sect2>
+    
+    <sect2>
+        <title><code>addPortOperation()</code> method.</title>
+        <para>
+            <code>addPortOperation($portType, $name, $input = false, $output = false, $fault = false)</code> method 
+            adds new port operation to the specified port type of the WSDL document 
+            (/definitions/portType/operation).
+        </para>
+        <para>
+            Each port operation corresponds to a class method (if Web Service is based on a class) or function
+            (if Web Service is based on a set of methods) in terms of Zend_Soap implementation.
+        </para>
+        <para>
+            It also adds corresponding port operation messages depending on specified 
+            <code>$input</code>, <code>$output</code> and <code>$fault</code> parameters.
+            
+            <note>
+                <para>
+                    Zend_Soap component generates two messages for each port operation while describing service based on
+                    <code>Zend_Soap_Server</code> class:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                input message with name <code>$methodName . 'Request'</code>.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                output message with name <code>$methodName . 'Response'</code>.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+            </note>
+        </para>
+        <para>
+            See <ulink url="http://www.w3.org/TR/wsdl#_request-response"/> for the details.
+        </para>
+    </sect2>
+
+    <sect2>
+        <title><code>addBinding()</code> method.</title>
+        <para>
+            <code>addBinding($name, $portType)</code> method adds new binding to the WSDL document (/definitions/binding). 
+        </para>
+        <para>
+            'binding' WSDL document node defines message format and protocol details for operations and messages 
+            defined by a particular portType (see <ulink url="http://www.w3.org/TR/wsdl#_bindings"/>).
+        </para>
+        <para>
+            The method creates binding node and returns it. Then it may be used to fill with actual data.
+        </para>
+        
+        <para>
+            Zend_Soap implementation uses <code>$serviceName . 'Binding'</code> name for 'binding' element of WSDL document.
+        </para>
+    </sect2>
+    
+    
+</sect1>
