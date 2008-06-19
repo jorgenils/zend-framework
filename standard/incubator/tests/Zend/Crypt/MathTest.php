@@ -6,9 +6,6 @@ require_once 'PHPUnit/Framework/TestCase.php';
 class Zend_Crypt_MathTest extends PHPUnit_Framework_TestCase 
 {
 
-    /**
-     * @todo set a urandom test and skip only if unsupported by platform
-     */
     public function testRand()
     {
         $math = new Zend_Crypt_Math;

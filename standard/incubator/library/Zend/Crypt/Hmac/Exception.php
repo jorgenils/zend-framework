@@ -14,14 +14,16 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Crypt
- * @subpackage Hmac
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: Exception.php 102 2007-07-13 15:16:01Z padraic $
+ * @package    Zend_Auth
+ * @copyright  Copyright (c) 2007 Pádraic Brady
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: Exception.php 102 2007-07-13 15:16:01Z padraic $
  */
 
-/** Zend_Crypt_Exception */
+
+/**
+ * Zend_Crypt_Exception
+ */
 require_once 'Zend/Crypt/Exception.php';
 
 

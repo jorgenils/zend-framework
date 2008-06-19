@@ -12,13 +12,18 @@
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
  *
+ * This class forms part of a proposal for the Zend Framework. The attached
+ * copyright will be transferred to Zend Technologies USA Inc. upon future
+ * acceptance of that proposal:
+ *      http://framework.zend.com/wiki/pages/viewpage.action?pageId=20369
+ *
  * @category   Zend
  * @package    Zend_Crypt
  * @subpackage Math
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: $
  */
+
 
 /** Zend_Crypt_Math_BigInteger_Interface */
 require_once 'Zend/Crypt/Math/BigInteger/Interface.php';
@@ -36,13 +41,13 @@ require_once 'Zend/Crypt/Math/BigInteger/Interface.php';
  * while the slowest, is available by default under Windows, and under Unix
  * if PHP is compiled with the flag "--enable-bcmath". GMP requires the gmp
  * library from http://www.swox.com/gmp/ and PHP compiled with the "--with-gmp"
- * flag. BIG_INT support is available from a big_int PHP library available from 
+ * flag. BIG_INT support is available from a big_int PHP library available from
  * only from PECL (a Windows port is not available).
  *
  * @category   Zend
  * @package    Zend_Crypt
  * @subpackage Math
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @author     Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Crypt_Math_BigInteger
@@ -68,20 +73,7 @@ class Zend_Crypt_Math_BigInteger
             require_once('Zend/Crypt/Math/BigInteger/Exception.php');
             throw new Zend_Crypt_Math_BigInteger_Exception('Invalid extension type; please use one of bcmath, gmp or bigint');
         }
-        if($extension == 'gmp' || extension_loaded('gmp') || @dl('gmp.' . PHP_SHLIB_SUFFIX) || @dl('php_gmp.' . PHP_SHLIB_SUFFIX)) {
-            require_once 'Zend/Crypt/Math/BigInteger/Gmp.php';
-            $this->_math = new Zend_Crypt_Math_BigInteger_Gmp();
-        }
-        elseif($extension == 'bigint' || extension_loaded('big_int') || @dl('big_int.' . PHP_SHLIB_SUFFIX) || @dl('php_big_int.' . PHP_SHLIB_SUFFIX)) {
-            require_once 'Zend/Crypt_Math/BigInteger/Bigint.php';
-            $this->_math = new Zend_Crypt_Math_BigInteger_Bigint();
-        } elseif($extension == 'bcmath' || extension_loaded('bcmath') || @dl('bcmath.' . PHP_SHLIB_SUFFIX) || @dl('php_bcmath.' . PHP_SHLIB_SUFFIX)) {
-            require_once 'Zend/Crypt/Math/BigInteger/Bcmath.php';
-            $this->_math = new Zend_Crypt_Math_BigInteger_Bcmath();
-        } else {
-            require_once 'Zend/Crypt/Math/BigInteger/Exception.php';
-            throw new Zend_Crypt_Math_BigInteger_Exception('no big integer precision math support detected');
-        }
+        $this->_loadAdapter($extension);
     }
 
     /**
@@ -98,6 +90,32 @@ class Zend_Crypt_Math_BigInteger
             throw new Zend_Crypt_Math_BigInteger_Exception('invalid method call: ' . get_class($this->_math) . '::' . $methodName . '() does not exist');
         }
         return call_user_func_array(array($this->_math, $methodName), $args);
+    }
+
+    protected function _loadAdapter($extension = null)
+    {
+        if (is_null($extension)) {
+            if (extension_loaded('gmp')) {
+                $extension = 'gmp';
+            //} elseif (extension_loaded('big_int')) {
+            //    $extension = 'big_int';
+            } else {
+                $extension = 'bcmath';
+            }
+        }
+        if($extension == 'gmp' && extension_loaded('gmp')) {
+            require_once 'Zend/Crypt/Math/BigInteger/Gmp.php';
+            $this->_math = new Zend_Crypt_Math_BigInteger_Gmp();
+        //} elseif($extension == 'bigint' && extension_loaded('big_int')) {
+        //    require_once 'Zend/Crypt_Math/BigInteger/Bigint.php';
+        //    $this->_math = new Zend_Crypt_Math_BigInteger_Bigint();
+        } elseif ($extension == 'bcmath') {
+            require_once 'Zend/Crypt/Math/BigInteger/Bcmath.php';
+            $this->_math = new Zend_Crypt_Math_BigInteger_Bcmath();
+        } else {
+            require_once 'Zend/Crypt/Math/BigInteger/Exception.php';
+            throw new Zend_Crypt_Math_BigInteger_Exception($extension . ' big integer precision math support not detected');
+        }
     }
 
 }

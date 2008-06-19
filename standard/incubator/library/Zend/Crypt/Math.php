@@ -15,37 +15,26 @@
  *
  * @category   Zend
  * @package    Zend_Crypt
- * @subpackage Math
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: Math.php 127 2007-09-17 13:48:20Z padraic $
+ * @copyright  Copyright (c) 2007 Pádraic Brady (http://blog.astrumfutura.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: Math.php 151 2008-06-16 16:50:42Z padraic $
  */
 
 /** Zend_Crypt_Math_BigInteger */
 require_once 'Zend/Crypt/Math/BigInteger.php';
 
-/**
- * Zend_Crypt helper class for negotiating Arbitrary Precision Big Integer
- * math extensions available for PHP and offering math functions required
- * by cryptographic algorithms.
- *
- * @package    Zend_Crypt
- * @subpackage Hmac
- * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
- */
 class Zend_Crypt_Math extends Zend_Crypt_Math_BigInteger
 {
 
     /**
      * Generate a pseudorandom number within the given range.
-     * Will attempt to read from a *nix kernal's random number
-     * generator if it exists.
+     * Will attempt to read from a systems RNG if it exists or else utilises
+     * a simple random character to maximum length process. Simplicity
+     * is a factor better left for development...
      *
-     * @param string|int $min
-     * @param string|int $max
+     * @param string|int $minimum
+     * @param string|int $maximum
      * @return string
-     * @todo Even more pseudorandomness would be nice...
      */
     public function rand($minimum, $maximum)
     {
@@ -69,7 +58,7 @@ class Zend_Crypt_Math extends Zend_Crypt_Math_BigInteger
 
     /**
      * Get the big endian two's complement of a given big integer in
-     * binary notation.
+     * binary notation
      *
      * @param string $long
      * @return string
@@ -88,38 +77,18 @@ class Zend_Crypt_Math extends Zend_Crypt_Math_BigInteger
      * @return string
      */
     public function fromBinary($binary) {
-        if (!$this instanceof Zend_Math_BigInteger_Gmp) {
-            $big = 0;
-            $length = strlen($binary);
-            for ($i = 0; $i < $length; $i++) {
-                $big = $this->_math->multiply($big, 256);
-                $big = $this->_math->add($big, ord($binary[$i]));
-            }
-            return $big;
-        } else {
-            return $this->_math->init(bin2hex($binary), 16); // gmp shortcut
-        }
+        return $this->_math->binaryToInteger($binary);
     }
 
     /**
-     * Translate a big integer string into a binary form.
+     * Translate a big integer string into a binary form
      *
-     * @param string $big
+     * @param string $integer
      * @return string
      */
-    public function toBinary($big)
+    public function toBinary($integer)
     {
-        $compare = $this->_math->compare($big, 0);
-        if ($compare == 0) {
-            return (chr(0));
-        } else if ($compare < 0) {
-            return false;
-        }
-        $binary = '';
-        while ($this->_math->compare($big, 0) > 0) {
-            $binary = chr($this->_math->modulus($big, 256)) . $binary;
-            $big = $this->_math->divide($big, 256);
-        }
-        return $binary;
+        return $this->_math->integerToBinary($integer);
     }
+
 }

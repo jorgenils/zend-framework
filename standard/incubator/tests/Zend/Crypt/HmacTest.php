@@ -231,8 +231,6 @@ class Zend_Crypt_HmacTest extends PHPUnit_Framework_TestCase
 
     public function testHmac_InternalMD5_6()
     {
-        $this->markTestIncomplete('Native md5/sha1 functions to be supported as last resort');
-
         $data = 'Test Using Larger Than Block-Size Key - Hash Key First';
         $key = str_repeat("\xaa",80);
         $hmac = Zend_Crypt_Hmac::compute($key, 'MD5', $data, Zend_Crypt_Hmac::STRING, true);
@@ -241,8 +239,6 @@ class Zend_Crypt_HmacTest extends PHPUnit_Framework_TestCase
 
     public function testHmac_InternalMD5_7()
     {
-        $this->markTestIncomplete('Native md5/sha1 functions to be supported as last resort');
-
         $data = 'Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data';
         $key = str_repeat("\xaa",80);
         $hmac = Zend_Crypt_Hmac::compute($key, 'MD5', $data, Zend_Crypt_Hmac::STRING, true);
@@ -293,8 +289,6 @@ class Zend_Crypt_HmacTest extends PHPUnit_Framework_TestCase
 
     public function testHmac_InternalSHA1_6()
     {
-        $this->markTestIncomplete('Native md5/sha1 functions to be supported as last resort');
-
         $data = 'Test Using Larger Than Block-Size Key - Hash Key First';
         $key = str_repeat("\xaa",80);
         $hmac = Zend_Crypt_Hmac::compute($key, 'SHA1', $data, Zend_Crypt_Hmac::STRING, true);
@@ -303,8 +297,6 @@ class Zend_Crypt_HmacTest extends PHPUnit_Framework_TestCase
 
     public function testHmac_InternalSHA1_7()
     {
-        $this->markTestIncomplete('Native md5/sha1 functions to be supported as last resort');
-
         $data = 'Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data';
         $key = str_repeat("\xaa",80);
         $hmac = Zend_Crypt_Hmac::compute($key, 'SHA1', $data, Zend_Crypt_Hmac::STRING, true);

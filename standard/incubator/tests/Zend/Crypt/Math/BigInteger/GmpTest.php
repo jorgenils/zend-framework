@@ -1,16 +1,22 @@
 <?php
 
-require_once 'Zend/Crypt/Math/BigInteger/Bcmath.php';
+require_once 'Zend/Crypt/Math/BigInteger/Gmp.php';
 require_once 'PHPUnit/Framework/TestCase.php';
 
-class Zend_Crypt_Math_BigInteger_BcmathTest extends PHPUnit_Framework_TestCase
+require_once 'Zend/Crypt/Math/BigInteger/Bcmath.php';
+
+class Zend_Crypt_Math_BigInteger_GmpTest extends PHPUnit_Framework_TestCase
 {
 
     private $_math = null;
 
     public function setUp()
     {
-        $this->_math = new Zend_Crypt_Math_BigInteger_Bcmath;
+        if (!extension_loaded('gmp')) {
+            $this->markTestSkipped('Skipped: Zend_Crypt_Math_BigInteger_GmpTest due to ext/gmp being unavailable');
+            return;
+        }
+        $this->_math = new Zend_Crypt_Math_BigInteger_Gmp;
     }
 
     public function testAdd()
