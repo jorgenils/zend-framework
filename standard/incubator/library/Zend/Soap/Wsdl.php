@@ -322,15 +322,17 @@ class Zend_Soap_Wsdl {
      * @param string $document Human readable documentation for the node
      * @return boolean
      */
-    public function addDocumentation($input_node, $documenation)
+    public function addDocumentation($input_node, $documentation)
     {
         if ($input_node === $this) {
             $node = $this->_dom->documentElement;
         } else {
             $node = $input_node;
         }
+        
+        /** @todo Check if 'documentation' is a correct name for the element (WSDL spec uses 'document') */
         $doc = $this->_dom->createElement('documentation');
-        $doc_cdata = $this->_dom->createTextNode($documenation);
+        $doc_cdata = $this->_dom->createTextNode($documentation);
         $doc->appendChild($doc_cdata);
         $node->appendChild($doc);
 
