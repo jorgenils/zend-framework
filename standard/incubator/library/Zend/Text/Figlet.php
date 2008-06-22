@@ -404,7 +404,7 @@ class Zend_Text_Figlet
     }
 
     /**
-     * Generate a FIGlet text
+     * Render a FIGlet text
      *
      * @param  string $text     Text to convert to a figlet text
      * @param  string $encoding Encoding of the input string
@@ -412,7 +412,7 @@ class Zend_Text_Figlet
      * @throws Zend_Text_Figlet_Exception    When $text it not properly encoded
      * @return string
      */
-    public function generate($text, $encoding = 'UTF-8')
+    public function render($text, $encoding = 'UTF-8')
     {
         if (is_string($text) === false) {
             throw new InvalidArgumentException('$text must be a string');
