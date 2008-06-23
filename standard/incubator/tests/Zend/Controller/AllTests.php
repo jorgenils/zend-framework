@@ -49,6 +49,7 @@ class Zend_Controller_AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Controller');
 
+        $suite->addTestSuite('Zend_Controller_Action_Helper_MultiPageFormTest');
         $suite->addTestSuite('Zend_Controller_Dispatcher_StandardTest');
         $suite->addTestSuite('Zend_Controller_FrontTest');
         
