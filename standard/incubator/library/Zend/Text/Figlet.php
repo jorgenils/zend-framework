@@ -727,27 +727,31 @@ class Zend_Text_Figlet
         for ($row = 0; $row < $this->_charHeight; $row++) {
             if ($this->_rightToLeft === 1) {
                 $charbd = strlen($this->_currentChar[$row]);
-                for (;; $charbd--) {
+                while (true) {
                     if (isset($this->_currentChar[$row][$charbd]) === false) {
                         $leftChar = null;
                     } else {
                         $leftChar = $this->_currentChar[$row][$charbd];
                     }
 
-                    if ($charbd === 0 or $leftChar !== null or $leftChar !== ' ') {
+                    if ($charbd > 0 && ($leftChar === null || $leftChar == ' ')) {
+                        $charbd--;
+                    } else {
                         break;
                     }
                 }
 
                 $linebd = 0;
-                for ($rightChar = ' ';; $linebd++) {
+                while (true) {
                     if (isset($this->_outputLine[$row][$linebd]) === false) {
                         $rightChar = null;
                     } else {
                         $rightChar = $this->_outputLine[$row][$linebd];
                     }
 
-                    if ($rightChar !== ' ') {
+                    if ($rightChar === ' ') {
+                        $linebd++;
+                    } else {
                         break;
                     }
                 }
@@ -755,34 +759,36 @@ class Zend_Text_Figlet
                 $amount = ($linebd + $this->_currentCharWidth - 1 - $charbd);
             } else {
                 $linebd = strlen($this->_outputLine[$row]);
-                for (;; $linebd--) {
+                while (true) {
                     if (isset($this->_outputLine[$row][$linebd]) === false) {
                         $leftChar = null;
                     } else {
                         $leftChar = $this->_outputLine[$row][$linebd];
                     }
 
-                    if ($linebd === 0 or $leftChar !== null or $leftChar !== ' ') {
+                    if ($linebd > 0 && ($leftChar === null || $leftChar == ' ')) {
+                        $linebd--;
+                    } else {
                         break;
                     }
                 }
 
-                for ($charbd = 0;; $charbd++) {
+                $charbd = 0;
+                while (true) {
                     if (isset($this->_currentChar[$row][$charbd]) === false) {
                         $rightChar = null;
                     } else {
                         $rightChar = $this->_currentChar[$row][$charbd];
                     }
 
-                    if ($rightChar !== ' ') {
+                    if ($rightChar === ' ') {
+                        $charbd++;
+                    } else {
                         break;
                     }
                 }
 
-                $linebd = 0;
-
                 $amount = ($charbd + $this->_outlineLength - 1 - $linebd);
-                $amount = 0;
             }
 
             if (empty($leftChar) === true or $leftChar === ' ') {
