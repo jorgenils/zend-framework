@@ -33,6 +33,7 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 require_once 'Zend/Controller/AllTests.php';
 // require_once 'Zend/Crypt/AllTests.php';
 require_once 'Zend/Db/AllTests.php';
+require_once 'Zend/Dojo/AllTests.php';
 require_once 'Zend/Json/AllTests.php';
 require_once 'Zend/Service/AllTests.php';
 require_once 'Zend/Text/AllTests.php';
@@ -72,6 +73,11 @@ class Zend_AllTests
          * Perform the tests for Zend_Db component now.
          */
         $suite->addTest(Zend_Db_AllTests::suite());
+
+        /*
+         * Perform the tests for Zend_Dojo component now.
+         */
+        $suite->addTest(Zend_Dojo_AllTests::suite());
 
         /*
          * Perform the tests for Zend_Json component now.
