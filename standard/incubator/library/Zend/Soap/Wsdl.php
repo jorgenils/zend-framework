@@ -463,6 +463,11 @@ class Zend_Soap_Wsdl {
 
         foreach ($class->getProperties() as $property) {
             if (preg_match_all('/@var\s+([^\s]+)/m', $property->getDocComment(), $matches)) {
+            	
+            	/**
+            	 * @todo check if 'xsd:element' must be used here (it may not be compatible with using 'complexType'
+            	 * node for describing other classes used as attribute types for current class
+            	 */
                 $element = $this->_dom->createElement('xsd:element');
                 $element->setAttribute('name', $property->getName());
                 $element->setAttribute('type', $this->getType(trim($matches[1][0])));

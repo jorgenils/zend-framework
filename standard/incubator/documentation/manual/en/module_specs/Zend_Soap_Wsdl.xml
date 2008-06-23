@@ -1,5 +1,5 @@
 <sect1 id="zend.soap.wsdl">
-    <title>WSDL</title>
+    <title>WSDL Accessor</title>
     
     <note>
         <para>
@@ -13,42 +13,42 @@
     
     <sect2 id="zend.soap.wsdl.constructor">
         <title><code>Zend_Soap_Wsdl</code> constructor.</title>
-	    <para>
-	        <code>Zend_Soap_Wsdl</code> constructor takes three parameters:
-	        <orderedlist>
-	            <listitem>
-	                <simpara><code>$name</code> - name of the Web Service being described.</simpara>
-	            </listitem>
-	            <listitem>
-	                <simpara>
-	                    <code>$uri</code> - URI where the WSDL will be available 
-	                    (could also be a reference to the file in the filesystem.)
-	                </simpara>
-	            </listitem>
-	            <listitem>
-	                <simpara>
-	                    <code>$extractComplexTypes</code> - optional flag used to identify that complex types (objects)
-	                    should be extracted.
-	                </simpara>
-	            </listitem>
-	        </orderedlist>
-	    </para>
+        <para>
+            <code>Zend_Soap_Wsdl</code> constructor takes three parameters:
+            <orderedlist>
+                <listitem>
+                    <simpara><code>$name</code> - name of the Web Service being described.</simpara>
+                </listitem>
+                <listitem>
+                    <simpara>
+                        <code>$uri</code> - URI where the WSDL will be available 
+                        (could also be a reference to the file in the filesystem.)
+                    </simpara>
+                </listitem>
+                <listitem>
+                    <simpara>
+                        <code>$extractComplexTypes</code> - optional flag used to identify that complex types (objects)
+                        should be extracted.
+                    </simpara>
+                </listitem>
+            </orderedlist>
+        </para>
     </sect2>
     
     
     <sect2 id="zend.soap.wsdl.addmessage">
         <title><code>addMessage()</code> method.</title>
-	    <para>
-	        <code>addMessage($name, $parts)</code> method adds new message description to the WSDL document 
-	        (/definitions/message element).
-	    </para>
+        <para>
+            <code>addMessage($name, $parts)</code> method adds new message description to the WSDL document 
+            (/definitions/message element).
+        </para>
         <para>
             Each message correspond to methods in terms of <code>Zend_Soap_Server</code> and 
             <code>Zend_Soap_Client</code> functionality.
         </para>
-	    <para>
-	       <code>$name</code> parameter represents message name.
-	    </para>
+        <para>
+           <code>$name</code> parameter represents message name.
+        </para>
         <para>
            <code>$parts</code> parameter is an array of message parts which describe SOAP call parameters.
            It's an associative array: 'part name' (SOAP call parameter name) =&gt; 'part type'.
@@ -259,6 +259,120 @@
         </para>
     </sect2>
 
+    <sect2 id="zend.soap.wsdl.types">
+        <title>Type mapping.</title>
+        <para>
+            Zend_Soap WSDL accessor implementation uses the following type mapping between PHP and SOAP types:
+
+            <itemizedlist>
+                <listitem>
+                    <para>PHP strings &lt;-&gt; <code>xsd:string</code>.</para>
+                </listitem>
+                <listitem>
+                    <para>PHP integers &lt;-&gt; <code>xsd:int</code>.</para>
+                </listitem>
+                <listitem>
+                    <para>PHP floats and doubles &lt;-&gt; <code>xsd:float</code>.</para>
+                </listitem>
+                <listitem>
+                    <para>PHP booleans &lt;-&gt; <code>xsd:boolean</code>.</para>
+                </listitem>
+                <listitem>
+                    <para>PHP arrays &lt;-&gt; <code>soap-enc:Array</code>.</para>
+                </listitem>
+                <listitem>
+                    <para>PHP object &lt;-&gt; <code>xsd:struct</code>.</para>
+                </listitem>
+                <listitem>
+                    <para>
+                        PHP class &lt;-&gt; <code>tns:$className</code>
+                        <footnote>
+                            <para>
+                                If <code>Zend_Soap_Wsdl</code> object is created with <code>$extractComplexTypes</code>
+                                parameter turned off, then classes are translated to <code>xsd:anyType</code>.
+                            </para>
+                            <para>
+                                Otherwise, <code>tns:$className</code> is used and type is described in details in &lt;types&gt;
+                                WSDL section.
+                            </para>
+                        </footnote>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>PHP void &lt;-&gt; empty type.</para>
+                </listitem>
+                <listitem>
+                    <para>If type is not matched to any of these types by some reason, then <code>xsd:anyType</code> is used.</para>
+                </listitem>
+            </itemizedlist>
+            
+            Where <code>xsd:</code> is "http://www.w3.org/2001/XMLSchema" namespace, 
+            <code>soap-enc:</code> is a "http://schemas.xmlsoap.org/soap/encoding/" namespace,
+            <code>tns:</code> is a "target namespace" for a service.
+        </para>
+        
+        <sect3 id="zend.soap.wsdl.types.retrieve">
+            <title>Retrieving type information.</title>
+            <para>
+                <code>getType($type)</code> method may be used to get mapping for a specified PHP type: 
+
+            <programlisting role="php"><![CDATA[<?php
+...
+$wsdl = new Zend_Soap_Wsdl('My_Web_Service', $myWebServiceUri);
+
+...
+$soapIntType = $wsdl->getType('int');
+
+...
+class MyClass {
+    ...
+}
+...
+$soapMyClassType = $wsdl->getType('MyClass');]]></programlisting>
+            </para>
+        </sect3>
+
+        <sect3 id="zend.soap.wsdl.types.add_complex">
+            <title>Retrieving type information.</title>
+            <para>
+                <code>addComplexType($type)</code> method is used to add complex types (PHP classes) to a WSDL document.
+            </para>
+            
+            <para>
+                It's automatically used by <code>getType()</code> method to add corresponding complex type 
+                if <code>$extractComplexTypes</code> parameter of the constructor is set tu <code>true</code>
+                (otherwise classes are mapped to 'xsd:anyType' SOAP type). 
+            </para>
+
+            <para>
+                <code>addComplexType()</code> method creates '/definitions/types/xsd:schema/xsd:complexType' element for 
+                each described complex type with name of the specified PHP class.  
+            </para>
+
+            <para>
+                All class public properties are described as corresponding elements of 'xsd:all' node attached to 'xsd:complexType'.  
+            </para>
+            
+            <para>
+                Class property <emphasis>MUST</emphasis> have docblock section with the described PHP type to have property
+                included into WSDL description.
+            </para>
+            
+            <para>
+                <code>addComplexType()</code> checks if type is already described within types section of the WSDL document.  
+            </para>
+            
+            <para>
+                It prevent duplications if this method is called two or more times and recursion in the types defenition
+                section.
+            </para>
+        </sect3>
+        
+        <para>
+            See <ulink url="http://www.w3.org/TR/wsdl#_types"/> for the details.
+        </para>
+    </sect2>
+
     <sect2 id="zend.soap.wsdl.add_documentation">
         <title><code>addDocumentation()</code> method.</title>
         <para>
@@ -277,7 +391,7 @@
         <title>Get finilised WSDL document.</title>
         <para>
             <code>toXML()</code>, <code>toDomDocument()</code> and <code>dump($filename = false)</code> methods may be used to get
-            WSDL document as an XML, DOM structure or a file (). 
+            WSDL document as an XML, DOM structure or a file. 
         </para>
     </sect2>
 
