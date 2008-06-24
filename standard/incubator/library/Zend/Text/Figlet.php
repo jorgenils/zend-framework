@@ -138,11 +138,11 @@ class Zend_Text_Figlet
     protected $_userSmush = 0;
 
     /**
-     * Wether to use paragraphs or not
+     * Wether to handle paragraphs or not
      *
      * @var boolean
      */
-    protected $_paragraph = false;
+    protected $_handleParagraphs = false;
 
     /**
      * Justification for the text, according to $_outputWidth
@@ -283,6 +283,10 @@ class Zend_Text_Figlet
      */
     public function setOptions(array $options)
     {
+        if (isset($options['handleParagraphs']) === true) {
+            $this->setHandleParagraphs($options['handleParagraphs']);
+        }
+
         if (isset($options['justification']) === true) {
             $this->setJustification($options['justification']);
         }
@@ -299,10 +303,6 @@ class Zend_Text_Figlet
             $this->setSmushMode($options['smushMode']);
         }
 
-        if (isset($options['smushOverride']) === true) {
-            $this->setSmushOverride($options['smushOverride']);
-        }
-
         return $this;
     }
 
@@ -315,6 +315,18 @@ class Zend_Text_Figlet
     public function setConfig(Zend_Config $config)
     {
         return $this->setOptions($config->toArray());
+    }
+
+    /**
+     * Set handling of paragraphs
+     *
+     * @param  boolean $handleParagraphs Wether to handle paragraphs or not
+     * @return Zend_Text_Figlet
+     */
+    public function setHandleParagraphs($handleParagraphs)
+    {
+        $this->_handleParagraphs = (bool) $handleParagraphs;
+        return $this;
     }
 
     /**
@@ -367,38 +379,23 @@ class Zend_Text_Figlet
      */
     public function setSmushMode($smushMode)
     {
-        $this->_userSmush = max(0, (int) $smushMode);
+        $smushMode = (int) $smushMode;
 
-        if ($this->_smushOverride === self::SMO_NO) {
-            $this->_smushMode = $this->_fontSmush;
-        } else if ($this->_smushOverride === self::SMO_YES) {
-            $this->_smushMode = $this->_userSmush;
-        } else if ($this->_smushOverride === self::SMO_FORCE) {
-            $this->_smushMode = ($this->_fontSmush | $this->_userSmush);
+        if ($smushMode < -1) {
+            $this->_smushOverride = self::SMO_NO;
+        } else {
+            if ($smushMode === 0) {
+                $this->_userSmush = self::SM_KERN;
+            } else if ($smushMode === -1) {
+                $this->_userSmush = 0;
+            } else {
+                $this->_userSmush = (($smushMode & 63) | self::SM_SMUSH);
+            }
+
+            $this->_smushOverride = self::SMO_YES;
         }
 
-        return $this;
-    }
-
-    /**
-     * How to override font smush mode.
-     *
-     * Use one of the constants of Zend_Text_Figlet::SMO_*
-     *
-     * @param  integer $smushOverride How to override the smush mode
-     * @return Zend_Text_Figlet
-     */
-    public function setSmushOverride($smushOverride)
-    {
-        $this->_smushOverride = min(2, max(0, (int) $smushOverride));
-
-        if ($this->_smushOverride === self::SMO_NO) {
-            $this->_smushMode = $this->_fontSmush;
-        } else if ($this->_smushOverride === self::SMO_YES) {
-            $this->_smushMode = $this->_userSmush;
-        } else if ($this->_smushOverride === self::SMO_FORCE) {
-            $this->_smushMode = ($this->_fontSmush | $this->_userSmush);
-        }
+        $this->_setUsedSmush();
 
         return $this;
     }
@@ -435,6 +432,7 @@ class Zend_Text_Figlet
         $textLength     = @iconv_strlen($text, 'UTF-8');
 
         if ($textLength === false) {
+            require_once 'Zend/Text/Figlet/Exception.php';
             throw new Zend_Text_Figlet_Exception('$text is not encoded with ' . $encoding);
         }
 
@@ -442,7 +440,7 @@ class Zend_Text_Figlet
             // Handle paragraphs
             $char = iconv_substr($text, $charNum, 1, 'UTF-8');
 
-            if ($char === "\n" and $this->_paragraph === true and $lastLineWasEolFlag === true) {
+            if ($char === "\n" and $this->_handleParagraphs === true and $lastCharWasEol === false) {
                 $nextChar = iconv_substr($text, ($charNum + 1), 1, 'UTF-8');
                 if ($nextChar === false) {
                     $nextChar = null;
@@ -464,6 +462,8 @@ class Zend_Text_Figlet
             }
 
             // Build the character
+            // Note: The following code is complex and thoroughly tested.
+            // Be careful when modifying!
             do {
                 $charNotAdded = false;
 
@@ -953,19 +953,19 @@ class Zend_Text_Figlet
     {
         // Check if the font file exists
         if (file_exists($fontFile) === false) {
-            require_once 'Zend/Figlet/Exception';
+            require_once 'Zend/Text/Figlet/Exception.php';
             throw new Zend_Text_Figlet_Exception($fontFile . ': Font file not found');
         }
 
         // Check if gzip support is required
         if (substr($fontFile, -3) === '.gz') {
             if (function_exists('gzcompress') === false) {
-                require_once 'Zend/Figlet/Exception';
+                require_once 'Zend/Text/Figlet/Exception.php';
                 throw new Zend_Text_Figlet_Exception('GZIP library is required for '
-                                                . 'gzip compressed font files');
+                                                     . 'gzip compressed font files');
             }
 
-            $fontFile   = 'gzcompress.zlib://' . $fontFile;
+            $fontFile   = 'compress.zlib://' . $fontFile;
             $compressed = true;
         } else {
             $compressed = false;
@@ -974,7 +974,7 @@ class Zend_Text_Figlet
         // Try to open the file
         $fp = fopen($fontFile, 'rb');
         if ($fp === false) {
-            require_once 'Zend/Figlet/Exception';
+            require_once 'Zend/Text/Figlet/Exception.php';
             throw new Zend_Text_Figlet_Exception($fontFile . ': Could not open file');
         }
 
@@ -998,7 +998,8 @@ class Zend_Text_Figlet
                            $this->_fontSmush);
 
         if ($magic !== self::FONTFILE_MAGIC_NUMBER or $numsRead < 5) {
-            throw new Exception($fontFile . ': Not a FIGlet 2 font file');
+            require_once 'Zend/Text/Figlet/Exception.php';
+            throw new Zend_Text_Figlet_Exception($fontFile . ': Not a FIGlet 2 font file');
         }
 
         // Set default right to left
@@ -1025,11 +1026,7 @@ class Zend_Text_Figlet
         $this->_maxLength += 100;
 
         // See if we have to override smush settings
-        if ($this->_smushOverride === self::SMO_NO) {
-            $this->_smushMode = $this->_fontSmush;
-        } else if ($this->_smushOverride === self::SMO_FORCE) {
-            $this->_smushMode |= $this->_fontSmush;
-        }
+        $this->_setUsedSmush();
 
         // Get left to right value
         if ($this->_rightToLeft === null) {
@@ -1097,6 +1094,23 @@ class Zend_Text_Figlet
         }
 
         fclose($fp);
+    }
+
+    /**
+     * Set the used smush mode, according to smush override, user smsush and
+     * font smush.
+     *
+     * @return void
+     */
+    protected function _setUsedSmush()
+    {
+        if ($this->_smushOverride === self::SMO_NO) {
+            $this->_smushMode = $this->_fontSmush;
+        } else if ($this->_smushOverride === self::SMO_YES) {
+            $this->_smushMode = $this->_userSmush;
+        } else if ($this->_smushOverride === self::SMO_FORCE) {
+            $this->_smushMode = ($this->_fontSmush | $this->_userSmush);
+        }
     }
 
     /**

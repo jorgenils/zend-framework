@@ -22,7 +22,7 @@
 /**
  * Zend_Exception
  */
-require_once 'Zend/Exception.php';
+require_once 'Zend/Text/Exception.php';
 
 /**
  * Exception class for Zend_Figlet
@@ -33,6 +33,6 @@ require_once 'Zend/Exception.php';
  * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Figlet_Exception extends Zend_Text_Exception
+class Zend_Text_Figlet_Exception extends Zend_Text_Exception
 {
 }

@@ -44,6 +44,15 @@
             </listitem>
             <listitem>
                 <para>
+                    <code>handleParagraphs</code> - A boolean which indicates,
+                    how new lines are handled. When set to true, single new lines
+                    are ignored and instead treated as single spaces. Only multiple
+                    new lines will be handled as such. The default value is
+                    <code>false</code>.
+                </para>
+            </listitem>
+            <listitem>
+                <para>
                     <code>justification</code> - May be one of the values of
                     <code>Zend_Text_Figlet::JUSTIFICATION_*</code>. There is
                     <code>JUSTIFICATION_LEFT</code>, <code>JUSTIFICATION_CENTER</code>
@@ -69,21 +78,13 @@
                     sum of multiple values from <code>Zend_Text_Figlet::SM_*</code>.
                     There are the following smush modes: SM_EQUAL, SM_LOWLINE,
                     SM_HIERARCHY, SM_PAIR, SM_BIGX, SM_HARDBLANK, SM_KERN and
-                    SM_SMUSH. An explanation of the different smush modes can be found
+                    SM_SMUSH. A value of 0 doesn't disable the entire smushing,
+                    but forces SM_KERN to be applied, while a value of -1 disables
+                    it. An explanation of the different smush modes can be found
                     <ulink url="http://www.jave.de/figlet/figfont.txt">here</ulink>.
-                    By default the setting of the font file is used.
-                </para>
-            </listitem>
-            <listitem>
-                <para>
-                    <code>smushOverride</code> - This option is required if you
-                    set the smush mode manually and defines how your settings
-                    affect the smush mode of the font. This can be one of the
-                    values of <code>Zend_Text_Figlet::SMO_*</code>.
-                    <code>SMO_NO</code> means, that your settings don't change
-                    the used smush mode. <code>SMO_YES</code> overrides the
-                    entire font setting, while <code>SMO_FORCE</code> merges
-                    your smush mode with the font setting.
+                    By default the setting of the font file is used. The smush mode
+                    option is normally used only by font designers testing the various
+                    layoutmodes with a new font.
                 </para>
             </listitem>
         </itemizedlist>
