@@ -31,9 +31,13 @@ require_once 'Zend/Session/Namespace.php';
 require_once 'Zend/Controller/Action/Helper/Abstract.php';
 
 /**
- * TODO: Provide a way to specify the page, even with single-action forms.
- * TODO: Cleanup unused attribs and methods (if any)
+ * @see Zend_Controller_Front
+ */
+require_once 'Zend/Controller/Front.php';
+
+/**
  * TODO: Check to see if there are any methods that should be protected
+ * TODO: Cleanup unused attribs and methods (if any)
  * TODO: Straighten out confusing naming issues (if any)
  * TODO: Complete unit testing
  * 
@@ -143,11 +147,26 @@ class Zend_Controller_Action_Helper_MultiPageForm extends Zend_Controller_Action
     protected $_activeFormName = null;
     
     /**
+     * The form route part
+     *
+     * @var string
+     */
+    protected $_formNameRoutePart = 'form';
+    
+    /**
+     * The router
+     *
+     * @var Zend_Controller_Router_Interface
+     */
+    protected $_router = null;
+    
+    /**
      * Construct and set default session object
      */
     public function __construct()
     {
         $this->_session = new Zend_Session_Namespace($this->getName());
+        $this->_router  = Zend_Controller_Front::getInstance()->getRouter();
     }
 
     /**
@@ -240,6 +259,29 @@ class Zend_Controller_Action_Helper_MultiPageForm extends Zend_Controller_Action
         
         // Return the element name for the provided action
         return $this->_navigationElements[$action];
+    }
+    
+    /**
+     * Set the form name route part
+     *
+     * @param string $name
+     * @return Zend_Controller_Action_Helper_MultiPageForm
+     */
+    public function setFormNameRoutePart($part)
+    {
+        $this->_formNameRoutePart = $part;
+        
+        return $this;
+    }
+    
+    /**
+     * Get the form name route part
+     *
+     * @return string
+     */
+    public function getFormNameRoutePart()
+    {
+        return $this->_formNameRoutePart;
     }
     
     /**
@@ -366,7 +408,7 @@ class Zend_Controller_Action_Helper_MultiPageForm extends Zend_Controller_Action
     {
         // Create two brand new arrays
         $subFormActions = array();
-        $subFormOrder = array();
+        $subFormOrder   = array();
         
         // Loop through the mapping.
         foreach ($formActionMapping as $key => $value) {
@@ -382,7 +424,7 @@ class Zend_Controller_Action_Helper_MultiPageForm extends Zend_Controller_Action
         }
         
         $this->_subFormActions = $subFormActions;
-        $this->_subFormOrder = $subFormOrder;
+        $this->_subFormOrder   = $subFormOrder;
 
         // Reset the session if this is the first time the forms/actions are mapped
         if (is_null($this->_session->valid) ||
@@ -788,6 +830,12 @@ class Zend_Controller_Action_Helper_MultiPageForm extends Zend_Controller_Action
     public function getActiveFormName()
     {
         if (!$this->_activeFormName) {
+            $formName = $this->_router->getParam($this->_formRoutePart);
+            
+            if ($formName != null) {
+                $this->_session->active = $formName;
+            }
+            
             $this->_activeFormName = $this->_session->active;
         }
         
