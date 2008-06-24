@@ -508,6 +508,10 @@ class Zend_Dojo_View_Helper_Dojo
             $stylesheets[] = $base . '/' . $stylesheet . '/' . $themeName . '.css';
         }
 
+        foreach ($this->getStylesheets() as $stylesheet) {
+            $stylesheets[] = $stylesheet;
+        }
+
         array_reverse($stylesheets);
         $style = '<style type="text/css">' . "\n";
         foreach ($stylesheets as $stylesheet) {
