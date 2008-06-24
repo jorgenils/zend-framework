@@ -33,6 +33,11 @@ require_once 'PHPUnit/TextUI/TestRunner.php';
 require_once 'Zend/Filter/AllTests.php';
 require_once 'Zend/Validate/AllTests.php';
 
+/**
+ * @see Zend_Service_AllTests
+ */
+require_once 'Zend/Service/AllTests.php';
+
 class Zend_AllTests
 {
     public static function main()
@@ -47,6 +52,7 @@ class Zend_AllTests
         // Add suites here
         $suite->addTest(Zend_Filter_AllTests::suite());
         $suite->addTest(Zend_Validate_AllTests::suite());
+        $suite->addTest(Zend_Service_AllTests::suite());
 
         return $suite;
     }
