@@ -33,5 +33,15 @@
  * code repository.
  */
 
+/**
+ * Zend_Service_Amazon online tests
+ */
+define('TESTS_ZEND_SERVICE_AMAZON_ONLINE_ENABLED', false);
+define('TESTS_ZEND_SERVICE_AMAZON_ONLINE_ACCESSKEYID', 'Enter AWSAccessKeyId here');
+define('TESTS_ZEND_SERVICE_AMAZON_ONLINE_SECRETKEYID', 'Enter AWSSecretKeyId here');
+
+/**
+ * PHPUnit Code Coverage / Test Report
+ */
 define('TESTS_GENERATE_REPORT', false);
 define('TESTS_GENERATE_REPORT_TARGET', '/path/to/target');
