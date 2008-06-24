@@ -380,7 +380,7 @@ class Zend_Service_Amazon_S3
         $stat['blksize'] = 0;
         $stat['blocks'] = 0;
 
-        $response = $this->_makeRequest('HEAD', $path);
+        $response = $this->_makeRequest('HEAD', $this->_objectName);
 
         if ($response->getStatus() == 200) {
             $stat['size'] = $response->getHeader('Content-length');
@@ -412,8 +412,8 @@ class Zend_Service_Amazon_S3
     /**
      * Attempt to rename the item
      *
-     * @param  string $path_from
-     * @param  string $path_to
+     * @param  string  $path_from
+     * @param  string  $path_to
      * @return boolean False
      */
     public function rename($path_from, $path_to)
@@ -429,7 +429,7 @@ class Zend_Service_Amazon_S3
     /**
      * Create a new directory
      *
-     * @param  string $path
+     * @param  string  $path
      * @param  integer $mode
      * @param  integer $options
      * @return boolean
@@ -448,7 +448,7 @@ class Zend_Service_Amazon_S3
     /**
      * Remove a directory
      *
-     * @param  string $path
+     * @param  string  $path
      * @param  integer $options
      * @return boolean
      */
