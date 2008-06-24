@@ -17,7 +17,7 @@ require_once 'PHPUnit/Framework/TestCase.php';
 /**
  * Test cases for Zend_Soap_AutoDiscover
  *
- * @package Zend_Rest
+ * @package Zend_Soap
  * @subpackage UnitTests
  */
 class Zend_Soap_AutoDiscoverTest extends PHPUnit_Framework_TestCase
