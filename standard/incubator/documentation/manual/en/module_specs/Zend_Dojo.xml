@@ -1,0 +1,20 @@
+<sect1 id="zend.dojo.introduction">
+    <title>Introduction</title>
+
+    <para>
+        As of version 1.6.0, Zend Framework ships <ulink
+            url="http://dojotoolkit.org">Dojo Toolkit</ulink> to support
+        out-of-the-box rich internet application development. Integration
+        points with Dojo include:
+    </para>
+
+    <itemizedlist>
+        <listitem><para>JSON-RPC support</para></listitem>
+        <listitem><para>dojo.data compatibility</para></listitem>
+        <listitem><para>View helper to help setup the Dojo environment</para></listitem>
+        <listitem><para>Dojo-specific Zend_Form elements and decorators</para></listitem>
+    </itemizedlist>
+</sect1>
+<!--
+vim:se ts=4 sw=4 et:
+-->
