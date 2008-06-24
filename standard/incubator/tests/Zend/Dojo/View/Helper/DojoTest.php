@@ -9,6 +9,9 @@ require_once dirname(__FILE__) . '/../../../../TestHelper.php';
 /** Zend_Dojo_View_Helper_Dojo */
 require_once 'Zend/Dojo/View/Helper/Dojo.php';
 
+/** Zend_Dojo_View_Helper_Dojo_Container */
+require_once 'Zend/Dojo/View/Helper/Dojo/Container.php';
+
 /** Zend_View */
 require_once 'Zend/View.php';
 
@@ -36,9 +39,11 @@ class Zend_Dojo_View_Helper_DojoTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
+        Zend_Registry::_unsetInstance();
         $this->view   = $this->getView();
-        $this->helper = new Zend_Dojo_View_Helper_Dojo();
+        $this->helper = new Zend_Dojo_View_Helper_Dojo_Container();
         $this->helper->setView($this->view);
+        Zend_Registry::set('Zend_Dojo_View_Helper_Dojo', $this->helper);
     }
 
     /**
@@ -309,9 +314,10 @@ function() {
         $this->assertContains('foo', $action);
     }
 
-    public function testDojoMethodShouldReturnSelf()
+    public function testDojoMethodShouldReturnContainer()
     {
-        $this->assertSame($this->helper, $this->helper->dojo());
+        $helper = new Zend_Dojo_View_Helper_Dojo();
+        $this->assertSame($this->helper, $helper->dojo());
     }
 
     public function testHelperStorageShouldPersistBetweenViewObjects()
@@ -330,15 +336,7 @@ function() {
 
     public function testEnablingHelperShouldCauseStringSerializationToWork()
     {
-        $this->helper->requireModule('dijit.layout.ContentPane')
-                     ->registerModulePath('custom', '../custom')
-                     ->requireModule('custom.foo')
-                     ->setCdnVersion('1.1')
-                     ->setDjConfig(array('parseOnLoad' => 'true'))
-                     ->addStylesheetModule('dijit.themes.tundra')
-                     ->addStylesheet('/css/custom.css')
-                     ->addOnLoad('foo')
-                     ->setView($this->getView());
+        $this->setupDojo();
         $html = $this->helper->__toString();
         $doc  = new DOMDocument;
         $doc->loadHTML($html);
@@ -373,6 +371,51 @@ function() {
         $this->assertContains('css/custom.css', $style);
         $this->assertContains('dijit/themes/tundra/tundra.css', $style);
         $this->assertContains('dojo/resources/dojo.css', $style);
+    }
+
+    public function testStringSerializationShouldBeDoctypeAware()
+    {
+        $view = $this->getView();
+        $view->doctype('HTML4_LOOSE');
+        $this->helper->setView($view);
+        $this->setupDojo();
+        $html = $this->helper->__toString();
+        $this->assertRegexp('|<style [^>]*>[\r\n]+\s*<!--|', $html);
+        $this->assertRegexp('|<script [^>]*>[\r\n]+\s*//<!--|', $html);
+
+        $this->helper = new Zend_Dojo_View_Helper_Dojo();
+        $view->doctype('XHTML1_STRICT');
+        $this->helper->setView($view);
+        $this->setupDojo();
+        $html = $this->helper->__toString();
+
+        /**
+         * @todo should stylesheets be escaped as CDATA when isXhtml()?
+         */
+        $this->assertRegexp('|<style [^>]*>[\r\n]+\s*<!--|', $html);
+        $this->assertRegexp('|<script [^>]*>[\r\n]+\s*//<!\[CDATA\[|', $html);
+    }
+
+    public function testDojoHelperContainerPersistsBetweenViewObjects()
+    {
+        $this->setupDojo();
+
+        $view = $this->getView();
+        $this->assertNotSame($this->view, $view);
+        $helper = $view->dojo();
+        $this->assertSame($this->helper, $helper);
+    }
+
+    public function setupDojo()
+    {
+        $this->helper->requireModule('dijit.layout.ContentPane')
+                     ->registerModulePath('custom', '../custom')
+                     ->requireModule('custom.foo')
+                     ->setCdnVersion('1.1')
+                     ->setDjConfig(array('parseOnLoad' => 'true'))
+                     ->addStylesheetModule('dijit.themes.tundra')
+                     ->addStylesheet('/css/custom.css')
+                     ->addOnLoad('foo');
     }
 }
 
