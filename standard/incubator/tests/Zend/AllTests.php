@@ -34,8 +34,10 @@ require_once 'Zend/Controller/AllTests.php';
 // require_once 'Zend/Crypt/AllTests.php';
 require_once 'Zend/Db/AllTests.php';
 require_once 'Zend/Dojo/AllTests.php';
+require_once 'Zend/Dom/AllTests.php';
 require_once 'Zend/Json/AllTests.php';
 require_once 'Zend/Service/AllTests.php';
+require_once 'Zend/Test/AllTests.php';
 require_once 'Zend/Text/AllTests.php';
 require_once 'Zend/TimeSyncTest.php';
 
@@ -80,6 +82,11 @@ class Zend_AllTests
         $suite->addTest(Zend_Dojo_AllTests::suite());
 
         /*
+         * Perform the tests for Zend_Dom component now.
+         */
+        $suite->addTest(Zend_Dom_AllTests::suite());
+
+        /*
          * Perform the tests for Zend_Json component now.
          */
         $suite->addTest(Zend_Json_AllTests::suite());
@@ -88,6 +95,11 @@ class Zend_AllTests
          * Perform the tests for Zend_Service component now.
          */
         $suite->addTest(Zend_Service_AllTests::suite());
+
+        /*
+         * Perform the tests for Zend_Test component now.
+         */
+        $suite->addTest(Zend_Test_AllTests::suite());
 
         /*
          * Perform the tests for Zend_Text component now.
