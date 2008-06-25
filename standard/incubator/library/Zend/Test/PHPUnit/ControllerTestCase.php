@@ -114,10 +114,12 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function reset()
     {
-        $this->getFrontController()->resetInstance();
-        Zend_Controller_Action_HelperBroker::resetHelpers();
+        $_SESSION = array();
         $this->_request  = null;
         $this->_response = null;
+        Zend_Controller_Action_HelperBroker::resetHelpers();
+        $this->getFrontController()->resetInstance();
+        Zend_Session::$_unitTestEnabled = true;
     }
 
     /**
