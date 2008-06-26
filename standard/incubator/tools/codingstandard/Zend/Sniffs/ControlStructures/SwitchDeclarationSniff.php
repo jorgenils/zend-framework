@@ -59,11 +59,13 @@ class Zend_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_CodeSn
         $caseCount     = 0;
         $oldCase       = $stackPtr;
 
-        while (($nextCase = $phpcsFile->findNext(array(T_CASE, T_SWITCH), ($nextCase + 1), $switch['scope_closer'])) !== false) {
+        $nextCase = $phpcsFile->findNext(array(T_CASE, T_SWITCH), ($nextCase + 1), $switch['scope_closer']);
+        while ($nextCase !== false) {
             // Skip nested SWITCH statements; they are handled on their own
             if ($tokens[$nextCase]['code'] === T_SWITCH) {
                 $oldCase  = $nextCase;
                 $nextCase = $tokens[$nextCase]['scope_closer'];
+                $nextCase = $phpcsFile->findNext(array(T_CASE, T_SWITCH), ($nextCase + 1), $switch['scope_closer']);
                 continue;
             }
 
@@ -121,6 +123,8 @@ class Zend_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_CodeSn
                                                              $switch['scope_closer']);
                                 if (($next !== false) and (trim($tokens[$next]['content']) ===
                                      '// Break intentionally omitted')) {
+                                    $nextCase = $phpcsFile->findNext(array(T_CASE, T_SWITCH), ($nextCase + 1),
+                                                                     $switch['scope_closer']);
                                     continue;
                                 }
 
@@ -128,6 +132,8 @@ class Zend_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_CodeSn
                                 $phpcsFile->addError($error, $nextCase);
                             }
 
+                            $nextCase = $phpcsFile->findNext(array(T_CASE, T_SWITCH), ($nextCase + 1),
+                                                             $switch['scope_closer']);
                             continue;
                         }
 
@@ -193,6 +199,8 @@ class Zend_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_CodeSn
                 $error = 'Blank lines are not allowed after CASE statements';
                 $phpcsFile->addError($error, $nextCase);
             }
+
+            $nextCase = $phpcsFile->findNext(array(T_CASE, T_SWITCH), ($nextCase + 1), $switch['scope_closer']);
         }
 
         $default = $phpcsFile->findPrevious(T_DEFAULT, $switch['scope_closer'], $switch['scope_opener']);

@@ -112,18 +112,12 @@ class Zend_Sniffs_WhiteSpace_OperatorSpacingSniff implements PHP_CodeSniffer_Sni
                     return;
                 }
 
-                if (in_array($tokens[$prev]['code'], PHP_CodeSniffer_Tokens::$operators) === true) {
-                    // Just trying to operate on a negative value; eg. ($var * -1).
-                    return;
-                }
-
-                if (in_array($tokens[$prev]['code'], PHP_CodeSniffer_Tokens::$equalityTokens) === true) {
-                    // Just trying to compare a negative value; eg. ($var === -1).
-                    return;
-                }
-
-                if (in_array($tokens[$prev]['code'], PHP_CodeSniffer_Tokens::$comparisonTokens) === true) {
-                    // Just trying to compare a negative value; eg. ($var < -1).
+                if ((in_array($tokens[$prev]['code'], PHP_CodeSniffer_Tokens::$operators) === true) or
+                    (in_array($tokens[$prev]['code'], PHP_CodeSniffer_Tokens::$equalityTokens) === true) or
+                    (in_array($tokens[$prev]['code'], PHP_CodeSniffer_Tokens::$comparisonTokens) === true)) {
+                    // Operators -> Just trying to operate on a negative value; eg. ($var * -1)
+                    // Equality  -> Just trying to compare a negative value; eg. ($var === -1)
+                    // Comparison-> Just trying to compare a negative value; eg. ($var < -1)
                     return;
                 }
 

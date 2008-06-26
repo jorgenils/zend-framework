@@ -279,9 +279,6 @@ class PHP_CodeSniffer_Standards_Zend_ZendCodingStandard extends PHP_CodeSniffer_
 
 /**
  * TODO:
- * Optional descriptions should begin with the Description "(Optional)"
- * @param string $variable (Optional) my variable
- *
  * Return value: If returns self/own object check for text "Provides a fluent interface"
  *
  * Error on @throws tag when no exception is thrown
@@ -296,7 +293,7 @@ class PHP_CodeSniffer_Standards_Zend_ZendCodingStandard extends PHP_CodeSniffer_
  *       'ddd', 'fff');
  * array('xxx' => 'xx', 'ccc' => 'cc'); // single line with key
  * array('x'   => 'x',   'cc'  => 'c',  // multiple line each element under each other with key
- *       'ddd' => 'ddd', 'fff' => 'ff');
+ *       'ddd' => 'ddd', 'fff' => 'ff'); // closing bracke never in a own line
  *
  * Add type hint "resource" for files
  *
@@ -304,4 +301,23 @@ class PHP_CodeSniffer_Standards_Zend_ZendCodingStandard extends PHP_CodeSniffer_
  *
  * Do not allow multiple assignments in a for/while/foreach loop
  * for ($a = 1, $b = 2; $a == 2, $b == 2;)
+ *
+ * Check for superflous whitespace - Example:
+ * 1: $conditionCheck = $phpcsFile->findPrevious(array(T_OPEN_PARENTHESIS, T_SEMICOLON),
+ *                      ($stackPtr - 1), null, false);
+ * 2: $conditionCheck = $phpcsFile->findPrevious(array(T_OPEN_PARENTHESIS, T_SEMICOLON),
+ *                                               ($stackPtr - 1), null, false);
+ * 3: $conditionCheck = $phpcsFile->findPrevious(array(T_OPEN_PARENTHESIS, T_SEMICOLON),
+ *                                                     ($stackPtr - 1), null, false);
+ * 4: $conditionCheck = $phpcsFile->findPrevious(array(T_OPEN_PARENTHESIS, T_SEMICOLON),
+ *                                                                         ($stackPtr - 1), null, false);
+ * Whitespace must be under the first sign after =, or under/after any ( or under any " C"
+ *
+ * When having "." then the "." must be under the equality sign or an other "."
+ *                         $error = 'Array value not aligned correctly; expected ' . ($keywordStart + 1)
+ *                                . ' spaces but found ' . $tokens[$value['value']]['column'];
+ *
+ * When having multiple "and", "or"s with equality they must be bracketed
+ * if (xxx === yyy)
+ * if ((xxx === yyy) and (xxx === zzz))
  */

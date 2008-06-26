@@ -62,15 +62,15 @@ class Zend_Sniffs_Commenting_BlockCommentSniff implements PHP_CodeSniffer_Sniff
         if ($tokens[$stackPtr]['code'] === T_DOC_COMMENT) {
             $nextToken = $phpcsFile->findNext(PHP_CodeSniffer_Tokens::$emptyTokens, ($stackPtr + 1), null, true);
             $ignore    = array(
-                          T_CLASS,
-                          T_INTERFACE,
-                          T_FUNCTION,
-                          T_PUBLIC,
-                          T_PRIVATE,
-                          T_PROTECTED,
-                          T_STATIC,
-                          T_ABSTRACT,
-                          T_CONST,
+                               T_CLASS,
+                               T_INTERFACE,
+                               T_FUNCTION,
+                               T_PUBLIC,
+                               T_PRIVATE,
+                               T_PROTECTED,
+                               T_STATIC,
+                               T_ABSTRACT,
+                               T_CONST,
                          );
             if (in_array($tokens[$nextToken]['code'], $ignore) === true) {
                 return;

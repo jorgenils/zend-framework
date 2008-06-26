@@ -64,7 +64,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
 
         $tokens     = $phpcsFile->getTokens();
         $type       = strtolower($tokens[$stackPtr]['content']);
-        $find       = array (T_ABSTRACT, T_WHITESPACE, T_FINAL);
+        $find       = array(T_ABSTRACT, T_WHITESPACE, T_FINAL);
         $this->type = $type;
 
         // Extract the class comment docblock
@@ -528,7 +528,7 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
      */
     protected function _processUses($errorPos)
     {
-        $uses = $this->commentParser->_getUses();
+        $uses = $this->commentParser->getUses();
         if ($uses !== null) {
             foreach ($uses as $use) {
                 $content = $use->getContent();
@@ -681,9 +681,9 @@ class Zend_Sniffs_Commenting_ClassCommentSniff implements PHP_CodeSniffer_Sniff
      *
      * @return void
      */
-    protected function _getUses()
+    public function getUses()
     {
-        $uses = $this->commentParser->getSee();
+        $uses = $this->commentParser->getUses();
         if ($uses !== null) {
             foreach ($uses as $use) {
                 $content = $use->getContent();

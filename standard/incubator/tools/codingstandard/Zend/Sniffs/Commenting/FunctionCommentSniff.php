@@ -63,6 +63,13 @@ class Zend_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sni
     private $_tagIndex = 0;
 
     /**
+     * The found tokens
+     *
+     * @var array
+     */
+    private $_tokens = null;
+
+    /**
      * The function comment parser for the current method
      *
      * @var PHP_CodeSniffer_Comment_Parser_FunctionCommentParser
@@ -98,8 +105,7 @@ class Zend_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sni
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
         $this->_currentFile = $phpcsFile;
-
-        $tokens = $phpcsFile->getTokens();
+        $this->_tokens      = $phpcsFile->getTokens();
 
         $find = array(
                  T_COMMENT,
@@ -117,7 +123,7 @@ class Zend_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sni
 
         // If the token that we found was a class or a function, then this
         // function has no doc comment
-        $code = $tokens[$commentEnd]['code'];
+        $code = $this->_tokens[$commentEnd]['code'];
 
         if ($code === T_COMMENT) {
             $error = 'You must use "/**" style comments for a function comment';
@@ -144,7 +150,7 @@ class Zend_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sni
 
         $this->_functionToken = $stackPtr;
 
-        foreach ($tokens[$stackPtr]['conditions'] as $condPtr => $condition) {
+        foreach ($this->_tokens[$stackPtr]['conditions'] as $condPtr => $condition) {
             if ($condition === T_CLASS or $condition === T_INTERFACE) {
                 $this->_classToken = $condPtr;
                 break;
@@ -742,13 +748,38 @@ class Zend_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_Sni
                     $error = 'Missing comment for param "' . $paramName . '" at position ' . $pos;
                     $this->_currentFile->addError($error, $errorPos);
                 } else {
-                    // Param comments must start with a capital letter and
-                    // end with the full stop
+                    // Param comments must start with a capital letter
                     $firstChar = $paramComment{0};
-                    if (((preg_match('|[A-Z]|', $firstChar) === 0) and ($firstChar !== '(')) or
-                        ((preg_match('|[A-Z]|', $paramComment{1}) === 0) and $firstChar === '(')) {
+                    if ((preg_match('|[A-Z]|', $firstChar) === 0) and ($firstChar !== '(')) {
                         $error = 'Param comment must start with a capital letter';
                         $this->_currentFile->addError($error, $errorPos);
+                    }
+
+                    // Check if optional params include (Optional) within their description
+                    $functionBegin = $this->_currentFile->findNext(array(T_FUNCTION), $commentStart);
+                    $functionName  = $this->_currentFile->findNext(array(T_STRING), $functionBegin);
+                    $openBracket   = $this->_tokens[$functionBegin]['parenthesis_opener'];
+                    $closeBracket  = $this->_tokens[$functionBegin]['parenthesis_closer'];
+                    $nextParam     = $this->_currentFile->findNext(T_VARIABLE, ($openBracket + 1), $closeBracket);
+                    while ($nextParam !== false) {
+                        $nextToken = $this->_currentFile->findNext(T_WHITESPACE, ($nextParam + 1), ($closeBracket + 1), true);
+                        if (($nextToken === false) and ($this->_tokens[($nextParam + 1)]['code'] === T_CLOSE_PARENTHESIS)) {
+                            break;
+                        }
+
+                        $nextCode = $this->_tokens[$nextToken]['code'];
+                        $arg      = $this->_tokens[$nextParam]['content'];
+                        if (($nextCode === T_EQUAL) and ($paramName === $arg)) {
+                            if (substr($paramComment, 0, 11) !== '(Optional) ') {
+                                $error = "Optional param comment for '$paramName' must start with '(Optional)'";
+                                $this->_currentFile->addError($error, $errorPos);
+                            } else if (preg_match('|[A-Z]|', $paramComment{11}) === 0) {
+                                $error = 'Param comment must start with a capital letter';
+                                $this->_currentFile->addError($error, $errorPos);
+                            }
+                        }
+
+                        $nextParam = $this->_currentFile->findNext(T_VARIABLE, ($nextParam + 1), $closeBracket);
                     }
                 }
 

@@ -189,7 +189,7 @@ class Zend_Sniffs_Functions_FunctionDeclarationArgumentSpacingSniff implements P
                 }
             }
 
-            $params[] = $nextParam;
+            $params[]  = $nextParam;
             $nextParam = $phpcsFile->findNext(T_VARIABLE, ($nextParam + 1), $closeBracket);
         }
 
