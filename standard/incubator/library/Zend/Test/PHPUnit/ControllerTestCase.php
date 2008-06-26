@@ -92,11 +92,15 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function dispatch($url = null)
     {
+        $redirector = Zend_Controller_Action_HelperBroker::getStaticHelper('redirector');
+        $redirector->setExit(false);
+        $request    = $this->getRequest();
         if (null !== $url) {
-            $this->getRequest()->setRequestUri($url);
+            $request->setRequestUri($url);
         }
+        $request->setPathInfo(null);
         $controller = $this->getFrontController();
-        $controller->setRequest($this->getRequest())
+        $controller->setRequest($request)
                    ->setResponse($this->getResponse())
                    ->throwExceptions(false)
                    ->returnResponse(false);
@@ -120,6 +124,19 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
         Zend_Controller_Action_HelperBroker::resetHelpers();
         $this->getFrontController()->resetInstance();
         Zend_Session::$_unitTestEnabled = true;
+    }
+
+    /**
+     * Reset the response object
+     *
+     * Useful for test cases that need to test multiple trips to the server.
+     * 
+     * @return Zend_Test_PHPUnit_ControllerTestCase
+     */
+    public function resetResponse()
+    {
+        $this->_response = null;
+        return $this;
     }
 
     /**
@@ -575,6 +592,158 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
         $response   = $this->getResponse();
         if (!$constraint->evaluate($response, __FUNCTION__, $pattern)) {
             $constraint->fail($response, $message);
+        }
+    }
+
+    /**
+     * Assert that the last handled request used the given module
+     * 
+     * @param  string $module 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertModule($module, $message = '')
+    {
+        $request = $this->getRequest();
+        if ($module != $request->getModuleName()) {
+            $msg = sprintf('Failed asserting last module used was "%s"', $module);
+            if (!empty($message)) {
+                $msg = $message . "\n" . $msg;
+            }
+            $this->fail($msg);
+        }
+    }
+
+    /**
+     * Assert that the last handled request did NOT use the given module
+     * 
+     * @param  string $module 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertNotModule($module, $message = '')
+    {
+        $request = $this->getRequest();
+        if ($module == $request->getModuleName()) {
+            $msg = sprintf('Failed asserting last module used was NOT "%s"', $module);
+            if (!empty($message)) {
+                $msg = $message . "\n" . $msg;
+            }
+            $this->fail($msg);
+        }
+    }
+
+    /**
+     * Assert that the last handled request used the given controller
+     * 
+     * @param  string $controller 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertController($controller, $message = '')
+    {
+        $request = $this->getRequest();
+        if ($controller != $request->getControllerName()) {
+            $msg = sprintf('Failed asserting last controller used was "%s"', $controller);
+            if (!empty($message)) {
+                $msg = $message . "\n" . $msg;
+            }
+            $this->fail($msg);
+        }
+    }
+
+    /**
+     * Assert that the last handled request did NOT use the given controller
+     * 
+     * @param  string $controller 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertNotController($controller, $message = '')
+    {
+        $request = $this->getRequest();
+        if ($controller == $request->getControllerName()) {
+            $msg = sprintf('Failed asserting last controller used was NOT "%s"', $controller);
+            if (!empty($message)) {
+                $msg = $message . "\n" . $msg;
+            }
+            $this->fail($msg);
+        }
+    }
+
+    /**
+     * Assert that the last handled request used the given action
+     * 
+     * @param  string $action 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertAction($action, $message = '')
+    {
+        $request = $this->getRequest();
+        if ($action != $request->getActionName()) {
+            $msg = sprintf('Failed asserting last action used was "%s"', $action);
+            if (!empty($message)) {
+                $msg = $message . "\n" . $msg;
+            }
+            $this->fail($msg);
+        }
+    }
+
+    /**
+     * Assert that the last handled request did NOT use the given action
+     * 
+     * @param  string $action 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertNotAction($action, $message = '')
+    {
+        $request = $this->getRequest();
+        if ($action == $request->getActionName()) {
+            $msg = sprintf('Failed asserting last action used was NOT "%s"', $action);
+            if (!empty($message)) {
+                $msg = $message . "\n" . $msg;
+            }
+            $this->fail($msg);
+        }
+    }
+
+    /**
+     * Assert that the specified route was used
+     * 
+     * @param  string $route 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertRoute($route, $message = '')
+    {
+        $router = $this->getFrontController()->getRouter();
+        if ($route != $router->getCurrentRouteName()) {
+            $msg = sprintf('Failed asserting route matched was "%s"', $route);
+            if (!empty($message)) {
+                $msg = $message . "\n" . $msg;
+            }
+            $this->fail($msg);
+        }
+    }
+
+    /**
+     * Assert that the route matched is NOT as specified
+     * 
+     * @param  string $route 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertNotRoute($route, $message = '')
+    {
+        $router = $this->getFrontController()->getRouter();
+        if ($route == $router->getCurrentRouteName()) {
+            $msg = sprintf('Failed asserting route matched was NOT "%s"', $route);
+            if (!empty($message)) {
+                $msg = $message . "\n" . $msg;
+            }
+            $this->fail($msg);
         }
     }
 

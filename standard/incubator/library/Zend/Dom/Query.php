@@ -159,7 +159,7 @@ class Zend_Dom_Query
 
         if (!$success) {
             require_once 'Zend/Dom/Exception.php';
-            throw new Zend_Dom_Exception('Error parsing document');
+            throw new Zend_Dom_Exception(sprintf('Error parsing document (type == %s)', $type));
         }
 
         $nodeList   = $this->_getNodeList($domDoc, $xpathQuery);
