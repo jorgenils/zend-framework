@@ -23,7 +23,7 @@
 
 
 if (!defined('PHPUnit_MAIN_METHOD')) {
-    define('PHPUnit_MAIN_METHOD', 'Zend_Service_Amazon_AllTests::main');
+    define('PHPUnit_MAIN_METHOD', 'Zend_Service_Amazon_S3_AllTests::main');
 }
 
 /**
