@@ -8,4 +8,10 @@ class FooController extends Zend_Controller_Action
     public function bazAction()
     {
     }
+
+    public function sessionAction()
+    {
+        $this->_helper->viewRenderer->setNoRender(true);
+        $_SESSION = array('foo' => 'bar', 'bar' => 'baz');
+    }
 }

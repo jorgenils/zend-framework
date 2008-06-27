@@ -39,6 +39,7 @@ class Zend_Test_PHPUnit_ControllerTestCaseTest extends PHPUnit_Framework_TestCas
      */
     public function setUp()
     {
+        $this->setExpectedException(null);
         $this->testCase = new Zend_Test_PHPUnit_ControllerTestCase();
     }
 
@@ -381,6 +382,99 @@ class Zend_Test_PHPUnit_ControllerTestCaseTest extends PHPUnit_Framework_TestCas
         $this->testCase->getResponse()->setRedirect('/foo');
         $this->testCase->assertNotRedirectTo('/bar');
         $this->testCase->assertNotRedirectRegex('/bar/i');
+    }
+
+    public function testModuleAssertionShouldDoNothingForValidComparison()
+    {
+        $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
+        $this->testCase->dispatch('/foo/baz');
+        $this->testCase->assertModule('default');
+        $this->testCase->assertNotModule('foo');
+    }
+
+    public function testModuleAssertionShouldThrowExceptionForInvalidComparison()
+    {
+        $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
+        $this->testCase->dispatch('/foo/baz');
+        $this->setExpectedException('PHPUnit_Framework_AssertionFailedError');
+        $this->testCase->assertModule('foo');
+        $this->testCase->assertNotModule('default');
+    }
+
+    public function testControllerAssertionShouldDoNothingForValidComparison()
+    {
+        $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
+        $this->testCase->dispatch('/foo/baz');
+        $this->testCase->assertController('foo');
+        $this->testCase->assertNotController('baz');
+    }
+
+    public function testControllerAssertionShouldThrowExceptionForInvalidComparison()
+    {
+        $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
+        $this->testCase->dispatch('/foo/baz');
+        $this->setExpectedException('PHPUnit_Framework_AssertionFailedError');
+        $this->testCase->assertController('baz');
+        $this->testCase->assertNotController('foo');
+    }
+
+    public function testActionAssertionShouldDoNothingForValidComparison()
+    {
+        $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
+        $this->testCase->dispatch('/foo/baz');
+        $this->testCase->assertAction('baz');
+        $this->testCase->assertNotAction('foo');
+    }
+
+    public function testActionAssertionShouldThrowExceptionForInvalidComparison()
+    {
+        $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
+        $this->testCase->dispatch('/foo/baz');
+        $this->setExpectedException('PHPUnit_Framework_AssertionFailedError');
+        $this->testCase->assertAction('foo');
+        $this->testCase->assertNotAction('baz');
+    }
+
+    public function testRouteAssertionShouldDoNothingForValidComparison()
+    {
+        $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
+        $this->testCase->dispatch('/foo/baz');
+        $this->testCase->assertRoute('default');
+        $this->testCase->assertNotRoute('foo');
+    }
+
+    public function testRouteAssertionShouldThrowExceptionForInvalidComparison()
+    {
+        $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
+        $this->testCase->dispatch('/foo/baz');
+        $this->setExpectedException('PHPUnit_Framework_AssertionFailedError');
+        $this->testCase->assertRoute('foo');
+        $this->testCase->assertNotRoute('default');
+    }
+
+    public function testResetShouldResetSessionArray()
+    {
+        $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
+        $this->testCase->dispatch('/foo/session');
+        $this->assertEquals(array('foo' => 'bar', 'bar' => 'baz'), $_SESSION);
+        $this->testCase->reset();
+        $this->assertTrue(empty($_SESSION));
+    }
+
+    public function testResetShouldUnitTestEnableZendSession()
+    {
+        $this->testCase->reset();
+        $this->assertTrue(Zend_Session::$_unitTestEnabled);
+    }
+
+    public function testResetResponseShouldClearResponseObject()
+    {
+        $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
+        $this->testCase->dispatch('/foo/baz');
+        $response = $this->testCase->getResponse();
+        $this->testCase->resetResponse();
+        $test = $this->testCase->getResponse();
+        $this->assertNotSame($response, $test);
     }
 }
 

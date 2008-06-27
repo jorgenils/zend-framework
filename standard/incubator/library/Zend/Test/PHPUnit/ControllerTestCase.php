@@ -1,6 +1,10 @@
 <?php
 
+/** PHPUnit_Framework_TestCase */
 require_once 'PHPUnit/Framework/TestCase.php';
+
+/** Zend_Session */
+require_once 'Zend/Session.php';
 
 /**
  * Functional testing scaffold for MVC applications
