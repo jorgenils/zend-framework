@@ -6,7 +6,7 @@
  * @subpackage Query
  * @copyright  Copyright (C) 2007 - Present, Zend Technologies, Inc.
  * @license    New BSD {@link http://framework.zend.com/license/new-bsd}
- * @version    $Id:$
+ * @version    $Id$
  */
 class Zend_Dom_Query_Css2Xpath
 {

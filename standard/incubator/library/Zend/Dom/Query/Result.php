@@ -7,7 +7,7 @@
  * @uses       Iterator
  * @copyright  Copyright (C) 2008 - Present, Zend Technologies, Inc.
  * @license    New BSD {@link http://framework.zend.com/license/new-bsd}
- * @version    $Id: $
+ * @version    $Id$
  */
 class Zend_Dom_Query_Result implements Iterator,Countable
 {
