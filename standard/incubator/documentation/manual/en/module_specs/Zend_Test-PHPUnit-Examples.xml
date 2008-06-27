@@ -1,0 +1,16 @@
+<sect2 id="zend.test.phpunit.examples">
+    <title>Examples</title>
+
+    <para>
+        Knowing how to setup your testing infrastructure and how to make
+        assertions is only half the battle; now it's time to start looking at
+        some actual testing scenarios to see how you can leverage them.
+    </para>
+
+    <para>
+        Coming soon!
+    </para>
+</sect2>
+<!--
+vim:se ts=4 sw=4 et:
+-->
