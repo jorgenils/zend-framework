@@ -211,7 +211,7 @@ class Zend_Text_FigletTest extends PHPUnit_Framework_TestCase
     {
         $figlet = new Zend_Text_Figlet(null, array('smushMode' => 5));
 
-        $this->_equalAgainstFile($figlet->render('Dummy'), 'StandardAlignLeft.figlet');
+        $this->_equalAgainstFile($figlet->render('Dummy'), 'SmushForced.figlet');
     }
 
     public function testWordWrapLeftToRight()

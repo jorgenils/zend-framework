@@ -261,7 +261,7 @@ class Zend_Text_Figlet
     {
         // Default font file if not filename was given
         if ($fontFile === null) {
-            $fontFile = dirname(__FILE__) . '/Figlet/standard.flf';
+            $fontFile = dirname(__FILE__) . '/Figlet/zend-framework.flf';
         }
 
         // Set options
