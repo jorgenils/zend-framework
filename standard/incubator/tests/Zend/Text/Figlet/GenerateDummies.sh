@@ -34,5 +34,5 @@ figlet -f $UTFLF Dummy Dummy Dummy > WordWrapLeftToRight.figlet
 figlet -f $UTFLF -R Dummy Dummy Dummy > WordWrapRightToLeft.figlet
 figlet -f $UTFLF DummyDumDummy > CharWrapLeftToRight.figlet
 figlet -f $UTFLF -R DummyDumDummy > CharWrapRightToLeft.figlet
-echo -e "Dummy\nDummy\n\nDummy" | figlet -f $UTFLF -p > ParagraphOn.figlet
-echo -e "Dummy\nDummy\n\nDummy" | figlet -f $UTFLF > ParagraphOff.figlet
+echo -e "Dum\nDum\n\nDum" | figlet -f $UTFLF -p > ParagraphOn.figlet
+echo -e "Dum\nDum\n\nDum" | figlet -f $UTFLF > ParagraphOff.figlet

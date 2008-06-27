@@ -246,14 +246,14 @@ class Zend_Text_FigletTest extends PHPUnit_Framework_TestCase
     {
         $figlet = new Zend_Text_Figlet();
 
-        $this->_equalAgainstFile($figlet->render("Dummy\nDummy\n\nDummy\n"), 'ParagraphOff.figlet');
+        $this->_equalAgainstFile($figlet->render("Dum\nDum\n\nDum\n"), 'ParagraphOff.figlet');
     }
 
     public function testParagraphOn()
     {
         $figlet = new Zend_Text_Figlet(null, array('handleParagraphs' => true));
 
-        $this->_equalAgainstFile($figlet->render("Dummy\nDummy\n\nDummy\n"), 'ParagraphOn.figlet');
+        $this->_equalAgainstFile($figlet->render("Dum\nDum\n\nDum\n"), 'ParagraphOn.figlet');
     }
 
     protected function _equalAgainstFile($output, $file)
