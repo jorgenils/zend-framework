@@ -28,12 +28,17 @@
     </note>
     <para>
         You can define multiple options for a FIGlet. When instantiating
-        <code>Zend_Text_Figlet</code>, the first parameter defines the path
-        to the font which should be used. If this parameter is <code>null</code>,
-        the default font is used automatically. The second parameter can either
-        be an array or a <code>Zend_Config</code> instance.
+        <code>Zend_Text_Figlet</code>, you can supply an array or an instance of
+        <code>Zend_Config</code>.
 
         <itemizedlist>
+            <listitem>
+                <para>
+                    <code>font</code> - Defines the font which should be used
+                    for rendering. If not defines, the built-in font will be
+                    used.
+                </para>
+            </listitem>
             <listitem>
                 <para>
                     <code>outputWidth</code> - Defines the maximum width of the

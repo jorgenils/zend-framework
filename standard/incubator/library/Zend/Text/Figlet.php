@@ -74,6 +74,13 @@ class Zend_Text_Figlet
     protected $_charList = array();
 
     /**
+     * Indicates if a font was loaded yet
+     *
+     * @var boolean
+     */
+    protected $_fontLoaded = false;
+
+    /**
      * Latin-1 codes for German letters, respectively:
      *
      * LATIN CAPITAL LETTER A WITH DIAERESIS = A-umlaut
@@ -249,21 +256,15 @@ class Zend_Text_Figlet
     protected $_output;
 
     /**
-     * Instantiate the FIGlet with a specific font. If font is null, the
+     * Instantiate the FIGlet with a specific font. If no font is given, the
      * standard font is used. You can also supply multiple options via
      * the $options variable, which can either be an array or an instance of
      * Zend_Config.
      *
-     * @param string            $fontFile Font file to load for this instance
-     * @param array|Zend_Config $options  Options for the output
+     * @param array|Zend_Config $options Options for the output
      */
-    public function __construct($fontFile = null, $options = null)
+    public function __construct($options = null)
     {
-        // Default font file if not filename was given
-        if ($fontFile === null) {
-            $fontFile = dirname(__FILE__) . '/Figlet/zend-framework.flf';
-        }
-
         // Set options
         if (is_array($options) === true) {
             $this->setOptions($options);
@@ -271,8 +272,10 @@ class Zend_Text_Figlet
             $this->setConfig($options);
         }
 
-        // Load the font
-        $this->_loadFont($fontFile);
+        // If no font was defined, load default font
+        if ($this->_fontLoaded === false) {
+            $this->_loadFont(dirname(__FILE__) . '/Figlet/zend-framework.flf');
+        }
     }
 
     /**
@@ -283,6 +286,10 @@ class Zend_Text_Figlet
      */
     public function setOptions(array $options)
     {
+        if (isset($options['font']) === true) {
+            $this->setFont($options['font']);
+        }
+
         if (isset($options['handleParagraphs']) === true) {
             $this->setHandleParagraphs($options['handleParagraphs']);
         }
@@ -315,6 +322,18 @@ class Zend_Text_Figlet
     public function setConfig(Zend_Config $config)
     {
         return $this->setOptions($config->toArray());
+    }
+
+    /**
+     * Set a font to use
+     *
+     * @param  string $font Path to the font
+     * @return Zend_Text_Figlet
+     */
+    public function setFont($font)
+    {
+        $this->_loadFont($font);
+        return $this;
     }
 
     /**
@@ -1094,6 +1113,8 @@ class Zend_Text_Figlet
         }
 
         fclose($fp);
+
+        $this->_fontLoaded = true;
     }
 
     /**
