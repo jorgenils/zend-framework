@@ -384,6 +384,64 @@ class Zend_Test_PHPUnit_ControllerTestCaseTest extends PHPUnit_Framework_TestCas
         $this->testCase->assertNotRedirectRegex('/bar/i');
     }
 
+    public function testHeaderAssertionShouldDoNothingForValidComparison()
+    {
+        $this->testCase->getResponse()->setHeader('Content-Type', 'x-application/my-foo');
+        $this->testCase->assertResponseCode(200);
+        $this->testCase->assertNotResponseCode(500);
+        $this->testCase->assertHeader('Content-Type');
+        $this->testCase->assertNotHeader('X-Bogus');
+        $this->testCase->assertHeaderContains('Content-Type', 'my-foo');
+        $this->testCase->assertNotHeaderContains('Content-Type', 'my-bar');
+        $this->testCase->assertHeaderRegex('Content-Type', '#^[a-z-]+/[a-z-]+$#i');
+        $this->testCase->assertNotHeaderRegex('Content-Type', '#^\d+#i');
+    }
+
+    public function testHeaderAssertionShouldThrowExceptionForInvalidComparison()
+    {
+        $this->testCase->getResponse()->setHeader('Content-Type', 'x-application/my-foo');
+        try {
+            $this->testCase->assertResponseCode(500);
+        } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
+            $this->assertContains('Failed', $e->getMessage());
+        }
+        try {
+            $this->testCase->assertNotResponseCode(200);
+        } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
+            $this->assertContains('Failed', $e->getMessage());
+        }
+        try {
+            $this->testCase->assertNotHeader('Content-Type');
+        } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
+            $this->assertContains('Failed', $e->getMessage());
+        }
+        try {
+            $this->testCase->assertHeader('X-Bogus');
+        } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
+            $this->assertContains('Failed', $e->getMessage());
+        }
+        try {
+            $this->testCase->assertNotHeaderContains('Content-Type', 'my-foo');
+        } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
+            $this->assertContains('Failed', $e->getMessage());
+        }
+        try {
+            $this->testCase->assertHeaderContains('Content-Type', 'my-bar');
+        } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
+            $this->assertContains('Failed', $e->getMessage());
+        }
+        try {
+            $this->testCase->assertNotHeaderRegex('Content-Type', '#^[a-z-]+/[a-z-]+$#i');
+        } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
+            $this->assertContains('Failed', $e->getMessage());
+        }
+        try {
+            $this->testCase->assertHeaderRegex('Content-Type', '#^\d+#i');
+        } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
+            $this->assertContains('Failed', $e->getMessage());
+        }
+    }
+
     public function testModuleAssertionShouldDoNothingForValidComparison()
     {
         $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');

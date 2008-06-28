@@ -91,6 +91,12 @@ class Zend_Dom_Query
         return $this;
     }
 
+    /**
+     * Register XML document
+     * 
+     * @param  string $document 
+     * @return Zend_Dom_Query
+     */
     public function setDocumentXml($document)
     {
         $this->_document = (string) $document;

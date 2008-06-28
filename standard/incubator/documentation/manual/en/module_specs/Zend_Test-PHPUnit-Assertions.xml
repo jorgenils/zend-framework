@@ -147,7 +147,9 @@
         <title>Redirect Assertions</title>
 
         <para>
-            Often an action will redirect. Instead of following the redirect, <code>Zend_Test_PHPUnit_ControllerTestCase</code> allows you to test for redirects with a handful of assertions.
+            Often an action will redirect. Instead of following the redirect,
+            <code>Zend_Test_PHPUnit_ControllerTestCase</code> allows you to
+            test for redirects with a handful of assertions.
         </para>
 
         <itemizedlist>
@@ -187,6 +189,47 @@
                 <code>$pattern</code>.
             </para></listitem>
         </itemizedlist>
+    </sect3>
+
+    <sect3 id="zend.test.phpunit.assertions.header">
+        <title>Response Header Assertions</title>
+
+        <para>
+            In addition to checking for redirect headers, you will often need
+            to check for specific HTTP response codes and headers -- for
+            instance, to determine whether an action results in a 404 or 500
+            response, or to ensure that JSON responses contain the appropriate
+            Content-Type header. The following assertions are available.
+        </para>
+
+        <itemizedlist>
+            <listitem><para>
+                <code>assertResponseCode($code, $message = '')</code>: assert
+                that the response resulted in the given HTTP response code.
+            </para></listitem>
+
+            <listitem><para>
+                <code>assertHeader($header, $message = '')</code>: assert
+                that the response contains the given header.
+            </para></listitem>
+
+            <listitem><para>
+                <code>assertHeaderContains($header, $match, $message =
+                '')</code>: assert that the response contains the given header
+                and that its content contains the given string.
+            </para></listitem>
+
+            <listitem><para>
+                <code>assertHeaderRegex($header, $pattern, $message =
+                '')</code>: assert that the response contains the given header
+            and that its content matches the given regex.
+            </para></listitem>
+        </itemizedlist>
+
+        <para>
+            Additionally, each of the above assertions have a 'Not' variant for
+            negative assertions.
+        </para>
     </sect3>
 
     <sect3 id="zend.test.phpunit.assertions.request">

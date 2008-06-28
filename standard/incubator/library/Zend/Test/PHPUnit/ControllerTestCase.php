@@ -549,7 +549,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Assert thta response does not redirect to given URL
+     * Assert that response does not redirect to given URL
      * 
      * @param  string $url 
      * @param  string $message 
@@ -595,6 +595,150 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
         $constraint = new Zend_Test_PHPUnit_Constraint_Redirect();
         $response   = $this->getResponse();
         if (!$constraint->evaluate($response, __FUNCTION__, $pattern)) {
+            $constraint->fail($response, $message);
+        }
+    }
+
+    /**
+     * Assert response code
+     * 
+     * @param  int $code 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertResponseCode($code, $message = '')
+    {
+        require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
+        $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
+        $response   = $this->getResponse();
+        if (!$constraint->evaluate($response, __FUNCTION__, $code)) {
+            $constraint->fail($response, $message);
+        }
+    }
+
+    /**
+     * Assert response code
+     * 
+     * @param  int $code 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertNotResponseCode($code, $message = '')
+    {
+        require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
+        $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
+        $constraint->setNegate(true);
+        $response   = $this->getResponse();
+        if (!$constraint->evaluate($response, __FUNCTION__, $code)) {
+            $constraint->fail($response, $message);
+        }
+    }
+
+    /**
+     * Assert response header exists
+     * 
+     * @param  string $header 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertHeader($header, $message = '')
+    {
+        require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
+        $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
+        $response   = $this->getResponse();
+        if (!$constraint->evaluate($response, __FUNCTION__, $header)) {
+            $constraint->fail($response, $message);
+        }
+    }
+
+    /**
+     * Assert response header does not exist
+     * 
+     * @param  string $header 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertNotHeader($header, $message = '')
+    {
+        require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
+        $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
+        $constraint->setNegate(true);
+        $response   = $this->getResponse();
+        if (!$constraint->evaluate($response, __FUNCTION__, $header)) {
+            $constraint->fail($response, $message);
+        }
+    }
+
+    /**
+     * Assert response header exists and contains the given string
+     * 
+     * @param  string $header 
+     * @param  string $match 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertHeaderContains($header, $match, $message = '')
+    {
+        require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
+        $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
+        $response   = $this->getResponse();
+        if (!$constraint->evaluate($response, __FUNCTION__, $header, $match)) {
+            $constraint->fail($response, $message);
+        }
+    }
+
+    /**
+     * Assert response header does not exist and/or does not contain the given string
+     * 
+     * @param  string $header 
+     * @param  string $match
+     * @param  string $message 
+     * @return void
+     */
+    public function assertNotHeaderContains($header, $match, $message = '')
+    {
+        require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
+        $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
+        $constraint->setNegate(true);
+        $response   = $this->getResponse();
+        if (!$constraint->evaluate($response, __FUNCTION__, $header, $match)) {
+            $constraint->fail($response, $message);
+        }
+    }
+
+    /**
+     * Assert response header exists and matches the given pattern
+     * 
+     * @param  string $header 
+     * @param  string $pattern 
+     * @param  string $message 
+     * @return void
+     */
+    public function assertHeaderRegex($header, $pattern, $message = '')
+    {
+        require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
+        $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
+        $response   = $this->getResponse();
+        if (!$constraint->evaluate($response, __FUNCTION__, $header, $pattern)) {
+            $constraint->fail($response, $message);
+        }
+    }
+
+    /**
+     * Assert response header does not exist and/or does not match the given regex
+     * 
+     * @param  string $header 
+     * @param  string $pattern
+     * @param  string $message 
+     * @return void
+     */
+    public function assertNotHeaderRegex($header, $pattern, $message = '')
+    {
+        require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
+        $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
+        $constraint->setNegate(true);
+        $response   = $this->getResponse();
+        if (!$constraint->evaluate($response, __FUNCTION__, $header, $pattern)) {
             $constraint->fail($response, $message);
         }
     }
