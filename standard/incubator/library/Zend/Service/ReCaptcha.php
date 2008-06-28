@@ -105,9 +105,14 @@ class Zend_Service_ReCaptcha
     /**
      * Options for tailoring reCaptcha
      *
+     * See the different options on http://recaptcha.net/apidocs/captcha/client.html
+     *
      * @var array
      */
-    protected $_options = array();
+    protected $_options = array(
+        'theme' => 'red',
+        'lang' => 'en',
+    );
 
     /**
      * Response from the verify server
