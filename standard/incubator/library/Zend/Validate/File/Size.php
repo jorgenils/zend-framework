@@ -65,7 +65,7 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
     /**
      * Maximum filesize
      *
-     * If null, there is no maximum file size
+     * If null, there is no maximum filesize
      *
      * @var integer|null
      */
@@ -74,14 +74,24 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
     /**
      * Sets validator options
      *
-     * @param  integer $min
-     * @param  integer $max
+     * @param  integer $max Maximum filesize
+     * @param  integer $min Minimum filesize
      * @return void
      */
-    public function __construct($min = 0, $max = null)
+    public function __construct($max = 0, $min = null)
     {
-        $this->setMin($min);
+        if (is_array($max)) {
+            if (isset($max['min'])) {
+                $min = $max['min'];
+            }
+
+            if (isset($max['max'])) {
+                $max = $max['max'];
+            }
+        }
+
         $this->setMax($max);
+        $this->setMin($min);
     }
 
     /**
@@ -110,6 +120,7 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
             throw new Zend_Validate_Exception("The minimum must be less than or equal to the maximum filesize, but $min >"
                                             . " $this->_max");
         }
+
         $this->_min = max(0, (integer) $min);
         return $this;
     }

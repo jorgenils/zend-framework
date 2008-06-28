@@ -111,6 +111,7 @@ class Zend_Validate_File_Extension extends Zend_Validate_Abstract
         if (in_array($info['extension'], $this->_extension) === true) {
             return true;
         }
+
         return false;
     }
 }
