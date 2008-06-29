@@ -402,41 +402,49 @@ class Zend_Test_PHPUnit_ControllerTestCaseTest extends PHPUnit_Framework_TestCas
         $this->testCase->getResponse()->setHeader('Content-Type', 'x-application/my-foo');
         try {
             $this->testCase->assertResponseCode(500);
+            $this->fail();
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
             $this->assertContains('Failed', $e->getMessage());
         }
         try {
             $this->testCase->assertNotResponseCode(200);
+            $this->fail();
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
             $this->assertContains('Failed', $e->getMessage());
         }
         try {
             $this->testCase->assertNotHeader('Content-Type');
+            $this->fail();
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
             $this->assertContains('Failed', $e->getMessage());
         }
         try {
             $this->testCase->assertHeader('X-Bogus');
+            $this->fail();
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
             $this->assertContains('Failed', $e->getMessage());
         }
         try {
             $this->testCase->assertNotHeaderContains('Content-Type', 'my-foo');
+            $this->fail();
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
             $this->assertContains('Failed', $e->getMessage());
         }
         try {
             $this->testCase->assertHeaderContains('Content-Type', 'my-bar');
+            $this->fail();
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
             $this->assertContains('Failed', $e->getMessage());
         }
         try {
             $this->testCase->assertNotHeaderRegex('Content-Type', '#^[a-z-]+/[a-z-]+$#i');
+            $this->fail();
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
             $this->assertContains('Failed', $e->getMessage());
         }
         try {
             $this->testCase->assertHeaderRegex('Content-Type', '#^\d+#i');
+            $this->fail();
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
             $this->assertContains('Failed', $e->getMessage());
         }
