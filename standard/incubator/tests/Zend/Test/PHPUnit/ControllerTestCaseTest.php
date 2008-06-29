@@ -122,6 +122,16 @@ class Zend_Test_PHPUnit_ControllerTestCaseTest extends PHPUnit_Framework_TestCas
         $this->assertSame($query, $test);
     }
 
+    public function testOverloadingShouldReturnRequestResponseAndFrontControllerObjects()
+    {
+        $request         = $this->testCase->getRequest();
+        $response        = $this->testCase->getResponse();
+        $frontController = $this->testCase->getFrontController();
+        $this->assertSame($request, $this->testCase->request);
+        $this->assertSame($response, $this->testCase->response);
+        $this->assertSame($frontController, $this->testCase->frontController);
+    }
+
     public function testResetShouldResetMvcState()
     {
         require_once 'Zend/Controller/Action/HelperBroker.php';

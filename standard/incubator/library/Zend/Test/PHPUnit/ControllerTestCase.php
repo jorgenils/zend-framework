@@ -25,7 +25,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     /**
      * @var Zend_Controller_Front
      */
-    protected $_controller;
+    protected $_frontController;
 
     /**
      * @var Zend_Dom_Query
@@ -41,6 +41,28 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      * @var Zend_Controller_Response_Abstract
      */
     protected $_response;
+
+    /**
+     * Overloading for common properties
+     *
+     * Provides overloading for request, response, and frontController objects.
+     * 
+     * @param mixed $name 
+     * @return void
+     */
+    public function __get($name)
+    {
+        switch ($name) {
+            case 'request':
+                return $this->getRequest();
+            case 'response':
+                return $this->getResponse();
+            case 'frontController':
+                return $this->getFrontController();
+        }
+
+        return null;
+    }
 
     /**
      * Set up MVC app
@@ -78,7 +100,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
                 }
             }
         }
-        $this->getFrontController()
+        $this->frontController
              ->setRequest($this->getRequest())
              ->setResponse($this->getResponse());
     }
@@ -104,11 +126,12 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
         }
         $request->setPathInfo(null);
         $controller = $this->getFrontController();
-        $controller->setRequest($request)
-                   ->setResponse($this->getResponse())
-                   ->throwExceptions(false)
-                   ->returnResponse(false);
-        $controller->dispatch();
+        $this->frontController
+             ->setRequest($request)
+             ->setResponse($this->getResponse())
+             ->throwExceptions(false)
+             ->returnResponse(false);
+        $this->frontController->dispatch();
     }
 
     /**
@@ -126,7 +149,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
         $this->_request  = null;
         $this->_response = null;
         Zend_Controller_Action_HelperBroker::resetHelpers();
-        $this->getFrontController()->resetInstance();
+        $this->frontController->resetInstance();
         Zend_Session::$_unitTestEnabled = true;
     }
 
@@ -154,7 +177,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__)) {
             $constraint->fail($path, $message);
         }
@@ -171,7 +194,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__)) {
             $constraint->fail($path, $message);
         }
@@ -189,7 +212,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $match)) {
             $constraint->fail($path, $message);
         }
@@ -207,7 +230,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $match)) {
             $constraint->fail($path, $message);
         }
@@ -225,7 +248,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $pattern)) {
             $constraint->fail($path, $message);
         }
@@ -243,7 +266,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $pattern)) {
             $constraint->fail($path, $message);
         }
@@ -261,7 +284,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $count)) {
             $constraint->fail($path, $message);
         }
@@ -279,7 +302,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $count)) {
             $constraint->fail($path, $message);
         }
@@ -297,7 +320,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $count)) {
             $constraint->fail($path, $message);
         }
@@ -315,7 +338,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $count)) {
             $constraint->fail($path, $message);
         }
@@ -332,7 +355,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__)) {
             $constraint->fail($path, $message);
         }
@@ -349,7 +372,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__)) {
             $constraint->fail($path, $message);
         }
@@ -367,7 +390,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $match)) {
             $constraint->fail($path, $message);
         }
@@ -385,7 +408,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $match)) {
             $constraint->fail($path, $message);
         }
@@ -403,7 +426,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $pattern)) {
             $constraint->fail($path, $message);
         }
@@ -421,7 +444,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $pattern)) {
             $constraint->fail($path, $message);
         }
@@ -439,7 +462,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $count)) {
             $constraint->fail($path, $message);
         }
@@ -457,7 +480,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $count)) {
             $constraint->fail($path, $message);
         }
@@ -475,7 +498,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $count)) {
             $constraint->fail($path, $message);
         }
@@ -493,7 +516,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
-        $content    = $this->getResponse()->outputBody();
+        $content    = $this->response->outputBody();
         if (!$constraint->evaluate($content, __FUNCTION__, $count)) {
             $constraint->fail($path, $message);
         }
@@ -509,7 +532,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/Redirect.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_Redirect();
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__)) {
             $constraint->fail($response, $message);
         }
@@ -525,7 +548,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/Redirect.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_Redirect();
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__)) {
             $constraint->fail($response, $message);
         }
@@ -542,7 +565,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/Redirect.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_Redirect();
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $url)) {
             $constraint->fail($response, $message);
         }
@@ -559,7 +582,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/Redirect.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_Redirect();
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $url)) {
             $constraint->fail($response, $message);
         }
@@ -576,7 +599,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/Redirect.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_Redirect();
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $pattern)) {
             $constraint->fail($response, $message);
         }
@@ -593,7 +616,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/Redirect.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_Redirect();
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $pattern)) {
             $constraint->fail($response, $message);
         }
@@ -610,7 +633,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $code)) {
             $constraint->fail($response, $message);
         }
@@ -628,7 +651,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
         require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
         $constraint->setNegate(true);
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $code)) {
             $constraint->fail($response, $message);
         }
@@ -645,7 +668,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $header)) {
             $constraint->fail($response, $message);
         }
@@ -663,7 +686,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
         require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
         $constraint->setNegate(true);
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $header)) {
             $constraint->fail($response, $message);
         }
@@ -681,7 +704,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $header, $match)) {
             $constraint->fail($response, $message);
         }
@@ -700,7 +723,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
         require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
         $constraint->setNegate(true);
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $header, $match)) {
             $constraint->fail($response, $message);
         }
@@ -718,7 +741,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $header, $pattern)) {
             $constraint->fail($response, $message);
         }
@@ -737,7 +760,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
         require_once 'Zend/Test/PHPUnit/Constraint/ResponseHeader.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_ResponseHeader();
         $constraint->setNegate(true);
-        $response   = $this->getResponse();
+        $response   = $this->response;
         if (!$constraint->evaluate($response, __FUNCTION__, $header, $pattern)) {
             $constraint->fail($response, $message);
         }
@@ -752,8 +775,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function assertModule($module, $message = '')
     {
-        $request = $this->getRequest();
-        if ($module != $request->getModuleName()) {
+        if ($module != $this->request->getModuleName()) {
             $msg = sprintf('Failed asserting last module used was "%s"', $module);
             if (!empty($message)) {
                 $msg = $message . "\n" . $msg;
@@ -771,8 +793,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function assertNotModule($module, $message = '')
     {
-        $request = $this->getRequest();
-        if ($module == $request->getModuleName()) {
+        if ($module == $this->request->getModuleName()) {
             $msg = sprintf('Failed asserting last module used was NOT "%s"', $module);
             if (!empty($message)) {
                 $msg = $message . "\n" . $msg;
@@ -790,8 +811,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function assertController($controller, $message = '')
     {
-        $request = $this->getRequest();
-        if ($controller != $request->getControllerName()) {
+        if ($controller != $this->request->getControllerName()) {
             $msg = sprintf('Failed asserting last controller used was "%s"', $controller);
             if (!empty($message)) {
                 $msg = $message . "\n" . $msg;
@@ -809,8 +829,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function assertNotController($controller, $message = '')
     {
-        $request = $this->getRequest();
-        if ($controller == $request->getControllerName()) {
+        if ($controller == $this->request->getControllerName()) {
             $msg = sprintf('Failed asserting last controller used was NOT "%s"', $controller);
             if (!empty($message)) {
                 $msg = $message . "\n" . $msg;
@@ -828,8 +847,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function assertAction($action, $message = '')
     {
-        $request = $this->getRequest();
-        if ($action != $request->getActionName()) {
+        if ($action != $this->request->getActionName()) {
             $msg = sprintf('Failed asserting last action used was "%s"', $action);
             if (!empty($message)) {
                 $msg = $message . "\n" . $msg;
@@ -847,8 +865,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function assertNotAction($action, $message = '')
     {
-        $request = $this->getRequest();
-        if ($action == $request->getActionName()) {
+        if ($action == $this->request->getActionName()) {
             $msg = sprintf('Failed asserting last action used was NOT "%s"', $action);
             if (!empty($message)) {
                 $msg = $message . "\n" . $msg;
@@ -866,7 +883,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function assertRoute($route, $message = '')
     {
-        $router = $this->getFrontController()->getRouter();
+        $router = $this->frontController->getRouter();
         if ($route != $router->getCurrentRouteName()) {
             $msg = sprintf('Failed asserting route matched was "%s"', $route);
             if (!empty($message)) {
@@ -885,7 +902,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function assertNotRoute($route, $message = '')
     {
-        $router = $this->getFrontController()->getRouter();
+        $router = $this->frontController->getRouter();
         if ($route == $router->getCurrentRouteName()) {
             $msg = sprintf('Failed asserting route matched was NOT "%s"', $route);
             if (!empty($message)) {
@@ -902,11 +919,11 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function getFrontController()
     {
-        if (null === $this->_controller) {
+        if (null === $this->_frontController) {
             require_once 'Zend/Controller/Front.php';
-            $this->_controller = Zend_Controller_Front::getInstance();
+            $this->_frontController = Zend_Controller_Front::getInstance();
         }
-        return $this->_controller;
+        return $this->_frontController;
     }
 
     /**
