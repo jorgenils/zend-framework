@@ -48,8 +48,7 @@ class UserControllerTest extends Zend_Test_PHPUnit_ControllerTestCase
 
     public function appBootstrap()
     {
-        $controller = $this->getFrontController();
-        $controller->registerPlugin(new Bugapp_Plugin_Initialize('development'));
+        $this->frontController->registerPlugin(new Bugapp_Plugin_Initialize('development'));
     }
 
     public function testCallWithoutActionShouldPullFromIndexAction()
@@ -68,19 +67,17 @@ class UserControllerTest extends Zend_Test_PHPUnit_ControllerTestCase
 
     public function testValidLoginShouldGoToProfilePage()
     {
-        $request = $this->getRequest();
-        $request->setMethod('POST')
-                ->setPost(array(
-                    'username' => 'foobar',
-                    'password' => 'foobar'
-                ));
-        $response = $this->getResponse();
+        $this->request->setMethod('POST')
+              ->setPost(array(
+                  'username' => 'foobar',
+                  'password' => 'foobar'
+              ));
         $this->dispatch('/user/login');
         $this->assertRedirectTo('/user/view');
 
         $this->resetResponse();
-        $request->setMethod('GET')
-                ->setPost(array());
+        $this->request->setMethod('GET')
+             ->setPost(array());
         $this->dispatch('/user/view');
         $this->assertRoute('default');
         $this->assertModule('default');
