@@ -15,19 +15,14 @@
     </para>
     
     <para>
-        WSDL document should be constructed manually or using SOAP WSDL accessor functionality provided 
-        by <link linkend="zend.soap.wsdl"><code>Zend_Soap_Wsdl</code> class</link>.
+        WSDL document may be auto-generated with functionality provided by 
+        <link linkend="zend.soap.autodiscovery">Zend_Soap_AutoDiscovery component</link> or should be constructed manually using 
+        <link linkend="zend.soap.wsdl"><code>Zend_Soap_Wsdl</code> class</link> or any other XML generating tool.
     </para>
 
     <para>
         If the non-WSDL mode is used, then all protocol options have to be set using options mechanism.  
     </para>
-    
-    <para>
-        In both cases initial WSDL document may be generated using 
-        <link linkend="zend.soap.autodiscovery"><code>Zend_Soap_AutoDiscover</code> class</link>.
-    </para>
-
     
     <sect2 id="zend.soap.server.constructor">
         <title><code>Zend_Soap_Server</code> constructor.</title>
@@ -237,6 +232,114 @@ $server->handle();]]></programlisting>
     
     <sect2 id="zend.soap.server.request_response">
         <title>Request and response objects handling.</title>
-        ...
+        <note>
+            <title>Advanced</title>
+            <para>
+                This section describes advanced request/response processing options and may be skipped.
+            </para>
+        </note>
+        
+        <para>
+            Zend_Soap_Server component performs request/response processing automatically, 
+            but allows to catch it and do some pre- and post-processing.
+        </para>
+        
+        <sect3 id="zend.soap.server.request_response.request">
+            <title>Request processing.</title>
+            
+            <para>
+                <code>Zend_Soap_Server::handle()</code> method takes request from the standard input stream ('php://input').
+                It may be overridden either by supplying optional parameter to the <code>handle()</code> method or
+                by setting request using <code>setRequest()</code> method:
+                <programlisting role="php"><![CDATA[<?php
+...
+$server = new Zend_Soap_Server(...);
+...
+// Set request using optional $request parameter
+$server->handle($request);
+...
+// Set request using setRequest() method
+$server->setRequest();
+$server->handle();]]></programlisting>
+            </para>
+            
+            <para>
+                Request object may be represented using any of the following:
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            DOMDocument (casted to XML)
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            DOMNode (owner document is grabbed and casted to XML)
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            SimpleXMLElement (casted to XML)
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            stdClass (__toString() is called and verified to be valid XML)
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            string (verified to be valid XML)
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            
+            <para>
+                Last processed request may be retrieved using <code>getLastRequest()</code> method as an XML string:
+                <programlisting role="php"><![CDATA[<?php
+...
+$server = new Zend_Soap_Server(...);
+...
+$server->handle();
+$request = $server->getLastRequest();]]></programlisting>
+                
+            </para>
+        </sect3>
+
+        <sect3 id="zend.soap.server.request_response.response">
+            <title>Response pre-processing.</title>
+            
+            <para>
+                <code>Zend_Soap_Server::handle()</code> method automatically emits generated response to the output stream.   
+                It may be blocked using <code>setReturnResponse()</code> with <code>true</code> or <code>false</code> 
+                as a parameter<footnote>
+                                <para>
+                                    Current state of the Return Response flag may be requested with
+                                    <code>setReturnResponse()</code> method.
+                                </para>
+                              </footnote>.
+                Generated response is returned by <code>handle()</code> method in this case.  
+                <programlisting role="php"><![CDATA[<?php
+...
+$server = new Zend_Soap_Server(...);
+...
+// Get a response as a return value of handle() method instead of emitting it to the standard output
+$server->setReturnResponse(true);
+...
+$response = $server->handle();
+...]]></programlisting>
+            </para>
+            
+            <para>
+                Last response may be also retrieved by <code>getLastResyponse()</code> method for some post-processing:
+                <programlisting role="php"><![CDATA[<?php
+...
+$server = new Zend_Soap_Server(...);
+...
+$server->handle();
+$response = $server->getLastResyponse();
+...]]></programlisting>
+            </para>
+        </sect3>
     </sect2>
 </sect1>
