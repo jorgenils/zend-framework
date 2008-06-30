@@ -42,6 +42,30 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     protected $_response;
 
+    public function __set($name, $value)
+    {
+        if (in_array($name, array('request', 'response', 'frontController'))) {
+            throw new Zend_Exception(sprintf('Setting %s object manually is not allowed', $name));
+        }
+
+        if ('_' == substr($name, 0, 1)) {
+            throw new Zend_Exception('Overloading of non-public properties is prohibited');
+        }
+
+        if (null === $this->_reflection) {
+            $this->_reflection = new ReflectionObject($this);
+        }
+
+        if ($this->_reflection->hasProperty($name)) {
+            $prop = $this->_reflection->getProperty($name);
+            if (!$prop->isPublic()) {
+                throw new Zend_Exception('Overloading of non-public properties is prohibited');
+            }
+        }
+
+        $this->$name = $value;
+    }
+
     /**
      * Overloading for common properties
      *

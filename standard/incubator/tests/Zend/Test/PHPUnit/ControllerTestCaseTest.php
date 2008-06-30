@@ -132,6 +132,30 @@ class Zend_Test_PHPUnit_ControllerTestCaseTest extends PHPUnit_Framework_TestCas
         $this->assertSame($frontController, $this->testCase->frontController);
     }
 
+    public function testOverloadingShouldPreventSettingRequestResponseAndFrontControllerObjects()
+    {
+        try {
+            $this->testCase->request = new Zend_Controller_Request_Http();
+            $this->fail('Setting request object as public property should raise exception');
+        } catch (Exception $e) {
+            $this->assertContains('not allow', $e->getMessage());
+        }
+
+        try {
+            $this->testCase->response = new Zend_Controller_Response_Http();
+            $this->fail('Setting response object as public property should raise exception');
+        } catch (Exception $e) {
+            $this->assertContains('not allow', $e->getMessage());
+        }
+
+        try {
+            $this->testCase->frontController = Zend_Controller_Front::getInstance();
+            $this->fail('Setting front controller as public property should raise exception');
+        } catch (Exception $e) {
+            $this->assertContains('not allow', $e->getMessage());
+        }
+    }
+
     public function testResetShouldResetMvcState()
     {
         require_once 'Zend/Controller/Action/HelperBroker.php';
