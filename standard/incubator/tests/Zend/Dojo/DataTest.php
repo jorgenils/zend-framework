@@ -83,99 +83,329 @@ class Zend_Dojo_DataTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('title', $this->dojoData->getLabel());
     }
 
+    public function testAddItemShouldThrowExceptionIfNoIdentifierPresentInObject()
+    {
+        $item = array(
+            'id'    => '1',
+            'title' => 'foo',
+            'url'   => 'http://www.example.com/',
+        );
+        try {
+            $this->dojoData->addItem($item);
+            $this->fail('Should throw exception if no identifier present');
+        } catch (Zend_Dojo_Exception $e) {
+            $this->assertContains('identifier', $e->getMessage());
+        }
+    }
+
+    public function testAddItemShouldThrowExceptionIfNoIdentifierPresentInItem()
+    {
+        $item = array(
+            'title' => 'foo',
+            'url'   => 'http://www.example.com/',
+        );
+        $this->dojoData->setIdentifier('id');
+        try {
+            $this->dojoData->addItem($item);
+            $this->fail('Should throw exception if no identifier present');
+        } catch (Zend_Dojo_Exception $e) {
+            $this->assertContains('identifier', $e->getMessage());
+        }
+    }
+
     public function testAddItemShouldAcceptArray()
     {
-        $this->markTestIncomplete();
+        $item = array(
+            'id'    => '1',
+            'title' => 'foo',
+            'url'   => 'http://www.example.com/',
+        );
+        $this->dojoData->setIdentifier('id');
+        $this->dojoData->addItem($item);
+        $this->assertEquals(1, count($this->dojoData));
+        $this->assertSame($item, $this->dojoData->getItem(1));
     }
 
     public function testAddItemShouldAcceptStdObject()
     {
-        $this->markTestIncomplete();
+        $item = array(
+            'id'    => '1',
+            'title' => 'foo',
+            'url'   => 'http://www.example.com/',
+        );
+        $obj = (object) $item;
+        $this->dojoData->setIdentifier('id');
+        $this->dojoData->addItem($obj);
+        $this->assertEquals(1, count($this->dojoData));
+        $this->assertSame($item, $this->dojoData->getItem(1));
     }
 
     public function testAddItemShouldAcceptObjectImplementingToArray()
     {
-        $this->markTestIncomplete();
+        $obj = new Zend_Dojo_DataTest_DataObject;
+        $this->dojoData->setIdentifier('id');
+        $this->dojoData->addItem($obj);
+        $this->assertEquals(1, count($this->dojoData));
+        $this->assertSame($obj->item, $this->dojoData->getItem('foo'));
+    }
+
+    public function testAddItemShouldThrowErrorOnInvalidItem()
+    {
+        $this->dojoData->setIdentifier('id');
+        try {
+            $this->dojoData->addItem('foo');
+            $this->fail('Invalid item should throw error');
+        } catch (Zend_Dojo_Exception $e) {
+            $this->assertContains('Only arrays and objects', $e->getMessage());
+        }
     }
 
     public function testAddItemShouldAllowSpecifyingIdentifier()
     {
-        $this->markTestIncomplete();
+        $item = array(
+            'title' => 'foo',
+            'url'   => 'http://www.example.com/',
+        );
+        $this->dojoData->setIdentifier('id');
+        $this->dojoData->addItem($item, 'foo');
+        $this->assertEquals(1, count($this->dojoData));
+        $stored = $this->dojoData->getItem('foo');
+        $this->assertTrue(array_key_exists('id', $stored));
+        $this->assertEquals('foo', $stored['id']);
+        foreach ($item as $key => $value) {
+            $this->assertTrue(array_key_exists($key, $stored));
+            $this->assertEquals($value, $stored[$key]);
+        }
     }
 
-    public function testAddItemShouldAutodiscoverIdentifierIfNoneProvidedAndObjectIdentifierSet()
+    public function testOverwritingItemsShouldNotBeAllowedFromAddItem()
     {
-        $this->markTestIncomplete();
+        $this->testAddItemShouldAcceptArray();
+        $item = array(
+            'id'    => '1',
+            'title' => 'foo',
+            'url'   => 'http://www.example.com/',
+        );
+        try {
+            $this->dojoData->addItem($item);
+            $this->fail('Overwriting items via addItem() should throw error');
+        } catch (Zend_Dojo_Exception $e) {
+            $this->assertContains('not allowed', $e->getMessage());
+        }
     }
 
     public function testSetItemShouldOverwriteExistingItem()
     {
-        $this->markTestIncomplete();
+        $this->testAddItemShouldAcceptArray();
+        $item = array(
+            'id'    => '1',
+            'title' => 'bar',
+            'url'   => 'http://www.foo.com/',
+        );
+        $this->assertNotSame($item, $this->dojoData->getItem(1));
+        $this->dojoData->setItem($item);
+        $this->assertEquals(1, count($this->dojoData));
+        $this->assertSame($item, $this->dojoData->getItem(1));
     }
 
     public function testSetItemShouldAddItemIfNonexistent()
     {
-        $this->markTestIncomplete();
+        $item = array(
+            'id'    => '1',
+            'title' => 'bar',
+            'url'   => 'http://www.foo.com/',
+        );
+        $this->dojoData->setIdentifier('id');
+        $this->assertEquals(0, count($this->dojoData));
+        $this->dojoData->setItem($item);
+        $this->assertEquals(1, count($this->dojoData));
+        $this->assertSame($item, $this->dojoData->getItem(1));
     }
 
     public function testAddItemsShouldAcceptArray()
     {
-        $this->markTestIncomplete();
+        $items = array(
+            array (
+                'id'    => 1,
+                'title' => 'Foo',
+                'email' => 'foo@bar',
+            ),
+            array (
+                'id'    => 2,
+                'title' => 'Bar',
+                'email' => 'bar@bar',
+            ),
+            array (
+                'id'    => 3,
+                'title' => 'Baz',
+                'email' => 'baz@bar',
+            ),
+        );
+        $this->dojoData->setIdentifier('id');
+        $this->assertEquals(0, count($this->dojoData));
+        $this->dojoData->addItems($items);
+        $this->assertEquals(3, count($this->dojoData));
+        $this->assertSame($items[0], $this->dojoData->getItem(1));
+        $this->assertSame($items[1], $this->dojoData->getItem(2));
+        $this->assertSame($items[2], $this->dojoData->getItem(3));
     }
 
     public function testAddItemsShouldAcceptTraversableObject()
     {
-        $this->markTestIncomplete();
+        $obj = new Zend_Dojo_DataTest_DataCollection;
+        $this->dojoData->setIdentifier('id');
+        $this->assertEquals(0, count($this->dojoData));
+        $this->dojoData->addItems($obj);
+        $this->assertEquals(3, count($this->dojoData));
+        $this->assertSame($obj->items[0]->toArray(), $this->dojoData->getItem(1));
+        $this->assertSame($obj->items[1]->toArray(), $this->dojoData->getItem(2));
+        $this->assertSame($obj->items[2]->toArray(), $this->dojoData->getItem(3));
     }
 
     public function testSetItemsShouldOverwriteAllCurrentItems()
     {
-        $this->markTestIncomplete();
+        $this->testAddItemsShouldAcceptArray();
+        $items = $this->dojoData->getItems();
+        $obj   = new Zend_Dojo_DataTest_DataCollection;
+        $this->dojoData->setItems($obj);
+        $this->assertEquals(3, count($this->dojoData));
+        $this->assertNotSame($items, $this->dojoData->getItems());
     }
 
     public function testRemoveItemShouldRemoveItemSpecifiedByIdentifier()
     {
-        $this->markTestIncomplete();
+        $this->testAddItemsShouldAcceptArray();
+        $this->assertNotNull($this->dojoData->getItem(1));
+        $this->dojoData->removeItem(1);
+        $this->assertNull($this->dojoData->getItem(1));
+        $this->assertEquals(2, count($this->dojoData));
     }
 
     public function testClearItemsShouldRemoveAllItems()
     {
-        $this->markTestIncomplete();
+        $this->testAddItemsShouldAcceptArray();
+        $this->dojoData->clearItems();
+        $this->assertEquals(0, count($this->dojoData));
+    }
+
+    public function testGetItemShouldReturnNullIfNoMatchingItemExists()
+    {
+        $this->assertNull($this->dojoData->getItem('bogus'));
     }
 
     public function testGetItemsShouldReturnArrayOfItems()
     {
-        $this->markTestIncomplete();
+        $this->testAddItemsShouldAcceptArray();
+        $items = $this->dojoData->getItems();
+        $this->assertTrue(is_array($items));
     }
 
     public function testShouldSerializeToArray()
     {
-        $this->markTestIncomplete();
+        $this->testAddItemsShouldAcceptTraversableObject();
+        $array = $this->dojoData->toArray();
+        $this->assertTrue(is_array($array));
+        $this->assertTrue(array_key_exists('identifier', $array));
+        $this->assertEquals($this->dojoData->getIdentifier(), $array['identifier']);
+        $this->assertEquals($this->dojoData->getItems(), $array['items']);
     }
 
     public function testShouldSerializeToJson()
     {
-        $this->markTestIncomplete();
+        $this->testAddItemsShouldAcceptTraversableObject();
+        $json = $this->dojoData->toJson();
+        $this->assertSame($this->dojoData->toArray(), Zend_Json::decode($json));
     }
 
     public function testShouldSerializeToStringAsJson()
     {
-        $this->markTestIncomplete();
+        $this->testAddItemsShouldAcceptTraversableObject();
+        $json = $this->dojoData->toJson();
+        $this->assertSame($json, $this->dojoData->__toString());
     }
 
     public function testShouldImplementArrayAccess()
     {
-        $this->markTestIncomplete();
+        $this->assertTrue($this->dojoData instanceof ArrayAccess);
+        $this->testAddItemsShouldAcceptTraversableObject();
+        $this->assertEquals($this->dojoData->getItem(1), $this->dojoData[1]);
+        $this->dojoData[4] = array(
+            'title' => 'ArrayAccess',
+            'meta'  => 'fun',
+        );
+        $this->assertTrue(isset($this->dojoData[4]));
+        $this->assertEquals($this->dojoData->getItem(4), $this->dojoData[4]);
+        unset($this->dojoData[4]);
+        $this->assertFalse(isset($this->dojoData[4]));
     }
 
     public function testShouldImplementIterator()
     {
-        $this->markTestIncomplete();
+        $this->assertTrue($this->dojoData instanceof Iterator);
+        $this->testAddItemsShouldAcceptTraversableObject();
+        foreach ($this->dojoData as $key => $item) {
+            $this->assertTrue(is_array($item));
+            $this->assertEquals($key, $item['id']);
+        }
     }
 
     public function testShouldImplementCountable()
     {
-        $this->markTestIncomplete();
+        $this->assertTrue($this->dojoData instanceof Countable);
+    }
+}
+
+class Zend_Dojo_DataTest_DataObject
+{
+    public $item = array(
+        'id'    => 'foo',
+        'title' => 'Foo',
+        'email' => 'foo@foo.com',
+    );
+
+    public function toArray()
+    {
+        return $this->item;
+    }
+}
+
+class Zend_Dojo_DataTest_DataCollection implements Iterator
+{
+    public $items = array();
+
+    public function __construct()
+    {
+        for ($i = 1; $i < 4; ++$i) {
+            $item = new Zend_Dojo_DataTest_DataObject;
+            $item->item['id'] = $i;
+            $item->item['title'] .= $i;
+            $this->items[] = $item;
+        }
+    }
+
+    public function current()
+    {
+        return current($this->items);
+    }
+
+    public function key()
+    {
+        return key($this->items);
+    }
+
+    public function next()
+    {
+        return next($this->items);
+    }
+
+    public function rewind()
+    {
+        return reset($this->items);
+    }
+
+    public function valid()
+    {
+        return (bool) $this->current();
     }
 }
 
