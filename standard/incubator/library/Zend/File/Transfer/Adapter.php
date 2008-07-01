@@ -30,42 +30,62 @@
 abstract class Zend_File_Transfer_Adapter
 {
     /**
-     * List of all validators
+     * Intern list of validators
      *
      * @var array
      */
     protected $_validator = array();
 
     /**
-     * Sets a validator for the class, erasing all previous set
+     * Intern list of filters
      *
-     * @param  string $validator Type of validator to set
-     * @param  array  $options   Options to set for this validator
-     * @return array All set options
+     * @var array
      */
-    public function setValidator(array $validator)
-    {
-        $this->_validator = null;
-        $this->addValidator($validator);
-        return $this;
-    }
+    protected $_filter = array();
 
     /**
      * Returns all set validators with their options
      *
-     * @return array List of all set validators
+     * @param  string $validator Returns the defined validator
+     * @return null|array List of set validators
      */
-    public function getValidator()
+    public function getValidator($validator = null)
     {
-        return $this->_validator;
+        if ($validator === null) {
+            return $this->_validator;
+        }
+
+        if (isset($this->_validator[$validator])) {
+            return $this->_validator[$validator];
+        }
+
+        return null;
+    }
+
+    /**
+     * Sets a validator for the class, erasing all previous set
+     *
+     * @param  string|array $validator Validator to set
+     * @param  string|array $options   Options to set for this validator
+     * @param  string|array $files     Files to limit this validator to
+     * @return Zend_File_Transfer_Adapter
+     */
+    public function setValidator($validator, $options = null, $files = null)
+    {
+        $this->_validator = null;
+        $this->addValidator($validator, $options, $files);
+        return $this;
     }
 
     /**
      * Adds a new validator for this class, old validators will not be erased
      *
-     * @param array $validator Type of validator to add with it's options
+     * @param string|array $validator Type of validator to add
+     * @param string|array $options   Options to set for the validator
+     * @param string|array $files     Files to limit this validator to
+     * @return Zend_File_Transfer_Adapter
      */
-    public function addValidator(array $validator)
+    public function addValidator($validator, $options = null, $files = null)
     {
         foreach ($validator as $class => $options) {
             switch(strtolower($class)) {
@@ -88,4 +108,86 @@ abstract class Zend_File_Transfer_Adapter
 
         return $this;
     }
+
+    /**
+     * Returns all set filters with their options
+     *
+     * @param string $filter Filter to return
+     * @return array List of set filters
+     */
+    public function getFilter($filter = null)
+    {
+        
+    }
+
+    /**
+     * Sets a filter for this class, erasing previous set
+     *
+     * @param string|array $filter  Filters to set
+     * @param string|array $options Options to set for the filter
+     * @param string|array $files   Files to limit this filter to
+     */
+    public function setFilter($filter, $options = null, $files = null)
+    {
+        
+    }
+
+    /**
+     * Adds a new filter for this class, old filters will not be erased
+     *
+     * @param string|array $filter  Type of filter to add
+     * @param string|array $options Options to set for the filter
+     * @param string|array $files   Files to limit this filter to
+     * @return Zend_File_Transfer_Adapter
+     */
+    public function addFilter($filter, $options = null, $files = null)
+    {
+        
+    }
+
+    /**
+     * Returns all set files
+     *
+     * @return array List of set files
+     */
+    public function getFile()
+    {
+        
+    }
+
+    /**
+     * Adds one or more files
+     *
+     * @param string|array $file      File to add
+     * @param string|array $validator Validators to use for this file, must be set before
+     * @param string|array $filter    Filters to use for this file, must be set before
+     */
+    public function addFile($file, $validator = null, $filter = null)
+    {
+        
+    }
+
+    /**
+     * Adds one or more type of files
+     *
+     * @param string|array $type Type of files to add
+     * @param string|array $validator Validators to use for this file, must be set before
+     * @param string|array $filter    Filters to use for this file, must be set before
+     */
+    public function addType($type, $validator = null, $filter = null)
+    {
+        
+    }
+
+    abstract public function send($options = null);
+
+    abstract public function receive($options = null);
+
+    abstract function isSent($file = null);
+
+    abstract function isReceived($file = null);
+
+    abstract function isValid($file = null);
+
+    abstract function getProgress();
 }
