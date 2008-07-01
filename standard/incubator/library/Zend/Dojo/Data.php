@@ -270,10 +270,21 @@ class Zend_Dojo_Data implements ArrayAccess,Iterator,Countable
      */
     public function toArray()
     {
-        return array(
-            'identifier' => $this->getIdentifier(),
+        if (null === ($identifier = $this->getIdentifier())) {
+            require_once 'Zend/Dojo/Exception.php';
+            throw new Zend_Dojo_Exception('Serialization requires that an identifier be present in the object; first call setIdentifier()');
+        }
+
+        $array = array(
+            'identifier' => $identifier,
             'items'      => $this->getItems(),
         );
+
+        if (null !== ($label = $this->getLabel())) {
+            $array['label'] = $label;
+        }
+
+        return $array;
     }
  
     /**

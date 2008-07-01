@@ -310,6 +310,28 @@ class Zend_Dojo_DataTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($this->dojoData->getItems(), $array['items']);
     }
 
+    public function testSerializingToArrayShouldIncludeLabelIfPresent()
+    {
+        $this->testShouldSerializeToArray();
+        $this->dojoData->setLabel('title');
+        $array = $this->dojoData->toArray();
+        $this->assertTrue(is_array($array));
+        $this->assertTrue(array_key_exists('label', $array));
+        $this->assertEquals($this->dojoData->getLabel(), $array['label']);
+    }
+
+    public function testSerializingToArrayShouldThrowErrorIfNoIdentifierInObject()
+    {
+        $this->testAddItemsShouldAcceptTraversableObject();
+        $this->dojoData->setIdentifier(null);
+        try {
+            $array = $this->dojoData->toArray();
+            $this->fail('Serialization to array should throw error when no identifier is present in object');
+        } catch (Zend_Dojo_Exception $e) {
+            $this->assertContains('present', $e->getMessage());
+        }
+    }
+
     public function testShouldSerializeToJson()
     {
         $this->testAddItemsShouldAcceptTraversableObject();
