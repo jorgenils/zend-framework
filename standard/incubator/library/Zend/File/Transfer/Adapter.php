@@ -39,8 +39,8 @@ abstract class Zend_File_Transfer_Adapter
     /**
      * Sets a validator for the class, erasing all previous set
      *
-     * @param string $validator Type of validator to set
-     * @param array  $options   Options to set for this validator
+     * @param  string $validator Type of validator to set
+     * @param  array  $options   Options to set for this validator
      * @return array All set options
      */
     public function setValidator(array $validator)
@@ -83,11 +83,9 @@ abstract class Zend_File_Transfer_Adapter
 
             require_once 'Zend/Loader.php';
             Zend_Loader::loadClass($class);
-            $instance = new $class($options);
+            $this->_validator[] = new $class($options);
         }
-        // check validator
-        // load validator
-        // check options
-        // save in validatorchain
+
+        return $this;
     }
 }

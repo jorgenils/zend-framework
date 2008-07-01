@@ -74,34 +74,57 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
     /**
      * Sets validator options
      *
-     * @param  integer $max Maximum filesize
-     * @param  integer $min Minimum filesize
+     * Min limits the filesize, when used with max=null if is the maximum filesize
+     * It also accepts an array with the keys 'min' and 'max'
+     *
+     * @param  integer|array $min Minimum filesize
+     * @param  integer       $max Maximum filesize
      * @return void
      */
-    public function __construct($max = 0, $min = null)
+    public function __construct($min, $max = null)
     {
-        if (is_array($max)) {
-            if (isset($max['min'])) {
-                $min = $max['min'];
+        if (is_array($min) === true) {
+            if (isset($min['max']) === true) {
+                $max = $min['max'];
             }
 
-            if (isset($max['max'])) {
-                $max = $max['max'];
+            if (isset($min['min']) === true) {
+                $min = $min['min'];
+            }
+
+            if (isset($min[0]) === true) {
+                if (count($min) === 2) {
+                    $max = $min[1];
+                    $min = $min[0];
+                } else {
+                    $max = $min[0];
+                    $min = null;
+                }
             }
         }
 
-        $this->setMax($max);
+        if (empty($max) === true) {
+            $max = $min;
+            $min = null;
+        }
+
         $this->setMin($min);
+        $this->setMax($max);
     }
 
     /**
      * Returns the minimum filesize
      *
+     * @param  boolean $unit Return the value with unit, when false the plan bytes will be returned
      * @return integer
      */
-    public function getMin()
+    public function getMin($unit = true)
     {
-        $min = $this->_toByteString($this->_min);
+        $min = $this->_min;
+        if ($unit === true) {
+            $min = $this->_toByteString($min);
+        }
+
         return $min;
     }
 
@@ -128,11 +151,16 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
     /**
      * Returns the maximum filesize
      *
+     * @param  boolean $unit Return the value with unit, when false the plan bytes will be returned
      * @return integer|null
      */
-    public function getMax()
+    public function getMax($unit = true)
     {
-        $max = $this->_toByteString($this->_max);
+        $max = $this->_max;
+        if ($unit === true) {
+            $max = $this->_toByteString($max);
+        }
+
         return $max;
     }
 
@@ -148,7 +176,7 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
         $max = $this->_fromByteString($max);
         if (null === $max) {
             $this->_max = null;
-        } else if ($max < $this->_min) {
+        } else if (($this->_min !== null) and ($max < $this->_min)) {
             require_once 'Zend/Validate/Exception.php';
             throw new Zend_Validate_Exception("The maximum must be greater than or equal to the minimum length, but "
                                             . "$max < $this->_min");
@@ -206,7 +234,6 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
         for ($i=0; $size > 1024 && $i < 9; $i++) {
             $size /= 1024;
         }
-
         return round($size, 2).$sizes[$i];
     }
 
@@ -217,9 +244,13 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
      * @return integer
      */
     private function _fromByteString($size) {
-        $type  = substr($size, -2);
+        if (is_int($size) === true) {
+            return $size;
+        }
+
+        $type  = trim(substr($size, -2));
         $value = substr($size, 0, -2);
-        switch ($type) {
+        switch (strtoupper($type)) {
             case 'YB':
                 $value *= (1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024);
                 break;
@@ -247,7 +278,7 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
                 $value *= (1024 * 1024);
                 break;
 
-            case 'kB':
+            case 'KB':
                 $value *= 1024;
                 break;
 

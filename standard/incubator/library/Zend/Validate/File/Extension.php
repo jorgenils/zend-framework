@@ -25,7 +25,7 @@
 require_once 'Zend/Validate/Abstract.php';
 
 /**
- * Validator for the maximum size of a file up to a max of 2GB
+ * Validator for the file extension of a file
  *
  * @category  Zend
  * @package   Zend_Validate
@@ -66,11 +66,16 @@ class Zend_Validate_File_Extension extends Zend_Validate_Abstract
     /**
      * Returns the set file extension
      *
+     * @param  boolean $asArray Returns the values as array, when false an concated string is returned
      * @return string
      */
-    public function getExtension()
+    public function getExtension($asArray = false)
     {
-        $extension = implode(',', $this->_extension);
+        $extension = $this->_extension;
+        if ($asArray === false) {
+            $extension = implode(',', $extension);
+        }
+
         return $extension;
     }
 
@@ -78,15 +83,28 @@ class Zend_Validate_File_Extension extends Zend_Validate_Abstract
      * Sets the file extensions
      *
      * @param  string|array $extension The extensions to validate
-     * @return Zend_Validate_File_Size Provides a fluent interface
+     * @return Zend_Validate_File_Extension Provides a fluent interface
      */
     public function setExtension($extension)
+    {
+        $this->_extension = null;
+        $this->addExtension($extension);
+        return $this;
+    }
+
+    /**
+     * Adds the file extensions
+     *
+     * @param  string|array $extension The extensions to add for validation
+     * @return Zend_Validate_File_Extension Provides a fluent interface
+     */
+    public function addExtension($extension)
     {
         if (is_string($extension) === true) {
             $extension = explode(',', $extension);
         }
 
-        $this->_extension = $extension;
+        $this->_extension += $extension;
         return $this;
     }
 
