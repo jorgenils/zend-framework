@@ -20,14 +20,14 @@
  */
 
 /**
- * Generic class for file transfers (Downloads and Uploads)
+ * Abstract class for file transfers (Downloads and Uploads)
  *
  * @category  Zend
  * @package   Zend_File_Transfer
  * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
-abstract class Zend_File_Transfer_Adapter
+abstract class Zend_File_Transfer_Adapter_Abstract
 {
     /**
      * Intern list of validators
@@ -42,6 +42,20 @@ abstract class Zend_File_Transfer_Adapter
      * @var array
      */
     protected $_filter = array();
+
+    /**
+     * Intern list of files
+     *
+     * @var array
+     */
+    protected $_files = array();
+
+    /**
+     * Intern list of types
+     *
+     * @var array
+     */
+    protected $_types = array();
 
     /**
      * Returns all set validators with their options
@@ -117,7 +131,7 @@ abstract class Zend_File_Transfer_Adapter
      */
     public function getFilter($filter = null)
     {
-        
+        throw new Zend_File_Transfer_Exception('Method not implemented');
     }
 
     /**
@@ -129,7 +143,7 @@ abstract class Zend_File_Transfer_Adapter
      */
     public function setFilter($filter, $options = null, $files = null)
     {
-        
+        throw new Zend_File_Transfer_Exception('Method not implemented');
     }
 
     /**
@@ -142,7 +156,7 @@ abstract class Zend_File_Transfer_Adapter
      */
     public function addFilter($filter, $options = null, $files = null)
     {
-        
+        throw new Zend_File_Transfer_Exception('Method not implemented');
     }
 
     /**
@@ -152,7 +166,7 @@ abstract class Zend_File_Transfer_Adapter
      */
     public function getFile()
     {
-        
+        throw new Zend_File_Transfer_Exception('Method not implemented');
     }
 
     /**
@@ -164,7 +178,17 @@ abstract class Zend_File_Transfer_Adapter
      */
     public function addFile($file, $validator = null, $filter = null)
     {
-        
+        throw new Zend_File_Transfer_Exception('Method not implemented');
+    }
+
+    /**
+     * Returns all set types
+     *
+     * @return array List of set types
+     */
+    public function getType()
+    {
+        throw new Zend_File_Transfer_Exception('Method not implemented');
     }
 
     /**
@@ -176,18 +200,29 @@ abstract class Zend_File_Transfer_Adapter
      */
     public function addType($type, $validator = null, $filter = null)
     {
-        
+        throw new Zend_File_Transfer_Exception('Method not implemented');
+    }
+
+    /**
+     * Sets a new destination for the given files
+     *
+     * @param string $destination New destination
+     * @param string|array $files Files to set the new destination for
+     */
+    public function setDestination($destination, $files = null)
+    {
+        throw new Zend_File_Transfer_Exception('Method not implemented');
     }
 
     abstract public function send($options = null);
 
     abstract public function receive($options = null);
 
-    abstract function isSent($file = null);
+    abstract public function isSent($file = null);
 
-    abstract function isReceived($file = null);
+    abstract public function isReceived($file = null);
 
-    abstract function isValid($file = null);
+    abstract public function isValid($file = null);
 
-    abstract function getProgress();
+    abstract public function getProgress();
 }
