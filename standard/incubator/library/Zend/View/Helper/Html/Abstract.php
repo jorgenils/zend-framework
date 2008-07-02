@@ -21,13 +21,18 @@
  */
 
 /**
+ * @see Zend_View_Helper_Abstract
+ */
+require_once 'Zend/View/Helper/Abstract.php';
+
+/**
  * @category   Zend
  * @package    Zend_View
  * @subpackage Helper
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-abstract class Zend_View_Helper_Html_Abstract
+abstract class Zend_View_Helper_Html_Abstract extends Zend_View_Helper_Abstract
 {
     /**
      * Newline
@@ -41,26 +46,6 @@ abstract class Zend_View_Helper_Html_Abstract
      */
     protected $_closingBracket = null;
 
-    /**
-     * View object
-     *
-     * @var Zend_View_Interface
-     */
-    public $view = null;
-    
-    /**
-     * Set the View object
-     *
-     * @param Zend_View_Interface $view
-     * @return Zend_View_Helper_Html_Abstract
-     */
-    public function setView(Zend_View_Interface $view)
-    {
-        $this->view = $view;
-        
-        return $this;
-    }
-    
     /**
      * Get the tag closing bracket
      *
