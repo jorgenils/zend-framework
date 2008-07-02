@@ -48,7 +48,7 @@ class Zend_View_Helper_HtmlFlashTest extends PHPUnit_Framework_TestCase
         unset($this->helper);
     }
 
-    public function testMakeHtmlFlashWithoutAttribsWithoutParams()
+    public function testMakeHtmlFlash()
     {
         $htmlFlash = $this->helper->htmlFlash('/path/to/flash.swf');
 

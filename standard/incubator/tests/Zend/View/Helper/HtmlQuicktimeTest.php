@@ -48,7 +48,7 @@ class Zend_View_Helper_HtmlQuicktimeTest extends PHPUnit_Framework_TestCase
         unset($this->helper);
     }
 
-    public function testMakeHtmlFlashWithoutAttribsWithoutParams()
+    public function testMakeHtmlQuicktime()
     {
         $htmlQuicktime = $this->helper->htmlQuicktime('/path/to/quicktime.mov');
 

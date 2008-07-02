@@ -48,7 +48,7 @@ class Zend_View_Helper_HtmlPageTest extends PHPUnit_Framework_TestCase
         unset($this->helper);
     }
 
-    public function testMakeHtmlFlashWithoutAttribsWithoutParams()
+    public function testMakeHtmlPage()
     {
         $htmlPage = $this->helper->htmlPage('/path/to/page.html');
 
