@@ -16,34 +16,17 @@
  * @package    UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- */ 
+ */
 
-// Call Zend_Soap_ServerTest::main() if this source file is executed directly.
-if (!defined("PHPUnit_MAIN_METHOD")) {
-    define("PHPUnit_MAIN_METHOD", "Zend_Soap_ServerTest::main");
-
-    $baseZfPath = dirname(__FILE__) . DIRECTORY_SEPARATOR . '..'
-                . DIRECTORY_SEPARATOR . '..'
-                . DIRECTORY_SEPARATOR . '..'
-                . DIRECTORY_SEPARATOR . '..';
-
-    set_include_path(
-        '.' 
-        . PATH_SEPARATOR . $baseZfPath . DIRECTORY_SEPARATOR . 'incubator' . DIRECTORY_SEPARATOR . 'library'
-        . PATH_SEPARATOR . $baseZfPath . DIRECTORY_SEPARATOR . 'library'
-        . get_include_path()
-    );
-}
-
+/** PHPUnit Test Case */
 require_once "PHPUnit/Framework/TestCase.php";
-require_once "PHPUnit/Framework/TestSuite.php";
 
 /** Zend_Soap_Server */
 require_once 'Zend/Soap/Server.php';
 
 /**
- * Zend_Soap_Server 
- * 
+ * Zend_Soap_Server
+ *
  * @category   Zend
  * @package    UnitTests
  * @uses       Zend_Server_Interface
@@ -53,60 +36,48 @@ require_once 'Zend/Soap/Server.php';
  */
 class Zend_Soap_ServerTest extends PHPUnit_Framework_TestCase
 {
-    /**
-     * Runs the test methods of this class.
-     *
-     * @access public
-     * @static
-     */
-    public static function main()
-    {
-        require_once "PHPUnit/TextUI/TestRunner.php";
-
-        $suite  = new PHPUnit_Framework_TestSuite("Zend_Soap_ServerTest");
-        $result = PHPUnit_TextUI_TestRunner::run($suite);
-    }
-
-    public function setUp()
-    {
-        $this->server = new Zend_Soap_Server();
-    }
-
-    public function tearDown()
-    {
-        unset($this->server);
-    }
-
-    /**
-     * @todo Implement testSetOptions().
-     */
     public function testSetOptions()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertTrue($server->getOptions() == array('soap_version' => SOAP_1_2));
+
+        $options = array('soap_version' => SOAP_1_1,
+                         'actor' => 'http://framework.zend.com/Zend_Soap_ServerTest.php',
+                         'classmap' => array('TestData1' => 'Zend_Soap_Server_TestData1',
+                                             'TestData2' => 'Zend_Soap_Server_TestData2',),
+                         'encoding' => 'ISO-8859-1',
+                         'uri' => 'http://framework.zend.com/Zend_Soap_ServerTest.php'
+                        );
+        $server->setOptions($options);
+
+        $this->assertTrue($server->getOptions() == $options);
     }
 
-    /**
-     * @todo Implement testGetOptions().
-     */
     public function testGetOptions()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertTrue($server->getOptions() == array('soap_version' => SOAP_1_2));
+
+        $options = array('soap_version' => SOAP_1_1,
+                         'uri' => 'http://framework.zend.com/Zend_Soap_ServerTest.php'
+                        );
+        $server->setOptions($options);
+
+        $this->assertTrue($server->getOptions() == $options);
     }
 
     public function testEncoding()
     {
-        $this->assertNull($this->server->getEncoding());
-        $this->server->setEncoding('ISO-8859-1');
-        $this->assertEquals('ISO-8859-1', $this->server->getEncoding());
+        $server = new Zend_Soap_Server();
+
+        $this->assertNull($server->getEncoding());
+        $server->setEncoding('ISO-8859-1');
+        $this->assertEquals('ISO-8859-1', $server->getEncoding());
 
         try {
-            $this->server->setEncoding(array('UTF-8'));
+            $server->setEncoding(array('UTF-8'));
             $this->fail('Non-string encoding values should fail');
         } catch (Exception $e) {
             // success
@@ -115,11 +86,13 @@ class Zend_Soap_ServerTest extends PHPUnit_Framework_TestCase
 
     public function testSoapVersion()
     {
-        $this->assertEquals(SOAP_1_2, $this->server->getSoapVersion());
-        $this->server->setSoapVersion(SOAP_1_1);
-        $this->assertEquals(SOAP_1_1, $this->server->getSoapVersion());
+        $server = new Zend_Soap_Server();
+
+        $this->assertEquals(SOAP_1_2, $server->getSoapVersion());
+        $server->setSoapVersion(SOAP_1_1);
+        $this->assertEquals(SOAP_1_1, $server->getSoapVersion());
         try {
-            $this->server->setSoapVersion('bogus');
+            $server->setSoapVersion('bogus');
             $this->fail('Invalid soap versions should fail');
         } catch (Exception $e)  {
             // success
@@ -128,224 +101,394 @@ class Zend_Soap_ServerTest extends PHPUnit_Framework_TestCase
 
     public function testValidateUrn()
     {
+        $server = new Zend_Soap_Server();
+
         try {
-            $this->server->validateUrn('bogosity');
+            $server->validateUrn('bogosity');
             $this->fail('URNs without schemes should fail');
         } catch (Exception $e) {
             // success
         }
 
-        $this->assertTrue($this->server->validateUrn('http://framework.zend.com/'));
-        $this->assertTrue($this->server->validateUrn('urn:soapHandler/GetOpt'));
+        $this->assertTrue($server->validateUrn('http://framework.zend.com/'));
+        $this->assertTrue($server->validateUrn('urn:soapHandler/GetOpt'));
     }
 
-    /**
-     * @todo Implement testSetActor().
-     */
     public function testSetActor()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertNull($server->getActor());
+        $server->setActor('http://framework.zend.com/');
+        $this->assertEquals('http://framework.zend.com/', $server->getActor());
+        try {
+            $server->setActor('bogus');
+            $this->fail('Invalid actor should fail');
+        } catch (Exception $e)  {
+            // success
+        }
     }
 
-    /**
-     * @todo Implement testGetActor().
-     */
     public function testGetActor()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertNull($server->getActor());
+        $server->setActor('http://framework.zend.com/');
+        $this->assertEquals('http://framework.zend.com/', $server->getActor());
     }
 
-    /**
-     * @todo Implement testSetUri().
-     */
     public function testSetUri()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertNull($server->getUri());
+        $server->setUri('http://framework.zend.com/');
+        $this->assertEquals('http://framework.zend.com/', $server->getUri());
+        try {
+            $server->setUri('bogus');
+            $this->fail('Invalid URI should fail');
+        } catch (Exception $e)  {
+            // success
+        }
     }
 
-    /**
-     * @todo Implement testGetUri().
-     */
     public function testGetUri()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertNull($server->getUri());
+        $server->setUri('http://framework.zend.com/');
+        $this->assertEquals('http://framework.zend.com/', $server->getUri());
     }
 
-    /**
-     * @todo Implement testSetClassmap().
-     */
     public function testSetClassmap()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $classmap = array('TestData1' => 'Zend_Soap_Server_TestData1',
+                          'TestData2' => 'Zend_Soap_Server_TestData2');
+
+        $this->assertNull($server->getClassmap());
+        $server->setClassmap($classmap);
+        $this->assertTrue($classmap == $server->getClassmap());
+        try {
+            $server->setClassmap('bogus');
+            $this->fail('Classmap which is not an array should fail');
+        } catch (Exception $e)  {
+            // success
+        }
+        try {
+            $server->setClassmap(array('soapTypeName', 'bogusClassName'));
+            $this->fail('Invalid class within classmap should fail');
+        } catch (Exception $e)  {
+            // success
+        }
     }
 
-    /**
-     * @todo Implement testGetClassmap().
-     */
     public function testGetClassmap()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $classmap = array('TestData1' => 'Zend_Soap_Server_TestData1',
+                          'TestData2' => 'Zend_Soap_Server_TestData2');
+
+        $this->assertNull($server->getClassmap());
+        $server->setClassmap($classmap);
+        $this->assertTrue($classmap == $server->getClassmap());
     }
 
-    /**
-     * @todo Implement testSetWsdl().
-     */
     public function testSetWsdl()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertNull($server->getWsdl());
+        $server->setWsdl(dirname(__FILE__).'/_files/wsdl_example.wsdl');
+        $this->assertEquals(dirname(__FILE__).'/_files/wsdl_example.wsdl', $server->getWsdl());
+        try {
+            $server->setWsdl(dirname(__FILE__).'/_files/bogus.wsdl');
+            $this->fail('Invalid WSDL URI or PATH should fail');
+        } catch (Exception $e)  {
+            // success
+        }
     }
 
-    /**
-     * @todo Implement testGetWsdl().
-     */
     public function testGetWsdl()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertNull($server->getWsdl());
+        $server->setWsdl(dirname(__FILE__).'/_files/wsdl_example.wsdl');
+        $this->assertEquals(dirname(__FILE__).'/_files/wsdl_example.wsdl', $server->getWsdl());
     }
 
-    /**
-     * @todo Implement testAddFunction().
-     */
     public function testAddFunction()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        try {
+            $server->addFunction('bogus_function');
+            $this->fail('Invalid function should fail');
+        } catch (Exception $e)  {
+            // success
+        }
+
+        // Correct function should pass
+        $server->addFunction('Zend_Soap_Server_TestFunc1');
+
+        // Array of correct functions should pass
+        $functions = array('Zend_Soap_Server_TestFunc2',
+                           'Zend_Soap_Server_TestFunc3',
+                           'Zend_Soap_Server_TestFunc4');
+        $server->addFunction($functions);
+
+        try {
+	        $functions1 = array('Zend_Soap_Server_TestFunc5',
+	                            'bogus_function',
+	                            'Zend_Soap_Server_TestFunc6');
+        	$server->addFunction('bogus_function');
+            $this->fail('Invalid function within a set of functions should fail');
+        } catch (Exception $e)  {
+            // success
+        }
+
+        try {
+            $server->addFunction(126);
+            $this->fail('Invalid value should fail');
+        } catch (Exception $e)  {
+            // success
+        }
+
+        // SOAP_FUNCTIONS_ALL as a value should pass
+        $server->addFunction(SOAP_FUNCTIONS_ALL);
     }
 
-    /**
-     * @todo Implement testSetClass().
-     */
     public function testSetClass()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        try {
+            $server->setClass(465);
+            $this->fail('Non-string value should fail');
+        } catch (Exception $e)  {
+            // success
+        }
+        try {
+            $server->setClass('Zend_Soap_Server_Test_BogusClass');
+            $this->fail('Invalid class should fail');
+        } catch (Exception $e)  {
+            // success
+        }
+
+        // Correct class name should pass
+        $server->setClass('Zend_Soap_Server_TestClass');
+
+        try {
+            $server->setClass('Zend_Soap_Server_TestClass');
+            $this->fail('setClass() should pass only once');
+        } catch (Exception $e)  {
+            // success
+        }
     }
 
-    /**
-     * @todo Implement testGetFunctions().
-     */
     public function testGetFunctions()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $server->addFunction('Zend_Soap_Server_TestFunc1');
+
+        $functions  =  array('Zend_Soap_Server_TestFunc2',
+                             'Zend_Soap_Server_TestFunc3',
+                             'Zend_Soap_Server_TestFunc4');
+        $server->addFunction($functions);
+
+        $functions  =  array('Zend_Soap_Server_TestFunc3',
+                             'Zend_Soap_Server_TestFunc5',
+                             'Zend_Soap_Server_TestFunc6');
+        $server->addFunction($functions);
+
+        $this->assertTrue($server->getFunctions() == array('Zend_Soap_Server_TestFunc1',
+                                                           'Zend_Soap_Server_TestFunc2',
+                                                           'Zend_Soap_Server_TestFunc3',
+                                                           'Zend_Soap_Server_TestFunc4',
+                                                           'Zend_Soap_Server_TestFunc5',
+							                               'Zend_Soap_Server_TestFunc6'));
     }
 
-    /**
-     * @todo Implement testLoadFunctions().
-     */
-    public function testLoadFunctions()
-    {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
-    }
-
-    /**
-     * @todo Implement testSetPersistence().
-     */
     public function testSetPersistence()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertNull($server->getPersistence());
+        $server->setPersistence(SOAP_PERSISTENCE_SESSION);
+        $this->assertEquals(SOAP_PERSISTENCE_SESSION, $server->getPersistence());
+        try {
+            $server->setSoapVersion('bogus');
+            $this->fail('Invalid soap versions should fail');
+        } catch (Exception $e)  {
+            // success
+        }
+
+        $server->setPersistence(SOAP_PERSISTENCE_REQUEST);
+        $this->assertEquals(SOAP_PERSISTENCE_REQUEST, $server->getPersistence());
     }
 
-    /**
-     * @todo Implement testSetRequest().
-     */
-    public function testSetRequest()
+    public function testGetPersistence()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertNull($server->getPersistence());
+        $server->setPersistence(SOAP_PERSISTENCE_SESSION);
+        $this->assertEquals(SOAP_PERSISTENCE_SESSION, $server->getPersistence());
     }
 
-    /**
-     * @todo Implement testGetLastRequest().
-     */
     public function testGetLastRequest()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+        $server->setOptions(array('location'=>'test://', 'uri'=>'http://framework.zend.com'));
+        $server->setReturnResponse(true);
+
+        $server->setClass('Zend_Soap_Server_TestClass');
+
+        $request =
+            '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL
+          . '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" '
+                             . 'xmlns:ns1="http://framework.zend.com" '
+                             . 'xmlns:xsd="http://www.w3.org/2001/XMLSchema" '
+                             . 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+                             . 'xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" '
+                             . 'SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'
+          .     '<SOAP-ENV:Body>'
+          .         '<ns1:testFunc2>'
+          .             '<param0 xsi:type="xsd:string">World</param0>'
+          .         '</ns1:testFunc2>'
+          .     '</SOAP-ENV:Body>'
+          . '</SOAP-ENV:Envelope>' . PHP_EOL;
+
+        $response = $server->handle($request);
+
+        $this->assertEquals($request, $server->getLastRequest());
     }
 
-    /**
-     * @todo Implement testSetReturnResponse().
-     */
     public function testSetReturnResponse()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertFalse($server->getReturnResponse());
+
+        $server->setReturnResponse(true);
+        $this->assertTrue($server->getReturnResponse());
+
+        $server->setReturnResponse(false);
+        $this->assertFalse($server->getReturnResponse());
     }
 
-    /**
-     * @todo Implement testGetReturnResponse().
-     */
     public function testGetReturnResponse()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+
+        $this->assertFalse($server->getReturnResponse());
+
+        $server->setReturnResponse(true);
+        $this->assertTrue($server->getReturnResponse());
     }
 
-    /**
-     * @todo Implement testGetLastResponse().
-     */
     public function testGetLastResponse()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+        $server->setOptions(array('location'=>'test://', 'uri'=>'http://framework.zend.com'));
+        $server->setReturnResponse(true);
+
+        $server->setClass('Zend_Soap_Server_TestClass');
+
+        $request =
+            '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL
+          . '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" '
+                             . 'xmlns:ns1="http://framework.zend.com" '
+                             . 'xmlns:xsd="http://www.w3.org/2001/XMLSchema" '
+                             . 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+                             . 'xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" '
+                             . 'SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'
+          .     '<SOAP-ENV:Body>'
+          .         '<ns1:testFunc2>'
+          .             '<param0 xsi:type="xsd:string">World</param0>'
+          .         '</ns1:testFunc2>'
+          .     '</SOAP-ENV:Body>'
+          . '</SOAP-ENV:Envelope>' . PHP_EOL;
+
+        $expectedResponse =
+            '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL
+          . '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" '
+                             . 'xmlns:ns1="http://framework.zend.com" '
+                             . 'xmlns:xsd="http://www.w3.org/2001/XMLSchema" '
+                             . 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+                             . 'xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" '
+                             . 'SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'
+          .     '<SOAP-ENV:Body>'
+          .         '<ns1:testFunc2Response>'
+          .             '<return xsi:type="xsd:string">Hello World!</return>'
+          .         '</ns1:testFunc2Response>'
+          .     '</SOAP-ENV:Body>'
+          . '</SOAP-ENV:Envelope>' . PHP_EOL;
+
+        $server->handle($request);
+
+        $this->assertEquals($expectedResponse, $server->getLastResponse());
     }
 
-    /**
-     * @todo Implement testHandle().
-     */
     public function testHandle()
     {
-        // Remove the following line when you implement this test.
-        $this->markTestIncomplete(
-          "This test has not been implemented yet."
-        );
+        $server = new Zend_Soap_Server();
+        $server->setOptions(array('location'=>'test://', 'uri'=>'http://framework.zend.com'));
+
+        $server->setClass('Zend_Soap_Server_TestClass');
+
+        $localClient = new Zend_Soap_Server_TestLocalSoapClient($server,
+                                                                null,
+                                                                array('location'=>'test://',
+                                                                      'uri'=>'http://framework.zend.com'));
+
+        // Local SOAP client call automatically invokes handle method of the provided SOAP server
+        $this->assertEquals('Hello World!', $localClient->testFunc2('World'));
+
+
+        $request =
+            '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL
+          . '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" '
+                             . 'xmlns:ns1="http://framework.zend.com" '
+                             . 'xmlns:xsd="http://www.w3.org/2001/XMLSchema" '
+                             . 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+                             . 'xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" '
+                             . 'SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'
+          .     '<SOAP-ENV:Body>'
+          .         '<ns1:testFunc2>'
+          .             '<param0 xsi:type="xsd:string">World</param0>'
+          .         '</ns1:testFunc2>'
+          .     '</SOAP-ENV:Body>'
+          . '</SOAP-ENV:Envelope>' . PHP_EOL;
+
+        $expectedResponse =
+            '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL
+          . '<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" '
+                             . 'xmlns:ns1="http://framework.zend.com" '
+                             . 'xmlns:xsd="http://www.w3.org/2001/XMLSchema" '
+                             . 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+                             . 'xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" '
+                             . 'SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'
+          .     '<SOAP-ENV:Body>'
+          .         '<ns1:testFunc2Response>'
+          .             '<return xsi:type="xsd:string">Hello World!</return>'
+          .         '</ns1:testFunc2Response>'
+          .     '</SOAP-ENV:Body>'
+          . '</SOAP-ENV:Envelope>' . PHP_EOL;
+
+        $server1 = new Zend_Soap_Server();
+        $server1->setOptions(array('location'=>'test://', 'uri'=>'http://framework.zend.com'));
+
+        $server1->setClass('Zend_Soap_Server_TestClass');
+        $server1->setReturnResponse(true);
+
+        $this->assertEquals($expectedResponse, $server1->handle($request));
     }
 
     /**
@@ -353,6 +496,8 @@ class Zend_Soap_ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testRegisterFaultException()
     {
+        $server = new Zend_Soap_Server();
+
         // Remove the following line when you implement this test.
         $this->markTestIncomplete(
           "This test has not been implemented yet."
@@ -364,6 +509,8 @@ class Zend_Soap_ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testDeregisterFaultException()
     {
+        $server = new Zend_Soap_Server();
+
         // Remove the following line when you implement this test.
         $this->markTestIncomplete(
           "This test has not been implemented yet."
@@ -375,6 +522,8 @@ class Zend_Soap_ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testGetFaultExceptions()
     {
+        $server = new Zend_Soap_Server();
+
         // Remove the following line when you implement this test.
         $this->markTestIncomplete(
           "This test has not been implemented yet."
@@ -386,6 +535,8 @@ class Zend_Soap_ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testFault()
     {
+        $server = new Zend_Soap_Server();
+
         // Remove the following line when you implement this test.
         $this->markTestIncomplete(
           "This test has not been implemented yet."
@@ -397,6 +548,8 @@ class Zend_Soap_ServerTest extends PHPUnit_Framework_TestCase
      */
     public function testHandlePhpErrors()
     {
+        $server = new Zend_Soap_Server();
+
         // Remove the following line when you implement this test.
         $this->markTestIncomplete(
           "This test has not been implemented yet."
@@ -404,7 +557,180 @@ class Zend_Soap_ServerTest extends PHPUnit_Framework_TestCase
     }
 }
 
-// Call Zend_Soap_ServerTest::main() if this source file is executed directly.
-if (PHPUnit_MAIN_METHOD == "Zend_Soap_ServerTest::main") {
-    Zend_Soap_ServerTest::main();
+
+/** Local SOAP client */
+class Zend_Soap_Server_TestLocalSoapClient extends SoapClient {
+	/**
+	 * Server object
+	 *
+	 * @var Zend_Soap_Server
+	 */
+	public $server;
+
+	/**
+	 * Local client constructor
+	 *
+	 * @param Zend_Soap_Server $server
+	 * @param string $wsdl
+	 * @param array $options
+	 */
+    function __construct(Zend_Soap_Server $server, $wsdl, $options) {
+        $this->server = $server;
+    	parent::__construct($wsdl, $options);
+    }
+
+    function __doRequest($request, $location, $action, $version) {
+        ob_start();
+        $this->server->handle($request);
+        $response = ob_get_contents();
+        ob_end_clean();
+
+        return $response;
+    }
 }
+
+
+
+/** Test Class */
+class Zend_Soap_Server_TestClass {
+    /**
+     * Test Function 1
+     *
+     * @return string
+     */
+    function testFunc1()
+    {
+        return "Hello World";
+    }
+
+    /**
+     * Test Function 2
+     *
+     * @param string $who Some Arg
+     * @return string
+     */
+    function testFunc2($who)
+    {
+        return "Hello $who!";
+    }
+
+    /**
+     * Test Function 3
+     *
+     * @param string $who Some Arg
+     * @param int $when Some
+     * @return string
+     */
+    function testFunc3($who, $when)
+    {
+        return "Hello $who, How are you $when";
+    }
+
+    /**
+     * Test Function 4
+     *
+     * @return string
+     */
+    static function testFunc4()
+    {
+        return "I'm Static!";
+    }
+}
+
+
+/** Test class 2 */
+class Zend_Soap_Server_TestData1 {
+    /**
+     * Property1
+     *
+     * @var string
+     */
+     public $property1;
+
+    /**
+     * Property2
+     *
+     * @var float
+     */
+     public $property2;
+}
+
+/** Test class 2 */
+class Zend_Soap_Server_TestData2 {
+    /**
+     * Property1
+     *
+     * @var integer
+     */
+     public $property1;
+
+    /**
+     * Property1
+     *
+     * @var float
+     */
+     public $property2;
+}
+
+
+/* Test Functions */
+
+/**
+ * Test Function
+ *
+ * @param string $arg
+ * @return string
+ */
+function Zend_Soap_Server_TestFunc1($who)
+{
+    return "Hello $who";
+}
+
+/**
+ * Test Function 2
+ */
+function Zend_Soap_Server_TestFunc2()
+{
+    return "Hello World";
+}
+
+/**
+ * Return false
+ *
+ * @return bool
+ */
+function Zend_Soap_Server_TestFunc3()
+{
+    return false;
+}
+
+/**
+ * Return true
+ *
+ * @return bool
+ */
+function Zend_Soap_Server_TestFunc4()
+{
+    return true;
+}
+
+/**
+ * Return integer
+ *
+ * @return int
+ */
+function Zend_Soap_Server_TestFunc5()
+{
+    return 123;
+}
+
+/**
+ * Return string
+ *
+ * @return string
+ */
+function Zend_Soap_Server_TestFunc6()
+{
+    return "string";
+}
+

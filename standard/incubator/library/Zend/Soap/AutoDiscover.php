@@ -73,7 +73,7 @@ class Zend_Soap_AutoDiscover extends Zend_Server_Abstract implements Zend_Server
      */
     public function setClass($class, $namespace = '', $argv = null)
     {
-        $uri = Zend_Uri::factory('http://'  .$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']);
+        $uri = Zend_Uri::factory('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']);
 
         $wsdl = new Zend_Soap_Wsdl($class, $uri, $this->_extractComplexTypes);
         

@@ -4,11 +4,8 @@
  * @subpackage UnitTests
  */
 
-/**
- * PHPUnit Test Case
- */
+/** PHPUnit Test Case */
 require_once 'PHPUnit/Framework/TestCase.php';
-
 
 /** Zend_Soap_Wsdl */
 require_once 'Zend/Soap/Wsdl.php';

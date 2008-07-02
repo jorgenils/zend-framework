@@ -16,15 +16,21 @@
  * @package    Zend_Soap
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- */ 
+ */
 
 /** Zend_Soap_Client_Exception */
 require_once 'Zend/Soap/Client/Exception.php';
 
+/** Zend_Soap_Server */
+require_once 'Zend/Soap/Server.php';
+
+/** Zend_Soap_Client_Local */
+require_once 'Zend/Soap/Client/Local.php';
+
 
 /**
- * Zend_Soap_Client 
- * 
+ * Zend_Soap_Client
+ *
  * @category   Zend
  * @package    Zend_Soap
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
@@ -37,7 +43,7 @@ class Zend_Soap_Client
      * @var string
      */
     protected $_encoding = 'UTF-8';
-    
+
     /**
      * Array of SOAP type => PHP class pairings for handling return/incoming values
      * @var array
@@ -49,25 +55,13 @@ class Zend_Soap_Client
      * @var array
      */
     protected $_faultExceptions = array();
-    
-    /**
-     * Request XML 
-     * @var string
-     */
-    protected $_request = null;
 
-    /**
-     * Response XML
-     * @var string
-     */
-    protected $_response = null;
-    
     /**
      * SOAP version to use; SOAP_1_2 by default, to allow processing of headers
      * @var int
      */
     protected $_soapVersion = SOAP_1_2;
-    
+
     /** Set of other SoapClient options */
     protected $_uri                 = null;
     protected $_location            = null;
@@ -86,7 +80,7 @@ class Zend_Soap_Client
 
     /**
      * WSDL used to access server
-     * It also defines Zend_Soap_Client working mode (WSDL vs non-WSDL) 
+     * It also defines Zend_Soap_Client working mode (WSDL vs non-WSDL)
      *
      * @var string
      */
@@ -98,24 +92,29 @@ class Zend_Soap_Client
 	 * @var SoapClient
 	 */
 	protected $_soapClient;
-	
-	
+
+	/**
+	 * Zend_Soap_Server object to process requests locally
+	 *
+	 * @var Zend_Soap_Server
+	 */
+    protected $_localServer = null;
+
+
     /**
      * Constructor
-     * 
-     * @param string $wsdl 
-     * @param array $options 
-     * @return void
+     *
+     * @param string $wsdl
+     * @param array $options
      */
     public function __construct($wsdl = null, $options = null)
     {
-    	$this->setWsdl($wsdl);
-    	
-    	if ($options == null) {
-    		$this->_soapClient = new SoapClient($wsdl);
-    	} else {
-    		$this->_soapClient = new SoapClient($wsdl, $options);
-    	}
+        if ($wsdl !== null) {
+            $this->setWsdl($wsdl);
+        }
+        if ($options !== null) {
+            $this->setOptions($options);
+        }
     }
 
     /**
@@ -126,9 +125,9 @@ class Zend_Soap_Client
      */
     public function setWsdl($wsdl)
     {
-    	$this->_wsdl;
+    	$this->_wsdl = $wsdl;
         $this->_soapClient = null;
-        
+
         return $this;
     }
 
@@ -143,11 +142,11 @@ class Zend_Soap_Client
     }
 
     /**
-     * Set Options 
+     * Set Options
      *
      * Allows setting options as an associative array of option => value pairs.
-     * 
-     * @param  array $options 
+     *
+     * @param  array $options
      * @return Zend_Soap_Client
      * @throws Zend_SoapClient_Exception
      */
@@ -203,7 +202,7 @@ class Zend_Soap_Client
                     $this->_local_cert = $value;
                     break;
                 case 'passphrase':
-                    $this->_ = $value;
+                    $this->_passphrase = $value;
                     break;
                 case 'compression':
                     $this->_compression = $value;
@@ -212,18 +211,20 @@ class Zend_Soap_Client
                     $this->_connection_timeout = $value;
                     break;
 
-                    default:
-                    throw new Zend_SoapClient_Exception('Unknown SOAP client option');
+                default:
+                    throw new Zend_Soap_Client_Exception('Unknown SOAP client option');
                     break;
             }
         }
+
+        $this->_soapClient = null;
 
         return $this;
     }
 
     /**
      * Return array of options suitable for using with SoapClient constructor
-     * 
+     *
      * @return array
      */
     public function getOptions()
@@ -237,6 +238,9 @@ class Zend_Soap_Client
         }
         if (null !== $this->_soapVersion) {
             $options['soap_version'] = $this->getSoapVersion();
+        }
+        if (null !== $this->_wsdl) {
+            $options['wsdl'] = $this->_wsdl;
         }
         if (null !== $this->_uri) {
             $options['uri'] = $this->_uri;
@@ -272,7 +276,7 @@ class Zend_Soap_Client
             $options['local_cert'] = $this->_local_cert;
         }
         if (null !== $this->_passphrase) {
-            $options[''] = $this->_passphrase;
+            $options['passphrase'] = $this->_passphrase;
         }
         if (null !== $this->_compression) {
             $options['compression'] = $this->_compression;
@@ -280,13 +284,13 @@ class Zend_Soap_Client
         if (null !== $this->_connection_timeout) {
             $options['connection_timeout'] = $this->_connection_timeout;
         }
-        
+
         return $options;
     }
 
     /**
      * Set SOAP version
-     * 
+     *
      * @param  int $version One of the SOAP_1_1 or SOAP_1_2 constants
      * @return Zend_Soap_Client
      * @throws Zend_Soap_Client_Exception with invalid soap version argument
@@ -302,8 +306,8 @@ class Zend_Soap_Client
     }
 
     /**
-     * Get SOAP version 
-     * 
+     * Get SOAP version
+     *
      * @return int
      */
     public function getSoapVersion()
@@ -341,9 +345,9 @@ class Zend_Soap_Client
     }
 
     /**
-     * Set encoding 
-     * 
-     * @param  string $encoding 
+     * Set encoding
+     *
+     * @param  string $encoding
      * @return Zend_Soap_Client
      * @throws Zend_Soap_Client_Exception with invalid encoding argument
      */
@@ -359,7 +363,7 @@ class Zend_Soap_Client
 
     /**
      * Get encoding
-     * 
+     *
      * @return string
      */
     public function getEncoding()
@@ -368,32 +372,79 @@ class Zend_Soap_Client
     }
 
     /**
+     * Retrieve request XML
+     *
+     * @return string
+     */
+    public function getLastRequest()
+    {
+    	if ($this->_soapClient !== null) {
+    		return $this->_soapClient->__getLastRequest();
+    	}
+
+        return '';
+    }
+
+    /**
+     * Get response XML
+     *
+     * @return string
+     */
+    public function getLastResponse()
+    {
+        if ($this->_soapClient !== null) {
+            return $this->_soapClient->__getLastResponse();
+        }
+
+        return '';
+    }
+
+    /**
+     * Set Zend_Soap_Server object to process requests locally
+     *
+     * @param Zend_Soap_Server $server
+     * @return Zend_Soap_Client
+     */
+    public function setLocalServer(Zend_Soap_Server $server)
+    {
+    	$this->_localServer = $server;
+    }
+
+    /**
      * Initialize SOAP Client object
-     * 
+     *
      * @throws Zend_Search_Client_Exception
      */
     protected function _initSoapClientObject()
     {
         $wsdl = $this->getWsdl();
-        $options = $this->getOptions();
-            
+        $options = array_merge($this->getOptions(), array('trace' => true));
+
+
         if ($wsdl == null) {
             if (!isset($options['location'])) {
-                throw new Zend_Search_Client_Exception('\'location\' parameter is required in non-WSDL mode.'); 
+                throw new Zend_Search_Client_Exception('\'location\' parameter is required in non-WSDL mode.');
             }
             if (!isset($options['uri'])) {
-                throw new Zend_Search_Client_Exception('\'uri\' parameter is required in non-WSDL mode.'); 
+                throw new Zend_Search_Client_Exception('\'uri\' parameter is required in non-WSDL mode.');
             }
         } else {
             if (isset($options['use'])) {
-                throw new Zend_Search_Client_Exception('\'use\' parameter only works in non-WSDL mode.'); 
+                throw new Zend_Search_Client_Exception('\'use\' parameter only works in non-WSDL mode.');
             }
             if (isset($options['style'])) {
                 throw new Zend_Search_Client_Exception('\'style\' parameter only works in non-WSDL mode.');
             }
         }
+        unset($options['wsdl']);
+
+        if ($this->_localServer === null) {
+        	$this->_soapClient = new SoapClient($wsdl, $options);
+        } else {
+        	$this->_soapClient = new Zend_Soap_Client_Local($this->_localServer, $wsdl, $options);
+        }
     }
-    
+
     /**
      * Perform a SOAP call
      *
@@ -407,7 +458,7 @@ class Zend_Soap_Client
     		$this->_initSoapClientObject();
         }
 
-        return $this->_soapClient->$name($arguments);
+        return call_user_func_array(array($this->_soapClient, $name), $arguments);
     }
 
     /**
@@ -421,11 +472,11 @@ class Zend_Soap_Client
     	if ($this->getWsdl() == null) {
     		throw new Zend_Search_Client_Exception('\'getFunctions\' method is available only in WSDL mode.');
     	}
-    	
+
         if ($this->_soapClient == null) {
             $this->_initSoapClientObject();
         }
 
-        return $this->_soapClient->getFunctions();
+        return $this->_soapClient->__getFunctions();
     }
 }

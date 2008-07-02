@@ -58,11 +58,6 @@
                 </listitem>
                 <listitem>
                     <para>
-                        'actor' - the actor URI for the server.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
                         'classmap' ('classMap') - can be used to map some WSDL types to PHP classes. 
                     </para>
                     <para>
