@@ -393,11 +393,10 @@ function() {
         $this->assertEquals(1, $results->length, $html);
         $style = $doc->saveXML($results->item(0));
         $this->assertContains('@import', $style);
-        $this->assertEquals(3, substr_count($style, '@import'));
-        $this->assertEquals(2, substr_count($style, 'http://o.aolcdn.com/dojo/1.1/'), $style);
+        $this->assertEquals(2, substr_count($style, '@import'));
+        $this->assertEquals(1, substr_count($style, 'http://o.aolcdn.com/dojo/1.1/'), $style);
         $this->assertContains('css/custom.css', $style);
         $this->assertContains('dijit/themes/tundra/tundra.css', $style);
-        $this->assertContains('dojo/resources/dojo.css', $style);
     }
 
     public function testStringSerializationShouldBeDoctypeAware()

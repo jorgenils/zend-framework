@@ -520,7 +520,6 @@ class Zend_Dojo_View_Helper_Dojo_Container
         } else {
             $base = $this->_getLocalRelativePath();
         }
-        $stylesheets = array($base . '/dojo/resources/dojo.css');
 
         $registeredStylesheets = $this->getStylesheetModules();
         foreach ($registeredStylesheets as $stylesheet) {
@@ -531,6 +530,10 @@ class Zend_Dojo_View_Helper_Dojo_Container
 
         foreach ($this->getStylesheets() as $stylesheet) {
             $stylesheets[] = $stylesheet;
+        }
+
+        if (empty($stylesheets)) {
+            return '';
         }
 
         array_reverse($stylesheets);
