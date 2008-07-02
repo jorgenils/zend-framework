@@ -85,23 +85,17 @@ abstract class Zend_View_Helper_Html_Abstract extends Zend_View_Helper_Abstract
      *
      * @return string The XHTML for the attributes.
      */
-    protected function _htmlAttribs(array $attribs)
+    protected function _htmlAttribs($attribs)
     {
         $xhtml = '';
-        foreach ($attribs as $key => $val) {
+        foreach ((array) $attribs as $key => $val) {
             $key = $this->view->escape($key);
-
             if (is_array($val)) {
                 $val = implode(' ', $val);
-            } else if ($val === null) {
-                continue;
             }
-
             $val = $this->view->escape($val);
-
-            $xhtml .= ' ' . $key . '="' . $val . '"';
+            $xhtml .= " $key=\"$val\"";
         }
-
-        return substr($xhtml, 1);
+        return $xhtml;
     }
 }
