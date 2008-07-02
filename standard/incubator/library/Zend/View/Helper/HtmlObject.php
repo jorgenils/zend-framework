@@ -59,7 +59,7 @@ class Zend_View_Helper_HtmlObject extends Zend_View_Helper_Html_Abstract
                 $options = array('value' => $options);
             }
 
-            $options = array_merge($options, array('name' => $param));
+            $options = array_merge(array('name' => $param), $options);
 
             $paramHtml[] = '<param ' . $this->_htmlAttribs($options) . $closingBracket;
         }
@@ -71,7 +71,7 @@ class Zend_View_Helper_HtmlObject extends Zend_View_Helper_Html_Abstract
 
         // Object header
         $xhtml = '<object ' . $this->_htmlAttribs($attribs) . '>' . self::NEWLINE
-                 . implode(self::NEWLINE, $paramHtml)
+                 . implode(self::NEWLINE, $paramHtml) . self::NEWLINE
                  . ($content ? $content . self::NEWLINE : '')
                  . '</object>';
 

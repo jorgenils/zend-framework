@@ -77,6 +77,6 @@ class Zend_View_Helper_HtmlQuicktime extends Zend_View_Helper_HtmlObject
         // Params
         $params = array_merge(array('src' => $data), $params);
 
-        return $this->object($data, self::TYPE, $attribs, $params, $content);
+        return $this->htmlObject($data, self::TYPE, $attribs, $params, $content);
     }
 }

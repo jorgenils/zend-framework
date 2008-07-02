@@ -76,6 +76,6 @@ class Zend_View_Helper_HtmlFlash extends Zend_View_Helper_HtmlObject
         // Params
         $params = array_merge(array('movie' => $data), $params);
 
-        return $this->object($data, self::TYPE, $attribs, $params, $content);
+        return $this->htmlObject($data, self::TYPE, $attribs, $params, $content);
     }
 }

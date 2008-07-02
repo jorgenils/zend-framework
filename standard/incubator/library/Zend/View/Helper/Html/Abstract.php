@@ -42,6 +42,26 @@ abstract class Zend_View_Helper_Html_Abstract
     protected $_closingBracket = null;
 
     /**
+     * View object
+     *
+     * @var Zend_View_Interface
+     */
+    public $view = null;
+    
+    /**
+     * Set the View object
+     *
+     * @param Zend_View_Interface $view
+     * @return Zend_View_Helper_Html_Abstract
+     */
+    public function setView(Zend_View_Interface $view)
+    {
+        $this->view = $view;
+        
+        return $this;
+    }
+    
+    /**
      * Get the tag closing bracket
      *
      * @return string
@@ -50,9 +70,9 @@ abstract class Zend_View_Helper_Html_Abstract
     {
         if (!$this->_closingBracket) {
             if ($this->_isXhtml()) {
-                $this->_closeBracket = ' />';
+                $this->_closingBracket = ' />';
             } else {
-                $this->_closeBracket = '>';
+                $this->_closingBracket = '>';
             }
         }
 
@@ -66,7 +86,7 @@ abstract class Zend_View_Helper_Html_Abstract
      */
     protected function _isXhtml()
     {
-        $doctype = $this->getView()->doctype();
+        $doctype = $this->view->doctype();
         return $doctype->isXhtml();
     }
 
@@ -82,11 +102,9 @@ abstract class Zend_View_Helper_Html_Abstract
      */
     protected function _htmlAttribs(array $attribs)
     {
-        $view = $this->getView();
-
         $xhtml = '';
         foreach ($attribs as $key => $val) {
-            $key = $view->escape($key);
+            $key = $this->view->escape($key);
 
             if (is_array($val)) {
                 $val = implode(' ', $val);
@@ -94,9 +112,9 @@ abstract class Zend_View_Helper_Html_Abstract
                 continue;
             }
 
-            $val = $view->escape($val);
+            $val = $this->view->escape($val);
 
-            $xhtml .= ' ' . $key . '="' . $val . '"'';
+            $xhtml .= ' ' . $key . '="' . $val . '"';
         }
 
         return substr($xhtml, 1);

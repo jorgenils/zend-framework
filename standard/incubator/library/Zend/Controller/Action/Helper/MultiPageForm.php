@@ -31,11 +31,6 @@ require_once 'Zend/Session/Namespace.php';
 require_once 'Zend/Controller/Action/Helper/Abstract.php';
 
 /**
- * @see Zend_Controller_Front
- */
-require_once 'Zend/Controller/Front.php';
-
-/**
  * TODO: Check to see if there are any methods that should be protected
  * TODO: Cleanup unused attribs and methods (if any)
  * TODO: Straighten out confusing naming issues (if any)
@@ -154,19 +149,11 @@ class Zend_Controller_Action_Helper_MultiPageForm extends Zend_Controller_Action
     protected $_formNameRoutePart = 'form';
     
     /**
-     * The router
-     *
-     * @var Zend_Controller_Router_Interface
-     */
-    protected $_router = null;
-    
-    /**
      * Construct and set default session object
      */
     public function __construct()
     {
         $this->_session = new Zend_Session_Namespace($this->getName());
-        $this->_router  = Zend_Controller_Front::getInstance()->getRouter();
     }
 
     /**
@@ -830,7 +817,7 @@ class Zend_Controller_Action_Helper_MultiPageForm extends Zend_Controller_Action
     public function getActiveFormName()
     {
         if (!$this->_activeFormName) {
-            $formName = $this->_router->getParam($this->_formRoutePart);
+            $formName = $this->getRequest()->getParams($this->_formRoutePart);
             
             if ($formName != null) {
                 $this->_session->active = $formName;
