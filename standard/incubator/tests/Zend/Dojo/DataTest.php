@@ -307,7 +307,7 @@ class Zend_Dojo_DataTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_array($array));
         $this->assertTrue(array_key_exists('identifier', $array));
         $this->assertEquals($this->dojoData->getIdentifier(), $array['identifier']);
-        $this->assertEquals($this->dojoData->getItems(), $array['items']);
+        $this->assertEquals(array_values($this->dojoData->getItems()), $array['items']);
     }
 
     public function testSerializingToArrayShouldIncludeLabelIfPresent()

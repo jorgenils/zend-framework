@@ -277,7 +277,7 @@ class Zend_Dojo_Data implements ArrayAccess,Iterator,Countable
 
         $array = array(
             'identifier' => $identifier,
-            'items'      => $this->getItems(),
+            'items'      => array_values($this->getItems()),
         );
 
         if (null !== ($label = $this->getLabel())) {
