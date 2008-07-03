@@ -32,12 +32,12 @@ require_once 'Zend/View/Helper/Abstract.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-abstract class Zend_View_Helper_Html_Abstract extends Zend_View_Helper_Abstract
+abstract class Zend_View_Helper_HtmlElement extends Zend_View_Helper_Abstract
 {
     /**
-     * Newline
+     * EOL character
      */
-    const NEWLINE = "\n";
+    const EOL = "\n";
 
     /**
      * The tag closing bracket

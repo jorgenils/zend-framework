@@ -21,9 +21,9 @@
  */
 
 /**
- * @see Zend_View_Helper_Html_Abstract
+ * @see Zend_View_Helper_HtmlElement
  */
-require_once 'Zend/View/Helper/Html/Abstract.php';
+require_once 'Zend/View/Helper/HtmlElement.php';
 
 /**
  * @category   Zend
@@ -32,7 +32,7 @@ require_once 'Zend/View/Helper/Html/Abstract.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Helper_HtmlObject extends Zend_View_Helper_Html_Abstract
+class Zend_View_Helper_HtmlObject extends Zend_View_Helper_HtmlElement
 {
     /**
      * Output an object set
@@ -66,13 +66,13 @@ class Zend_View_Helper_HtmlObject extends Zend_View_Helper_Html_Abstract
 
         // Content
         if (is_array($content)) {
-            $content = implode(self::NEWLINE, $content);
+            $content = implode(self::EOL, $content);
         }
 
         // Object header
-        $xhtml = '<object ' . $this->_htmlAttribs($attribs) . '>' . self::NEWLINE
-                 . implode(self::NEWLINE, $paramHtml) . self::NEWLINE
-                 . ($content ? $content . self::NEWLINE : '')
+        $xhtml = '<object ' . $this->_htmlAttribs($attribs) . '>' . self::EOL
+                 . implode(self::EOL, $paramHtml) . self::EOL
+                 . ($content ? $content . self::EOL : '')
                  . '</object>';
 
         return $xhtml;

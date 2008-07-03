@@ -20,9 +20,9 @@
  */
 
 /**
- * @see Zend_View_Helper_Html_Abstract
+ * @see Zend_View_Helper_HtmlElement
  */
-require_once 'Zend/View/Helper/Html/Abstract.php';
+require_once 'Zend/View/Helper/HtmlElement.php';
 
 /**
  * Base helper for form elements.  Extend this, don't use it on its own.
@@ -33,7 +33,7 @@ require_once 'Zend/View/Helper/Html/Abstract.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-abstract class Zend_View_Helper_FormElement extends Zend_View_Helper_Html_Abstract
+abstract class Zend_View_Helper_FormElement extends Zend_View_Helper_HtmlElement
 {
     /**
      * Converts parameter arguments to an element info array.
@@ -50,8 +50,8 @@ abstract class Zend_View_Helper_FormElement extends Zend_View_Helper_Html_Abstra
      * attribs, options, listsep, disable, and escape.
      */
     protected function _getInfo($name, $value = null, $attribs = null,
-        $options = null, $listsep = null)
-    {
+        $options = null, $listsep = null
+    ) {
         // the baseline info.  note that $name serves a dual purpose;
         // if an array, it's an element info array that will override
         // these baseline values.  as such, ignore it for the 'name'
@@ -157,10 +157,9 @@ abstract class Zend_View_Helper_FormElement extends Zend_View_Helper_Html_Abstra
      */
     protected function _hidden($name, $value = null, $attribs = null)
     {
-        $endTag = ($this->view->doctype()->isXhtml()) ? ' />' : '>';
         return '<input type="hidden"'
              . ' name="' . $this->view->escape($name) . '"'
              . ' value="' . $this->view->escape($value) . '"'
-             . $this->_htmlAttribs($attribs) . $endTag;
+             . $this->_htmlAttribs($attribs) . $this->getClosingBracket();
     }
 }
