@@ -206,12 +206,27 @@ abstract class Zend_File_Transfer_Adapter_Abstract
     /**
      * Sets a new destination for the given files
      *
-     * @param string $destination New destination
-     * @param string|array $files Files to set the new destination for
+     * @param string       $destination New destination directory
+     * @param string|array $files       Files to set the new destination for
+     * @return Zend_File_Transfer_Abstract
      */
     public function setDestination($destination, $files = null)
     {
-        throw new Zend_File_Transfer_Exception('Method not implemented');
+        if ($files === null) {
+            foreach($this->_files as $file => $content) {
+                $this->_files[$file]['destination'] = $destination;
+            }
+        }
+
+        if (is_array($files) === false) {
+            $files = array($files);
+        }
+
+        foreach($files as $file) {
+            $this->_files[$file]['destination'] = $destination;
+        }
+
+        return $this;
     }
 
     abstract public function send($options = null);

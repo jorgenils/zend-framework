@@ -32,6 +32,14 @@ require_once 'Zend/File/Transfer/Adapter/Abstract.php';
 class Zend_File_Transfer_Adapter_Http extends Zend_File_Transfer_Adapter_Abstract
 {
     /**
+     * Constructor for Http File Transfers
+     */
+    public function __construct()
+    {
+        $this->_files = $_FILES;
+    }
+
+    /**
      * Send the file to the client (Download)
      *
      * @param string|array $options Options for the file(s) to send
@@ -44,11 +52,24 @@ class Zend_File_Transfer_Adapter_Http extends Zend_File_Transfer_Adapter_Abstrac
     /**
      * Receive the file from the client (Upload)
      *
+     * @todo Check if file exists otherwise existing will be overwritten
+     * @todo Add validations
+     * @todo Add filters
      * @param string|array $options Options for the file(s) to receive
      */
     public function receive($options = null)
     {
-        throw new Zend_File_Transfer_Exception('Method not implemented');
+        $this->isValid();
+        foreach($this->_files as $file => $content) {
+            $directory = "";
+            if (isset($content['destination']) === true) {
+                $directory = $content['destination'] . DIRECTORY_SEPARATOR;
+            }
+            
+            if (move_uploaded_file($content['tmp_name'], $directory . $content) === false) {
+                throw new Zend_File_Transfer_Exception("'$file' was illegal uploaded... possible attack", 100);
+            }
+        }
     }
 
     /**
@@ -78,7 +99,51 @@ class Zend_File_Transfer_Adapter_Http extends Zend_File_Transfer_Adapter_Abstrac
      */
     public function isValid($file = null)
     {
-        throw new Zend_File_Transfer_Exception('Method not implemented');
+        if ($file !== null) {
+            throw new Zend_File_Transfer_Exception('Method not implemented');
+        }
+
+        foreach ($this->_files as $file => $content) {
+            if ($content['error'] > 0) {
+                switch ($content['error']) {
+                    case 1:
+                        throw new Zend_File_Transfer_Exception("'$file' exceeds the servers size definition", 1);
+                        break;
+
+                    case 2:
+                        throw new Zend_File_Transfer_Exception("'$file' exceeds the HTML form size definition", 2);
+                        break;
+
+                    case 3:
+                        throw new Zend_File_Transfer_Exception("'$file' was only uploaded partially", 3);
+                        break;
+
+                    case 4:
+                        throw new Zend_File_Transfer_Exception("'$file' was not uploaded", 4);
+                        break;
+
+                    case 6:
+                        throw new Zend_File_Transfer_Exception("'$file' could not be stored... missing temporary folder", 6);
+                        break;
+
+                    case 7:
+                        throw new Zend_File_Transfer_Exception("'$file' could not be stored... error writing to disk", 7);
+                        break;
+
+                    case 8:
+                        throw new Zend_File_Transfer_Exception("'$file' upload stopped by extension", 8);
+                        break;
+
+                    default:
+                        throw new Zend_File_Transfer_Exception("'$file' unknown upload error", $content['error']);
+                        break;
+                }
+            }
+
+            if (is_uploaded_file($content['tmp_name']) === false) {
+                throw new Zend_File_Transfer_Exception("'$file' was illegal uploaded... possible attack", 100);
+            }
+        }
     }
 
     /**
