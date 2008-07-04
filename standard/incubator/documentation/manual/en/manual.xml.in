@@ -62,6 +62,11 @@
         <title>Zend_Text</title>
         <xi:include href="module_specs/Zend_Text_Figlet.xml" />
     </chapter>
+    
+    <chapter id="zend.view">
+        <title>Zend_Text</title>
+        <xi:include href="module_specs/Zend_View_Helpers.xml" />
+    </chapter>
 
     <appendix id="appendix.copyright">
         <title>Copyright Information</title>
