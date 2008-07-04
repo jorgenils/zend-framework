@@ -209,6 +209,7 @@ abstract class Zend_File_Transfer_Adapter_Abstract
      * @param string       $destination New destination directory
      * @param string|array $files       Files to set the new destination for
      * @return Zend_File_Transfer_Abstract
+     * @depriciated Will be changed to be a filter!!!
      */
     public function setDestination($destination, $files = null)
     {
