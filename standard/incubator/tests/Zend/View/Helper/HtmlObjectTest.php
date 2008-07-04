@@ -47,6 +47,11 @@ class Zend_View_Helper_HtmlObjectTest extends PHPUnit_Framework_TestCase
     {
         unset($this->helper);
     }
+    
+    public function testViewObjectIsSet()
+    {
+        $this->assertType('Zend_View_Interface', $this->helper->view);
+    }
 
     public function testMakeHtmlObjectWithoutAttribsWithoutParams()
     {
