@@ -2,12 +2,11 @@
 if (!defined('PHPUnit_MAIN_METHOD')) {
     define('PHPUnit_MAIN_METHOD', 'Zend_View_Helper_AllTests::main');
 }
-require_once dirname(__FILE__) . '/../../../TestHelper.php';
 
-require_once 'Zend/View/Helper/HtmlFlashTest.php';
-require_once 'Zend/View/Helper/HtmlObjectTest.php';
-require_once 'Zend/View/Helper/HtmlPageTest.php';
-require_once 'Zend/View/Helper/HtmlQuicktimeTest.php';
+require_once dirname(__FILE__) . '/../../../Zend/View/Helper/HtmlFlashTest.php';
+require_once dirname(__FILE__) . '/../../../Zend/View/Helper/HtmlObjectTest.php';
+require_once dirname(__FILE__) . '/../../../Zend/View/Helper/HtmlPageTest.php';
+require_once dirname(__FILE__) . '/../../../Zend/View/Helper/HtmlQuicktimeTest.php';
 
 /**
  * @category   Zend

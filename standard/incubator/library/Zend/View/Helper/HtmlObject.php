@@ -61,7 +61,7 @@ class Zend_View_Helper_HtmlObject extends Zend_View_Helper_HtmlElement
 
             $options = array_merge(array('name' => $param), $options);
 
-            $paramHtml[] = '<param ' . $this->_htmlAttribs($options) . $closingBracket;
+            $paramHtml[] = '<param' . $this->_htmlAttribs($options) . $closingBracket;
         }
 
         // Content
@@ -70,7 +70,7 @@ class Zend_View_Helper_HtmlObject extends Zend_View_Helper_HtmlElement
         }
 
         // Object header
-        $xhtml = '<object ' . $this->_htmlAttribs($attribs) . '>' . self::EOL
+        $xhtml = '<object' . $this->_htmlAttribs($attribs) . '>' . self::EOL
                  . implode(self::EOL, $paramHtml) . self::EOL
                  . ($content ? $content . self::EOL : '')
                  . '</object>';
