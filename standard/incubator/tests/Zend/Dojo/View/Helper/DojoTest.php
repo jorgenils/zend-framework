@@ -71,6 +71,7 @@ class Zend_Dojo_View_Helper_DojoTest extends PHPUnit_Framework_TestCase
         $this->helper = new Zend_Dojo_View_Helper_Dojo_Container();
         $this->helper->setView($this->view);
         Zend_Registry::set('Zend_Dojo_View_Helper_Dojo', $this->helper);
+        Zend_Dojo_View_Helper_Dojo::setUseDeclarative();
     }
 
     /**
@@ -123,6 +124,15 @@ class Zend_Dojo_View_Helper_DojoTest extends PHPUnit_Framework_TestCase
         } catch (Zend_Dojo_View_Exception $e) {
             $this->assertContains('invalid character', $e->getMessage());
         }
+    }
+
+    public function testShouldNotRegisterDuplicateModules()
+    {
+        $this->helper->requireModule('foo.bar');
+        $this->helper->requireModule('foo.bar');
+        $modules = $this->helper->getModules();
+        $this->assertContains('foo.bar', $modules);
+        $this->assertEquals(1, count($modules));
     }
 
     public function testModulePathsShouldBeEmptyByDefault()
@@ -290,55 +300,37 @@ class Zend_Dojo_View_Helper_DojoTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_array($onLoad));
         $this->assertEquals(1, count($onLoad));
         $action = array_shift($onLoad);
-        $this->assertTrue(is_array($action));
-        $this->assertEquals(1, count($action));
-        $this->assertContains('foo', $action);
-    }
-
-    public function testShouldAllowSpecifyingOnLoadObjectMethod()
-    {
-        $this->helper->addOnLoad('foo', 'bar');
-        $onLoad = $this->helper->getOnLoadActions();
-        $this->assertTrue(is_array($onLoad));
-        $this->assertEquals(1, count($onLoad));
-        $action = array_shift($onLoad);
-        $this->assertTrue(is_array($action));
-        $this->assertEquals(2, count($action));
-        $this->assertEquals('foo', array_shift($action));
-        $this->assertEquals('bar', array_shift($action));
+        $this->assertTrue(is_string($action));
+        $this->assertEquals('foo', $action);
     }
 
     public function testShouldAllowCapturingOnLoadActions()
     {
-        $this->helper->onLoadCaptureStart('foo'); ?>
+        $this->helper->onLoadCaptureStart(); ?>
 function() {
     bar();
     baz();
 }
-<?php   $this->helper->onLoadCaptureStop('foo');
+<?php   $this->helper->onLoadCaptureStop();
         $onLoad = $this->helper->getOnLoadActions();
         $this->assertTrue(is_array($onLoad));
         $this->assertEquals(1, count($onLoad));
         $action = array_shift($onLoad);
-        $this->assertTrue(is_array($action));
-        $this->assertEquals(2, count($action));
-        $this->assertEquals('foo', array_shift($action));
-        $callback = array_shift($action);
-        $this->assertContains('function() {', $callback);
-        $this->assertContains('bar();', $callback);
-        $this->assertContains('baz();', $callback);
+        $this->assertTrue(is_string($action));
+        $this->assertContains('function() {', $action);
+        $this->assertContains('bar();', $action);
+        $this->assertContains('baz();', $action);
     }
 
     public function testShouldNotAllowSpecifyingDuplicateOnLoadActions()
     {
         $this->helper->addOnLoad('foo');
+        $this->helper->addOnLoad('foo');
         $onLoad = $this->helper->getOnLoadActions();
         $this->assertTrue(is_array($onLoad));
         $this->assertEquals(1, count($onLoad));
         $action = array_shift($onLoad);
-        $this->assertTrue(is_array($action));
-        $this->assertEquals(1, count($action));
-        $this->assertContains('foo', $action);
+        $this->assertEquals('foo', $action);
     }
 
     public function testDojoMethodShouldReturnContainer()
@@ -385,6 +377,7 @@ function() {
                     $this->assertContains('dojo.registerModulePath("../custom")', $script, $script);
                     $this->assertContains('dojo.require("dijit.layout.ContentPane")', $script, $script);
                     $this->assertContains('dojo.require("custom.foo")', $script, $script);
+                    $this->assertContains('dojo.addOnLoad(foo)', $script, $script);
                     break;
             }
         }
@@ -430,6 +423,26 @@ function() {
         $this->assertNotSame($this->view, $view);
         $helper = $view->dojo();
         $this->assertSame($this->helper, $helper);
+    }
+
+    public function testShouldUseDeclarativeDijitCreationByDefault()
+    {
+        $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useDeclarative());
+    }
+
+    public function testShouldAllowSpecifyingProgrammaticDijitCreation()
+    {
+        $this->testShouldUseDeclarativeDijitCreationByDefault();
+        Zend_Dojo_View_Helper_Dojo::setUseProgrammatic();
+        $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useProgrammatic());
+    }
+
+    public function testShouldAllowSpecifyingProgrammaticDijitCreationWithNoScriptGeneration()
+    {
+        $this->testShouldUseDeclarativeDijitCreationByDefault();
+        Zend_Dojo_View_Helper_Dojo::setUseProgrammatic(-1);
+        $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useProgrammatic());
+        $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useProgrammaticNoScript());
     }
 
     public function setupDojo()

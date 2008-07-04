@@ -36,6 +36,13 @@ require_once 'Zend/Registry.php';
  */
 class Zend_Dojo_View_Helper_Dojo 
 { 
+    /**#@+
+     * @const Programmatic dijit creation style constants
+     */
+    const PROGRAMMATIC_SCRIPT = 1;
+    const PROGRAMMATIC_NOSCRIPT = -1;
+    /**#@-*/
+
     /**
      * @var Zend_View_Interface
      */
@@ -45,6 +52,11 @@ class Zend_Dojo_View_Helper_Dojo
      * @var Zend_Dojo_View_Helper_Dojo_Container
      */
     protected $_container;
+
+    /**
+     * @var bool Whether or not dijits should be declared programmatically
+     */
+    protected static $_useProgrammatic = false;
 
     /**
      * Initialize helper
@@ -103,5 +115,62 @@ class Zend_Dojo_View_Helper_Dojo
         }
 
         return call_user_func_array(array($this->_container, $method), $args);
+    }
+
+    /**
+     * Set whether or not dijits should be created declaratively
+     * 
+     * @return void
+     */
+    public static function setUseDeclarative()
+    {
+        self::$_useProgrammatic = false;
+    }
+
+    /**
+     * Set whether or not dijits should be created programmatically
+     *
+     * Optionally, specifiy whether or not dijit helpers should generate the 
+     * programmatic dojo.
+     * 
+     * @param  int $style 
+     * @return void
+     */
+    public static function setUseProgrammatic($style = self::PROGRAMMATIC_SCRIPT)
+    {
+        if (!in_array($style, array(self::PROGRAMMATIC_SCRIPT, self::PROGRAMMATIC_NOSCRIPT))) {
+            $style = self::PROGRAMMATIC_SCRIPT;
+        }
+        self::$_useProgrammatic = $style;
+    }
+
+    /**
+     * Should dijits be created declaratively?
+     * 
+     * @return bool
+     */
+    public static function useDeclarative()
+    {
+        return (false === self::$_useProgrammatic);
+    }
+
+    /**
+     * Should dijits be created programmatically?
+     * 
+     * @return bool
+     */
+    public static function useProgrammatic()
+    {
+        return (false !== self::$_useProgrammatic);
+    }
+
+    /**
+     * Should dijits be created programmatically but without scripts?
+     * 
+     * @return bool
+     */
+    public static function useProgrammaticNoScript()
+    {
+        return (self::PROGRAMMATIC_NOSCRIPT === self::$_useProgrammatic);
     }
 }

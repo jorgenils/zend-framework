@@ -181,7 +181,10 @@ class Zend_Dojo_View_Helper_Dojo_Container
             throw new Zend_Dojo_View_Exception(sprintf('Module name specified, "%s", contains invalid characters', (string) $module));
         }
 
-        $this->_modules[] = $module;
+        if (!in_array($module, $this->_modules)) {
+            $this->_modules[] = $module;
+        }
+
         return $this;
     }
 
@@ -402,23 +405,14 @@ class Zend_Dojo_View_Helper_Dojo_Container
      * dojo.addOnLoad accepts:
      * - function name
      * - lambda
-     * - object and function name
-     * - object and lambda
      * 
-     * @param  string $spec
-     * @param  string $function
+     * @param  string $callback Lambda
      * @return Zend_Dojo_View_Helper_Dojo
      */
-    public function addOnLoad($spec, $function = null)
+    public function addOnLoad($callback)
     {
-        if (null === $function) {
-            $spec = array((string) $spec);
-        } else {
-            $spec = array((string) $spec, (string) $function);
-        }
-
-        if (!in_array($spec, $this->_onLoadActions, true)) {
-            $this->_onLoadActions[] = $spec;
+        if (!in_array($callback, $this->_onLoadActions, true)) {
+            $this->_onLoadActions[] = $callback;
         }
         return $this;
     }
@@ -436,10 +430,9 @@ class Zend_Dojo_View_Helper_Dojo_Container
     /**
      * Start capturing routines to run onLoad
      * 
-     * @param  string $obj
      * @return bool
      */
-    public function onLoadCaptureStart($obj = null)
+    public function onLoadCaptureStart()
     {
         if ($this->_captureLock) {
             require_once 'Zend/Dojo/View/Exception.php';
@@ -447,28 +440,20 @@ class Zend_Dojo_View_Helper_Dojo_Container
         }
 
         $this->_captureLock = true;
-        $this->_captureObj  = $obj;
         return ob_start();
     }
 
     /**
      * Stop capturing routines to run onLoad
      * 
-     * @param  string $obj
      * @return bool
      */
-    public function onLoadCaptureStop($obj = null)
+    public function onLoadCaptureStop()
     {
         $data               = ob_get_clean();
         $this->_captureLock = false;
-        $obj                = $this->_captureObj;
-        $this->_captureObj  = null;
 
-        if (null === $obj) {
-            $this->addOnLoad($data);
-        } else {
-            $this->addOnLoad($obj, $data);
-        }
+        $this->addOnLoad($data);
         return true;
     }
 
@@ -484,6 +469,10 @@ class Zend_Dojo_View_Helper_Dojo_Container
         }
 
         $this->_isXhtml = $this->view->doctype()->isXhtml();
+
+        if (Zend_Dojo_View_Helper_Dojo::useDeclarative()) {
+            $this->setDjConfigOption('parseOnLoad', true);
+        }
 
         $html  = $this->_renderStylesheets() . PHP_EOL
                . $this->_renderDjConfig() . PHP_EOL
@@ -615,9 +604,26 @@ class Zend_Dojo_View_Helper_Dojo_Container
             }
         }
 
+        $onLoadActions = array();
+        foreach ($this->getOnLoadActions() as $callback) {
+            $onLoadActions[] = 'dojo.addOnLoad(' . $callback . ');';
+        }
+
+        $content = '';
+        if (!empty($js)) {
+            $content .= implode("\n    ", $js) . "\n";
+        }
+        if (!empty($onLoadActions)) {
+            $content .= implode("\n    ", $onLoadActions) . "\n";
+        }
+
+        if (preg_match('/^\s*$/s', $content)) {
+            return '';
+        }
+
         $html = '<script type="text/javascript">' . PHP_EOL
               . (($this->_isXhtml) ? '//<![CDATA[' : '//<!--') . PHP_EOL
-              . implode(PHP_EOL . "    ", $js) . PHP_EOL
+              . $content
               . (($this->_isXhtml) ? '//]]>' : '//-->') . PHP_EOL
               . PHP_EOL . '</script>';
         return $html;
