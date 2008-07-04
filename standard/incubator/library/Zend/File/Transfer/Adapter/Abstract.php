@@ -217,14 +217,14 @@ abstract class Zend_File_Transfer_Adapter_Abstract
             foreach($this->_files as $file => $content) {
                 $this->_files[$file]['destination'] = $destination;
             }
-        }
+        } else {
+            if (is_array($files) === false) {
+                $files = array($files);
+            }
 
-        if (is_array($files) === false) {
-            $files = array($files);
-        }
-
-        foreach($files as $file) {
-            $this->_files[$file]['destination'] = $destination;
+            foreach($files as $file) {
+                $this->_files[$file]['destination'] = $destination;
+            }
         }
 
         return $this;

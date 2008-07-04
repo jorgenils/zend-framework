@@ -20,6 +20,7 @@
  */
 
 require_once 'Zend/File/Transfer/Adapter/Abstract.php';
+require_once 'Zend/File/Transfer/Exception.php';
 
 /**
  * File transfer adapter class for the HTTP protocol
@@ -66,7 +67,7 @@ class Zend_File_Transfer_Adapter_Http extends Zend_File_Transfer_Adapter_Abstrac
                 $directory = $content['destination'] . DIRECTORY_SEPARATOR;
             }
             
-            if (move_uploaded_file($content['tmp_name'], $directory . $content) === false) {
+            if (move_uploaded_file($content['tmp_name'], ($directory . $content['name'])) === false) {
                 throw new Zend_File_Transfer_Exception("'$file' was illegal uploaded... possible attack", 100);
             }
         }

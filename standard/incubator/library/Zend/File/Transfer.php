@@ -29,6 +29,15 @@
  */
 class Zend_File_Transfer
 {
+    const ERR_INI_SIZE   = 1;
+    const ERR_FORM_SIZE  = 2;
+    const ERR_PARTITIAL  = 3;
+    const ERR_NO_FILE    = 4;
+    const ERR_NO_TMP_DIR = 6;
+    const ERR_CANT_WRITE = 7;
+    const ERR_EXTENSION  = 8;
+    const ERR_ATTACK     = 100;
+
     /**
      * Creates a file processing handler
      *
@@ -36,6 +45,9 @@ class Zend_File_Transfer
      */
     public function __construct($protocol = null)
     {
+        require_once 'Zend/File/Transfer/Exception.php';
+        throw new Zend_File_Transfer_Exception('Implementation in progress');
+
         switch (strtoupper($protocol)) {
             default:
                 $adapter = 'Zend_File_Transfer_Adapter_Http';
@@ -48,5 +60,7 @@ class Zend_File_Transfer
             require_once 'Zend/File/Transfer/Exception.php';
             throw new Zend_File_Transfer_Exception("Adapter " . $adapter . " does not extend Zend_File_Transfer_Adapter'");
         }
+
+        return $this->_adapter;
     }
 }

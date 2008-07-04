@@ -34,16 +34,6 @@ require_once 'Zend/Exception.php';
  */
 class Zend_File_Transfer_Exception extends Zend_Exception
 {
-    const ERR_OK         = 0;
-    const ERR_INI_SIZE   = 1;
-    const ERR_FORM_SIZE  = 2;
-    const ERR_PARTITIAL  = 3;
-    const ERR_NO_FILE    = 4;
-    const ERR_NO_TMP_DIR = 6;
-    const ERR_CANT_WRITE = 7;
-    const ERR_EXTENSION  = 8;
-    const ERR_ATTACK     = 100;
-
     protected $_fileerror = null;
 
     public function __construct($message, $fileerror = 0)
