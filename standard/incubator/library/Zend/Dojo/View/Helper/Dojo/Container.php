@@ -490,7 +490,7 @@ class Zend_Dojo_View_Helper_Dojo_Container
     {
         if (null === $this->_localRelativePath) {
             $localPath = $this->getLocalPath();
-            $localPath = preg_replace('|dojo[/\\]dojo.js[^/\\]*$|i', '', $localPath);
+            $localPath = preg_replace('|dojo[/\\\\]dojo.js[^/\\\\]*$|i', '', $localPath);
             $this->_localRelativePath = $localPath;
         }
         return $this->_localRelativePath;
