@@ -24,7 +24,7 @@
 require_once 'Zend/Dojo/View/Helper/Abstract.php';
 
 /**
- * Dojo Textarea dijit
+ * Dojo Form dijit
  * 
  * @uses       Zend_Dojo_View_Helper_Abstract
  * @package    Zend_Dojo
@@ -32,46 +32,53 @@ require_once 'Zend/Dojo/View/Helper/Abstract.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
   */
-class Zend_Dojo_View_Helper_Textarea extends Zend_Dojo_View_Helper_Abstract
+class Zend_Dojo_View_Helper_CheckBox extends Zend_Dojo_View_Helper_Abstract
 {
     /**
      * Dijit being used
      * @var string
      */
-    protected $_dijit  = 'dijit.form.Textarea';
-
-    /**
-     * HTML element type
-     * @var string
-     */
-    protected $_elementType = 'text';
+    protected $_dijit  = 'dijit.form.CheckBox';
 
     /**
      * Dojo module to use
      * @var string
      */
-    protected $_module = 'dijit.form.Textarea';
+    protected $_module = 'dijit.form.CheckBox';
 
     /**
-     * dijit.form.Textarea
+     * dijit.form.CheckBox
      * 
      * @param  int $id 
-     * @param  mixed $value 
+     * @param  string $content 
      * @param  array $params  Parameters to use for dijit creation
      * @param  array $attribs HTML attributes
      * @return string
      */
-    public function textarea($id, $value = null, array $params = array(), array $attribs = array())
+    public function checkBox($id, $value = null, array $params = array(), array $attribs = array(), array $checkedOptions = null)
     {
-        $attribs['id']    = $id;
-        $attribs['name']  = $id;
-        $attribs['type']  = $this->_elementType;
+        // Prepare the checkbox options
+        require_once 'Zend/View/Helper/FormCheckbox.php';
+        $checked = false;
+        if (isset($attribs['checked']) && $attribs['checked']) {
+            $checked = true;
+        } elseif (isset($attribs['checked'])) {
+            $checked = false;
+        }
+        $checkboxInfo = Zend_View_Helper_FormCheckbox::determineCheckboxInfo($value, $checked, $checkedOptions);
+        $attribs['checked'] = $checkboxInfo['checked'];
 
-        $attribs = $this->_prepareDijit($attribs, $params, 'textarea');
+        $attribs = $this->_prepareDijit($attribs, $params, 'element');
 
-        $html = '<textarea' . $this->_htmlAttribs($attribs) . '>'
-              . $value
-              . "</textarea>\n";
+        // and now we create it:
+        $html = '';
+        if (!strstr($id, '[]')) {
+            // hidden element for unchecked value
+            $html .= '<input name="' . $id . '" type="hidden" value="' . $this->view->escape($checkboxInfo['unCheckedValue']) . '"' . $this->getClosingBracket();
+        }
+
+        // and final element
+        $html .= $this->_createFormElement($id, $value, $params, $attribs);
 
         return $html;
     }

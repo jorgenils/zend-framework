@@ -56,6 +56,13 @@ class Zend_Dojo_View_Helper_Form extends Zend_Dojo_View_Helper_Abstract
      */
     public function form($id, $content, array $attribs = array())
     {
-        return $this->_createLayoutContainer($id, $content, array(), $attribs);
+        $attribs['id'] = $id;
+        $attribs = $this->_prepareDijit($attribs, array(), 'layout');
+
+        $html = '<form' . $this->_htmlAttribs($attribs) . '>'
+              . $content
+              . '</form>';
+
+        return $html;
     }
 }

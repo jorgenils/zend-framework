@@ -114,19 +114,9 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
      */
     protected function _createLayoutContainer($id, $content, array $params, array $attribs)
     {
-        $this->dojo->requireModule($this->_module);
-
         $attribs['id'] = $id;
-        if (array_key_exists('id', $params)) {
-            unset($params['id']);
-        }
-        if ($this->_useDeclarative()) {
-            $attribs = array_merge($attribs, $params);
-            $attribs['dojoType'] = $this->_dijit;
-        } elseif (!$this->_useProgrammaticNoScript()) {
-            $this->_createDijit($this->_dijit, $id, $params);
-        }
-
+        $attribs = $this->_prepareDijit($attribs, $params, 'layout');
+     
         $html = '<div' . $this->_htmlAttribs($attribs) . '>'
               . $content
               . "</div>\n";
@@ -145,14 +135,54 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
      */
     public function _createFormElement($id, $value, array $params, array $attribs)
     {
-        $this->dojo->requireModule($this->_module);
-
         $attribs['id']    = $id;
         $attribs['name']  = $id;
         $attribs['value'] = (string) $value;
         $attribs['type']  = $this->_elementType;
 
-        foreach (array('id', 'name', 'value', 'type') as $param) {
+        $attribs = $this->_prepareDijit($attribs, $params, 'element');
+
+        $html = '<input' 
+              . $this->_htmlAttribs($attribs) 
+              . $this->getClosingBracket();
+        return $html;
+    }
+
+    /**
+     * Merge attributes and parameters
+     *
+     * Also sets up requires
+     * 
+     * @param array $attribs 
+     * @param array $params 
+     * @param mixed $type 
+     * @return void
+     */
+    protected function _prepareDijit(array $attribs, array $params, $type)
+    {
+        $this->dojo->requireModule($this->_module);
+
+        switch ($type) {
+            case 'layout':
+                $stripParams = array('id');
+                break;
+            case 'element':
+                $stripParams = array('id', 'name', 'value', 'type');
+                if (array_key_exists('checked', $attribs)) {
+                    if ($attribs['checked']) {
+                        $attribs['checked'] = 'checked';
+                    } else {
+                        unset($attribs['checked']);
+                    }
+                }
+                break;
+            case 'textarea':
+                $stripParams = array('id', 'name', 'type');
+                break;
+            default:
+        }
+
+        foreach ($stripParams as $param) {
             if (array_key_exists($param, $params)) {
                 unset($params[$param]);
             }
@@ -165,10 +195,7 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
             $this->_createDijit($this->_dijit, $id, $params);
         }
 
-        $html = '<input' 
-              . $this->_htmlAttribs($attribs) 
-              . $this->getClosingBracket();
-        return $html;
+        return $attribs;
     }
 
     /**
