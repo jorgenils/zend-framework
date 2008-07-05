@@ -58,7 +58,7 @@ class Zend_Dojo_View_Helper_BorderContainer extends Zend_Dojo_View_Helper_Abstra
     public function borderContainer($id, $content, array $params = array(), array $attribs = array())
     {
         // this will ensure that the border container is viewable:
-        $this->headStyle()->appendStyle('html, body { height: 100%; width: 100%; margin: 0; padding: 0; }');
+        $this->view->headStyle()->appendStyle('html, body { height: 100%; width: 100%; margin: 0; padding: 0; }');
 
         // and now we create it:
         return $this->_createLayoutContainer($id, $content, $params, $attribs);
