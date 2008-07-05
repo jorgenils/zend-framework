@@ -46,11 +46,16 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
     protected $_dijit;
 
     /**
+     * Element type
+     * @var string
+     */
+    protected $_elementType;
+
+    /**
      * Dojo module to use
      * @var string
      */
     protected $_module;
-
 
     /**
      * Set view
@@ -109,7 +114,7 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
      */
     protected function _createLayoutContainer($id, $content, array $params, array $attribs)
     {
-        $this->view->dojo()->requireModule($this->_module);
+        $this->dojo->requireModule($this->_module);
 
         $attribs['id'] = $id;
         if (array_key_exists('id', $params)) {
@@ -126,6 +131,43 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
               . $content
               . "</div>\n";
 
+        return $html;
+    }
+
+    /**
+     * Create HTML representation of a dijit form element
+     * 
+     * @param  string $id 
+     * @param  string $value 
+     * @param  array $params 
+     * @param  array $attribs 
+     * @return string
+     */
+    public function _createFormElement($id, $value, array $params, array $attribs)
+    {
+        $this->dojo->requireModule($this->_module);
+
+        $attribs['id']    = $id;
+        $attribs['name']  = $id;
+        $attribs['value'] = (string) $value;
+        $attribs['type']  = $this->_elementType;
+
+        foreach (array('id', 'name', 'value', 'type') as $param) {
+            if (array_key_exists($param, $params)) {
+                unset($params[$param]);
+            }
+        }
+
+        if ($this->_useDeclarative()) {
+            $attribs = array_merge($attribs, $params);
+            $attribs['dojoType'] = $this->_dijit;
+        } elseif (!$this->_useProgrammaticNoScript()) {
+            $this->_createDijit($this->_dijit, $id, $params);
+        }
+
+        $html = '<input' 
+              . $this->_htmlAttribs($attribs) 
+              . $this->getClosingBracket();
         return $html;
     }
 
