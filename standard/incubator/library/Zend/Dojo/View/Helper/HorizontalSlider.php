@@ -20,53 +20,43 @@
  * @version    $Id: $
  */
 
-/** Zend_Dojo_View_Helper_Abstract */
-require_once 'Zend/Dojo/View/Helper/Abstract.php';
+/** Zend_Dojo_View_Helper_Slider */
+require_once 'Zend/Dojo/View/Helper/Slider.php';
 
 /**
- * Dojo RadioButton dijit
+ * Dojo HorizontalSlider dijit
  * 
- * @uses       Zend_Dojo_View_Helper_Abstract
+ * @uses       Zend_Dojo_View_Helper_Slider
  * @package    Zend_Dojo
  * @subpackage View
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
   */
-class Zend_Dojo_View_Helper_RadioButton extends Zend_Dojo_View_Helper_Abstract
+class Zend_Dojo_View_Helper_HorizontalSlider extends Zend_Dojo_View_Helper_Slider
 {
     /**
      * Dijit being used
      * @var string
      */
-    protected $_dijit  = 'dijit.form.RadioButton';
+    protected $_dijit  = 'dijit.form.HorizontalSlider';
 
     /**
-     * Dojo module to use
+     * Slider type
      * @var string
      */
-    protected $_module = 'dijit.form.RadioButton';
+    protected $_sliderType = 'Horizontal';
 
     /**
-     * dijit.form.RadioButton
+     * dijit.form.HorizontalSlider
      * 
      * @param  int $id 
-     * @param  string $content 
+     * @param  mixed $value 
      * @param  array $params  Parameters to use for dijit creation
      * @param  array $attribs HTML attributes
-     * @param  array $options Array of radio options
-     * @param  string $listsep String with which to separate options
      * @return string
      */
-    public function radioButton(
-        $id, 
-        $value = null, 
-        array $params = array(), 
-        array $attribs = array(), 
-        array $options = null, 
-        $listsep = "<br />\n"
-    ) {
-        $attribs = $this->_prepareDijit($attribs, $params, 'element');
-
-        return $this->view->formRadio($id, $value, $attribs, $options, $listsep);
+    public function horizontalSlider($id, $value = null, array $params = array(), array $attribs = array())
+    {
+        return $this->prepareSlider($id, $value, $params, $attribs);
     }
 }

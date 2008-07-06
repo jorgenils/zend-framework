@@ -110,12 +110,13 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
      * @param  string $content 
      * @param  array $params 
      * @param  array $attribs 
+     * @param  string|null $dijit 
      * @return string
      */
-    protected function _createLayoutContainer($id, $content, array $params, array $attribs)
+    protected function _createLayoutContainer($id, $content, array $params, array $attribs, $dijit = null)
     {
         $attribs['id'] = $id;
-        $attribs = $this->_prepareDijit($attribs, $params, 'layout');
+        $attribs = $this->_prepareDijit($attribs, $params, 'layout', $dijit);
      
         $html = '<div' . $this->_htmlAttribs($attribs) . '>'
               . $content
@@ -131,16 +132,17 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
      * @param  string $value 
      * @param  array $params 
      * @param  array $attribs 
+     * @param  string|null $dijit 
      * @return string
      */
-    public function _createFormElement($id, $value, array $params, array $attribs)
+    public function _createFormElement($id, $value, array $params, array $attribs, $dijit = null)
     {
         $attribs['id']    = $id;
         $attribs['name']  = $id;
         $attribs['value'] = (string) $value;
         $attribs['type']  = $this->_elementType;
 
-        $attribs = $this->_prepareDijit($attribs, $params, 'element');
+        $attribs = $this->_prepareDijit($attribs, $params, 'element', $dijit);
 
         $html = '<input' 
               . $this->_htmlAttribs($attribs) 
@@ -153,12 +155,13 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
      *
      * Also sets up requires
      * 
-     * @param array $attribs 
-     * @param array $params 
-     * @param mixed $type 
-     * @return void
+     * @param  array $attribs 
+     * @param  array $params 
+     * @param  string $type 
+     * @param  string $dijit Dijit type to use (otherwise, pull from $_dijit)
+     * @return array
      */
-    protected function _prepareDijit(array $attribs, array $params, $type)
+    protected function _prepareDijit(array $attribs, array $params, $type, $dijit = null)
     {
         $this->dojo->requireModule($this->_module);
 
@@ -190,11 +193,12 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
             }
         }
 
+        $dijit = (null === $dijit) ? $this->_dijit : $dijit;
         if ($this->_useDeclarative()) {
             $attribs = array_merge($attribs, $params);
-            $attribs['dojoType'] = $this->_dijit;
+            $attribs['dojoType'] = $dijit;
         } elseif (!$this->_useProgrammaticNoScript()) {
-            $this->_createDijit($this->_dijit, $id, $params);
+            $this->_createDijit($dijit, $id, $params);
         }
 
         return $attribs;
