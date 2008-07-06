@@ -24,7 +24,7 @@
 require_once 'Zend/Dojo/View/Helper/Abstract.php';
 
 /**
- * Dojo CheckBox dijit
+ * Dojo RadioButton dijit
  * 
  * @uses       Zend_Dojo_View_Helper_Abstract
  * @package    Zend_Dojo
@@ -32,54 +32,45 @@ require_once 'Zend/Dojo/View/Helper/Abstract.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
   */
-class Zend_Dojo_View_Helper_CheckBox extends Zend_Dojo_View_Helper_Abstract
+class Zend_Dojo_View_Helper_RadioButton extends Zend_Dojo_View_Helper_Abstract
 {
     /**
      * Dijit being used
      * @var string
      */
-    protected $_dijit  = 'dijit.form.CheckBox';
+    protected $_dijit  = 'dijit.form.RadioButton';
 
     /**
      * Dojo module to use
      * @var string
      */
-    protected $_module = 'dijit.form.CheckBox';
+    protected $_module = 'dijit.form.RadioButton';
 
     /**
-     * dijit.form.CheckBox
+     * dijit.form.RadioButton
      * 
      * @param  int $id 
      * @param  string $content 
      * @param  array $params  Parameters to use for dijit creation
      * @param  array $attribs HTML attributes
+     * @param  array $options Array of radio options
+     * @param  string $listsep String with which to separate options
      * @return string
      */
-    public function checkBox($id, $value = null, array $params = array(), array $attribs = array(), array $checkedOptions = null)
-    {
-        // Prepare the checkbox options
-        require_once 'Zend/View/Helper/FormCheckbox.php';
-        $checked = false;
-        if (isset($attribs['checked']) && $attribs['checked']) {
-            $checked = true;
-        } elseif (isset($attribs['checked'])) {
-            $checked = false;
-        }
-        $checkboxInfo = Zend_View_Helper_FormCheckbox::determineCheckboxInfo($value, $checked, $checkedOptions);
-        $attribs['checked'] = $checkboxInfo['checked'];
-
+    public function radioButton(
+        $id, 
+        $value = null, 
+        array $params = array(), 
+        array $attribs = array(), 
+        array $options = null, 
+        $listsep = "<br />\n"
+    ) {
         $attribs = $this->_prepareDijit($attribs, $params, 'element');
 
-        // and now we create it:
-        $html = '';
-        if (!strstr($id, '[]')) {
-            // hidden element for unchecked value
-            $html .= '<input name="' . $id . '" type="hidden" value="' . $this->view->escape($checkboxInfo['unCheckedValue']) . '"' . $this->getClosingBracket();
-        }
-
-        // and final element
-        $html .= $this->_createFormElement($id, $value, $params, $attribs);
-
-        return $html;
+        // Prepare the radio options
+        require_once 'Zend/View/Helper/FormRadio.php';
+        $formRadio = new Zend_View_Helper_FormRadio();
+        $formRadio->setView($this->view);
+        return $formRadio->formRadio($id, $value, $attribs, $options, $listsep);
     }
 }

@@ -168,11 +168,13 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
                 break;
             case 'element':
                 $stripParams = array('id', 'name', 'value', 'type');
-                if (array_key_exists('checked', $attribs)) {
-                    if ($attribs['checked']) {
-                        $attribs['checked'] = 'checked';
-                    } else {
-                        unset($attribs['checked']);
+                foreach (array('checked', 'disabled', 'readonly') as $attrib) {
+                    if (array_key_exists($attrib, $attribs)) {
+                        if ($attribs[$attrib]) {
+                            $attribs[$attrib] = $attrib;
+                        } else {
+                            unset($attribs[$attrib]);
+                        }
                     }
                 }
                 break;
