@@ -30,6 +30,28 @@ if (!defined('PHPUnit_MAIN_METHOD')) {
 }
 
 require_once 'Zend/Dojo/View/Helper/DojoTest.php';
+require_once 'Zend/Dojo/View/Helper/AccordionContainerTest.php';
+require_once 'Zend/Dojo/View/Helper/AccordionPaneTest.php';
+require_once 'Zend/Dojo/View/Helper/BorderContainerTest.php';
+require_once 'Zend/Dojo/View/Helper/CheckBoxTest.php';
+require_once 'Zend/Dojo/View/Helper/ComboBoxTest.php';
+require_once 'Zend/Dojo/View/Helper/ContentPaneTest.php';
+require_once 'Zend/Dojo/View/Helper/CurrencyTextBoxTest.php';
+require_once 'Zend/Dojo/View/Helper/DateTextBoxTest.php';
+require_once 'Zend/Dojo/View/Helper/FilteringSelectTest.php';
+require_once 'Zend/Dojo/View/Helper/FormTest.php';
+require_once 'Zend/Dojo/View/Helper/HorizontalSliderTest.php';
+require_once 'Zend/Dojo/View/Helper/NumberSpinnerTest.php';
+require_once 'Zend/Dojo/View/Helper/NumberTextBoxTest.php';
+require_once 'Zend/Dojo/View/Helper/RadioButtonTest.php';
+require_once 'Zend/Dojo/View/Helper/SplitContainerTest.php';
+require_once 'Zend/Dojo/View/Helper/StackContainerTest.php';
+require_once 'Zend/Dojo/View/Helper/TabContainerTest.php';
+require_once 'Zend/Dojo/View/Helper/TextareaTest.php';
+require_once 'Zend/Dojo/View/Helper/TextBoxTest.php';
+require_once 'Zend/Dojo/View/Helper/TimeTextBoxTest.php';
+require_once 'Zend/Dojo/View/Helper/ValidationTextBoxTest.php';
+require_once 'Zend/Dojo/View/Helper/VerticalSliderTest.php';
 
 /**
  * @category   Zend
@@ -50,6 +72,28 @@ class Zend_Dojo_View_Helper_AllTests
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Dojo - View_Helper');
 
         $suite->addTestSuite('Zend_Dojo_View_Helper_DojoTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_AccordionContainerTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_AccordionPaneTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_BorderContainerTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_CheckBoxTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_ComboBoxTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_ContentPaneTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_CurrencyTextBoxTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_DateTextBoxTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_FilteringSelectTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_FormTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_HorizontalSliderTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_NumberSpinnerTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_NumberTextBoxTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_RadioButtonTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_SplitContainerTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_StackContainerTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_TabContainerTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_TextareaTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_TextBoxTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_TimeTextBoxTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_ValidationTextBoxTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_VerticalSliderTest');
 
         return $suite;
     }
