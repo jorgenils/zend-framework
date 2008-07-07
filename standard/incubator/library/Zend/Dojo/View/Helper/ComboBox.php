@@ -109,6 +109,7 @@ class Zend_Dojo_View_Helper_ComboBox extends Zend_Dojo_View_Helper_Abstract
 
         $this->dojo->requireModule($params['type']);
 
+        $extraParams = array();
         $storeParams = array(
             'dojoType' => $params['type'],
             'jsId'     => $params['store'],
@@ -116,6 +117,20 @@ class Zend_Dojo_View_Helper_ComboBox extends Zend_Dojo_View_Helper_Abstract
 
         if (array_key_exists('params', $params)) {
             $storeParams = array_merge($storeParams, $params['params']);
+            $extraParams = $params['params'];
+        }
+
+        if ($this->_useProgrammatic()) {
+            if (!$this->_useProgrammaticNoScript()) {
+                if (array_key_exists('params'))
+                require_once 'Zend/Json.php';
+                $js = 'var ' . $storeParams['jsId'] . ' = '
+                    . 'new ' . $storeParams['dojoType'] . '('
+                    . Zend_Json::encode($extraParams)
+                    . ');';
+                $this->view->headScript()->appendScript($js);
+            }
+            return true;
         }
 
         return '<div' . $this->_htmlAttribs($storeParams) . '></div>';
