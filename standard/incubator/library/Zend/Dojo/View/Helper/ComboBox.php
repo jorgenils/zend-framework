@@ -84,7 +84,7 @@ class Zend_Dojo_View_Helper_ComboBox extends Zend_Dojo_View_Helper_Abstract
                     $storeParams['storeParams'] = $params['storeParams'];
                     unset($params['storeParams']);
                 }
-                $html .= $this->_renderStore($params['store']);
+                $html .= $this->_renderStore($storeParams);
             }
             $html .= $this->_createFormElement($id, $value, $params, $attribs);
             return $html;
