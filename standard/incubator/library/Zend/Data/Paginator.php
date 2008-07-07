@@ -193,11 +193,11 @@ class Zend_Data_Paginator implements Countable, IteratorAggregate
             $paginator = new self(new Zend_Data_Paginator_Adapter_Iterator($data));
         } else if (is_int($data)) {
             /**
-             * @see Zend_Data_Paginator_Adapter_Dummy
+             * @see Zend_Data_Paginator_Adapter_Null
              */
-            require_once 'Zend/Data/Paginator/Adapter/Dummy.php';
+            require_once 'Zend/Data/Paginator/Adapter/Null.php';
             
-            $paginator = new self(new Zend_Data_Paginator_Adapter_Dummy($data));
+            $paginator = new self(new Zend_Data_Paginator_Adapter_Null($data));
         } else {
             $type = (is_object($data)) ? get_class($data) : gettype($data);
             

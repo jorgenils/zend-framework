@@ -21,9 +21,9 @@
  */
 
 /**
- * @see Zend_Data_Paginator_Adapter_Dummy
+ * @see Zend_Data_Paginator_Adapter_Null
  */
-require_once 'Zend/Data/Paginator/Adapter/Dummy.php';
+require_once 'Zend/Data/Paginator/Adapter/Null.php';
 
 /**
  * @see PHPUnit_Framework_TestCase
@@ -50,7 +50,7 @@ class Zend_Data_Paginator_Adapter_DummyTest extends PHPUnit_Framework_TestCase
     protected function setUp ()
     {
         parent::setUp();
-        $this->_adapter = new Zend_Data_Paginator_Adapter_Dummy(101);
+        $this->_adapter = new Zend_Data_Paginator_Adapter_Null(101);
     }
     /**
      * Cleans up the environment after running a test.

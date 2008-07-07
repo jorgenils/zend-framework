@@ -30,7 +30,7 @@ require_once 'Zend/Data/Paginator/Adapter/Interface.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_Adapter_Dummy implements Zend_Data_Paginator_Adapter_Interface
+class Zend_Data_Paginator_Adapter_Null implements Zend_Data_Paginator_Adapter_Interface
 {
     /**
      * Item count

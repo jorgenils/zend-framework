@@ -83,10 +83,10 @@ class Zend_Data_PaginatorTest extends PHPUnit_Framework_TestCase
         $this->assertType('Zend_Data_Paginator_Adapter_Iterator', $paginator->getAdapter());
     }
     
-    public function testFactoryReturnsDummyAdapter()
+    public function testFactoryReturnsNullAdapter()
     {
         $paginator = Zend_Data_Paginator::factory(101);
-        $this->assertType('Zend_Data_Paginator_Adapter_Dummy', $paginator->getAdapter());
+        $this->assertType('Zend_Data_Paginator_Adapter_Null', $paginator->getAdapter());
     }
     
     public function testGetSetItemCountPerPage()
