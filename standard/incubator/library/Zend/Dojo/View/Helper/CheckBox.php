@@ -67,6 +67,7 @@ class Zend_Dojo_View_Helper_CheckBox extends Zend_Dojo_View_Helper_Abstract
         }
         $checkboxInfo = Zend_View_Helper_FormCheckbox::determineCheckboxInfo($value, $checked, $checkedOptions);
         $attribs['checked'] = $checkboxInfo['checked'];
+        $attribs['id']      = $id;
 
         $attribs = $this->_prepareDijit($attribs, $params, 'element');
 

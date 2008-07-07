@@ -198,7 +198,7 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
             $attribs = array_merge($attribs, $params);
             $attribs['dojoType'] = $dijit;
         } elseif (!$this->_useProgrammaticNoScript()) {
-            $this->_createDijit($dijit, $id, $params);
+            $this->_createDijit($dijit, $attribs['id'], $params);
         }
 
         return $attribs;
