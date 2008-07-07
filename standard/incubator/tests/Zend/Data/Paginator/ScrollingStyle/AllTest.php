@@ -57,7 +57,7 @@ class Zend_Data_Paginator_ScrollingStyle_AllTest extends PHPUnit_Framework_TestC
     {
         parent::setUp();
         $this->_scrollingStyle = new Zend_Data_Paginator_ScrollingStyle_All();
-        $this->_paginator = Zend_Data_Paginator::factory(range(1, 100));
+        $this->_paginator = Zend_Data_Paginator::factory(range(1, 101));
         $this->_paginator->setItemCountPerPage(10);
     }
     /**
@@ -75,8 +75,48 @@ class Zend_Data_Paginator_ScrollingStyle_AllTest extends PHPUnit_Framework_TestC
      */
     public function testGetPages()
     {
-        $expected = array_combine(range(1, 10), range(1, 10));
+        $expected = array_combine(range(1, 11), range(1, 11));
         $pages = $this->_scrollingStyle->getPages($this->_paginator);
         $this->assertEquals($expected, $pages);
+    }
+    
+    public function testGetNextAndPreviousPageForFirstPage()
+    {
+        $this->_paginator->setCurrentPageNumber(1);
+        $pages = $this->_paginator->getPages('All');
+        $this->assertEquals(null, $pages->previous);
+        $this->assertEquals(2, $pages->next);
+    }
+    
+    public function testGetNextAndPreviousPageForSecondPage()
+    {
+        $this->_paginator->setCurrentPageNumber(2);
+        $pages = $this->_paginator->getPages('All');
+        $this->assertEquals(1, $pages->previous);
+        $this->assertEquals(3, $pages->next);
+    }
+    
+    public function testGetNextAndPreviousPageForMiddlePage()
+    {
+        $this->_paginator->setCurrentPageNumber(6);
+        $pages = $this->_paginator->getPages('All');
+        $this->assertEquals(5, $pages->previous);
+        $this->assertEquals(7, $pages->next);
+    }
+    
+    public function testGetNextAndPreviousPageForSecondLastPage()
+    {
+        $this->_paginator->setCurrentPageNumber(10);
+        $pages = $this->_paginator->getPages('All');
+        $this->assertEquals(9, $pages->previous);
+        $this->assertEquals(11, $pages->next);
+    }
+    
+    public function testGetNextAndPreviousPageForLastPage()
+    {
+        $this->_paginator->setCurrentPageNumber(11);
+        $pages = $this->_paginator->getPages('All');
+        $this->assertEquals(10, $pages->previous);
+        $this->assertEquals(null, $pages->next);
     }
 }

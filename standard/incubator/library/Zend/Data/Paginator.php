@@ -191,6 +191,13 @@ class Zend_Data_Paginator implements Countable, IteratorAggregate
             require_once 'Zend/Data/Paginator/Adapter/Iterator.php';
             
             $paginator = new self(new Zend_Data_Paginator_Adapter_Iterator($data));
+        } else if (is_int($data)) {
+            /**
+             * @see Zend_Data_Paginator_Adapter_Dummy
+             */
+            require_once 'Zend/Data/Paginator/Adapter/Dummy.php';
+            
+            $paginator = new self(new Zend_Data_Paginator_Adapter_Dummy($data));
         } else {
             $type = (is_object($data)) ? get_class($data) : gettype($data);
             
@@ -672,7 +679,7 @@ class Zend_Data_Paginator implements Countable, IteratorAggregate
      */
     protected function _calculatePageCount()
     {
-        return ceil($this->_adapter->count() / $this->_itemCountPerPage);
+        return (int) ceil($this->_adapter->count() / $this->_itemCountPerPage);
     }
 
     /**

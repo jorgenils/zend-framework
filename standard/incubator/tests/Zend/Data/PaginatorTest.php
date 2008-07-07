@@ -83,6 +83,12 @@ class Zend_Data_PaginatorTest extends PHPUnit_Framework_TestCase
         $this->assertType('Zend_Data_Paginator_Adapter_Iterator', $paginator->getAdapter());
     }
     
+    public function testFactoryReturnsDummyAdapter()
+    {
+        $paginator = Zend_Data_Paginator::factory(101);
+        $this->assertType('Zend_Data_Paginator_Adapter_Dummy', $paginator->getAdapter());
+    }
+    
     public function testGetSetItemCountPerPage()
     {
         $this->assertEquals(10, $this->_paginator->getItemCountPerPage());
@@ -138,5 +144,39 @@ class Zend_Data_PaginatorTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $this->_paginator->getItem(1));
         $this->assertEquals(11, $this->_paginator->getItem(1, 2));
         $this->assertEquals(24, $this->_paginator->getItem(4, 3));
+    }
+    
+    public function testNormalizePageNumber()
+    {
+        $this->assertEquals(1, $this->_paginator->normalizePageNumber(0));
+        $this->assertEquals(1, $this->_paginator->normalizePageNumber(1));
+        $this->assertEquals(2, $this->_paginator->normalizePageNumber(2));
+        $this->assertEquals(5, $this->_paginator->normalizePageNumber(5));
+        $this->assertEquals(10, $this->_paginator->normalizePageNumber(10));
+        $this->assertEquals(11, $this->_paginator->normalizePageNumber(11));
+        $this->assertEquals(11, $this->_paginator->normalizePageNumber(12));
+    }
+    
+    public function testNormalizeItemNumber()
+    {
+        $this->assertEquals(1, $this->_paginator->normalizeItemNumber(0));
+        $this->assertEquals(1, $this->_paginator->normalizeItemNumber(1));
+        $this->assertEquals(2, $this->_paginator->normalizeItemNumber(2));
+        $this->assertEquals(5, $this->_paginator->normalizeItemNumber(5));
+        $this->assertEquals(9, $this->_paginator->normalizeItemNumber(9));
+        $this->assertEquals(10, $this->_paginator->normalizeItemNumber(10));
+        $this->assertEquals(10, $this->_paginator->normalizeItemNumber(11));
+    }
+    
+    public function testGetPagesInRangeSubRange()
+    {
+        $actual = $this->_paginator->getPagesInRange(3, 8);
+        $this->assertEquals(range(3, 8), $actual);
+    }
+    
+    public function testGetPagesInRangeOutOfBounds()
+    {
+        $actual = $this->_paginator->getPagesInRange(-1, 12);
+        $this->assertEquals(range(1, 11), $actual);
     }
 }

@@ -53,6 +53,8 @@ class Zend_Data_Paginator_ScrollingStyle_JumpingTest extends PHPUnit_Framework_T
      */
     private $_paginator;
     
+    private $_expectedRange;
+    
     /**
      * Prepares the environment before running a test.
      */
@@ -63,6 +65,7 @@ class Zend_Data_Paginator_ScrollingStyle_JumpingTest extends PHPUnit_Framework_T
         $this->_paginator = Zend_Data_Paginator::factory(range(1, 101));
         $this->_paginator->setItemCountPerPage(10);
         $this->_paginator->setPageRange(10);
+        $this->_expectedRange = array_combine(range(1, 10), range(1, 10));
     }
     /**
      * Cleans up the environment after running a test.
@@ -78,16 +81,21 @@ class Zend_Data_Paginator_ScrollingStyle_JumpingTest extends PHPUnit_Framework_T
     {
         $this->_paginator->setCurrentPageNumber(1);
         $actual = $this->_scrollingStyle->getPages($this->_paginator);
-        $expected = array_combine(range(1, 10), range(1, 10));
-        $this->assertEquals($expected, $actual);
+        $this->assertEquals($this->_expectedRange, $actual);
     }
     
     public function testGetPagesInRangeForSecondPage()
     {
         $this->_paginator->setCurrentPageNumber(2);
         $actual = $this->_scrollingStyle->getPages($this->_paginator);
-        $expected = array_combine(range(1, 10), range(1, 10));
-        $this->assertEquals($expected, $actual);
+        $this->assertEquals($this->_expectedRange, $actual);
+    }
+    
+    public function testGetPagesInRangeForSecondLastPage()
+    {
+        $this->_paginator->setCurrentPageNumber(10);
+        $actual = $this->_scrollingStyle->getPages($this->_paginator);
+        $this->assertEquals($this->_expectedRange, $actual);
     }
     
     public function testGetPagesInRangeForLastPage()
@@ -96,5 +104,45 @@ class Zend_Data_Paginator_ScrollingStyle_JumpingTest extends PHPUnit_Framework_T
         $actual = $this->_scrollingStyle->getPages($this->_paginator);
         $expected = array(11 => 11);
         $this->assertEquals($expected, $actual);
+    }
+    
+    public function testGetNextAndPreviousPageForFirstPage()
+    {
+        $this->_paginator->setCurrentPageNumber(1);
+        $pages = $this->_paginator->getPages('Jumping');
+        $this->assertEquals(null, $pages->previous);
+        $this->assertEquals(2, $pages->next);
+    }
+    
+    public function testGetNextAndPreviousPageForSecondPage()
+    {
+        $this->_paginator->setCurrentPageNumber(2);
+        $pages = $this->_paginator->getPages('Jumping');
+        $this->assertEquals(1, $pages->previous);
+        $this->assertEquals(3, $pages->next);
+    }
+    
+    public function testGetNextAndPreviousPageForMiddlePage()
+    {
+        $this->_paginator->setCurrentPageNumber(6);
+        $pages = $this->_paginator->getPages('Jumping');
+        $this->assertEquals(5, $pages->previous);
+        $this->assertEquals(7, $pages->next);
+    }
+    
+    public function testGetNextAndPreviousPageForSecondLastPage()
+    {
+        $this->_paginator->setCurrentPageNumber(10);
+        $pages = $this->_paginator->getPages('Jumping');
+        $this->assertEquals(9, $pages->previous);
+        $this->assertEquals(11, $pages->next);
+    }
+    
+    public function testGetNextAndPreviousPageForLastPage()
+    {
+        $this->_paginator->setCurrentPageNumber(11);
+        $pages = $this->_paginator->getPages('Jumping');
+        $this->assertEquals(10, $pages->previous);
+        $this->assertEquals(null, $pages->next);
     }
 }
