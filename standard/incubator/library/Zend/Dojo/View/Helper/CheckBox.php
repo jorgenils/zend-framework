@@ -41,6 +41,12 @@ class Zend_Dojo_View_Helper_CheckBox extends Zend_Dojo_View_Helper_Abstract
     protected $_dijit  = 'dijit.form.CheckBox';
 
     /**
+     * Element type
+     * @var string
+     */
+    protected $_elementType = 'checkbox';
+
+    /**
      * Dojo module to use
      * @var string
      */
@@ -75,7 +81,7 @@ class Zend_Dojo_View_Helper_CheckBox extends Zend_Dojo_View_Helper_Abstract
         $html = '';
         if (!strstr($id, '[]')) {
             // hidden element for unchecked value
-            $html .= '<input name="' . $id . '" type="hidden" value="' . $this->view->escape($checkboxInfo['unCheckedValue']) . '"' . $this->getClosingBracket();
+            $html .= $this->_renderHiddenElement($id, $checkboxInfo['unCheckedValue']);
         }
 
         // and final element

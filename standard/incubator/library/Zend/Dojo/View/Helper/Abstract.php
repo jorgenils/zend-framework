@@ -230,4 +230,22 @@ EOJ;
 
         $this->dojo->addOnLoad($lambda);
     }
+
+    /**
+     * Render a hidden element to hold a value
+     * 
+     * @param  string $id 
+     * @param  string|int|float $value 
+     * @return string
+     */
+    protected function _renderHiddenElement($id, $value)
+    {
+        $hiddenAttribs = array(
+            'id'    => $id,
+            'name'  => $id,
+            'value' => (string) $value,
+            'type'  => 'hidden',
+        );
+        return '<input' . $this->_htmlAttribs($hiddenAttribs) . $this->getClosingBracket();
+    }
 }

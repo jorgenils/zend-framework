@@ -66,7 +66,7 @@ abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Abstra
         $this->_sliderType = strtolower($this->_sliderType);
 
         // Prepare two items: a hidden element to store the value, and the slider
-        $hidden = $this->_getHiddenElement($id, $value);
+        $hidden = $this->_renderHiddenElement($id, $value);
 
         foreach ($this->_requiredParams as $param) {
             if (!array_key_exists($param, $params)) {
@@ -95,6 +95,14 @@ abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Abstra
                     $content .= $this->_prepareDecoration('bottomDecoration', $id, $params['bottomDecoration']);
                     unset($params['bottomDecoration']);
                 }
+
+                if (array_key_exists('leftDecoration', $params)) {
+                    unset($params['leftDecoration']);
+                }
+
+                if (array_key_exists('rightDecoration', $params)) {
+                    unset($params['rightDecoration']);
+                }
                 break;
             case 'vertical':
                 if (array_key_exists('leftDecoration', $params)) {
@@ -106,6 +114,14 @@ abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Abstra
                     $content .= $this->_prepareDecoration('rightDecoration', $id, $params['rightDecoration']);
                     unset($params['rightDecoration']);
                 }
+
+                if (array_key_exists('topDecoration', $params)) {
+                    unset($params['topDecoration']);
+                }
+
+                if (array_key_exists('bottomDecoration', $params)) {
+                    unset($params['bottomDecoration']);
+                }
                 break;
             default:
                 require_once 'Zend/Dojo/View/Exception.php';
@@ -113,24 +129,6 @@ abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Abstra
         }
 
         return $hidden . $this->_createLayoutContainer($id, $content, $params, $attribs);
-    }
-
-    /**
-     * Get the hidden element that will hold the value
-     * 
-     * @param  string $id 
-     * @param  string|int|float $value 
-     * @return string
-     */
-    protected function _getHiddenElement($id, $value)
-    {
-        $hiddenAttribs = array(
-            'id'    => $id,
-            'name'  => $id,
-            'value' => (string) $value,
-            'type'  => 'hidden',
-        );
-        return '<input' . $this->_htmlAttribs($hiddenAttribs) . $this->getClosingBracket();
     }
 
     /**

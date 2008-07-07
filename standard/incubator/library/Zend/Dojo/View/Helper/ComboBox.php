@@ -91,6 +91,7 @@ class Zend_Dojo_View_Helper_ComboBox extends Zend_Dojo_View_Helper_Abstract
         }
 
         // do as normal select
+        $attribs['id'] = $id;
         $attribs = $this->_prepareDijit($attribs, $params, 'element');
         return $this->view->formSelect($id, $value, $attribs, $options);
     }
@@ -122,7 +123,6 @@ class Zend_Dojo_View_Helper_ComboBox extends Zend_Dojo_View_Helper_Abstract
 
         if ($this->_useProgrammatic()) {
             if (!$this->_useProgrammaticNoScript()) {
-                if (array_key_exists('params'))
                 require_once 'Zend/Json.php';
                 $js = 'var ' . $storeParams['jsId'] . ' = '
                     . 'new ' . $storeParams['dojoType'] . '('

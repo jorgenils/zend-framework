@@ -65,6 +65,7 @@ class Zend_Dojo_View_Helper_RadioButton extends Zend_Dojo_View_Helper_Abstract
         array $options = null, 
         $listsep = "<br />\n"
     ) {
+        $attribs['id'] = $id;
         $attribs = $this->_prepareDijit($attribs, $params, 'element');
 
         return $this->view->formRadio($id, $value, $attribs, $options, $listsep);
