@@ -78,8 +78,8 @@ abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Abstra
         $content = '';
         $params['value'] = $value;
 
-        if (!array_key_exists('onChange', $params)) {
-            $params['onChange'] = 'dojo.byId("' . $id . '").value = arguments[0];';
+        if (!array_key_exists('onChange', $attribs)) {
+            $attribs['onChange'] = "dojo.byId('" . $id . "').value = arguments[0];";
         }
 
         $id .= '-slider';
