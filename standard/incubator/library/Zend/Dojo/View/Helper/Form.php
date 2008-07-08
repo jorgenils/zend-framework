@@ -50,13 +50,21 @@ class Zend_Dojo_View_Helper_Form extends Zend_Dojo_View_Helper_Dijit
      * dijit.form.Form
      * 
      * @param  int $id 
-     * @param  string $content 
-     * @param  array $attribs HTML attributes
+     * @param  null|array $attribs HTML attributes
+     * @param  false|string $content 
      * @return string
      */
-    public function form($id, $content, array $attribs = array())
+    public function form($id, $attribs = null, $content = false)
     {
+        if (!is_array($attribs)) {
+            $attribs = (array) $attribs;
+        }
         $attribs['id'] = $id;
+
+        if (false === $content) {
+            $content = '';
+        }
+
         $attribs = $this->_prepareDijit($attribs, array(), 'layout');
 
         $html = '<form' . $this->_htmlAttribs($attribs) . '>'

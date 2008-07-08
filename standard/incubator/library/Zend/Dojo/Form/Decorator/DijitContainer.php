@@ -168,7 +168,7 @@ class Zend_Dojo_Form_Decorator_DijitContainer extends Zend_Form_Decorator_Form
     }
 
     /**
-     * Render a form
+     * Render a dijit layout container
      *
      * Replaces $content entirely from currently set element.
      * 
