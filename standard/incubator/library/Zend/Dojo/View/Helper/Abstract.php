@@ -214,21 +214,8 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
      */
     protected function _createDijit($dijit, $id, array $params)
     {
-        if (empty($params)) {
-            $params = '{}';
-        } else {
-            require_once 'Zend/Json.php';
-            $params = Zend_Json::encode($params);
-        }
-
-        $lambda =<<<EOJ
-function() {
-    var zfDijit = new $dijit($params, dojo.byId('$id'));
-    zfDijit.startup();
-}
-EOJ;
-
-        $this->dojo->addOnLoad($lambda);
+        $params['dojoType'] = $dijit;
+        $this->dojo->setDijit($id, $params);
     }
 
     /**

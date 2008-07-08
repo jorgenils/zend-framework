@@ -123,12 +123,14 @@ class Zend_Dojo_View_Helper_ComboBox extends Zend_Dojo_View_Helper_Abstract
 
         if ($this->_useProgrammatic()) {
             if (!$this->_useProgrammaticNoScript()) {
+                $this->dojo->addJavascript('var ' . $storeParams['jsId'] . ';');
                 require_once 'Zend/Json.php';
-                $js = 'var ' . $storeParams['jsId'] . ' = '
+                $js = "function() {\n"
+                    . '    ' . $storeParams['jsId'] . ' = '
                     . 'new ' . $storeParams['dojoType'] . '('
-                    . Zend_Json::encode($extraParams)
-                    . ');';
-                $this->view->headScript()->appendScript($js);
+                    .         Zend_Json::encode($extraParams)
+                    . ");\n}";
+                $this->dojo->addOnLoad($js);
             }
             return true;
         }

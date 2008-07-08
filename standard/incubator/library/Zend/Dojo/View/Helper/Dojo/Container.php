@@ -59,6 +59,18 @@ class Zend_Dojo_View_Helper_Dojo_Container
     protected $_captureObj;
 
     /**
+     * Has the dijit loader been registered?
+     * @var bool
+     */
+    protected $_dijitLoaderRegistered = false;
+
+    /**
+     * Registered programmatic dijits
+     * @var array
+     */
+    protected $_dijits = array();
+
+    /**
      * Dojo configuration
      * @var array
      */
@@ -75,6 +87,12 @@ class Zend_Dojo_View_Helper_Dojo_Container
      * @var bool
      */
     protected $_isXhtml = false;
+
+    /**
+     * Arbitrary javascript to include in dojo script
+     * @var array
+     */
+    protected $_javascriptStatements = array();
 
     /**
      * Relative path to dojo
@@ -458,6 +476,241 @@ class Zend_Dojo_View_Helper_Dojo_Container
     }
 
     /**
+     * Add a programmatic dijit
+     * 
+     * @param  string $id 
+     * @param  array $params 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function addDijit($id, array $params)
+    {
+        if (array_key_exists($id, $this->_dijits)) {
+            require_once 'Zend/Dojo/View/Exception.php';
+            throw new Zend_Dojo_View_Exception(sprintf('Duplicate dijit with id "%s" already registered', $id));
+        }
+
+        $this->_dijits[$id] = array(
+            'id'     => $id,
+            'params' => $params,
+        );
+
+        return $this;
+    }
+
+    /**
+     * Set a programmatic dijit (overwrites)
+     * 
+     * @param  string $id 
+     * @param  array $params 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function setDijit($id, array $params)
+    {
+        $this->removeDijit($id);
+        return $this->addDijit($id, $params);
+    }
+
+    /**
+     * Add multiple dijits at once
+     *
+     * Expects an array of id => array $params pairs
+     * 
+     * @param  array $dijits 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function addDijits(array $dijits)
+    {
+        foreach ($dijits as $id => $params) {
+            $this->addDijit($id, $params);
+        }
+        return $this;
+    }
+
+    /**
+     * Set multiple dijits at once (overwrites)
+     *
+     * Expects an array of id => array $params pairs
+     * 
+     * @param  array $dijits 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function setDijits(array $dijits)
+    {
+        $this->clearDijits();
+        return $this->addDijits($dijits);
+    }
+
+    /**
+     * Is the given programmatic dijit already registered?
+     * 
+     * @param  string $id 
+     * @return bool
+     */
+    public function hasDijit($id)
+    {
+        return array_key_exists($id, $this->_dijits);
+    }
+
+    /**
+     * Retrieve a dijit by id
+     * 
+     * @param  string $id 
+     * @return array|null
+     */
+    public function getDijit($id)
+    {
+        if ($this->hasDijit($id)) {
+            return $this->_dijits[$id]['params'];
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve all dijits
+     *
+     * Returns dijits as an array of assoc arrays
+     * 
+     * @return array
+     */
+    public function getDijits()
+    {
+        return array_values($this->_dijits);
+    }
+
+    /**
+     * Remove a programmatic dijit if it exists
+     * 
+     * @param  string $id 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function removeDijit($id)
+    {
+        if (array_key_exists($id, $this->_dijits)) {
+            unset($this->_dijits[$id]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Clear all dijits
+     * 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function clearDijits()
+    {
+        $this->_dijits = array();
+        return $this;
+    }
+
+    /**
+     * Render dijits as JSON structure
+     * 
+     * @return string
+     */
+    public function dijitsToJson()
+    {
+        require_once 'Zend/Json.php';
+        return Zend_Json::encode($this->getDijits());
+    }
+
+    /**
+     * Create dijit loader functionality
+     * 
+     * @return void
+     */
+    public function registerDijitLoader()
+    {
+        if (!$this->_dijitLoaderRegistered) {
+            $js =<<<EOJ
+function() {
+    dojo.forEach(zendDijits, function(info) {
+        var n = dojo.byId(info.id);
+        dojo.attr(n, dojo.mixin({ id: info.id }, info.params));
+    })
+    dojo.parser.parse();
+}
+EOJ;
+            $this->requireModule('dojo.parser');
+            $this->addOnLoad($js);
+            $this->addJavascript('var zendDijits = ' . $this->dijitsToJson() . ';');
+            $this->_dijitLoaderRegistered = true;
+        }
+    }
+
+    /**
+     * Add arbitrary javascript to execute in dojo JS container
+     * 
+     * @param  string $js 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function addJavascript($js)
+    {
+        $js = preg_replace('/^\s*(.*?)\s*$/s', '$1', $js);
+        if (!in_array(substr($js, -1), array(';', '}'))) {
+            $js .= ';';
+        }
+
+        if (in_array($js, $this->_javascriptStatements)) {
+            return $this;
+        }
+
+        $this->_javascriptStatements[] = $js;
+        return $this;
+    }
+
+    /**
+     * Return all registered javascript statements
+     * 
+     * @return array
+     */
+    public function getJavascript()
+    {
+        return $this->_javascriptStatements;
+    }
+
+    /**
+     * Clear arbitrary javascript stack
+     * 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function clearJavascript()
+    {
+        $this->_javascriptStatements = array();
+        return $this;
+    }
+
+    /**
+     * Capture arbitrary javascript to include in dojo script
+     * 
+     * @return void
+     */
+    public function javascriptCaptureStart()
+    {
+        if ($this->_captureLock) {
+            require_once 'Zend/Dojo/View/Exception.php';
+            throw new Zend_Dojo_View_Exception('Cannot nest captures');
+        }
+
+        $this->_captureLock = true;
+        return ob_start();
+    }
+
+    /**
+     * Finish capturing arbitrary javascript to include in dojo script
+     * 
+     * @return true
+     */
+    public function javascriptCaptureEnd()
+    {
+        $data               = ob_get_clean();
+        $this->_captureLock = false;
+
+        $this->addJavascript($data);
+        return true;
+    }
+
+    /**
      * String representation of dojo environment
      * 
      * @return string
@@ -472,6 +725,10 @@ class Zend_Dojo_View_Helper_Dojo_Container
 
         if (Zend_Dojo_View_Helper_Dojo::useDeclarative()) {
             $this->setDjConfigOption('parseOnLoad', true);
+        }
+
+        if (!empty($this->_dijits)) {
+            $this->registerDijitLoader();
         }
 
         $html  = $this->_renderStylesheets() . PHP_EOL
@@ -609,12 +866,19 @@ class Zend_Dojo_View_Helper_Dojo_Container
             $onLoadActions[] = 'dojo.addOnLoad(' . $callback . ');';
         }
 
+        $javascript = implode("\n    ", $this->getJavascript());
+
         $content = '';
         if (!empty($js)) {
             $content .= implode("\n    ", $js) . "\n";
         }
+
         if (!empty($onLoadActions)) {
             $content .= implode("\n    ", $onLoadActions) . "\n";
+        }
+
+        if (!empty($javascript)) {
+            $content .= $javascript . "\n";
         }
 
         if (preg_match('/^\s*$/s', $content)) {

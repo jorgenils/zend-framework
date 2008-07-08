@@ -445,6 +445,199 @@ function() {
         $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useProgrammaticNoScript());
     }
 
+    public function testAddingProgrammaticDijitsShouldAcceptIdAndArrayOfDijitParams()
+    {
+        $this->helper->addDijit('foo', array('dojoType' => 'dijit.form.Form'));
+        $dijits = $this->helper->getDijits();
+        $this->assertTrue(is_array($dijits));
+        $this->assertEquals(1, count($dijits));
+        $dijit = array_shift($dijits);
+        $this->assertTrue(is_array($dijit));
+        $this->assertEquals(2, count($dijit));
+        $this->assertTrue(array_key_exists('id', $dijit));
+        $this->assertTrue(array_key_exists('params', $dijit));
+        $this->assertEquals('foo', $dijit['id']);
+        $this->assertTrue(is_array($dijit['params']));
+        $this->assertEquals(1, count($dijit['params']));
+        $this->assertTrue(array_key_exists('dojoType', $dijit['params']));
+        $this->assertEquals('dijit.form.Form', $dijit['params']['dojoType']);
+    }
+
+    /**
+     * @expectedException Zend_Dojo_View_Exception
+     */
+    public function testAddingDuplicateProgrammaticDijitsShouldRaiseExceptions()
+    {
+        $this->helper->addDijit('foo', array('dojoType' => 'dijit.form.Form'));
+        $this->helper->addDijit('foo', array('dojoType' => 'dijit.form.ComboBox'));
+    }
+
+    public function testSettingProgrammaticDijitsShouldOverwriteExistingDijits()
+    {
+        $this->testAddingProgrammaticDijitsShouldAcceptIdAndArrayOfDijitParams();
+        $this->helper->setDijit('foo', array('dojoType' => 'dijit.form.ComboBox'));
+        $dijits = $this->helper->getDijits();
+        $this->assertTrue(is_array($dijits));
+        $this->assertEquals(1, count($dijits));
+        $dijit = array_shift($dijits);
+        $this->assertEquals('dijit.form.ComboBox', $dijit['params']['dojoType']);
+    }
+
+    public function testShouldAllowAddingMultipleDijitsAtOnce()
+    {
+        $dijits = array(
+            'foo' => array(
+                'dojoType' => 'dijit.form.Form'
+            ),
+            'bar' => array(
+                'dojoType' => 'dijit.form.TextBox',
+            ),
+        );
+        $this->helper->addDijits($dijits);
+        $test = $this->helper->getDijits();
+        $this->assertTrue(is_array($test));
+        $this->assertEquals(2, count($test));
+        $keys = array();
+        foreach ($test as $dijit) {
+            $keys[] = $dijit['id'];
+        }
+        $this->assertSame(array_keys($dijits), $keys);
+    }
+
+    public function testSettingMultipleDijitsAtOnceShouldOverwriteAllDijits()
+    {
+        $this->testAddingProgrammaticDijitsShouldAcceptIdAndArrayOfDijitParams();
+        $dijits = array(
+            'bar' => array(
+                'dojoType' => 'dijit.form.Form'
+            ),
+            'baz' => array(
+                'dojoType' => 'dijit.form.TextBox',
+            ),
+        );
+        $this->helper->setDijits($dijits);
+        $test = $this->helper->getDijits();
+        $this->assertTrue(is_array($test));
+        $this->assertEquals(2, count($test));
+        $keys = array();
+        foreach ($test as $dijit) {
+            $keys[] = $dijit['id'];
+        }
+        $this->assertSame(array_keys($dijits), $keys);
+    }
+
+    public function testRetrievingDijitsByIdShouldReturnJustParams()
+    {
+        $this->helper->addDijit('foo', array('dojoType' => 'dijit.form.Form'));
+        $params = $this->helper->getDijit('foo');
+        $this->assertTrue(is_array($params));
+        $this->assertEquals(1, count($params), var_export($params, 1));
+        $this->assertTrue(array_key_exists('dojoType', $params));
+        $this->assertEquals('dijit.form.Form', $params['dojoType']);
+    }
+
+    public function testShouldAllowRemovingIndividualDijits()
+    {
+        $this->helper->addDijit('foo', array('dojoType' => 'dijit.form.Form'));
+        $dijits = $this->helper->getDijits();
+        $this->assertTrue(is_array($dijits));
+        $this->assertEquals(1, count($dijits));
+        $this->helper->removeDijit('foo');
+        $dijits = $this->helper->getDijits();
+        $this->assertTrue(is_array($dijits));
+        $this->assertEquals(0, count($dijits));
+    }
+
+    public function testShouldAllowClearingAllDijits()
+    {
+        $this->testShouldAllowAddingMultipleDijitsAtOnce();
+        $this->helper->clearDijits();
+        $dijits = $this->helper->getDijits();
+        $this->assertTrue(is_array($dijits));
+        $this->assertEquals(0, count($dijits));
+    }
+
+    public function testShouldAllowRetrievingDijitsAsJsonArray()
+    {
+        $this->testShouldAllowAddingMultipleDijitsAtOnce();
+        $json  = $this->helper->dijitsToJson();
+        $array = Zend_Json::decode($json);
+        $this->assertTrue(is_array($array));
+
+        $keys  = array();
+        foreach ($array as $dijit) {
+            $keys[] = $dijit['id'];
+            $this->assertTrue(array_key_exists('params', $dijit));
+            $this->assertTrue(is_array($dijit['params']));
+        }
+        $this->assertSame(array('foo', 'bar'), $keys);
+    }
+
+    public function testRenderingShouldCreateZendDijitsObjectAndAddOnloadForDijitsWhenDijitsArePresent()
+    {
+        $this->helper->enable();
+        $this->testShouldAllowAddingMultipleDijitsAtOnce();
+        $json = $this->helper->dijitsToJson();
+        $html = $this->helper->__toString();
+        $this->assertContains($json, $html, $html);
+
+        $found = false;
+        foreach ($this->helper->getOnLoadActions() as $action) {
+            if (strstr($action, 'dojo.mixin')) {
+                $found = true;
+                break;
+            }
+        }
+        $this->assertTrue($found, 'Dijit onload action not created');
+        $this->assertContains($action, $html);
+    }
+
+    public function testShouldAllowAddingArbitraryJsToPrimaryDojoScriptTag()
+    {
+        $this->helper->enable();
+        $this->helper->addJavascript('var foo = "bar";');
+        $html = $this->helper->__toString();
+        $found = false;
+        if (preg_match_all('|<script[^>]*>(.*?)(</script>)|s', $html, $m)) {
+            foreach ($m[1] as $script)  {
+                if (strstr($script, 'var foo = "bar";')) {
+                    $found = true;
+                    break;
+                }
+            }
+        }
+        $this->assertTrue($found, 'Js not found: ' . $html);
+    }
+
+    public function testShouldAllowClearingArbitraryJsStack()
+    {
+        $this->testShouldAllowAddingArbitraryJsToPrimaryDojoScriptTag();
+        $this->helper->clearJavascript();
+        $js = $this->helper->getJavascript();
+        $this->assertTrue(is_array($js));
+        $this->assertEquals(0, count($js));
+    }
+
+    public function testShouldNotAllowAddingDuplicateArbitraryJsToPrimaryDojoScriptTag()
+    {
+        $this->helper->addJavascript('var foo = "bar";');
+        $this->helper->addJavascript('var foo = "bar";');
+        $js = $this->helper->getJavascript();
+        $this->assertTrue(is_array($js));
+        $this->assertEquals(1, count($js), var_export($js, 1));
+        $this->assertEquals('var foo = "bar";', $js[0]);
+    }
+
+    public function testShouldAllowCapturingArbitraryJsToPrimaryDojoScriptTag()
+    {
+        $this->helper->javascriptCaptureStart();
+        echo 'var foo = "bar";';
+        $this->helper->javascriptCaptureEnd();
+        $js = $this->helper->getJavascript();
+        $this->assertEquals(1, count($js));
+        $this->assertContains('var foo = "bar";', $js[0]);
+    }
+
     public function setupDojo()
     {
         $this->helper->requireModule('dijit.layout.ContentPane')
