@@ -110,15 +110,7 @@ class Zend_Dojo_View_Helper_AccordionPaneTest extends PHPUnit_Framework_TestCase
         Zend_Dojo_View_Helper_Dojo::setUseProgrammatic();
         $html = $this->getContainer();
         $this->assertNotRegexp('/<div[^>]*(dojoType="dijit.layout.AccordionPane")/', $html);
-
-        $onLoadActions = $this->view->dojo()->getOnloadActions();
-        $found = false;
-        foreach ($onLoadActions as $action) {
-            if (preg_match('/var zfDijit = new dijit.layout.AccordionPane\(.*, dojo.byId\(\'pane1\'\)/m', $action)) {
-                $found = true;
-            }
-        }
-        $this->assertTrue($found, 'Did not find programmatic JS in dojo helper: '. var_export($onLoadActions, 1));
+        $this->assertNotNull($this->view->dojo()->getDijit('pane1'));
     }
 }
 

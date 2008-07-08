@@ -142,15 +142,7 @@ class Zend_Dojo_View_Helper_ComboBoxTest extends PHPUnit_Framework_TestCase
         Zend_Dojo_View_Helper_Dojo::setUseProgrammatic();
         $html = $this->getElementAsSelect();
         $this->assertNotRegexp('/<select[^>]*(dojoType="dijit.form.ComboBox")/', $html);
-
-        $onLoadActions = $this->view->dojo()->getOnloadActions();
-        $found = false;
-        foreach ($onLoadActions as $action) {
-            if (preg_match('/var zfDijit = new dijit.form.ComboBox\(.*, dojo.byId\(\'elementId\'\)/m', $action)) {
-                $found = true;
-            }
-        }
-        $this->assertTrue($found, 'Did not find programmatic JS in dojo helper: '. var_export($onLoadActions, 1));
+        $this->assertNotNull($this->view->dojo()->getDijit('elementId'));
     }
 
     public function testShouldAllowDeclarativeDijitCreationAsRemoter()
@@ -168,15 +160,27 @@ class Zend_Dojo_View_Helper_ComboBoxTest extends PHPUnit_Framework_TestCase
         $html = $this->getElementAsRemoter();
         $this->assertNotRegexp('/<input[^>]*(dojoType="dijit.form.ComboBox")/', $html);
         $this->assertRegexp('/<input[^>]*(type="text")/', $html);
+        $this->assertNotNull($this->view->dojo()->getDijit('elementId'));
 
-        $onLoadActions = $this->view->dojo()->getOnloadActions();
         $found = false;
-        foreach ($onLoadActions as $action) {
-            if (preg_match('/var zfDijit = new dijit.form.ComboBox\(.*, dojo.byId\(\'elementId\'\)/m', $action)) {
+        $scripts = $this->view->dojo()->getJavascript();
+        foreach ($scripts as $js) {
+            if (strstr($js, 'var stateStore;')) {
                 $found = true;
+                break;
             }
         }
-        $this->assertTrue($found, 'Did not find programmatic JS in dojo helper: '. var_export($onLoadActions, 1));
+        $this->assertTrue($found, 'No store declaration found: ' . var_export($scripts, 1));
+
+        $found = false;
+        $actions = $this->view->dojo()->getOnloadActions();
+        foreach ($actions as $action) {
+            if (strstr($action, 'stateStore = ')) {
+                $found = true;
+                break;
+            }
+        }
+        $this->assertTrue($found, 'No store onLoad action found: ' . var_export($actions, 1));
     }
 }
 

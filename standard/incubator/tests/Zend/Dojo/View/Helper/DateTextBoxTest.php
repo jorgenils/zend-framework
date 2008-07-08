@@ -117,15 +117,7 @@ class Zend_Dojo_View_Helper_DateTextBoxTest extends PHPUnit_Framework_TestCase
         Zend_Dojo_View_Helper_Dojo::setUseProgrammatic();
         $html = $this->getElement();
         $this->assertNotRegexp('/<input[^>]*(dojoType="dijit.form.DateTextBox")/', $html);
-
-        $onLoadActions = $this->view->dojo()->getOnloadActions();
-        $found = false;
-        foreach ($onLoadActions as $action) {
-            if (preg_match('/var zfDijit = new dijit.form.DateTextBox\(.*, dojo.byId\(\'elementId\'\)/m', $action)) {
-                $found = true;
-            }
-        }
-        $this->assertTrue($found, 'Did not find programmatic JS in dojo helper: '. var_export($onLoadActions, 1));
+        $this->assertNotNull($this->view->dojo()->getDijit('elementId'));
     }
 
     public function testShouldCreateTextInput()

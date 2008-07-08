@@ -119,15 +119,7 @@ class Zend_Dojo_View_Helper_CurrencyTextBoxTest extends PHPUnit_Framework_TestCa
         Zend_Dojo_View_Helper_Dojo::setUseProgrammatic();
         $html = $this->getElement();
         $this->assertNotRegexp('/<input[^>]*(dojoType="dijit.form.CurrencyTextBox")/', $html);
-
-        $onLoadActions = $this->view->dojo()->getOnloadActions();
-        $found = false;
-        foreach ($onLoadActions as $action) {
-            if (preg_match('/var zfDijit = new dijit.form.CurrencyTextBox\(.*, dojo.byId\(\'elementId\'\)/m', $action)) {
-                $found = true;
-            }
-        }
-        $this->assertTrue($found, 'Did not find programmatic JS in dojo helper: '. var_export($onLoadActions, 1));
+        $this->assertNotNull($this->view->dojo()->getDijit('elementId'));
     }
 
     public function testShouldCreateTextInput()

@@ -181,15 +181,7 @@ class Zend_Dojo_View_Helper_VerticalSliderTest extends PHPUnit_Framework_TestCas
         Zend_Dojo_View_Helper_Dojo::setUseProgrammatic();
         $html = $this->getElement();
         $this->assertNotRegexp('/<div[^>]*(dojoType="dijit.form.VerticalSlider")/', $html);
-
-        $onLoadActions = $this->view->dojo()->getOnloadActions();
-        $found = false;
-        foreach ($onLoadActions as $action) {
-            if (preg_match('/var zfDijit = new dijit.form.VerticalSlider\(.*, dojo.byId\(\'elementId-slider\'\)/m', $action)) {
-                $found = true;
-            }
-        }
-        $this->assertTrue($found, 'Did not find programmatic JS in dojo helper: '. var_export($onLoadActions, 1));
+        $this->assertNotNull($this->view->dojo()->getDijit('elementId-slider'));
     }
 
     public function testShouldCreateOnChangeAttributeByDefault()
