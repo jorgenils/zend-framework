@@ -87,6 +87,17 @@ abstract class Zend_Dojo_Form_Element_Dijit extends Zend_Form_Element
     }
 
     /**
+     * Does the given dijit parameter exist?
+     * 
+     * @param  string $key 
+     * @return bool
+     */
+    public function hasDijitParam($key)
+    {
+        return array_key_exists($key, $this->dijitParams);
+    }
+
+    /**
      * Get a single dijit parameter
      * 
      * @param  string $key 
@@ -95,7 +106,7 @@ abstract class Zend_Dojo_Form_Element_Dijit extends Zend_Form_Element
     public function getDijitParam($key)
     {
         $key = (string) $key;
-        if (array_key_exists($key, $this->dijitParams)) {
+        if ($this->hasDijitParam($key)) {
             return $this->dijitParams[$key];
         }
         return null;
@@ -108,7 +119,7 @@ abstract class Zend_Dojo_Form_Element_Dijit extends Zend_Form_Element
      */
     public function getDijitParams()
     {
-        return $this->dijitParams();
+        return $this->dijitParams;
     }
 
     /**

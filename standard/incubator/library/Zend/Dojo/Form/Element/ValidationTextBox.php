@@ -32,7 +32,7 @@ require_once 'Zend/Dojo/Form/Element/Dijit.php';
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id: $
  */
-class Zend_Dojo_Form_Element_ValidationTextBox extends Zend_Form_Element
+class Zend_Dojo_Form_Element_ValidationTextBox extends Zend_Dojo_Form_Element_Dijit
 {
     /**
      * Use ValidationTextBox dijit view helper

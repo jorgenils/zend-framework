@@ -19,24 +19,121 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_Dojo_Form_Element_Dijit */
-require_once 'Zend/Dojo/Form/Element/Dijit.php';
+/** Zend_Dojo_Form_Element_DijitMulti */
+require_once 'Zend/Dojo/Form/Element/DijitMulti.php';
 
 /**
  * ComboBox dijit
  * 
- * @category   Zend
+ * @uses       Zend_Dojo_Form_Element_DijitMulti
  * @package    Zend_Dojo
  * @subpackage Form_Element
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id: $
  */
-class Zend_Dojo_Form_Element_ComboBox extends Zend_Form_Element
+class Zend_Dojo_Form_Element_ComboBox extends Zend_Dojo_Form_Element_DijitMulti
 {
     /**
      * Use ComboBox dijit view helper
      * @var string
      */
     public $helper = 'ComboBox';
+
+    /**
+     * Get datastore information 
+     * 
+     * @return array
+     */
+    public function getStoreInfo()
+    {
+        if (!$this->hasDijitParam('store')) {
+            $this->dijitParams['store'] = array();
+        }
+        return $this->dijitParams['store'];
+    }
+
+    /**
+     * Set datastore identifier
+     * 
+     * @param  string $identifier 
+     * @return Zend_Dojo_Form_Element_ComboBox
+     */
+    public function setStoreId($identifier)
+    {
+        $store = $this->getStoreInfo();
+        $store['store'] = (string) $identifier;
+        $this->dijitParams['store'] = $store;
+        return $this;
+    }
+
+    /**
+     * Get datastore identifier 
+     * 
+     * @return string|null
+     */
+    public function getStoreId()
+    {
+        $store = $this->getStoreInfo();
+        if (array_key_exists('store', $store)) {
+            return $store['store'];
+        }
+        return null;
+    }
+
+    /**
+     * Set datastore dijit type
+     * 
+     * @param  string $dojoType 
+     * @return Zend_Dojo_Form_Element_ComboBox
+     */
+    public function setStoreType($dojoType)
+    {
+        $store = $this->getStoreInfo();
+        $store['type'] = (string) $dojoType;
+        $this->dijitParams['store'] = $store;
+        return $this;
+    }
+
+    /**
+     * Get datastore dijit type 
+     * 
+     * @return string|null
+     */
+    public function getStoreType()
+    {
+        $store = $this->getStoreInfo();
+        if (array_key_exists('type', $store)) {
+            return $store['type'];
+        }
+        return null;
+    }
+
+    /**
+     * Set datastore parameters
+     * 
+     * @param  array $params 
+     * @return Zend_Dojo_Form_Element_ComboBox
+     */
+    public function setStoreParams(array $params)
+    {
+        $store = $this->getStoreInfo();
+        $store['params'] = $params;
+        $this->dijitParams['store'] = $store;
+        return $this;
+    }
+
+    /**
+     * Get datastore params
+     * 
+     * @return array
+     */
+    public function getStoreParams()
+    {
+        $store = $this->getStoreInfo();
+        if (array_key_exists('params', $store)) {
+            return $store['params'];
+        }
+        return array();
+    }
 }
