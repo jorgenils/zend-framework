@@ -24,7 +24,7 @@
 require_once 'Zend/View/Helper/HtmlElement.php';
 
 /**
- * Dojo AccordionContainer dijit
+ * Dojo dijit base class
  * 
  * @uses       Zend_View_Helper_Abstract
  * @package    Zend_Dojo
@@ -32,7 +32,7 @@ require_once 'Zend/View/Helper/HtmlElement.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
   */
-class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
+abstract class Zend_Dojo_View_Helper_Dijit extends Zend_View_Helper_HtmlElement
 {
     /**
      * @var Zend_Dojo_View_Helper_Dojo_Container
@@ -63,7 +63,7 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
      * Set view and enable dojo
      * 
      * @param  Zend_View_Interface $view 
-     * @return Zend_Dojo_View_Helper_Abstract
+     * @return Zend_Dojo_View_Helper_Dijit
      */
     public function setView(Zend_View_Interface $view)
     {

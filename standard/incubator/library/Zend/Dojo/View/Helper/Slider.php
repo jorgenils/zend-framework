@@ -20,19 +20,19 @@
  * @version    $Id: $
  */
 
-/** Zend_Dojo_View_Helper_Abstract */
-require_once 'Zend/Dojo/View/Helper/Abstract.php';
+/** Zend_Dojo_View_Helper_Dijit */
+require_once 'Zend/Dojo/View/Helper/Dijit.php';
 
 /**
  * Abstract class for Dojo Slider dijits
  * 
- * @uses       Zend_Dojo_View_Helper_Abstract
+ * @uses       Zend_Dojo_View_Helper_Dijit
  * @package    Zend_Dojo
  * @subpackage View
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
   */
-abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Abstract
+abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Dijit
 {
     /**
      * Dojo module to use
@@ -67,6 +67,7 @@ abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Abstra
 
         // Prepare two items: a hidden element to store the value, and the slider
         $hidden = $this->_renderHiddenElement($id, $value);
+        $hidden = preg_replace('/(name=")([^"]*)"/', 'id="$2" $1$2"', $hidden);
 
         foreach ($this->_requiredParams as $param) {
             if (!array_key_exists($param, $params)) {

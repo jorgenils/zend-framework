@@ -155,6 +155,9 @@ class Zend_Dojo_Form_Decorator_DijitElement extends Zend_Form_Decorator_ViewHelp
         }
 
         $dijitParams = $this->getDijitParams();
+        if ($element->isRequired()) {
+            $dijitParams['required'] = true;
+        }
 
         $options = null;
         if (method_exists($element, 'getMultiOptions')) {
