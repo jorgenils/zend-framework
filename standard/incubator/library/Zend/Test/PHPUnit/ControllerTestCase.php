@@ -48,6 +48,13 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     protected $_response;
 
+    /**
+     * Overlaoding: prevent overloading to special properties
+     * 
+     * @param  string $name 
+     * @param  mixed $value 
+     * @return void
+     */
     public function __set($name, $value)
     {
         if (in_array($name, array('request', 'response', 'frontController'))) {
@@ -56,17 +63,6 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
 
         if ('_' == substr($name, 0, 1)) {
             throw new Zend_Exception('Overloading of non-public properties is prohibited');
-        }
-
-        if (null === $this->_reflection) {
-            $this->_reflection = new ReflectionObject($this);
-        }
-
-        if ($this->_reflection->hasProperty($name)) {
-            $prop = $this->_reflection->getProperty($name);
-            if (!$prop->isPublic()) {
-                throw new Zend_Exception('Overloading of non-public properties is prohibited');
-            }
         }
 
         $this->$name = $value;
