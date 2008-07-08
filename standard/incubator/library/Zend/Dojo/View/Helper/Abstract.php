@@ -228,7 +228,6 @@ class Zend_Dojo_View_Helper_Abstract extends Zend_View_Helper_HtmlElement
     protected function _renderHiddenElement($id, $value)
     {
         $hiddenAttribs = array(
-            'id'    => $id,
             'name'  => $id,
             'value' => (string) $value,
             'type'  => 'hidden',
