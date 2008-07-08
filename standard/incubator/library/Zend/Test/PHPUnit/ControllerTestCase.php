@@ -6,6 +6,12 @@ require_once 'PHPUnit/Framework/TestCase.php';
 /** Zend_Session */
 require_once 'Zend/Session.php';
 
+/** Zend_Controller_Action_HelperBroker */
+require_once 'Zend/Controller/Action/HelperBroker.php';
+
+/** Zend_Controller_Front */
+require_once 'Zend/Controller/Front.php';
+
 /**
  * Functional testing scaffold for MVC applications
  * 
@@ -944,7 +950,6 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
     public function getFrontController()
     {
         if (null === $this->_frontController) {
-            require_once 'Zend/Controller/Front.php';
             $this->_frontController = Zend_Controller_Front::getInstance();
         }
         return $this->_frontController;
