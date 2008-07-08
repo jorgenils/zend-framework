@@ -68,7 +68,7 @@ class Zend_View_Helper_HtmlPage extends Zend_View_Helper_HtmlObject
         $attribs = array_merge($this->_attribs, $attribs);
 
         // Params
-        $params = array_merge(array('src' => $data), $params);
+        $params = array_merge(array('data' => $data), $params);
 
         return $this->htmlObject($data, self::TYPE, $attribs, $params, $content);
     }
