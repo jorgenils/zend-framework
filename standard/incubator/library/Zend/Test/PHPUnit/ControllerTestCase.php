@@ -3,14 +3,14 @@
 /** PHPUnit_Framework_TestCase */
 require_once 'PHPUnit/Framework/TestCase.php';
 
-/** Zend_Session */
-require_once 'Zend/Session.php';
+/** Zend_Controller_Front */
+require_once 'Zend/Controller/Front.php';
 
 /** Zend_Controller_Action_HelperBroker */
 require_once 'Zend/Controller/Action/HelperBroker.php';
 
-/** Zend_Controller_Front */
-require_once 'Zend/Controller/Front.php';
+/** Zend_Session */
+require_once 'Zend/Session.php';
 
 /**
  * Functional testing scaffold for MVC applications
@@ -148,8 +148,14 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      */
     public function dispatch($url = null)
     {
+        // redirector should not exit
         $redirector = Zend_Controller_Action_HelperBroker::getStaticHelper('redirector');
         $redirector->setExit(false);
+
+        // json helper should not exit
+        $json = Zend_Controller_Action_HelperBroker::getStaticHelper('json');
+        $json->suppressExit = true;
+
         $request    = $this->getRequest();
         if (null !== $url) {
             $request->setRequestUri($url);
