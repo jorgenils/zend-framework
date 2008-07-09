@@ -19,24 +19,105 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_Dojo_Form_Element_Dijit */
-require_once 'Zend/Dojo/Form/Element/Dijit.php';
+/** Zend_Dojo_Form_Element_TextBox */
+require_once 'Zend/Dojo/Form/Element/TextBox.php';
 
 /**
  * ValidationTextBox dijit
  * 
- * @category   Zend
+ * @uses       Zend_Dojo_Form_Element_TextBox
  * @package    Zend_Dojo
  * @subpackage Form_Element
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id: $
  */
-class Zend_Dojo_Form_Element_ValidationTextBox extends Zend_Dojo_Form_Element_Dijit
+class Zend_Dojo_Form_Element_ValidationTextBox extends Zend_Dojo_Form_Element_TextBox
 {
     /**
      * Use ValidationTextBox dijit view helper
      * @var string
      */
     public $helper = 'ValidationTextBox';
+
+    /**
+     * Set invalidMessage
+     *
+     * @param  string $message
+     * @return Zend_Dojo_Form_Element_ValidationTextBox
+     */
+    public function setInvalidMessage($message)
+    {
+        $this->setDigitParam('invalidMessage', (string) $message);
+        return $this;
+    }
+
+    /**
+     * Retrieve invalidMessage
+     *
+     * @return string|null
+     */
+    public function getInvalidMessage()
+    {
+        return $this->getDijitParam('invalidMessage');
+    }
+
+    /**
+     * Set promptMessage
+     *
+     * @param  string $message
+     * @return Zend_Dojo_Form_Element_ValidationTextBox
+     */
+    public function setPromptMessage($message)
+    {
+        $this->setDigitParam('promptMessage', (string) $message);
+        return $this;
+    }
+
+    /**
+     * Retrieve promptMessage
+     *
+     * @return string|null
+     */
+    public function getPromptMessage()
+    {
+        return $this->getDijitParam('promptMessage');
+    }
+
+    /**
+     * Set regExp
+     *
+     * @param  string $regexp
+     * @return Zend_Dojo_Form_Element_ValidationTextBox
+     */
+    public function setRegExp($regexp)
+    {
+        $this->setDigitParam('regExp', (string) $regexp);
+        return $this;
+    }
+
+    /**
+     * Retrieve regExp
+     *
+     * @return string|null
+     */
+    public function getRegExp()
+    {
+        return $this->getDijitParam('regExp');
+    }
+
+    /**
+     * Set validation constraints
+     *
+     * Refer to Dojo dijit.form.ValidationTextBox documentation for valid 
+     * structure.
+     * 
+     * @param  array $constraints 
+     * @return Zend_Dojo_Form_Element_ValidationTextBox
+     */
+    public function setConstraints(array $constraints)
+    {
+        $this->setDijitParam('constraints', $constraints);
+        return $this;
+    }
 }
