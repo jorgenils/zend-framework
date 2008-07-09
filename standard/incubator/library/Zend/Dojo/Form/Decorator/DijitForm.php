@@ -48,7 +48,7 @@ class Zend_Dojo_Form_Decorator_DijitForm extends Zend_Dojo_Form_Decorator_DijitC
     public function render($content)
     {
         $element = $this->getElement();
-        $view    = $form->getView();
+        $view    = $element->getView();
         if (null === $view) {
             return $content;
         }

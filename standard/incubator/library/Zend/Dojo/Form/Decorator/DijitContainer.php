@@ -42,10 +42,10 @@ require_once 'Zend/Form/Decorator/Form.php';
 class Zend_Dojo_Form_Decorator_DijitContainer extends Zend_Form_Decorator_Form
 {
     /**
-     * View helper; requires one is passed in
+     * View helper
      * @var string
      */
-    protected $_helper;
+    protected $_helper = 'ContentPane';
 
     /**
      * Dijit option parameters
@@ -91,13 +91,21 @@ class Zend_Dojo_Form_Decorator_DijitContainer extends Zend_Form_Decorator_Form
                     $this->setOption('enctype', 'application/x-www-form-urlencoded');
                 }
                 foreach ($element->getAttribs() as $key => $value) {
-                    $this->setOption($key, $value);
+                    if ('dijitParams' == $key) {
+                        $this->setDijitParams($value);
+                    } else {
+                        $this->setOption($key, $value);
+                    }
                 }
             } elseif (($element instanceof Zend_Form_SubForm)
                 || ($element instanceof Zend_Form_DisplayGroup)
             ) {
                 foreach ($element->getAttribs() as $key => $value) {
-                    $this->setOption($key, $value);
+                    if ('dijitParams' == $key) {
+                        $this->setDijitParams($value);
+                    } else {
+                        $this->setOption($key, $value);
+                    }
                 }
             }
         }
@@ -178,7 +186,7 @@ class Zend_Dojo_Form_Decorator_DijitContainer extends Zend_Form_Decorator_Form
     public function render($content)
     {
         $element = $this->getElement();
-        $view    = $form->getView();
+        $view    = $element->getView();
         if (null === $view) {
             return $content;
         }

@@ -56,7 +56,7 @@ abstract class Zend_Dojo_Form_Element_Dijit extends Zend_Form_Element
      */
     public function __construct($spec, $options = null)
     {
-        $this->setPrefixPath('Zend_Dojo_Form', 'Zend/Dojo/Form/');
+        $this->addPrefixPath('Zend_Dojo_Form_Decorator', 'Zend/Dojo/Form/Decorator', 'decorator');
         parent::__construct($spec, $options);
     }
 
