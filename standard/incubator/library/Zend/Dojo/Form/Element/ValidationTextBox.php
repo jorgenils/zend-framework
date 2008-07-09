@@ -48,7 +48,7 @@ class Zend_Dojo_Form_Element_ValidationTextBox extends Zend_Dojo_Form_Element_Te
      */
     public function setInvalidMessage($message)
     {
-        $this->setDigitParam('invalidMessage', (string) $message);
+        $this->setDijitParam('invalidMessage', (string) $message);
         return $this;
     }
 
@@ -70,7 +70,7 @@ class Zend_Dojo_Form_Element_ValidationTextBox extends Zend_Dojo_Form_Element_Te
      */
     public function setPromptMessage($message)
     {
-        $this->setDigitParam('promptMessage', (string) $message);
+        $this->setDijitParam('promptMessage', (string) $message);
         return $this;
     }
 
@@ -92,7 +92,7 @@ class Zend_Dojo_Form_Element_ValidationTextBox extends Zend_Dojo_Form_Element_Te
      */
     public function setRegExp($regexp)
     {
-        $this->setDigitParam('regExp', (string) $regexp);
+        $this->setDijitParam('regExp', (string) $regexp);
         return $this;
     }
 

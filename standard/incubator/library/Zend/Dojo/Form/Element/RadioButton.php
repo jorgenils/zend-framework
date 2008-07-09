@@ -19,20 +19,20 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_Dojo_Form_Element_Dijit */
-require_once 'Zend/Dojo/Form/Element/Dijit.php';
+/** Zend_Dojo_Form_Element_DijitMulti */
+require_once 'Zend/Dojo/Form/Element/DijitMulti.php';
 
 /**
  * RadioButton dijit
  * 
- * @category   Zend
+ * @uses       Zend_Dojo_Form_Element_DijitMulti
  * @package    Zend_Dojo
  * @subpackage Form_Element
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id: $
  */
-class Zend_Dojo_Form_Element_RadioButton extends Zend_Dojo_Form_Element_Dijit
+class Zend_Dojo_Form_Element_RadioButton extends Zend_Dojo_Form_Element_DijitMulti
 {
     /**
      * Use RadioButton dijit view helper
