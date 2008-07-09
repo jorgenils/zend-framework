@@ -1,0 +1,73 @@
+<?php
+/**
+ * Zend Framework
+ *
+ * LICENSE
+ *
+ * This source file is subject to the new BSD license that is bundled
+ * with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://framework.zend.com/license/new-bsd
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@zend.com so we can send you a copy immediately.
+ *
+ * @category   Zend
+ * @package    Zend_Dojo
+ * @subpackage Form
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ */
+
+/** Zend_Form_DisplayGroup */
+require_once 'Zend/Form/DisplayGroup.php';
+
+/**
+ * Dijit-enabled DisplayGroup
+ * 
+ * @uses       Zend_Form_DisplayGroup
+ * @package    Zend_Dojo
+ * @subpackage Form
+ * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @version    $Id: $
+ */
+class Zend_Dojo_Form_SubForm extends Zend_Form_DisplayGroup
+{
+    /**
+     * Has the dojo view helper path been registered?
+     * @var bool
+     */
+    protected $_dojoViewPathRegistered = false;
+
+    /**
+     * Constructor
+     * 
+     * @param  string $name
+     * @param  Zend_Loader_PluginLoader $loader
+     * @param  array|Zend_Config|null $options 
+     * @return void
+     */
+    public function __construct($name, Zend_Loader_PluginLoader $loader, $options = null)
+    {
+        $this->addPrefixPath('Zend_Dojo_Form_Decorator', 'Zend/Dojo/Form/Decorator');
+        parent::__construct($name, $loader, $options);
+    }
+
+    /**
+     * Get view 
+     * 
+     * @return Zend_View_Interface
+     */
+    public function getView()
+    {
+        $view = parent::getView();
+        if (!$this->_dojoViewPathRegistered) {
+            if (false === $view->getPluginLoader('helper')->getPaths('Zend_Dojo_View_Helper')) {
+                $view->addHelperPath('Zend/Dojo/View/Helper', 'Zend_Dojo_View_Helper');
+            }
+            $this->_dojoViewPathRegistered = true;
+        }
+        return $view;
+    }
+}
