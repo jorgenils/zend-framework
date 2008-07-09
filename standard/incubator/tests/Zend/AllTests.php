@@ -31,12 +31,13 @@ require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'PHPUnit/TextUI/TestRunner.php';
 
 require_once 'Zend/Controller/AllTests.php';
-// require_once 'Zend/Crypt/AllTests.php';
+require_once 'Zend/Crypt/AllTests.php';
 require_once 'Zend/Db/AllTests.php';
 require_once 'Zend/Dojo/AllTests.php';
 require_once 'Zend/Dom/AllTests.php';
 require_once 'Zend/Json/AllTests.php';
 require_once 'Zend/Data/PaginatorTest.php';
+require_once 'Zend/Oauth/AllTests.php';
 require_once 'Zend/Service/AllTests.php';
 require_once 'Zend/Test/AllTests.php';
 require_once 'Zend/Text/AllTests.php';
@@ -64,7 +65,7 @@ class Zend_AllTests
          * Perform the tests for Zend_Controller component now.
          */
         $suite->addTest(Zend_Controller_AllTests::suite());
-        
+
         /*
          * Perform the tests for Zend_Data_Paginator component now.
          */
@@ -73,7 +74,7 @@ class Zend_AllTests
         /*
          * Perform the tests for Zend_Crypt component now.
          *
-         * Currenty there's a missing exception class; turning it off
+         * Currently there's a missing exception class; turning it off
          */
         // $suite->addTest(Zend_Crypt_AllTests::suite());
 
@@ -96,6 +97,11 @@ class Zend_AllTests
          * Perform the tests for Zend_Json component now.
          */
         $suite->addTest(Zend_Json_AllTests::suite());
+
+        /*
+         * Perform the tests for Zend_Oauth component now.
+         */
+        $suite->addTest(Zend_Oauth_AllTests::suite());
 
         /*
          * Perform the tests for Zend_Service component now.
