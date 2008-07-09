@@ -22,40 +22,22 @@
 require_once 'Zend/Dojo/Form/Decorator/DijitContainer.php';
 
 /**
- * Zend_Dojo_Form_Decorator_DijitForm
+ * AccordionContainer
  *
- * Render a dojo form dijit via a view helper
+ * Render a dijit AccordionContainer
  *
- * Accepts the following options:
- * - helper:    the name of the view helper to use
- *
+ * @uses       Zend_Dojo_Form_Decorator_DijitContainer
  * @package    Zend_Dojo
  * @subpackage Form_Decorator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id: $
  */
-class Zend_Dojo_Form_Decorator_DijitForm extends Zend_Dojo_Form_Decorator_DijitContainer
+class Zend_Dojo_Form_Decorator_AccordionContainer extends Zend_Dojo_Form_Decorator_DijitContainer
 {
     /**
-     * Render a form
-     *
-     * Replaces $content entirely from currently set element.
-     * 
-     * @param  string $content 
-     * @return string
+     * View helper
+     * @var string
      */
-    public function render($content)
-    {
-        $element = $this->getElement();
-        $view    = $element->getView();
-        if (null === $view) {
-            return $content;
-        }
-
-        $dijitParams = $this->getDijitParams();
-        $attribs     = array_merge($this->getAttribs(), $this->getOptions());
-
-        return $view->form($element->getName(), $attribs, $content); 
-    }
+    protected $_helper = 'AccordionContainer';
 }

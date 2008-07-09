@@ -168,7 +168,16 @@ class Zend_Dojo_Form_Decorator_DijitElement extends Zend_Form_Decorator_ViewHelp
         $separator = $this->getSeparator();
         $value     = $this->getValue($element);
 
-        $elementContent = $view->$helper($this->getName(), $value, $dijitParams, $this->getElementAttribs(), $options);
+        $id = $element->getId();
+        if ($view->dojo()->hasDijit($id)) {
+            trigger_error(sprintf('Duplicate dijit ID detected for id "%s; temporarily generating uniqid"', $id), E_USER_WARNING);
+            $base = $id;
+            do {
+                $id = $base . '-' . uniqid();
+            } while ($view->dojo()->hasDijit($id));
+        }
+
+        $elementContent = $view->$helper($id, $value, $dijitParams, $this->getElementAttribs(), $options);
         switch ($this->getPlacement()) {
             case self::APPEND:
                 return $content . $separator . $elementContent;
