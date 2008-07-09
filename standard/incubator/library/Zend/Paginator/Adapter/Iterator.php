@@ -13,31 +13,31 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
 
 /**
- * @see Zend_Data_Paginator_Adapter_Interface
+ * @see Zend_Paginator_Adapter_Interface
  */
-require_once 'Zend/Data/Paginator/Adapter/Interface.php';
+require_once 'Zend/Paginator/Adapter/Interface.php';
 
 /**
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_Adapter_Array implements Zend_Data_Paginator_Adapter_Interface
+class Zend_Paginator_Adapter_Iterator implements Zend_Paginator_Adapter_Interface
 {
     /**
-     * Array
+     * Iterator which implements Countable
      * 
-     * @var array
+     * @var Iterator
      */
-    protected $_array = null;
+    protected $_iterator = null;
     
     /**
      * Item count
@@ -45,16 +45,26 @@ class Zend_Data_Paginator_Adapter_Array implements Zend_Data_Paginator_Adapter_I
      * @var integer
      */
     protected $_count = null;
-    
+
     /**
      * Constructor.
      * 
-     * @param array $array Array to paginate
+     * @param  Iterator $iterator Iterator to paginate
+     * @throws Zend_Paginator_Exception
      */
-    public function __construct(array $array)
+    public function __construct(Iterator $iterator)
     {
-        $this->_array = $array;
-        $this->_count = count($array);
+        if (!$iterator instanceof Countable) {
+            /**
+             * @see Zend_Paginator_Exception
+             */
+            require_once 'Zend/Paginator/Exception.php';
+            
+            throw new Zend_Paginator_Exception('Iterator must implement Countable');
+        }
+
+        $this->_iterator = $iterator;
+        $this->_count = count($iterator);
     }
 
     /**
@@ -66,11 +76,11 @@ class Zend_Data_Paginator_Adapter_Array implements Zend_Data_Paginator_Adapter_I
      */
     public function getItems($offset, $itemCountPerPage)
     {
-        return array_slice($this->_array, $offset, $itemCountPerPage);
+        return new LimitIterator($this->_iterator, $offset, $itemCountPerPage);
     }
 
     /**
-     * Returns the total number of rows in the array.
+     * Returns the total number of rows in the collection.
      *
      * @return integer
      */

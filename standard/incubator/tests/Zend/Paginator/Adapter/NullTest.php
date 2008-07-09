@@ -13,7 +13,7 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
@@ -21,9 +21,9 @@
  */
 
 /**
- * @see Zend_Data_Paginator_Adapter_Array
+ * @see Zend_Paginator_Adapter_Null
  */
-require_once 'Zend/Data/Paginator/Adapter/Array.php';
+require_once 'Zend/Paginator/Adapter/Null.php';
 
 /**
  * @see PHPUnit_Framework_TestCase
@@ -32,15 +32,15 @@ require_once 'PHPUnit/Framework/TestCase.php';
 
 /**
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_Adapter_ArrayTest extends PHPUnit_Framework_TestCase
+class Zend_Paginator_Adapter_DummyTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var Zend_Data_Paginator_Adapter_Array
+     * @var Zend_Paginator_Adapter_Array
      */
     private $_adapter;
     
@@ -50,7 +50,7 @@ class Zend_Data_Paginator_Adapter_ArrayTest extends PHPUnit_Framework_TestCase
     protected function setUp ()
     {
         parent::setUp();
-        $this->_adapter = new Zend_Data_Paginator_Adapter_Array(range(1, 101));
+        $this->_adapter = new Zend_Paginator_Adapter_Null(101);
     }
     /**
      * Cleans up the environment after running a test.
@@ -61,18 +61,10 @@ class Zend_Data_Paginator_Adapter_ArrayTest extends PHPUnit_Framework_TestCase
         parent::tearDown();
     }
     
-    public function testGetItemsOffsetZero()
+    public function testGetItems()
     {
-        $expected = range(1, 10);
         $actual = $this->_adapter->getItems(0, 10);
-        $this->assertEquals($expected, $actual);
-    }
-    
-    public function testGetItemsOffsetTen()
-    {
-        $expected = range(11, 20);
-        $actual = $this->_adapter->getItems(10, 10);
-        $this->assertEquals($expected, $actual);
+        $this->assertEquals(array(), $actual);
     }
     
     public function testCount()

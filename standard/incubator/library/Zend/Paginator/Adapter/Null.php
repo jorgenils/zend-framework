@@ -13,38 +13,61 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
 
 /**
- * @see Zend_Data_Paginator_ScrollingStyle_Interface
+ * @see Zend_Paginator_Adapter_Interface
  */
-require_once 'Zend/Data/Paginator/ScrollingStyle/Interface.php';
+require_once 'Zend/Paginator/Adapter/Interface.php';
 
 /**
- * A scrolling style that returns every page in the collection.  
- * Useful when it is necessary to make every page available at 
- * once--for example, when using a dropdown menu pagination control.
- * 
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_ScrollingStyle_All implements Zend_Data_Paginator_ScrollingStyle_Interface
+class Zend_Paginator_Adapter_Null implements Zend_Paginator_Adapter_Interface
 {
     /**
-     * Returns an array of all pages given a page number and range.
+     * Item count
+     *
+     * @var integer
+     */
+    protected $_count = null;
+    
+    /**
+     * Constructor.
      * 
-     * @param  Zend_Data_Paginator $paginator
-     * @param  integer $pageRange Unused
+     * @param array $count Total item count
+     */
+    public function __construct($count = 0)
+    {
+        $this->_count = $count;
+    }
+
+    /**
+     * Returns an array of items for a page.
+     *
+     * @param  integer $offset Page offset
+     * @param  integer $itemCountPerPage Number of items per page
      * @return array
      */
-    public function getPages(Zend_Data_Paginator $paginator, $pageRange = null)
+    public function getItems($offset, $itemCountPerPage)
     {
-        return $paginator->getPagesInRange(1, $paginator->count());
+        return array();
+    }
+
+    /**
+     * Returns the total number of rows in the array.
+     *
+     * @return integer
+     */
+    public function count()
+    {
+        return $this->_count;
     }
 }

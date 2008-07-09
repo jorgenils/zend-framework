@@ -36,7 +36,7 @@ require_once 'Zend/Db/AllTests.php';
 require_once 'Zend/Dojo/AllTests.php';
 require_once 'Zend/Dom/AllTests.php';
 require_once 'Zend/Json/AllTests.php';
-require_once 'Zend/Data/PaginatorTest.php';
+require_once 'Zend/PaginatorTest.php';
 require_once 'Zend/Oauth/AllTests.php';
 require_once 'Zend/Service/AllTests.php';
 require_once 'Zend/Test/AllTests.php';
@@ -67,9 +67,9 @@ class Zend_AllTests
         $suite->addTest(Zend_Controller_AllTests::suite());
 
         /*
-         * Perform the tests for Zend_Data_Paginator component now.
+         * Perform the tests for Zend_Paginator component now.
          */
-        $suite->addTest(Zend_Data_Paginator_AllTests::suite());
+        $suite->addTest(Zend_Paginator_AllTests::suite());
 
         /*
          * Perform the tests for Zend_Crypt component now.

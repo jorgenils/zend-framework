@@ -13,7 +13,7 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
@@ -21,9 +21,9 @@
  */
 
 /**
- * @see Zend_Data_Paginator_ScrollingStyle_Sliding
+ * @see Zend_Paginator_ScrollingStyle_Sliding
  */
-require_once 'Zend/Data/Paginator/ScrollingStyle/Sliding.php';
+require_once 'Zend/Paginator/ScrollingStyle/Sliding.php';
 
 /**
  * @see PHPUnit_Framework_TestCase
@@ -31,25 +31,25 @@ require_once 'Zend/Data/Paginator/ScrollingStyle/Sliding.php';
 require_once 'PHPUnit/Framework/TestCase.php';
 
 /**
- * @see Zend_Data_Paginator
+ * @see Zend_Paginator
  */
-require_once 'Zend/Data/Paginator.php';
+require_once 'Zend/Paginator.php';
 
 /**
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_ScrollingStyle_SlidingTest extends PHPUnit_Framework_TestCase
+class Zend_Paginator_ScrollingStyle_SlidingTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var Zend_Data_Paginator_ScrollingStyle_Sliding
+     * @var Zend_Paginator_ScrollingStyle_Sliding
      */
     private $_scrollingStyle;
     /**
-     * @var Zend_Data_Paginator
+     * @var Zend_Paginator
      */
     private $_paginator;
     
@@ -59,8 +59,8 @@ class Zend_Data_Paginator_ScrollingStyle_SlidingTest extends PHPUnit_Framework_T
     protected function setUp()
     {
         parent::setUp();
-        $this->_scrollingStyle = new Zend_Data_Paginator_ScrollingStyle_Sliding();
-        $this->_paginator = Zend_Data_Paginator::factory(range(1, 101));
+        $this->_scrollingStyle = new Zend_Paginator_ScrollingStyle_Sliding();
+        $this->_paginator = Zend_Paginator::factory(range(1, 101));
         $this->_paginator->setItemCountPerPage(10);
         $this->_paginator->setPageRange(5);
     }

@@ -13,26 +13,35 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
 
 /**
+ * Interface for pagination adapters.
+ *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-interface Zend_Data_Paginator_ScrollingStyle_Interface
+interface Zend_Paginator_Adapter_Interface extends Countable
 {
     /**
-     * Returns an array of "local" pages given a page number and range.
-     * 
-     * @param  Zend_Data_Paginator $paginator
-     * @param  integer $pageRange (Optional) Page range
-     * @return array
+     * Returns the total number of rows in the collection.
+     *
+     * @return integer
      */
-    public function getPages(Zend_Data_Paginator $paginator, $pageRange = null);
+    //public function count();
+
+    /**
+     * Returns a collection of items for a page.
+     *
+     * @param  integer $pageNumber Page number
+     * @param  integer $itemCountPerPage Number of items per page
+     * @return mixed
+     */
+    public function getItems($pageNumber, $itemCountPerPage);
 }

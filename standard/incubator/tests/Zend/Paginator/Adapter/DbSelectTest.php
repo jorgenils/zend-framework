@@ -13,7 +13,7 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
@@ -21,9 +21,9 @@
  */
 
 /**
- * @see Zend_Data_Paginator_Adapter_DbSelect
+ * @see Zend_Paginator_Adapter_DbSelect
  */
-require_once 'Zend/Data/Paginator/Adapter/DbSelect.php';
+require_once 'Zend/Paginator/Adapter/DbSelect.php';
 
 /**
  * @see Zend_Db_Adapter_Pdo_Sqlite
@@ -37,15 +37,15 @@ require_once 'PHPUnit/Framework/TestCase.php';
 
 /**
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_Adapter_DbSelectTest extends PHPUnit_Framework_TestCase
+class Zend_Paginator_Adapter_DbSelectTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var Zend_Data_Paginator_Adapter_DbSelect
+     * @var Zend_Paginator_Adapter_DbSelect
      */
     private $_adapter;
     /**
@@ -60,7 +60,7 @@ class Zend_Data_Paginator_Adapter_DbSelectTest extends PHPUnit_Framework_TestCas
         ));
         $query = $db->select()->from('test');
         
-        $this->_adapter = new Zend_Data_Paginator_Adapter_DbSelect($query);
+        $this->_adapter = new Zend_Paginator_Adapter_DbSelect($query);
     }
     /**
      * Cleans up the environment after running a test.

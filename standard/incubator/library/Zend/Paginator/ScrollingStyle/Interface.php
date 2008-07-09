@@ -13,23 +13,26 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
 
 /**
- * @see Zend_Exception
- */
-require_once 'Zend/Exception.php';
-
-/**
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_Exception extends Zend_Exception
+interface Zend_Paginator_ScrollingStyle_Interface
 {
+    /**
+     * Returns an array of "local" pages given a page number and range.
+     * 
+     * @param  Zend_Paginator $paginator
+     * @param  integer $pageRange (Optional) Page range
+     * @return array
+     */
+    public function getPages(Zend_Paginator $paginator, $pageRange = null);
 }

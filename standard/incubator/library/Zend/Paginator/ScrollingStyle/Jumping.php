@@ -13,49 +13,51 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
 
 /**
- * @see Zend_Data_Paginator_ScrollingStyle_Sliding
+ * @see Zend_Paginator_ScrollingStyle_Interface
  */
-require_once 'Zend/Data/Paginator/ScrollingStyle/Sliding.php';
+require_once 'Zend/Paginator/ScrollingStyle/Interface.php';
 
 /**
- * A Google-like scrolling style.  Incrementally expands the range to about
- * twice the given page range, then behaves like a slider.  See the example
- * link.
+ * A scrolling style in which the cursor advances to the upper bound 
+ * of the page range, the page range "jumps" to the next section, and 
+ * the cursor moves back to the beginning of the range.
  * 
- * @link       http://www.google.com/search?q=Zend+Framework
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_ScrollingStyle_Elastic extends Zend_Data_Paginator_ScrollingStyle_Sliding
+class Zend_Paginator_ScrollingStyle_Jumping implements Zend_Paginator_ScrollingStyle_Interface
 {
     /**
      * Returns an array of "local" pages given a page number and range.
      * 
-     * @param  Zend_Data_Paginator $paginator
+     * @param  Zend_Paginator $paginator
      * @param  integer $pageRange Unused
      * @return array
      */
-    public function getPages(Zend_Data_Paginator $paginator, $pageRange = null)
+    public function getPages(Zend_Paginator $paginator, $pageRange = null)
     {
         $pageRange  = $paginator->getPageRange();
         $pageNumber = $paginator->getCurrentPageNumber();
-
-        $originalPageRange = $pageRange;
-        $pageRange         = $pageRange * 2 - 1;
-
-        if ($originalPageRange + $pageNumber - 1 < $pageRange) {
-            $pageRange = $originalPageRange + $pageNumber - 1;
-        }
         
-        return parent::getPages($paginator, $pageRange);
+        $delta = $pageNumber % $pageRange;
+        
+        if ($delta == 0) {
+            $delta = $pageRange;
+        }
+
+        $offset     = $pageNumber - $delta;
+        $lowerBound = $offset + 1; 
+        $upperBound = $offset + $pageRange;
+        
+        return $paginator->getPagesInRange($lowerBound, $upperBound); 
     }
 }

@@ -13,7 +13,7 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
@@ -21,9 +21,9 @@
  */
 
 /**
- * @see Zend_Data_Paginator_Adapter_Null
+ * @see Zend_Paginator_Adapter_Iterator
  */
-require_once 'Zend/Data/Paginator/Adapter/Null.php';
+require_once 'Zend/Paginator/Adapter/Iterator.php';
 
 /**
  * @see PHPUnit_Framework_TestCase
@@ -32,15 +32,15 @@ require_once 'PHPUnit/Framework/TestCase.php';
 
 /**
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_Adapter_DummyTest extends PHPUnit_Framework_TestCase
+class Zend_Paginator_Adapter_IteratorTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var Zend_Data_Paginator_Adapter_Array
+     * @var Zend_Paginator_Adapter_Iterator
      */
     private $_adapter;
     
@@ -50,7 +50,8 @@ class Zend_Data_Paginator_Adapter_DummyTest extends PHPUnit_Framework_TestCase
     protected function setUp ()
     {
         parent::setUp();
-        $this->_adapter = new Zend_Data_Paginator_Adapter_Null(101);
+        $iterator = new ArrayIterator(range(1, 101));
+        $this->_adapter = new Zend_Paginator_Adapter_Iterator($iterator);
     }
     /**
      * Cleans up the environment after running a test.
@@ -61,10 +62,28 @@ class Zend_Data_Paginator_Adapter_DummyTest extends PHPUnit_Framework_TestCase
         parent::tearDown();
     }
     
-    public function testGetItems()
+    public function testGetItemsOffsetZero()
     {
         $actual = $this->_adapter->getItems(0, 10);
-        $this->assertEquals(array(), $actual);
+        $this->assertType('LimitIterator', $actual);
+        
+        $i = 1;
+        foreach ($actual as $item) {
+            $this->assertEquals($i, $item);
+            $i++;
+        }
+    }
+    
+    public function testGetItemsOffsetTen()
+    {
+        $actual = $this->_adapter->getItems(10, 10);
+        $this->assertType('LimitIterator', $actual);
+        
+        $i = 11;
+        foreach ($actual as $item) {
+            $this->assertEquals($i, $item);
+            $i++;
+        }
     }
     
     public function testCount()

@@ -13,7 +13,7 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
@@ -21,14 +21,14 @@
  */
 
 /**
- * @see Zend_Data_Paginator
+ * @see Zend_Paginator
  */
-require_once 'Zend/Data/Paginator.php';
+require_once 'Zend/Paginator.php';
 
 /**
- * @see Zend_Data_Paginator_ScrollingStyle_All
+ * @see Zend_Paginator_ScrollingStyle_All
  */
-require_once 'Zend/Data/Paginator/ScrollingStyle/All.php';
+require_once 'Zend/Paginator/ScrollingStyle/All.php';
 
 /**
  * @see PHPUnit_Framework_TestCase
@@ -37,15 +37,15 @@ require_once 'PHPUnit/Framework/TestCase.php';
 
 /**
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_ScrollingStyle_AllTest extends PHPUnit_Framework_TestCase
+class Zend_Paginator_ScrollingStyle_AllTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @var Zend_Data_Paginator_ScrollingStyle_All
+     * @var Zend_Paginator_ScrollingStyle_All
      */
     private $_scrollingStyle = null;
     private $_paginator = null;
@@ -56,8 +56,8 @@ class Zend_Data_Paginator_ScrollingStyle_AllTest extends PHPUnit_Framework_TestC
     protected function setUp()
     {
         parent::setUp();
-        $this->_scrollingStyle = new Zend_Data_Paginator_ScrollingStyle_All();
-        $this->_paginator = Zend_Data_Paginator::factory(range(1, 101));
+        $this->_scrollingStyle = new Zend_Paginator_ScrollingStyle_All();
+        $this->_paginator = Zend_Paginator::factory(range(1, 101));
         $this->_paginator->setItemCountPerPage(10);
     }
     /**
@@ -71,7 +71,7 @@ class Zend_Data_Paginator_ScrollingStyle_AllTest extends PHPUnit_Framework_TestC
     }
     
     /**
-     * Tests Zend_Data_Paginator_ScrollingStyle_All->getPages()
+     * Tests Zend_Paginator_ScrollingStyle_All->getPages()
      */
     public function testGetPages()
     {

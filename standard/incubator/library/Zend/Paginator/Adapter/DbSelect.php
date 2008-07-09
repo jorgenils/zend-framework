@@ -13,24 +13,24 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
 
 /**
- * @see Zend_Data_Paginator_Adapter_Interface
+ * @see Zend_Paginator_Adapter_Interface
  */
-require_once 'Zend/Data/Paginator/Adapter/Interface.php';
+require_once 'Zend/Paginator/Adapter/Interface.php';
 
 /**
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_Adapter_DbSelect implements Zend_Data_Paginator_Adapter_Interface
+class Zend_Paginator_Adapter_DbSelect implements Zend_Paginator_Adapter_Interface
 {
     /**
      * Name of the row count column
@@ -75,8 +75,8 @@ class Zend_Data_Paginator_Adapter_DbSelect implements Zend_Data_Paginator_Adapte
      *
      * @param  Zend_Db_Select|integer $totalRowCount Total row count integer 
      *                                               or query
-     * @return Zend_Data_Paginator_Adapter_DbSelect $this
-     * @throws Zend_Data_Paginator_Exception
+     * @return Zend_Paginator_Adapter_DbSelect $this
+     * @throws Zend_Paginator_Exception
      */
     public function setRowCount($rowCount)
     {
@@ -84,7 +84,7 @@ class Zend_Data_Paginator_Adapter_DbSelect implements Zend_Data_Paginator_Adapte
             $result = $rowCount->query()->fetch();
             
             if (!isset($result[self::ROW_COUNT_COLUMN])) {
-                throw new Zend_Data_Paginator_Exception('Row count column not found');
+                throw new Zend_Paginator_Exception('Row count column not found');
             }
             
             $this->_rowCount = $result[self::ROW_COUNT_COLUMN];
@@ -92,11 +92,11 @@ class Zend_Data_Paginator_Adapter_DbSelect implements Zend_Data_Paginator_Adapte
             $this->_rowCount = $rowCount;
         } else {
             /**
-             * @see Zend_Data_Paginator_Exception
+             * @see Zend_Paginator_Exception
              */
-            require_once 'Zend/Data/Paginator/Exception.php';
+            require_once 'Zend/Paginator/Exception.php';
             
-            throw new Zend_Data_Paginator_Exception('Invalid row count');
+            throw new Zend_Paginator_Exception('Invalid row count');
         }
 
         return $this;

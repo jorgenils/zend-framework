@@ -13,46 +13,23 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
- * @subpackage UnitTests
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
 
 /**
- * Test helper
+ * @see Zend_Exception
  */
-require_once dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'TestHelper.php';
-
-if (!defined('PHPUnit_MAIN_METHOD')) {
-    define('PHPUnit_MAIN_METHOD', 'Zend_Data_Paginator_AllTests::main');
-}
-
-require_once 'Zend/Data/PaginatorTest.php';
+require_once 'Zend/Exception.php';
 
 /**
  * @category   Zend
- * @package    Zend_Data_Paginator
- * @subpackage UnitTests
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_AllTests
+class Zend_Paginator_Exception extends Zend_Exception
 {
-    public static function main()
-    {
-        PHPUnit_TextUI_TestRunner::run(self::suite());
-    }
-
-    public static function suite()
-    {
-        $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Data_Paginator');
-        $suite->addTestSuite('Zend_Data_PaginatorTest');
-        return $suite;
-    }
-}
-
-if (PHPUnit_MAIN_METHOD == 'Zend_Data_Paginator_AllTests::main') {
-    Zend_Data_Paginator_AllTests::main();
 }

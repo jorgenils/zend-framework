@@ -13,7 +13,7 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
@@ -21,9 +21,9 @@
  */
 
 /**
- * @see Zend_Data_Paginator
+ * @see Zend_Paginator
  */
-require_once 'Zend/Data/Paginator.php';
+require_once 'Zend/Paginator.php';
 
 /**
  * @see PHPUnit_Framework_TestCase
@@ -32,17 +32,17 @@ require_once 'PHPUnit/Framework/TestCase.php';
 
 /**
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_PaginatorTest extends PHPUnit_Framework_TestCase
+class Zend_PaginatorTest extends PHPUnit_Framework_TestCase
 {
     /**
      * Paginator instance
      *
-     * @var Zend_Data_Paginator
+     * @var Zend_Paginator
      */
     protected $_paginator = null; 
     
@@ -51,7 +51,7 @@ class Zend_Data_PaginatorTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->_testCollection = range(1, 101);
-        $this->_paginator = Zend_Data_Paginator::factory($this->_testCollection);
+        $this->_paginator = Zend_Paginator::factory($this->_testCollection);
         $this->_paginator->setItemCountPerPage(10);
     }
     
@@ -62,8 +62,8 @@ class Zend_Data_PaginatorTest extends PHPUnit_Framework_TestCase
     
     public function testFactoryReturnsArrayAdapter()
     {
-        $paginator = Zend_Data_Paginator::factory($this->_testCollection);
-        $this->assertType('Zend_Data_Paginator_Adapter_Array', $paginator->getAdapter());
+        $paginator = Zend_Paginator::factory($this->_testCollection);
+        $this->assertType('Zend_Paginator_Adapter_Array', $paginator->getAdapter());
     }
 
     public function testFactoryReturnsDbSelectAdapter()
@@ -73,20 +73,20 @@ class Zend_Data_PaginatorTest extends PHPUnit_Framework_TestCase
             'dbname' => 'Paginator/_files/test.sqlite'
         ));
         $query   = $db->select()->from('test');
-        $paginator = Zend_Data_Paginator::factory($query);
-        $this->assertType('Zend_Data_Paginator_Adapter_DbSelect', $paginator->getAdapter());
+        $paginator = Zend_Paginator::factory($query);
+        $this->assertType('Zend_Paginator_Adapter_DbSelect', $paginator->getAdapter());
     }
 
     public function testFactoryReturnsIteratorAdapter()
     {
-        $paginator = Zend_Data_Paginator::factory(new ArrayIterator($this->_testCollection));
-        $this->assertType('Zend_Data_Paginator_Adapter_Iterator', $paginator->getAdapter());
+        $paginator = Zend_Paginator::factory(new ArrayIterator($this->_testCollection));
+        $this->assertType('Zend_Paginator_Adapter_Iterator', $paginator->getAdapter());
     }
     
     public function testFactoryReturnsNullAdapter()
     {
-        $paginator = Zend_Data_Paginator::factory(101);
-        $this->assertType('Zend_Data_Paginator_Adapter_Null', $paginator->getAdapter());
+        $paginator = Zend_Paginator::factory(101);
+        $this->assertType('Zend_Paginator_Adapter_Null', $paginator->getAdapter());
     }
     
     public function testGetSetItemCountPerPage()

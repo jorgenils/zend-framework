@@ -13,35 +13,46 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
+ * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
 
 /**
- * Interface for pagination adapters.
- *
+ * Test helper
+ */
+require_once dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'TestHelper.php';
+
+if (!defined('PHPUnit_MAIN_METHOD')) {
+    define('PHPUnit_MAIN_METHOD', 'Zend_Paginator_AllTests::main');
+}
+
+require_once 'Zend/PaginatorTest.php';
+
+/**
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
+ * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-interface Zend_Data_Paginator_Adapter_Interface extends Countable
+class Zend_Paginator_AllTests
 {
-    /**
-     * Returns the total number of rows in the collection.
-     *
-     * @return integer
-     */
-    //public function count();
+    public static function main()
+    {
+        PHPUnit_TextUI_TestRunner::run(self::suite());
+    }
 
-    /**
-     * Returns a collection of items for a page.
-     *
-     * @param  integer $pageNumber Page number
-     * @param  integer $itemCountPerPage Number of items per page
-     * @return mixed
-     */
-    public function getItems($pageNumber, $itemCountPerPage);
+    public static function suite()
+    {
+        $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Paginator');
+        $suite->addTestSuite('Zend_PaginatorTest');
+        return $suite;
+    }
+}
+
+if (PHPUnit_MAIN_METHOD == 'Zend_Paginator_AllTests::main') {
+    Zend_Paginator_AllTests::main();
 }

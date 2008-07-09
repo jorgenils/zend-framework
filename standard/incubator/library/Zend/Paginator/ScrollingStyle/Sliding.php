@@ -13,16 +13,16 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
 
 /**
- * @see Zend_Data_Paginator_ScrollingStyle_Interface
+ * @see Zend_Paginator_ScrollingStyle_Interface
  */
-require_once 'Zend/Data/Paginator/ScrollingStyle/Interface.php';
+require_once 'Zend/Paginator/ScrollingStyle/Interface.php';
 
 /**
  * A Yahoo! Search-like scrolling style.  The cursor will advance to 
@@ -32,20 +32,20 @@ require_once 'Zend/Data/Paginator/ScrollingStyle/Interface.php';
  *
  * @link       http://search.yahoo.com/search?p=Zend+Framework
  * @category   Zend
- * @package    Zend_Data_Paginator
+ * @package    Zend_Paginator
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Data_Paginator_ScrollingStyle_Sliding implements Zend_Data_Paginator_ScrollingStyle_Interface
+class Zend_Paginator_ScrollingStyle_Sliding implements Zend_Paginator_ScrollingStyle_Interface
 {
     /**
      * Returns an array of "local" pages given a page number and range.
      * 
-     * @param  Zend_Data_Paginator $paginator
+     * @param  Zend_Paginator $paginator
      * @param  integer $pageRange (Optional) Page range
      * @return array
      */
-    public function getPages(Zend_Data_Paginator $paginator, $pageRange = null)
+    public function getPages(Zend_Paginator $paginator, $pageRange = null)
     {
         if ($pageRange === null) {
             $pageRange = $paginator->getPageRange();
