@@ -65,11 +65,7 @@ class Zend_Dojo_View_Helper_NumberSpinner extends Zend_Dojo_View_Helper_Dijit
     {
         // Get constraints and serialize to JSON if necessary
         if (array_key_exists('constraints', $params)) {
-            $constraints = $params['constraints'];
-            if (is_array($constraints)) {
-                require_once 'Zend/Json.php';
-                $params['constraints'] = Zend_Json::encode($constraints);
-            } else {
+            if (!is_array($constraints)) {
                 unset($params['constraints']);
             }
         } else {
@@ -86,10 +82,7 @@ class Zend_Dojo_View_Helper_NumberSpinner extends Zend_Dojo_View_Helper_Dijit
                 $constraints['places'] = $params['places'];
                 unset($params['places']);
             }
-            if (!empty($constraints)) {
-                require_once 'Zend/Json.php';
-                $params['constraints'] = Zend_Json::encode($constraints);
-            }
+            $params['constraints'] = $constraints;
         }
 
         return $this->_createFormElement($id, $value, $params, $attribs);

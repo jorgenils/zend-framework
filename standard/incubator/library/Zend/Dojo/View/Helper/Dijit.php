@@ -193,6 +193,15 @@ abstract class Zend_Dojo_View_Helper_Dijit extends Zend_View_Helper_HtmlElement
             }
         }
 
+        // Normalize constraints, if present
+        if (array_key_exists('constraints', $params) && is_array($params['constraints'])) {
+            require_once 'Zend/Json.php';
+            $params['constraints'] = Zend_Json::encode($params['constraints']);
+        }
+        if (array_key_exists('constraints', $params)) {
+            $params['constraints'] = str_replace('"', '', $params['constraints']);
+        }
+
         $dijit = (null === $dijit) ? $this->_dijit : $dijit;
         if ($this->_useDeclarative()) {
             $attribs = array_merge($attribs, $params);
