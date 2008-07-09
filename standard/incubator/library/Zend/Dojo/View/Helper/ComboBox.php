@@ -64,16 +64,22 @@ class Zend_Dojo_View_Helper_ComboBox extends Zend_Dojo_View_Helper_Dijit
      */
     public function comboBox($id, $value = null, array $params = array(), array $attribs = array(), array $options = null)
     {
+        $html = '';
+        if (!array_key_exists('id', $attribs)) {
+            $attribs['id'] = $id;
+        }
         if (array_key_exists('store', $params) && is_array($params['store'])) {
             // using dojo.data datastore
-            if (false !== ($html = $this->_renderStore($params['store']))) {
+            if (false !== ($store = $this->_renderStore($params['store']))) {
                 $params['store'] = $params['store']['store'];
+                if (is_string($store)) {
+                    $html .= $store;
+                }
                 $html .= $this->_createFormElement($id, $value, $params, $attribs);
                 return $html;
             }
             unset($params['store']);
         } elseif (array_key_exists('store', $params)) {
-            $html = '';
             if (array_key_exists('storeType', $params)) {
                 $storeParams = array(
                     'store' => $params['store'],
@@ -84,20 +90,25 @@ class Zend_Dojo_View_Helper_ComboBox extends Zend_Dojo_View_Helper_Dijit
                     $storeParams['storeParams'] = $params['storeParams'];
                     unset($params['storeParams']);
                 }
-                $html .= $this->_renderStore($storeParams);
+                if (false !== ($store = $this->_renderStore($storeParams))) {
+                    if (is_string($store)) {
+                        $html .= $store;
+                    }
+                }
             }
             $html .= $this->_createFormElement($id, $value, $params, $attribs);
             return $html;
         }
 
         // do as normal select
-        $attribs['id'] = $id;
         $attribs = $this->_prepareDijit($attribs, $params, 'element');
         return $this->view->formSelect($id, $value, $attribs, $options);
     }
 
     /**
      * Render data store element
+     *
+     * Renders to dojo view helper
      * 
      * @param  array $params 
      * @return string|false

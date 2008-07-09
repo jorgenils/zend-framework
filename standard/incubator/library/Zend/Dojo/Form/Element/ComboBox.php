@@ -63,7 +63,7 @@ class Zend_Dojo_Form_Element_ComboBox extends Zend_Dojo_Form_Element_DijitMulti
     {
         $store = $this->getStoreInfo();
         $store['store'] = (string) $identifier;
-        $this->dijitParams['store'] = $store;
+        $this->setDijitParam('store', $store);
         return $this;
     }
 
@@ -91,7 +91,7 @@ class Zend_Dojo_Form_Element_ComboBox extends Zend_Dojo_Form_Element_DijitMulti
     {
         $store = $this->getStoreInfo();
         $store['type'] = (string) $dojoType;
-        $this->dijitParams['store'] = $store;
+        $this->setDijitParam('store', $store);
         return $this;
     }
 
@@ -119,7 +119,7 @@ class Zend_Dojo_Form_Element_ComboBox extends Zend_Dojo_Form_Element_DijitMulti
     {
         $store = $this->getStoreInfo();
         $store['params'] = $params;
-        $this->dijitParams['store'] = $store;
+        $this->setDijitParam('store', $store);
         return $this;
     }
 
@@ -135,5 +135,30 @@ class Zend_Dojo_Form_Element_ComboBox extends Zend_Dojo_Form_Element_DijitMulti
             return $store['params'];
         }
         return array();
+    }
+
+    /**
+     * Set autocomplete flag
+     * 
+     * @param  bool $flag 
+     * @return Zend_Dojo_Form_Element_ComboBox
+     */
+    public function setAutocomplete($flag)
+    {
+        $this->setDijitParam('autocomplete', (bool) $flag);
+        return $this;
+    }
+
+    /**
+     * Get autocomplete flag
+     * 
+     * @return bool
+     */
+    public function getAutocomplete()
+    {
+        if (!$this->hasDijitParam('autocomplete')) {
+            return false;
+        }
+        return $this->getDijitParam('autocomplete');
     }
 }

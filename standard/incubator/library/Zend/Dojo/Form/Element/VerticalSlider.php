@@ -77,7 +77,7 @@ class Zend_Dojo_Form_Element_VerticalSlider extends Zend_Dojo_Form_Element_Slide
     {
         $decoration = $this->getLeftDecoration();
         $decoration['container'] = (string) $container;
-        $this->setContainerParam('leftDecoration', $decoration);
+        $this->setDijitParam('leftDecoration', $decoration);
         return $this;
     }
 
@@ -160,7 +160,7 @@ class Zend_Dojo_Form_Element_VerticalSlider extends Zend_Dojo_Form_Element_Slide
     {
         $decoration = $this->getRightDecoration();
         $decoration['container'] = (string) $container;
-        $this->setContainerParam('rightDecoration', $decoration);
+        $this->setDijitParam('rightDecoration', $decoration);
         return $this;
     }
 

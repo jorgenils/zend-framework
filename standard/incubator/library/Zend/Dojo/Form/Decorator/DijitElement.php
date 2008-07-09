@@ -167,6 +167,8 @@ class Zend_Dojo_Form_Decorator_DijitElement extends Zend_Form_Decorator_ViewHelp
         $helper    = $this->getHelper();
         $separator = $this->getSeparator();
         $value     = $this->getValue($element);
+        $attribs   = $this->getElementAttribs();
+        $name      = $element->getFullyQualifiedName();
 
         $id = $element->getId();
         if ($view->dojo()->hasDijit($id)) {
@@ -176,8 +178,9 @@ class Zend_Dojo_Form_Decorator_DijitElement extends Zend_Form_Decorator_ViewHelp
                 $id = $base . '-' . uniqid();
             } while ($view->dojo()->hasDijit($id));
         }
+        $attribs['id'] = $id;
 
-        $elementContent = $view->$helper($id, $value, $dijitParams, $this->getElementAttribs(), $options);
+        $elementContent = $view->$helper($name, $value, $dijitParams, $attribs, $options);
         switch ($this->getPlacement()) {
             case self::APPEND:
                 return $content . $separator . $elementContent;
