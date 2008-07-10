@@ -44,7 +44,7 @@ class Zend_Dojo_View_Helper_RadioButton extends Zend_Dojo_View_Helper_Dijit
      * Dojo module to use
      * @var string
      */
-    protected $_module = 'dijit.form.RadioButton';
+    protected $_module = 'dijit.form.CheckBox';
 
     /**
      * dijit.form.RadioButton

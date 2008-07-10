@@ -54,7 +54,6 @@ class Zend_Dojo_Form_Decorator_DijitElement extends Zend_Form_Decorator_ViewHelp
      */
     protected $_checkboxTypes = array(
         'Zend_Dojo_Form_Element_CheckBox',
-        'Zend_Dojo_Form_Element_RadioButton',
     );
 
     /**
