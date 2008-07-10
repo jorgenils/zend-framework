@@ -5,6 +5,9 @@ if (!defined('PHPUnit_MAIN_METHOD')) {
 require_once dirname(__FILE__) . '/../../../TestHelper.php';
 
 require_once 'Zend/Dojo/Form/Decorator/AllTests.php';
+require_once 'Zend/Dojo/Form/Element/AllTests.php';
+require_once 'Zend/Dojo/Form/FormTest.php';
+require_once 'Zend/Dojo/Form/SubFormTest.php';
 
 /**
  * @category   Zend
@@ -25,6 +28,9 @@ class Zend_Dojo_Form_AllTests
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Dojo_Form');
 
         $suite->addTest(Zend_Dojo_Form_Decorator_AllTests::suite());
+        $suite->addTest(Zend_Dojo_Form_Element_AllTests::suite());
+        $suite->addTestSuite('Zend_Dojo_Form_FormTest');
+        $suite->addTestSuite('Zend_Dojo_Form_SubFormTest');
         
         return $suite;
     }

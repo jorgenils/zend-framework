@@ -120,4 +120,17 @@ class Zend_Dojo_Form_Element_ValidationTextBox extends Zend_Dojo_Form_Element_Te
         $this->setDijitParam('constraints', $constraints);
         return $this;
     }
+
+    /**
+     * Get constraints
+     * 
+     * @return array
+     */
+    public function getConstraints()
+    {
+        if ($this->hasDijitParam('constraints')) {
+            return $this->getDijitParam('constraints');
+        }
+        return array();
+    }
 }

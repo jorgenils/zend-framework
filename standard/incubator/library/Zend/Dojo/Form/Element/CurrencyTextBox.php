@@ -43,12 +43,12 @@ class Zend_Dojo_Form_Element_CurrencyTextBox extends Zend_Dojo_Form_Element_Vali
     /**
      * Set currency
      *
-     * @param  string $regexp
+     * @param  string $currency
      * @return Zend_Dojo_Form_Element_ValidationTextBox
      */
-    public function setCurrency($regexp)
+    public function setCurrency($currency)
     {
-        $this->setDijitParam('currency', (string) $regexp);
+        $this->setDijitParam('currency', (string) $currency);
         return $this;
     }
 

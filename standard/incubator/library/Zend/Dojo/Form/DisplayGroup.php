@@ -32,7 +32,7 @@ require_once 'Zend/Form/DisplayGroup.php';
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id: $
  */
-class Zend_Dojo_Form_SubForm extends Zend_Form_DisplayGroup
+class Zend_Dojo_Form_DisplayGroup extends Zend_Form_DisplayGroup
 {
     /**
      * Has the dojo view helper path been registered?
@@ -50,8 +50,8 @@ class Zend_Dojo_Form_SubForm extends Zend_Form_DisplayGroup
      */
     public function __construct($name, Zend_Loader_PluginLoader $loader, $options = null)
     {
-        $this->addPrefixPath('Zend_Dojo_Form_Decorator', 'Zend/Dojo/Form/Decorator');
         parent::__construct($name, $loader, $options);
+        $this->addPrefixPath('Zend_Dojo_Form_Decorator', 'Zend/Dojo/Form/Decorator');
     }
 
     /**
