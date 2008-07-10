@@ -19,8 +19,10 @@
  * @version    $Id$
  */
 
+/** Zend_Oauth_Signature_Abstract */
 require_once 'Zend/Oauth/Signature/Abstract.php';
 
+/** Zend_Crypt_Rsa */
 require_once 'Zend/Crypt/Rsa.php';
 
 /**
