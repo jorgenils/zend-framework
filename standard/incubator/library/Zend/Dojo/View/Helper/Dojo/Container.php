@@ -685,7 +685,9 @@ class Zend_Dojo_View_Helper_Dojo_Container
 function() {
     dojo.forEach(zendDijits, function(info) {
         var n = dojo.byId(info.id);
-        dojo.attr(n, dojo.mixin({ id: info.id }, info.params));
+        if (null !== n) {
+            dojo.attr(n, dojo.mixin({ id: info.id }, info.params));
+        }
     })
     dojo.parser.parse();
 }
