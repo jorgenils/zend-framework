@@ -56,7 +56,7 @@ class Zend_Dojo_View_Helper_Dojo
     /**
      * @var bool Whether or not dijits should be declared programmatically
      */
-    protected static $_useProgrammatic = false;
+    protected static $_useProgrammatic = true;
 
     /**
      * Initialize helper

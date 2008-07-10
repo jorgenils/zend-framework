@@ -95,6 +95,12 @@ class Zend_Dojo_View_Helper_Dojo_Container
     protected $_javascriptStatements = array();
 
     /**
+     * Dojo layers (custom builds) to use
+     * @var array
+     */
+    protected $_layers = array();
+
+    /**
      * Relative path to dojo
      * @var string
      */
@@ -240,6 +246,59 @@ class Zend_Dojo_View_Helper_Dojo_Container
     public function getModulePaths()
     {
         return $this->_modulePaths;
+    }
+
+    /**
+     * Add layer (custom build) path
+     * 
+     * @param  string $path 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function addLayer($path)
+    {
+        $path = (string) $path;
+        if (!in_array($path, $this->_layers)) {
+            $this->_layers[] = $path;
+        }
+        return $this;
+    }
+
+    /**
+     * Get registered layers
+     * 
+     * @return array
+     */
+    public function getLayers()
+    {
+        return $this->_layers;
+    }
+
+    /**
+     * Remove a registered layer
+     * 
+     * @param  string $path 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function removeLayer($path)
+    {
+        $path = (string) $path;
+        $layers = array_flip($this->_layers);
+        if (array_key_exists($path, $layers)) {
+            unset($layers[$path]);
+            $this->_layers = array_keys($layers);
+        }
+        return $this;
+    }
+
+    /**
+     * Clear all registered layers
+     * 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function clearLayers()
+    {
+        $this->_layers = array();
+        return $this;
     }
  
     /**
@@ -734,6 +793,7 @@ EOJ;
         $html  = $this->_renderStylesheets() . PHP_EOL
                . $this->_renderDjConfig() . PHP_EOL
                . $this->_renderDojoScriptTag() . PHP_EOL
+               . $this->_renderLayers() . PHP_EOL
                . $this->_renderExtras();
         return $html;
     }
@@ -837,6 +897,29 @@ EOJ;
 
         $scriptTag = '<script type="text/javascript" src="' . $source . '"></script>';
         return $scriptTag;
+    }
+
+    /**
+     * Render layers (custom builds) as script tags
+     * 
+     * @return string
+     */
+    protected function _renderLayers()
+    {
+        $layers = $this->getLayers();
+        if (empty($layers)) {
+            return '';
+        }
+
+        $html = array();
+        foreach ($layers as $path) {
+            $html[] = sprintf(
+                '<script type="text/javascript" src="%s"></script>',
+                htmlentities($path, ENT_QUOTES)
+            );
+        }
+
+        return implode("\n", $html);
     }
 
     /**

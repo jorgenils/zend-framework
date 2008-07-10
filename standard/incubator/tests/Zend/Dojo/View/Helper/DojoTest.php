@@ -71,7 +71,7 @@ class Zend_Dojo_View_Helper_DojoTest extends PHPUnit_Framework_TestCase
         $this->helper = new Zend_Dojo_View_Helper_Dojo_Container();
         $this->helper->setView($this->view);
         Zend_Registry::set('Zend_Dojo_View_Helper_Dojo', $this->helper);
-        Zend_Dojo_View_Helper_Dojo::setUseDeclarative();
+        Zend_Dojo_View_Helper_Dojo::setUseProgrammatic();
     }
 
     /**
@@ -425,21 +425,20 @@ function() {
         $this->assertSame($this->helper, $helper);
     }
 
-    public function testShouldUseDeclarativeDijitCreationByDefault()
+    public function testShouldUseProgrammaticDijitCreationByDefault()
     {
-        $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useDeclarative());
+        $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useProgrammatic());
     }
 
-    public function testShouldAllowSpecifyingProgrammaticDijitCreation()
+    public function testShouldAllowSpecifyingDeclarativeDijitCreation()
     {
-        $this->testShouldUseDeclarativeDijitCreationByDefault();
-        Zend_Dojo_View_Helper_Dojo::setUseProgrammatic();
-        $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useProgrammatic());
+        $this->testShouldUseProgrammaticDijitCreationByDefault();
+        Zend_Dojo_View_Helper_Dojo::setUseDeclarative();
+        $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useDeclarative());
     }
 
     public function testShouldAllowSpecifyingProgrammaticDijitCreationWithNoScriptGeneration()
     {
-        $this->testShouldUseDeclarativeDijitCreationByDefault();
         Zend_Dojo_View_Helper_Dojo::setUseProgrammatic(-1);
         $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useProgrammatic());
         $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useProgrammaticNoScript());
@@ -636,6 +635,80 @@ function() {
         $js = $this->helper->getJavascript();
         $this->assertEquals(1, count($js));
         $this->assertContains('var foo = "bar";', $js[0]);
+    }
+
+    public function testNoLayersShouldBeRegisteredByDefault()
+    {
+        $layers = $this->helper->getLayers();
+        $this->assertTrue(is_array($layers));
+        $this->assertTrue(empty($layers));
+    }
+
+    public function testShouldAllowAddingLayers()
+    {
+        $this->testNoLayersShouldBeRegisteredByDefault();
+        $this->helper->addLayer('/js/foo/foo.xd.js');
+        $layers = $this->helper->getLayers();
+        $this->assertEquals(1, count($layers));
+        $this->assertEquals('/js/foo/foo.xd.js', $layers[0]);
+
+        $this->helper->addLayer('/js/bar/bar.xd.js');
+        $layers = $this->helper->getLayers();
+        $this->assertEquals(2, count($layers));
+        $this->assertEquals('/js/foo/foo.xd.js', $layers[0]);
+        $this->assertEquals('/js/bar/bar.xd.js', $layers[1]);
+    }
+
+    public function testShouldNotAllowDuplicateLayers()
+    {
+        $this->testShouldAllowAddingLayers();
+        $this->helper->addLayer('/js/foo/foo.xd.js');
+        $layers = $this->helper->getLayers();
+        $this->assertEquals(2, count($layers));
+        $this->assertEquals('/js/foo/foo.xd.js', $layers[0]);
+        $this->assertEquals('/js/bar/bar.xd.js', $layers[1]);
+    }
+
+    public function testShouldAllowRemovingLayers()
+    {
+        $this->testShouldAllowAddingLayers();
+        $this->helper->removeLayer('/js/foo/foo.xd.js');
+        $layers = $this->helper->getLayers();
+        $this->assertEquals(1, count($layers));
+        $this->assertEquals('/js/bar/bar.xd.js', $layers[0]);
+    }
+
+    public function testShouldAllowClearingLayers()
+    {
+        $this->testShouldAllowAddingLayers();
+        $this->helper->clearLayers();
+        $layers = $this->helper->getLayers();
+        $this->assertTrue(is_array($layers));
+        $this->assertTrue(empty($layers));
+    }
+
+    public function testShouldRenderScriptTagsWithLayersWhenLayersAreRegistered()
+    {
+        $this->setupDojo();
+        $this->testShouldAllowAddingLayers();
+        $html = $this->helper->__toString();
+        $doc  = new DOMDocument;
+        $doc->loadHTML($html);
+        $xPath = new DOMXPath($doc);
+        $results = $xPath->query('//script');
+
+        $found = array();
+        for ($i = 0; $i < $results->length; ++$i) {
+            $script = $doc->saveXML($results->item($i));
+            foreach (array('foo', 'bar') as $layerType) {
+                $layer = sprintf('/js/%s/%s.xd.js', $layerType, $layerType);
+                if (strstr($script, $layer)) {
+                    $found[] = $layerType;
+                    break;
+                }
+            }
+        }
+        $this->assertSame(array('foo', 'bar'), $found);
     }
 
     public function setupDojo()
