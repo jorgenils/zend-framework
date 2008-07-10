@@ -313,6 +313,22 @@ class Zend_PaginatorTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('', $string);
     }
     
+    public function testToStringWithPartial()
+    {
+        $this->_restorePaginatorDefaults();
+        
+        $view = new Zend_View();
+        $view->addBasePath(dirname(__FILE__) . '/Paginator/_files');
+        $view->addHelperPath(dirname(__FILE__) . '/../../../trunk/library/Zend/View/Helper', 'Zend_View_Helper');
+        
+        Zend_View_Helper_PaginationControl::setDefaultViewPartial('partial.phtml');
+        
+        $this->_paginator->setView($view);
+        
+        $string = $this->_paginator->__toString();
+        $this->assertEquals('partial rendered successfully', $string);
+    }
+    
     public function testGetPageCount()
     {
         $this->_restorePaginatorDefaults();
@@ -338,6 +354,7 @@ class Zend_PaginatorTest extends PHPUnit_Framework_TestCase
         $this->_paginator->setPageRange(10);
         
         $this->assertEquals(10, $this->_paginator->getCurrentItemCount());
+        
         $this->_paginator->setCurrentPageNumber(11);
         
         $this->assertEquals(1, $this->_paginator->getCurrentItemCount());
