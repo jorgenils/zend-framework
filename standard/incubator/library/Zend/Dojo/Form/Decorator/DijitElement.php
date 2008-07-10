@@ -171,7 +171,7 @@ class Zend_Dojo_Form_Decorator_DijitElement extends Zend_Form_Decorator_ViewHelp
 
         $id = $element->getId();
         if ($view->dojo()->hasDijit($id)) {
-            trigger_error(sprintf('Duplicate dijit ID detected for id "%s; temporarily generating uniqid"', $id), E_USER_WARNING);
+            trigger_error(sprintf('Duplicate dijit ID detected for id "%s; temporarily generating uniqid"', $id), E_USER_NOTICE);
             $base = $id;
             do {
                 $id = $base . '-' . uniqid();

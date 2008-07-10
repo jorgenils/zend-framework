@@ -140,14 +140,14 @@ abstract class Zend_Dojo_Form_Decorator_DijitContainer extends Zend_Form_Decorat
                     $title = $element->getLegend();
                 }
             }
-            if ((null === $title) && (null !== ($legend = $this->getOption('legend')))) {
+            if (empty($title) && (null !== ($title = $this->getOption('legend')))) {
                 $this->removeOption('legend');
             }
-            if ((null === $title) && (null !== ($legend = $this->getOption('title')))) {
+            if (empty($title) && (null !== ($title = $this->getOption('title')))) {
                 $this->removeOption('title');
             }
 
-            if (null !== $title) {
+            if (!empty($title)) {
                 if (null !== ($translator = $element->getTranslator())) {
                     $title = $translator->translate($title);
                 }
@@ -155,7 +155,7 @@ abstract class Zend_Dojo_Form_Decorator_DijitContainer extends Zend_Form_Decorat
             }
         }
 
-        return ((null === $this->_title) ? '' : $this->_title);
+        return (empty($this->_title) ? '' : $this->_title);
     }
 
     /**
