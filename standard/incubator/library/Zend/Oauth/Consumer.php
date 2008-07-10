@@ -155,6 +155,14 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         return $this->_accessToken;
     }
 
+    /**
+     * Simple Proxy to the current Zend_Oauth_Config method. It's that instance
+     * which holds all configuration methods and values this object also presents
+     * as it's API.
+     *
+     * @param Zend_Http_Client $httpClient
+     * @return void
+     */
     public function __call($method, array $args) 
     {
         if (method_exists($this->_config, $method)) {

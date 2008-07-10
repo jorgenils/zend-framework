@@ -40,10 +40,27 @@ require_once 'Zend/Oauth/Config.php';
 class Zend_Oauth_Client extends Zend_Http_Client
 {
 
-    protected $_token = null;
-
+    /**
+     * Holds the current OAuth Configuration set encapsulated in an instance
+     * of Zend_Oauth_Config; it's not a Zend_Config instance since that level
+     * of abstraction is unnecessary and doesn't let me escape the accessors
+     * and mutators anyway!
+     *
+     * @var Zend_Oauth_Config
+     */
     protected $_config = null;
 
+    /**
+     * Constructor; creates a new HTTP Client instance which itself is
+     * just a typical Zend_Http_Client subclass with some OAuth icing to
+     * assist in automating OAuth parameter generation, addition and
+     * cryptographioc signing of requests.
+     *
+     * @param array $oauthOptions
+     * @param string $uri
+     * @param array|Zend_Config $config
+     * @return void
+     */
     public function __construct(array $oauthOptions, $uri = null, $config = null)
     {
         parent::__construct($uri, $config);
@@ -56,6 +73,13 @@ class Zend_Oauth_Client extends Zend_Http_Client
         }
     }
 
+    /**
+     * Same as Zend_Http_Client::setMethod() except it also creates an
+     * Oauth specific reference to the method type.
+     *
+     * @param string $method
+     * @return Zend_Http_Client
+     */
     public function setMethod($method = self::GET)
     {
         if ($method == self::GET) {
@@ -66,6 +90,14 @@ class Zend_Oauth_Client extends Zend_Http_Client
         return parent::setMethod($method);
     }
 
+    /**
+     * Same as Zend_Http_Client::request() except just before the request is
+     * executed, we automatically append any necessary OAuth parameters and
+     * sign the request using the relevant signature method.
+     *
+     * @param string $method
+     * @return Zend_Http_Response
+     */
     public function request($method = null)
     {
         if (!is_null($method)) {
@@ -75,6 +107,11 @@ class Zend_Oauth_Client extends Zend_Http_Client
         return parent::request();
     }
 
+    /**
+     * Performs OAuth preparation on the request before sending.
+     *
+     * @return void
+     */
     public function prepareOauth() 
     {
         $requestScheme = $this->getRequestScheme();
@@ -124,6 +161,14 @@ class Zend_Oauth_Client extends Zend_Http_Client
         }
     }
 
+    /**
+     * Simple Proxy to the current Zend_Oauth_Config method. It's that instance
+     * which holds all configuration methods and values this object also presents
+     * as it's API.
+     *
+     * @param Zend_Http_Client $httpClient
+     * @return void
+     */
     public function __call($method, array $args) 
     {
         if (method_exists($this->_config, $method)) {
