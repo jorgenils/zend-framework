@@ -37,7 +37,7 @@ require_once 'PHPUnit/Framework/TestCase.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Paginator_Adapter_DummyTest extends PHPUnit_Framework_TestCase
+class Zend_Paginator_Adapter_NullTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @var Zend_Paginator_Adapter_Array
@@ -55,7 +55,7 @@ class Zend_Paginator_Adapter_DummyTest extends PHPUnit_Framework_TestCase
     /**
      * Cleans up the environment after running a test.
      */
-    protected function tearDown ()
+    protected function tearDown()
     {
         $this->_adapter = null;
         parent::tearDown();

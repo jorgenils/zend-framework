@@ -84,7 +84,7 @@ class Zend_Paginator_ScrollingStyle_AllTest extends PHPUnit_Framework_TestCase
     {
         $this->_paginator->setCurrentPageNumber(1);
         $pages = $this->_paginator->getPages('All');
-        $this->assertEquals(null, $pages->previous);
+        
         $this->assertEquals(2, $pages->next);
     }
     
@@ -117,6 +117,5 @@ class Zend_Paginator_ScrollingStyle_AllTest extends PHPUnit_Framework_TestCase
         $this->_paginator->setCurrentPageNumber(11);
         $pages = $this->_paginator->getPages('All');
         $this->assertEquals(10, $pages->previous);
-        $this->assertEquals(null, $pages->next);
     }
 }

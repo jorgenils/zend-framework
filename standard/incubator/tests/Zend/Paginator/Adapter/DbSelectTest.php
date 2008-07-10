@@ -51,6 +51,8 @@ class Zend_Paginator_Adapter_DbSelectTest extends PHPUnit_Framework_TestCase
     
     private $_db;
     
+    private $_query;
+    
     /**
      * Prepares the environment before running a test.
      */
@@ -59,11 +61,12 @@ class Zend_Paginator_Adapter_DbSelectTest extends PHPUnit_Framework_TestCase
         parent::setUp();
         
         $this->_db = new Zend_Db_Adapter_Pdo_Sqlite(array(
-            'dbname' => 'Paginator/_files/test.sqlite'
+            'dbname' => dirname(__FILE__) . '/../_files/test.sqlite'
         ));
-        $query = $this->_db->select()->from('test');
         
-        $this->_adapter = new Zend_Paginator_Adapter_DbSelect($query);
+        $this->_query = $this->_db->select()->from('test');
+        
+        $this->_adapter = new Zend_Paginator_Adapter_DbSelect($this->_query);
     }
     /**
      * Cleans up the environment after running a test.
@@ -80,7 +83,7 @@ class Zend_Paginator_Adapter_DbSelectTest extends PHPUnit_Framework_TestCase
         
         $i = 1;
         foreach ($actual as $item) {
-        	$this->assertEquals($i, $item->number);
+        	$this->assertEquals($i, $item['number']);
         	$i++;
         }
     }
@@ -91,7 +94,7 @@ class Zend_Paginator_Adapter_DbSelectTest extends PHPUnit_Framework_TestCase
         
         $i = 11;
         foreach ($actual as $item) {
-            $this->assertEquals($i, $item->number);
+            $this->assertEquals($i, $item['number']);
             $i++;
         }
     }
@@ -114,10 +117,28 @@ class Zend_Paginator_Adapter_DbSelectTest extends PHPUnit_Framework_TestCase
     
     public function testSetValidQueryRowCount()
     {
-        $this->_adapter->setRowCount($this->_db
-                                          ->select(new Zend_Db_Expr('COUNT(*) AS '
-                                                                  . self::ROW_COUNT_COLUMN))
-                                          ->from('test'));
+        $expression = new Zend_Db_Expr('COUNT(*) AS ' . Zend_Paginator_Adapter_DbSelect::ROW_COUNT_COLUMN);
+        
+        $rowCount   = clone $this->_query;
+        $rowCount->reset(Zend_Db_Select::COLUMNS)
+                 ->columns($expression);
+        
+        $this->_adapter->setRowCount($rowCount);
+                                          
+        $this->assertEquals(500, $this->_adapter->count());
+    }
+    
+    public function testSetInalidQueryRowCount()
+    {
+        try {
+            $expr = new Zend_Db_Expr('COUNT(*) AS wrongcolumn');
+            $query = $this->_db->select($expr)->from('test');
+            
+            $this->_adapter->setRowCount($query);
+        } catch (Exception $e) {
+            $this->assertType('Zend_Paginator_Exception', $e);
+            $this->assertEquals('Row count column not found', $e->getMessage());
+        }
     }
     
     public function testSetInvalidRowCount()
@@ -126,7 +147,7 @@ class Zend_Paginator_Adapter_DbSelectTest extends PHPUnit_Framework_TestCase
             $this->_adapter->setRowCount('invalid');
         } catch (Exception $e) {
             $this->assertType('Zend_Paginator_Exception', $e);
-            $this->assertContains('Invalid row count', $e->getMessage());
+            $this->assertEquals('Invalid row count', $e->getMessage());
         }
     }
     

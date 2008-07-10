@@ -30,8 +30,16 @@ if (!defined('PHPUnit_MAIN_METHOD')) {
 }
 
 require_once 'Zend/PaginatorTest.php';
-require_once 'Zend/Paginator/Adapter/AllTests.php';
+
+require_once 'Zend/Paginator/Adapter/ArrayTest.php';
+require_once 'Zend/Paginator/Adapter/DbSelectTest.php';
+require_once 'Zend/Paginator/Adapter/IteratorTest.php';
+require_once 'Zend/Paginator/Adapter/NullTest.php';
+
 require_once 'Zend/Paginator/ScrollingStyle/AllTest.php';
+require_once 'Zend/Paginator/ScrollingStyle/ElasticTest.php';
+require_once 'Zend/Paginator/ScrollingStyle/JumpingTest.php';
+require_once 'Zend/Paginator/ScrollingStyle/SlidingTest.php';
 
 /**
  * @category   Zend
@@ -51,8 +59,16 @@ class Zend_Paginator_AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Paginator');
         $suite->addTestSuite('Zend_PaginatorTest');
-        $suite->addTestSuite('Zend_Paginator_Adapter_AllTests');
-        $suite->addTestSuite('Zend_Paginator_ScrollingStyle_AllTests');
+        
+        $suite->addTestSuite('Zend_Paginator_Adapter_ArrayTest');
+        $suite->addTestSuite('Zend_Paginator_Adapter_DbSelectTest');
+        $suite->addTestSuite('Zend_Paginator_Adapter_IteratorTest');
+        $suite->addTestSuite('Zend_Paginator_Adapter_NullTest');
+        
+        $suite->addTestSuite('Zend_Paginator_ScrollingStyle_AllTest');
+        $suite->addTestSuite('Zend_Paginator_ScrollingStyle_ElasticTest');
+        $suite->addTestSuite('Zend_Paginator_ScrollingStyle_JumpingTest');
+        $suite->addTestSuite('Zend_Paginator_ScrollingStyle_SlidingTest');
         
         return $suite;
     }

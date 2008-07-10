@@ -110,7 +110,7 @@ class Zend_Paginator_ScrollingStyle_SlidingTest extends PHPUnit_Framework_TestCa
     {
         $this->_paginator->setCurrentPageNumber(1);
         $pages = $this->_paginator->getPages('Sliding');
-        $this->assertEquals(null, $pages->previous);
+        
         $this->assertEquals(2, $pages->next);
     }
     
@@ -143,6 +143,12 @@ class Zend_Paginator_ScrollingStyle_SlidingTest extends PHPUnit_Framework_TestCa
         $this->_paginator->setCurrentPageNumber(11);
         $pages = $this->_paginator->getPages('Sliding');
         $this->assertEquals(10, $pages->previous);
-        $this->assertEquals(null, $pages->next);
+    }
+    
+    public function testPageRangeIsLargerThanPageCount()
+    {
+        $this->_paginator->setPageRange(100);
+        $pages = $this->_paginator->getPages();
+        $this->assertEquals(11, $pages->last);
     }
 }

@@ -90,4 +90,16 @@ class Zend_Paginator_Adapter_IteratorTest extends PHPUnit_Framework_TestCase
     {
         $this->assertEquals(101, $this->_adapter->count());
     }
+    
+    public function testThrowsExceptionIfNotCountable()
+    {
+        $iterator = new LimitIterator(new ArrayIterator(range(1, 101)));
+        
+        try {
+            new Zend_Paginator_Adapter_Iterator($iterator);
+        } catch (Exception $e) {
+            $this->assertType('Zend_Paginator_Exception', $e);
+            $this->assertEquals('Iterator must implement Countable', $e->getMessage());
+        }
+    }
 }

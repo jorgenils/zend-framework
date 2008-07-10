@@ -84,6 +84,11 @@ class Zend_Paginator_Adapter_DbSelect implements Zend_Paginator_Adapter_Interfac
             $result = $rowCount->query()->fetch();
             
             if (!isset($result[self::ROW_COUNT_COLUMN])) {
+                /**
+                 * @see Zend_Paginator_Exception
+                 */
+                require_once 'Zend/Paginator/Exception.php';
+                
                 throw new Zend_Paginator_Exception('Row count column not found');
             }
             
