@@ -323,9 +323,7 @@ class Zend_Paginator implements Countable, IteratorAggregate
      */
     public function count()
     {
-        if ($this->_pageCount === null) {
-            // TODO: There is no test case where this line is executed.
-            // This entire if block could probably go. 
+        if ($this->_pageCount === null) { 
             $this->_pageCount = $this->_calculatePageCount();
         }
         
@@ -450,19 +448,7 @@ class Zend_Paginator implements Countable, IteratorAggregate
                                              . ' contain item number ' . $itemNumber);
         }
         
-        if ($page instanceof ArrayAccess) {
-            return $page[$itemNumber - 1];
-        } else if ($page instanceof Iterator) {
-            // This is needed to make this work for collections other than an array.
-            $i = 1;
-            foreach ($page as $item) {
-                if ($i == $itemNumber) {
-                    return $item;
-                }
-                
-                $i++;
-            }
-        }
+        return $page[$itemNumber - 1];
     }
 
     /**

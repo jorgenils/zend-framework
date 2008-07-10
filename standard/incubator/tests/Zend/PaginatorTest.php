@@ -80,16 +80,21 @@ class Zend_PaginatorTest extends PHPUnit_Framework_TestCase
     
     protected $_query = null;
     
+    protected $_config = null;
+    
     protected function setUp()
     {
         $db = new Zend_Db_Adapter_Pdo_Sqlite(array(
-            'dbname' => 'Paginator/_files/test.sqlite'
+            'dbname' => dirname(__FILE__) . '/Paginator/_files/test.sqlite'
         ));
         
-        $this->_query = $db->select()->from('tests');
+        $this->_query = $db->select()->from('test');
         
         $this->_testCollection = range(1, 101);
         $this->_paginator = Zend_Paginator::factory($this->_testCollection);
+        
+        $this->_config = new Zend_Config_Xml(dirname(__FILE__) . '/Paginator/_files/config.xml');
+        
         $this->_restorePaginatorDefaults();
     }
     
@@ -106,8 +111,12 @@ class Zend_PaginatorTest extends PHPUnit_Framework_TestCase
         $this->_paginator->setCurrentPageNumber(1);
         $this->_paginator->setPageRange(10);
         $this->_paginator->setView();
+        
         Zend_Paginator::setDefaultScrollingStyle();
         Zend_View_Helper_PaginationControl::setDefaultViewPartial(null);
+        
+        Zend_Paginator::setConfig($this->_config->default);
+        
         $loader = Zend_Paginator::getScrollingStyleLoader();
         $loader->clearPaths();
         $loader->addPrefixPath('Zend_Paginator_ScrollingStyle', 'Zend/Paginator/ScrollingStyle');
@@ -214,12 +223,17 @@ class Zend_PaginatorTest extends PHPUnit_Framework_TestCase
         Zend_Paginator::setDefaultScrollingStyle('Sliding');
     }
     
+    public function testCountAfterInit()
+    {
+        $paginator = Zend_Paginator::factory(range(1, 101));
+        $this->assertEquals(11, $paginator->count());
+    }
+    
     public function testLoadFromConfig()
     {
         $this->_restorePaginatorDefaults();
         
-        $config = new Zend_Config_Xml(dirname(__FILE__) . '/Paginator/_files/config.xml');
-        Zend_Paginator::setConfig($config);
+        Zend_Paginator::setConfig($this->_config->testing);
         $this->assertEquals('Scrolling', Zend_Paginator::getDefaultScrollingStyle());
         
         $paths = array(
@@ -325,6 +339,7 @@ class Zend_PaginatorTest extends PHPUnit_Framework_TestCase
         
         $this->assertEquals(10, $this->_paginator->getCurrentItemCount());
         $this->_paginator->setCurrentPageNumber(11);
+        
         $this->assertEquals(1, $this->_paginator->getCurrentItemCount());
         
         $this->_paginator->setCurrentPageNumber(1);
@@ -419,14 +434,6 @@ class Zend_PaginatorTest extends PHPUnit_Framework_TestCase
             $this->assertType('Zend_Paginator_Exception', $e);
             $this->assertContains('Page 11 does not contain item number 10', $e->getMessage());
         }
-    }
-    
-    public function testGetItemFromNonArrayAccessResult()
-    {
-        $paginator = Zend_Paginator::factory($this->_query);
-        
-        $item = $paginator->getItem(3, 4);
-        $this->assertEquals(33, $item->number = 33);
     }
     
     public function testNormalizePageNumber()
