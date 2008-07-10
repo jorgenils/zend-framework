@@ -66,14 +66,20 @@ class Zend_Dojo_View_Helper_RadioButton extends Zend_Dojo_View_Helper_Dijit
         $listsep = "<br />\n"
     ) {
         $attribs['name'] = $id;
+        if (!array_key_exists('id', $attribs)) {
+            $attribs['id'] = $id;
+        }
         $attribs = $this->_prepareDijit($attribs, $params, 'element');
 
-        $id = $attribs['id'];
         if (is_array($options) && $this->_useProgrammatic() && !$this->_useProgrammaticNoScript()) {
+            $baseId = $id;
+            if (array_key_exists('id', $attribs)) {
+                $baseId = $attribs['id'];
+            }
             require_once 'Zend/Filter/Alnum.php';
             $filter = new Zend_Filter_Alnum();
             foreach ($options as $key => $value) {
-                $optId = $id . '-' . $filter->filter($key);
+                $optId = $baseId . '-' . $filter->filter($key);
                 $this->_createDijit($this->_dijit, $optId, array());
             }
         }
