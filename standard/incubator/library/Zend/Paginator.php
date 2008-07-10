@@ -132,7 +132,7 @@ class Zend_Paginator implements Countable, IteratorAggregate
      */
     public static function addScrollingStylePrefixPath($prefix, $path)
     {
-        self::_getScrollingStyleLoader()->addPrefixPath($prefix, $path);
+        self::getScrollingStyleLoader()->addPrefixPath($prefix, $path);
     }
 
     /**
@@ -154,11 +154,31 @@ class Zend_Paginator implements Countable, IteratorAggregate
             self::addScrollingStylePrefixPath($prefixPaths['prefix'], $prefixPaths['path']);
         } else {
             foreach ($prefixPaths as $prefix => $path) {
-                if (isset($path['prefix']) && isset($path['path'])) {
-                    self::addScrollingStylePrefixPath($prefix, $path);
+                if (is_array($path) && isset($path['prefix']) && isset($path['path'])) {
+                    $prefix = $path['prefix'];
+                    $path   = $path['path'];
                 }
+                
+                self::addScrollingStylePrefixPath($prefix, $path);
             }
         }
+    }
+    
+    /**
+     * Returns the scrolling style loader.  If it doesn't exist it's
+     * created.
+     *
+     * @return Zend_Loader_PluginLoader
+     */
+    public static function getScrollingStyleLoader()
+    {
+        if (self::$_scrollingStyleLoader === null) {
+            self::$_scrollingStyleLoader = new Zend_Loader_PluginLoader(
+                array('Zend_Paginator_ScrollingStyle' => 'Zend/Paginator/ScrollingStyle')
+            );
+        }
+        
+        return self::$_scrollingStyleLoader;
     }
 
     /**
@@ -224,20 +244,26 @@ class Zend_Paginator implements Countable, IteratorAggregate
         $scrollingStyle = $config->get('scrollingstyle');
         
         if ($scrollingStyle != null) {
-            $default = $scrollingStyle->get('default');
-            
-            if ($default != null) {
-                self::setDefaultScrollingStyle($default);
-            }
-            
-            $prefixPaths = $config->get('prefixpaths');
-            
-            if ($prefixPaths != null) {
-                self::addScrollingStylePrefixPaths($prefixPaths->toArray());
-            }
+            self::setDefaultScrollingStyle($scrollingStyle);
+        }
+        
+        $prefixPaths = $config->get('prefixpaths');
+        
+        if ($prefixPaths != null) {
+            self::addScrollingStylePrefixPaths($prefixPaths->prefixpath->toArray());
         }
     }
 
+    /**
+     * Gets the default scrolling style.
+     *
+     * @return  string
+     */
+    public static function getDefaultScrollingStyle()
+    {
+        return self::$_defaultScrollingStyle;
+    }
+    
     /**
      * Sets the default scrolling style.
      *
@@ -245,7 +271,7 @@ class Zend_Paginator implements Countable, IteratorAggregate
      */
     public static function setDefaultScrollingStyle($scrollingStyle = 'Sliding')
     {
-        self::$_scrollingStyle = $scrollingStyle;
+        self::$_defaultScrollingStyle = $scrollingStyle;
     }
 
     /**
@@ -298,6 +324,8 @@ class Zend_Paginator implements Countable, IteratorAggregate
     public function count()
     {
         if ($this->_pageCount === null) {
+            // TODO: There is no test case where this line is executed.
+            // This entire if block could probably go. 
             $this->_pageCount = $this->_calculatePageCount();
         }
         
@@ -402,6 +430,26 @@ class Zend_Paginator implements Countable, IteratorAggregate
         
         $page = $this->getItemsByPage($pageNumber);
         
+        if ($page->count() == 0) {
+            /**
+             * @see Zend_Paginator_Exception
+             */
+            require_once 'Zend/Paginator/Exception.php';
+            
+            throw new Zend_Paginator_Exception('Page ' . $pageNumber . ' is empty. '
+                                             . 'Probably no data to paginate.');
+        }
+        
+        if ($itemNumber > $page->count()) {
+            /**
+             * @see Zend_Paginator_Exception
+             */
+            require_once 'Zend/Paginator/Exception.php';
+            
+            throw new Zend_Paginator_Exception('Page ' . $pageNumber . ' does not'
+                                             . ' contain item number ' . $itemNumber);
+        }
+        
         if ($page instanceof ArrayAccess) {
             return $page[$itemNumber - 1];
         } else if ($page instanceof Iterator) {
@@ -415,14 +463,6 @@ class Zend_Paginator implements Countable, IteratorAggregate
                 $i++;
             }
         }
-        
-        /**
-         * @see Zend_Paginator_Exception
-         */
-        require_once 'Zend/Paginator/Exception.php';
-        
-        throw new Zend_Paginator_Exception('Unable to locate the item number "' . $itemNumber . '".'
-                                         . 'Perhaps you have specified an empty collection?');
     }
 
     /**
@@ -656,23 +696,6 @@ class Zend_Paginator implements Countable, IteratorAggregate
     }
 
     /**
-     * Returns the scrolling style loader.  If it doesn't exist it's
-     * created.
-     *
-     * @return Zend_Loader_PluginLoader
-     */
-    protected static function _getScrollingStyleLoader()
-    {
-        if (self::$_scrollingStyleLoader === null) {
-            self::$_scrollingStyleLoader = new Zend_Loader_PluginLoader(
-                array('Zend_Paginator_ScrollingStyle' => 'Zend/Paginator/ScrollingStyle')
-            );
-        }
-        
-        return self::$_scrollingStyleLoader;
-    }
-    
-    /**
      * Calculate the page count
      *
      * @return int
@@ -736,7 +759,7 @@ class Zend_Paginator implements Countable, IteratorAggregate
             $scrollingStyle = self::$_defaultScrollingStyle;
         }
         
-        $className = self::_getScrollingStyleLoader()->load($scrollingStyle);
+        $className = self::getScrollingStyleLoader()->load($scrollingStyle);
         
         return new $className();
     }

@@ -26,12 +26,13 @@
 require_once dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'TestHelper.php';
 
 if (!defined('PHPUnit_MAIN_METHOD')) {
-    define('PHPUnit_MAIN_METHOD', 'Zend_Paginator_AllTests::main');
+    define('PHPUnit_MAIN_METHOD', 'Zend_Paginator_ScrollingStyle_AllTests::main');
 }
 
-require_once 'Zend/PaginatorTest.php';
-require_once 'Zend/Paginator/Adapter/AllTests.php';
-require_once 'Zend/Paginator/ScrollingStyle/AllTest.php';
+require_once 'Zend/Paginator/Adapter/ArrayTest.php';
+require_once 'Zend/Paginator/Adapter/DbSelectTest.php';
+require_once 'Zend/Paginator/Adapter/IteratorTest.php';
+require_once 'Zend/Paginator/Adapter/NullTest.php';
 
 /**
  * @category   Zend
@@ -40,7 +41,7 @@ require_once 'Zend/Paginator/ScrollingStyle/AllTest.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Paginator_AllTests
+class Zend_Paginator_ScrollingStyle_AllTests
 {
     public static function main()
     {
@@ -49,15 +50,17 @@ class Zend_Paginator_AllTests
 
     public static function suite()
     {
-        $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Paginator');
-        $suite->addTestSuite('Zend_PaginatorTest');
-        $suite->addTestSuite('Zend_Paginator_Adapter_AllTests');
-        $suite->addTestSuite('Zend_Paginator_ScrollingStyle_AllTests');
+        $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Paginator - Adapter');
+        
+        $suite->addTestSuite('Zend_Paginator_Adapter_ArrayTest');
+        $suite->addTestSuite('Zend_Paginator_Adapter_DbSelectTest');
+        $suite->addTestSuite('Zend_Paginator_Adapter_IteratorTest');
+        $suite->addTestSuite('Zend_Paginator_Adapter_NullTest');
         
         return $suite;
     }
 }
 
-if (PHPUnit_MAIN_METHOD == 'Zend_Paginator_AllTests::main') {
-    Zend_Paginator_AllTests::main();
+if (PHPUnit_MAIN_METHOD == 'Zend_Paginator_ScrollingStyle_AllTests::main') {
+    Zend_Paginator_ScrollingStyle_AllTests::main();
 }
