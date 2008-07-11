@@ -143,6 +143,18 @@ class Zend_Dojo_View_Helper_NumberSpinnerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(array_key_exists('max', $constraints));
         $this->assertTrue(array_key_exists('places', $constraints));
     }
+
+    public function testInvalidConstraintsShouldBeStrippedPriorToRendering()
+    {
+        $html = $this->helper->numberSpinner(
+            'foo', 
+            5, 
+            array (
+                'constraints' => 'bogus',
+            )
+        );
+        $this->assertNotContains('constraints="', $html);
+    }
 }
 
 // Call Zend_Dojo_View_Helper_NumberSpinnerTest::main() if this source file is executed directly.

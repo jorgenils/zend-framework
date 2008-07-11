@@ -65,7 +65,7 @@ class Zend_Dojo_View_Helper_NumberSpinner extends Zend_Dojo_View_Helper_Dijit
     {
         // Get constraints and serialize to JSON if necessary
         if (array_key_exists('constraints', $params)) {
-            if (!is_array($constraints)) {
+            if (!is_array($params['constraints'])) {
                 unset($params['constraints']);
             }
         } else {

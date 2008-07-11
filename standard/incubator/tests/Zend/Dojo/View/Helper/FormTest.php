@@ -112,6 +112,14 @@ class Zend_Dojo_View_Helper_FormTest extends PHPUnit_Framework_TestCase
         $this->assertNotRegexp('/<form[^>]*(dojoType="dijit.form.Form")/', $html);
         $this->assertNotNull($this->view->dojo()->getDijit('myForm'));
     }
+
+    public function testOnlyIdShouldBeNecessary()
+    {
+        Zend_Dojo_View_Helper_Dojo::setUseDeclarative();
+        $html = $this->view->form('foo');
+        $this->assertRegexp('/<form[^>]*(dojoType="dijit.form.Form")/', $html, $html);
+        $this->assertRegexp('/<form[^>]*(id="foo")/', $html, $html);
+    }
 }
 
 // Call Zend_Dojo_View_Helper_FormTest::main() if this source file is executed directly.

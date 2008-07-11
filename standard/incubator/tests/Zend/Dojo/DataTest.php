@@ -71,6 +71,28 @@ class Zend_Dojo_DataTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('id', $this->dojoData->getIdentifier());
     }
 
+    public function testNullIdentifierShouldBeAllowed()
+    {
+        $this->dojoData->setIdentifier('foo');
+        $this->assertEquals('foo', $this->dojoData->getIdentifier());
+        $this->dojoData->setIdentifier(null);
+        $this->assertNull($this->dojoData->getIdentifier());
+    }
+
+    public function testIntegerIdentifierShouldBeAllowed()
+    {
+        $this->dojoData->setIdentifier(2);
+        $this->assertSame(2, $this->dojoData->getIdentifier());
+    }
+
+    /**
+     * @expectedException Zend_Dojo_Exception
+     */
+    public function testSetIdentifierShouldThrowExceptionOnInvalidType()
+    {
+        $this->dojoData->setIdentifier(true);
+    }
+
     public function testLabelShouldBeNullByDefault()
     {
         $this->assertNull($this->dojoData->getLabel());
@@ -81,6 +103,13 @@ class Zend_Dojo_DataTest extends PHPUnit_Framework_TestCase
         $this->testLabelShouldBeNullByDefault();
         $this->dojoData->setLabel('title');
         $this->assertEquals('title', $this->dojoData->getLabel());
+    }
+
+    public function testLabelShouldBeNullable()
+    {
+        $this->testLabelShouldBeMutable();
+        $this->dojoData->setLabel(null);
+        $this->assertNull($this->dojoData->getLabel());
     }
 
     public function testAddItemShouldThrowExceptionIfNoIdentifierPresentInObject()
@@ -262,6 +291,14 @@ class Zend_Dojo_DataTest extends PHPUnit_Framework_TestCase
         $this->assertSame($obj->items[2]->toArray(), $this->dojoData->getItem(3));
     }
 
+    /**
+     * @expectedException Zend_Dojo_Exception
+     */
+    public function testAddItemsShouldThrowExceptionForInvalidItems()
+    {
+        $this->dojoData->addItems('foo');
+    }
+
     public function testSetItemsShouldOverwriteAllCurrentItems()
     {
         $this->testAddItemsShouldAcceptArray();
@@ -298,6 +335,33 @@ class Zend_Dojo_DataTest extends PHPUnit_Framework_TestCase
         $this->testAddItemsShouldAcceptArray();
         $items = $this->dojoData->getItems();
         $this->assertTrue(is_array($items));
+    }
+
+    public function testConstructorShouldSetIdentifierItemsAndLabelWhenPassed()
+    {
+        $items = array(
+            array (
+                'id'    => 1,
+                'title' => 'Foo',
+                'email' => 'foo@bar',
+            ),
+            array (
+                'id'    => 2,
+                'title' => 'Bar',
+                'email' => 'bar@bar',
+            ),
+            array (
+                'id'    => 3,
+                'title' => 'Baz',
+                'email' => 'baz@bar',
+            ),
+        );
+        $data = new Zend_Dojo_Data('id', $items, 'title');
+        $this->assertEquals('id', $data->getIdentifier());
+        $this->assertEquals('title', $data->getLabel());
+        foreach ($items as $item) {
+            $this->assertTrue($data->hasItem($item['id']));
+        }
     }
 
     public function testShouldSerializeToArray()

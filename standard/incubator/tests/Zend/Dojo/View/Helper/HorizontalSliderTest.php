@@ -112,6 +112,7 @@ class Zend_Dojo_View_Helper_HorizontalSliderTest extends PHPUnit_Framework_TestC
                         '80%',
                         ' ',
                     ),
+                    'container' => 'top',
                     'attribs' => array(
                         'container' => array(
                             'style' => 'height:1.2em; font-size=75%;color:gray;',
@@ -214,6 +215,46 @@ class Zend_Dojo_View_Helper_HorizontalSliderTest extends PHPUnit_Framework_TestC
         $html = $this->getElement();
         $this->assertNotContains('leftDecoration', $html);
         $this->assertNotContains('rightDecoration', $html);
+    }
+
+    /**
+     * @expectedException Zend_Dojo_View_Exception
+     */
+    public function testSliderShouldRaiseExceptionIfMissingRequiredParameters()
+    {
+        $this->helper->prepareSlider('foo', 4);
+    }
+
+    public function testShouldAllowPassingLabelParametersViaDecorationParameters()
+    {
+        $html = $this->helper->horizontalSlider(
+            'elementId', 
+            '', 
+            array(
+                'minimum'        => -10,
+                'maximum'        => 10,
+                'discreteValues' => 11,
+                'topDecoration' => array(
+                    'labels' => array(
+                        ' ',
+                        '20%',
+                        '40%',
+                        '60%',
+                        '80%',
+                        ' ',
+                    ),
+                    'params' => array(
+                        'required' => true,
+                        'list' => array(
+                            'minimum' => 5,
+                        )
+                    ),
+                    'dijit' => 'HorizontalRuleLabels',
+                ),
+            )
+        );
+        $this->assertContains('required="', $html);
+        $this->assertContains('minimum="', $html);
     }
 }
 

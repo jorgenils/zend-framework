@@ -196,6 +196,14 @@ class Zend_Dojo_Form_Element_CheckBoxTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($this->element->checked);
     }
 
+    public function testIsCheckedShouldReflectCurrentCheckedStatus()
+    {
+        $this->element->setChecked(true);
+        $this->assertTrue($this->element->isChecked());
+        $this->element->setChecked(false);
+        $this->assertFalse($this->element->isChecked());
+    }
+
     public function testSetOptionsSetsInitialValueAccordingToCheckedAndUncheckedValues()
     {
         $options = array(

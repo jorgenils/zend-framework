@@ -196,6 +196,54 @@ class Zend_Dojo_Form_Decorator_DijitContainerTest extends PHPUnit_Framework_Test
         $html = $this->decorator->render('');
         $this->assertContains('dojoType="dijit.layout.ContentPane"', $html);
     }
+
+    /**
+     * @expectedException Zend_Form_Decorator_Exception
+     */
+    public function testAbsenceOfHelperShouldRaiseException()
+    {
+        $decorator = new Zend_Dojo_Form_Decorator_DijitContainerTest_Example();
+        $helper = $decorator->getHelper();
+    }
+
+    public function testShouldAllowPassingDijitParamsAsOptions()
+    {
+        $element = new Zend_Dojo_Form_SubForm();
+        $element->setAttribs(array(
+            'name'   => 'foo',
+            'style'  => 'width: 300px; height: 500px;',
+            'class'  => 'someclass',
+        ));
+        $dijitParams = array(
+            'labelAttr' => 'foobar',
+            'typeAttr'  => 'barbaz',
+        );
+        $this->decorator->setElement($element);
+        $this->decorator->setOption('dijitParams', $dijitParams);
+        $test = $this->decorator->getDijitParams();
+        foreach ($dijitParams as $key => $value) {
+            $this->assertEquals($value, $test[$key]);
+        }
+    }
+
+    public function testShouldUseLegendAttribAsTitleIfNoTitlePresent()
+    {
+        $element = new Zend_Dojo_Form_SubForm();
+        $element->setAttribs(array(
+                    'name'   => 'foo',
+                    'legend' => 'FooBar',
+                    'style'  => 'width: 300px; height: 500px;',
+                    'class'  => 'someclass',
+                ))
+                ->setView($this->view);
+        $this->decorator->setElement($element);
+        $html = $this->decorator->render('');
+        $this->assertContains('FooBar', $html);
+    }
+}
+
+class Zend_Dojo_Form_Decorator_DijitContainerTest_Example extends Zend_Dojo_Form_Decorator_DijitContainer
+{
 }
 
 // Call Zend_Dojo_Form_Decorator_DijitContainerTest::main() if this source file is executed directly.

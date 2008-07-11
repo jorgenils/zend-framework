@@ -113,6 +113,51 @@ class Zend_Dojo_Form_Element_RadioButtonTest extends PHPUnit_Framework_TestCase
         return $element;
     }
 
+    public function testShouldAllowSpecifyingSeparatorText()
+    {
+        $this->element->setSeparator('<br />');
+        $this->assertEquals('<br />', $this->element->getSeparator());
+    }
+
+    public function testAddingAnOptionShouldResetOptionsToArrayIfScalar()
+    {
+        $this->element->options = 'foo';
+        $this->element->addMultiOption('bar', 'baz');
+        $this->assertTrue(is_array($this->element->options));
+    }
+
+    public function testAddMultiOptionsShouldPassKeyValueArraysAsIndividualOptions()
+    {
+        $this->element->addMultiOptions(array(
+            array('key' => 'foo', 'value' => 'bar'),
+            array('key' => 'bar', 'value' => 'baz'),
+        ));
+        $this->assertEquals('bar', $this->element->getMultiOption('foo'));
+        $this->assertEquals('baz', $this->element->getMultiOption('bar'));
+    }
+
+    public function testShouldAllowRemovingIndividualOptions()
+    {
+        $this->element->removeMultiOption('bar');
+        $this->assertNull($this->element->getMultiOption('bar'));
+    }
+
+    public function testOptionsShouldBeTranslatable()
+    {
+        $translations = array(
+            'Foo' => 'This is Foo',
+            'Bar' => 'This is Bar',
+            'Baz' => 'This is Baz',
+        );
+        require_once 'Zend/Translate.php';
+        $translate = new Zend_Translate('array', $translations, 'en');
+        $this->element->setTranslator($translate);
+        $html = $this->element->render();
+        foreach ($translations as $string) {
+            $this->assertContains($string, $html);
+        }
+    }
+
     public function testShouldRenderRadioButtonDijit()
     {
         $html = $this->element->render();

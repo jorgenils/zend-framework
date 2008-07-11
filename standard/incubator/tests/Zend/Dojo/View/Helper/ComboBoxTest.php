@@ -182,6 +182,24 @@ class Zend_Dojo_View_Helper_ComboBoxTest extends PHPUnit_Framework_TestCase
         }
         $this->assertTrue($found, 'No store onLoad action found: ' . var_export($actions, 1));
     }
+
+    public function testShouldAllowAlternateNotationToSpecifyRemoter()
+    {
+        $html = $this->helper->comboBox(
+            'elementId',
+            'someCombo',
+            array(
+                'store'       => 'stateStore',
+                'storeType'   => 'dojo.data.ItemFileReadStore',
+                'storeParams' => array('url' => 'states.txt'),
+                'searchAttr'  => 'name',
+            )
+        );
+        if (!preg_match('/(<input[^>]*(dojoType="dijit.form.ComboBox"))/', $html, $m)) {
+            $this->fail('Did not create text input as remoter: ' . $html);
+        }
+        $this->assertContains('type="text"', $m[1]);
+    }
 }
 
 // Call Zend_Dojo_View_Helper_ComboBoxTest::main() if this source file is executed directly.

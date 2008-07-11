@@ -171,10 +171,44 @@ class Zend_Dojo_Form_Decorator_DijitElementTest extends PHPUnit_Framework_TestCa
         $this->assertTrue($found);
     }
 
+    public function testShouldAllowAddingAndRetrievingIndividualDijitParams()
+    {
+        $this->assertNull($this->decorator->getDijitParam('bogus'));
+        $this->decorator->setDijitParam('bogus', 'value');
+        $this->assertEquals('value', $this->decorator->getDijitParam('bogus'));
+    }
+
+    /**
+     * @expectedException Zend_Form_Decorator_Exception
+     */
+    public function testRenderingShouldThrowExceptionWhenNoViewObjectRegistered()
+    {
+        $element = new Zend_Dojo_Form_Element_TextBox(
+            'foo',
+            array(
+                'value' => 'some text',
+                'label' => 'TextBox',
+                'trim'  => true,
+                'propercase' => true,
+                'class' => 'someclass',
+                'style' => 'width: 100px;',
+            )
+        );
+        $this->decorator->setElement($element);
+        $html = $this->decorator->render('');
+    }
+
     public function testRenderingShouldCreateDijit()
     {
         $html = $this->decorator->render('');
         $this->assertContains('dojoType="dijit.form.TextBox"', $html);
+    }
+
+    public function testRenderingShouldSetRequiredDijitParamWhenElementIsRequired()
+    {
+        $this->element->setRequired(true);
+        $html = $this->decorator->render('');
+        $this->assertContains('required="', $html);
     }
 }
 

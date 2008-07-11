@@ -88,7 +88,7 @@ class Zend_Dojo_View_Helper_DojoTest extends PHPUnit_Framework_TestCase
     {
         require_once 'Zend/View.php';
         $view = new Zend_View();
-        $view->addHelperPath(dirname(__FILE__) . '/../../../../library/Zend/Dojo/View/Helper/', 'Zend_Dojo_View_Helper');
+        $view->addHelperPath('Zend/Dojo/View/Helper/', 'Zend_Dojo_View_Helper');
         return $view;
     }
 
@@ -709,6 +709,34 @@ function() {
             }
         }
         $this->assertSame(array('foo', 'bar'), $found);
+    }
+
+    /**
+     * @expectedException Zend_Dojo_View_Exception
+     */
+    public function testCallingMethodThatDoesNotExistInContainerShouldRaiseException()
+    {
+        $dojo = new Zend_Dojo_View_Helper_Dojo();
+        $dojo->bogus();
+    }
+
+    public function testShouldAllowSpecifyingDeclarativeUsage()
+    {
+        Zend_Dojo_View_Helper_Dojo::setUseDeclarative();
+        $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useDeclarative());
+    }
+
+    public function testShouldAllowSpecifyingProgrammaticUsageWithNoScriptGeneration()
+    {
+        Zend_Dojo_View_Helper_Dojo::setUseProgrammatic(-1);
+        $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useProgrammaticNoScript());
+    }
+
+    public function testInvalidFlagPassedToUseProgrammaticShouldUseProgrammaticWithScripts()
+    {
+        Zend_Dojo_View_Helper_Dojo::setUseProgrammatic('foo');
+        $this->assertFalse(Zend_Dojo_View_Helper_Dojo::useProgrammaticNoScript());
+        $this->assertTrue(Zend_Dojo_View_Helper_Dojo::useProgrammatic());
     }
 
     public function setupDojo()
