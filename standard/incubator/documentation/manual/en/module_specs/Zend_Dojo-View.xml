@@ -29,6 +29,7 @@ $view->addHelperPath('Zend/Dojo/View/Helper/', 'Zend_Dojo_View_Helper');
     </example>
 
     <xi:include href="Zend_Dojo-View-Dojo.xml" />
+    <xi:include href="Zend_Dojo-View-Helpers.xml" />
 </sect1>
 <!--
 vim:se ts=4 sw=4 et:
