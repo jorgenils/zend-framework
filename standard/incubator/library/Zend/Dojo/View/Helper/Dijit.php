@@ -226,7 +226,25 @@ abstract class Zend_Dojo_View_Helper_Dijit extends Zend_View_Helper_HtmlElement
     protected function _createDijit($dijit, $id, array $params)
     {
         $params['dojoType'] = $dijit;
+
+        array_walk_recursive($params, array($this, '_stringifyBoolean'));
+
         $this->dojo->setDijit($id, $params);
+    }
+
+    /**
+     * Cast a boolean to a string value
+     * 
+     * @param  mixed $item 
+     * @param  string $key 
+     * @return void
+     */
+    protected function _stringifyBoolean(&$item, $key)
+    {
+        if (!is_bool($item)) {
+            return;
+        }
+        $item = ($item) ? "true" : "false";
     }
 
     /**
