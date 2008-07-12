@@ -78,7 +78,7 @@ class Zend_Dojo_View_Helper_RadioButton extends Zend_Dojo_View_Helper_Dijit
             }
             require_once 'Zend/Filter/Alnum.php';
             $filter = new Zend_Filter_Alnum();
-            foreach ($options as $key => $value) {
+            foreach (array_keys($options) as $key) {
                 $optId = $baseId . '-' . $filter->filter($key);
                 $this->_createDijit($this->_dijit, $optId, array());
             }

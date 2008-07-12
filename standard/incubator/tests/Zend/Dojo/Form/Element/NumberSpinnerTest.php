@@ -162,6 +162,24 @@ class Zend_Dojo_Form_Element_NumberSpinnerTest extends PHPUnit_Framework_TestCas
         $this->assertEquals('foo', $this->element->dijitParams['rangeMessage']);
     }
 
+    public function testMinAccessorsShouldProxyToConstraintsDijitParam()
+    {
+        $this->assertNull($this->element->getMin());
+        $this->assertFalse(array_key_exists('constraints', $this->element->dijitParams));
+        $this->element->setMin(5);
+        $this->assertEquals(5, $this->element->getMin());
+        $this->assertEquals(5, $this->element->dijitParams['constraints']['min']);
+    }
+
+    public function testMaxAccessorsShouldProxyToConstraintsDijitParam()
+    {
+        $this->assertNull($this->element->getMax());
+        $this->assertFalse(array_key_exists('constraints', $this->element->dijitParams));
+        $this->element->setMax(5);
+        $this->assertEquals(5, $this->element->getMax());
+        $this->assertEquals(5, $this->element->dijitParams['constraints']['max']);
+    }
+
     public function testShouldRenderNumberSpinnerDijit()
     {
         $html = $this->element->render();

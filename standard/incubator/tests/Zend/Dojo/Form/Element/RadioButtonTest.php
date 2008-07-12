@@ -99,7 +99,7 @@ class Zend_Dojo_Form_Element_RadioButtonTest extends PHPUnit_Framework_TestCase
         $element = new Zend_Dojo_Form_Element_RadioButton(
             'foo',
             array(
-                'value' => 'some text',
+                'value' => 'bar',
                 'label' => 'RadioButton',
                 'class' => 'someclass',
                 'style' => 'width: 100px;',
@@ -162,6 +162,15 @@ class Zend_Dojo_Form_Element_RadioButtonTest extends PHPUnit_Framework_TestCase
     {
         $html = $this->element->render();
         $this->assertContains('dojoType="dijit.form.RadioButton"', $html);
+    }
+
+    public function testPassingValueShouldMarkThatValueCheckedWhenRendering()
+    {
+        $html = $this->element->render();
+        if (!preg_match('/(<input[^>]*(id="foo-bar")[^>]*>)/', $html, $matches)) {
+            $this->fail('Did not find radio option matching bar');
+        }
+        $this->assertContains('checked="checked"', $matches[1]);
     }
 }
 

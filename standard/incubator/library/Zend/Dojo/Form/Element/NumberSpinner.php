@@ -174,4 +174,72 @@ class Zend_Dojo_Form_Element_NumberSpinner extends Zend_Dojo_Form_Element_Valida
     {
         return $this->getDijitParam('rangeMessage');
     }
+
+    /**
+     * Set minimum value
+     * 
+     * @param  int $value 
+     * @return Zend_Dojo_Form_Element_NumberSpinner
+     */
+    public function setMin($value)
+    {
+        $constraints = array();
+        if ($this->hasDijitParam('constraints')) {
+            $constraints = $this->getDijitParam('constraints');
+        }
+        $constraints['min'] = (int) $value;
+        $this->setDijitParam('constraints', $constraints);
+        return $this;
+    }
+
+    /**
+     * Get minimum value
+     * 
+     * @return null|int
+     */
+    public function getMin()
+    {
+        if (!$this->hasDijitParam('constraints')) {
+            return null;
+        }
+        $constraints = $this->getDijitParam('constraints');
+        if (!array_key_exists('min', $constraints)) {
+            return null;
+        }
+        return $constraints['min'];
+    }
+
+    /**
+     * Set maximum value
+     * 
+     * @param  int $value 
+     * @return Zend_Dojo_Form_Element_NumberSpinner
+     */
+    public function setMax($value)
+    {
+        $constraints = array();
+        if ($this->hasDijitParam('constraints')) {
+            $constraints = $this->getDijitParam('constraints');
+        }
+        $constraints['max'] = (int) $value;
+        $this->setDijitParam('constraints', $constraints);
+        return $this;
+    }
+
+    /**
+     * Get maximum value
+     * 
+     * @return null|int
+     */
+    public function getMax()
+    {
+        if (!$this->hasDijitParam('constraints')) {
+            return null;
+        }
+        $constraints = $this->getDijitParam('constraints');
+        if (!array_key_exists('max', $constraints)) {
+            return null;
+        }
+        return $constraints['max'];
+    }
 }
