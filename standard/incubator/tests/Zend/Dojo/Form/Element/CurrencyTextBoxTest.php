@@ -108,6 +108,11 @@ class Zend_Dojo_Form_Element_CurrencyTextBoxTest extends PHPUnit_Framework_TestC
         return $element;
     }
 
+    public function testShouldExtendNumberTextBox()
+    {
+        $this->assertTrue($this->element instanceof Zend_Dojo_Form_Element_NumberTextBox);
+    }
+
     public function testCurrencyAccessorsShouldProxyToDijitParams()
     {
         $this->assertNull($this->element->getCurrency());
@@ -115,6 +120,39 @@ class Zend_Dojo_Form_Element_CurrencyTextBoxTest extends PHPUnit_Framework_TestC
         $this->element->setCurrency('USD');
         $this->assertEquals('USD', $this->element->getCurrency());
         $this->assertEquals('USD', $this->element->dijitParams['currency']);
+    }
+
+    public function testFractionalAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertFalse($this->element->getFractional());
+        $this->assertFalse(array_key_exists('fractional', $this->element->dijitParams));
+        $this->element->setFractional(true);
+        $this->assertTrue($this->element->getFractional());
+        $this->assertTrue($this->element->dijitParams['fractional']);
+    }
+
+    public function testSymbolAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getSymbol());
+        $this->assertFalse(array_key_exists('symbol', $this->element->dijitParams));
+        $this->element->setSymbol('USD');
+        $this->assertEquals('USD', $this->element->getSymbol());
+        $this->assertEquals('USD', $this->element->dijitParams['symbol']);
+    }
+
+    public function testSymbolMutatorShouldCastToStringAndUppercaseAndLimitTo3Chars()
+    {
+        $this->element->setSymbol('usdollar');
+        $this->assertEquals('USD', $this->element->getSymbol());
+        $this->assertEquals('USD', $this->element->dijitParams['symbol']);
+    }
+
+    /**
+     * @expectedException Zend_Form_Element_Exception
+     */
+    public function testSymbolMutatorShouldRaiseExceptionWhenFewerThan3CharsProvided()
+    {
+        $this->element->setSymbol('$');
     }
 
     public function testShouldRenderCurrencyTextBoxDijit()

@@ -108,6 +108,71 @@ class Zend_Dojo_Form_Element_TimeTextBoxTest extends PHPUnit_Framework_TestCase
         return $element;
     }
 
+    public function testShouldExtendDateTextBox()
+    {
+        $this->assertTrue($this->element instanceof Zend_Dojo_Form_Element_DateTextBox);
+    }
+
+    public function testTimePatternAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getTimePattern());
+        $this->assertFalse(array_key_exists('timePattern', $this->element->dijitParams));
+        $this->element->setTimePattern('h:mm a');
+        $this->assertEquals('h:mm a', $this->element->getTimePattern());
+        $this->assertEquals('h:mm a', $this->element->dijitParams['timePattern']);
+    }
+
+    public function testClickableIncrementAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getClickableIncrement());
+        $this->assertFalse(array_key_exists('clickableIncrement', $this->element->dijitParams));
+        $this->element->setClickableIncrement('T00:15:00');
+        $this->assertEquals('T00:15:00', $this->element->getClickableIncrement());
+        $this->assertEquals('T00:15:00', $this->element->dijitParams['clickableIncrement']);
+    }
+
+    /**
+     * @expectedException Zend_Form_Element_Exception
+     */
+    public function testClickableIncrementMutatorShouldRaiseExceptionOnInvalidFormat()
+    {
+        $this->element->setClickableIncrement('en-US');
+    }
+
+    public function testVisibleIncrementAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getVisibleIncrement());
+        $this->assertFalse(array_key_exists('visibleIncrement', $this->element->dijitParams));
+        $this->element->setVisibleIncrement('T00:15:00');
+        $this->assertEquals('T00:15:00', $this->element->getVisibleIncrement());
+        $this->assertEquals('T00:15:00', $this->element->dijitParams['visibleIncrement']);
+    }
+
+    /**
+     * @expectedException Zend_Form_Element_Exception
+     */
+    public function testVisibleIncrementMutatorShouldRaiseExceptionOnInvalidFormat()
+    {
+        $this->element->setVisibleIncrement('en-US');
+    }
+
+    public function testVisibleRangeAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getVisibleRange());
+        $this->assertFalse(array_key_exists('visibleRange', $this->element->dijitParams));
+        $this->element->setVisibleRange('T00:15:00');
+        $this->assertEquals('T00:15:00', $this->element->getVisibleRange());
+        $this->assertEquals('T00:15:00', $this->element->dijitParams['visibleRange']);
+    }
+
+    /**
+     * @expectedException Zend_Form_Element_Exception
+     */
+    public function testVisibleRangeMutatorShouldRaiseExceptionOnInvalidFormat()
+    {
+        $this->element->setVisibleRange('en-US');
+    }
+
     public function testShouldRenderTimeTextBoxDijit()
     {
         $html = $this->element->render();

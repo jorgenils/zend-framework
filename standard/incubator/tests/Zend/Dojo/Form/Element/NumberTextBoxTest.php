@@ -108,6 +108,59 @@ class Zend_Dojo_Form_Element_NumberTextBoxTest extends PHPUnit_Framework_TestCas
         return $element;
     }
 
+    public function testLocaleAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getLocale());
+        $this->assertFalse(array_key_exists('locale', $this->element->dijitParams));
+        $this->element->setLocale('en-US');
+        $this->assertEquals('en-US', $this->element->getLocale());
+        $this->assertEquals('en-US', $this->element->dijitParams['locale']);
+    }
+
+    public function testPatternAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getPattern());
+        $this->assertFalse(array_key_exists('pattern', $this->element->dijitParams));
+        $this->element->setPattern('###0.#####');
+        $this->assertEquals('###0.#####', $this->element->getPattern());
+        $this->assertEquals('###0.#####', $this->element->dijitParams['pattern']);
+    }
+
+    public function testTypeAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getType());
+        $this->assertFalse(array_key_exists('type', $this->element->dijitParams));
+        $this->element->setType('percent');
+        $this->assertEquals('percent', $this->element->getType());
+        $this->assertEquals('percent', $this->element->dijitParams['type']);
+    }
+
+    /**
+     * @expectedException Zend_Form_Element_Exception
+     */
+    public function testTypeMutatorShouldThrowExceptionWithInvalidType()
+    {
+        $this->element->setType('foobar');
+    }
+
+    public function testPlacesAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getPlaces());
+        $this->assertFalse(array_key_exists('places', $this->element->dijitParams));
+        $this->element->setPlaces(3);
+        $this->assertEquals(3, $this->element->getPlaces());
+        $this->assertEquals(3, $this->element->dijitParams['places']);
+    }
+
+    public function testStrictAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertFalse($this->element->getStrict());
+        $this->assertFalse(array_key_exists('strict', $this->element->dijitParams));
+        $this->element->setStrict(true);
+        $this->assertTrue($this->element->getStrict());
+        $this->assertTrue($this->element->dijitParams['strict']);
+    }
+
     public function testShouldRenderNumberTextBoxDijit()
     {
         $html = $this->element->render();

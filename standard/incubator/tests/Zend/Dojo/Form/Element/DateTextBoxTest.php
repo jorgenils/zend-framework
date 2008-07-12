@@ -108,6 +108,78 @@ class Zend_Dojo_Form_Element_DateTextBoxTest extends PHPUnit_Framework_TestCase
         return $element;
     }
 
+    public function testAmPmAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertFalse($this->element->getAmPm());
+        $this->assertFalse(array_key_exists('am,pm', $this->element->dijitParams));
+        $this->element->setAmPm(true);
+        $this->assertTrue($this->element->getAmPm());
+        $this->assertTrue(array_key_exists('am,pm', $this->element->dijitParams));
+        $this->assertTrue($this->element->dijitParams['am,pm']);
+    }
+
+    public function testStrictAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertFalse($this->element->getStrict());
+        $this->assertFalse(array_key_exists('strict', $this->element->dijitParams));
+        $this->element->setStrict(true);
+        $this->assertTrue($this->element->getStrict());
+        $this->assertTrue(array_key_exists('strict', $this->element->dijitParams));
+        $this->assertTrue($this->element->dijitParams['strict']);
+    }
+
+    public function testLocaleAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getLocale());
+        $this->assertFalse(array_key_exists('locale', $this->element->dijitParams));
+        $this->element->setLocale('en-US');
+        $this->assertEquals('en-US', $this->element->getLocale());
+        $this->assertEquals('en-US', $this->element->dijitParams['locale']);
+    }
+
+    public function testFormatLengthAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getFormatLength());
+        $this->assertFalse(array_key_exists('formatLength', $this->element->dijitParams));
+        $this->element->setFormatLength('long');
+        $this->assertEquals('long', $this->element->getFormatLength());
+        $this->assertEquals('long', $this->element->dijitParams['formatLength']);
+    }
+
+    /**
+     * @expectedException Zend_Form_Element_Exception
+     */
+    public function testFormatLengthMutatorShouldThrowExceptionWithInvalidFormatLength()
+    {
+        $this->element->setFormatLength('foobar');
+    }
+
+    public function testSelectorAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getSelector());
+        $this->assertFalse(array_key_exists('selector', $this->element->dijitParams));
+        $this->element->setSelector('time');
+        $this->assertEquals('time', $this->element->getSelector());
+        $this->assertEquals('time', $this->element->dijitParams['selector']);
+    }
+
+    /**
+     * @expectedException Zend_Form_Element_Exception
+     */
+    public function testSelectorMutatorShouldThrowExceptionWithInvalidSelector()
+    {
+        $this->element->setSelector('foobar');
+    }
+
+    public function testDatePatternAccessorsShouldProxyToDijitParams()
+    {
+        $this->assertNull($this->element->getDatePattern());
+        $this->assertFalse(array_key_exists('datePattern', $this->element->dijitParams));
+        $this->element->setDatePattern('EEE, MMM d, Y');
+        $this->assertEquals('EEE, MMM d, Y', $this->element->getDatePattern());
+        $this->assertEquals('EEE, MMM d, Y', $this->element->dijitParams['datePattern']);
+    }
+
     public function testShouldRenderDateTextBoxDijit()
     {
         $html = $this->element->render();

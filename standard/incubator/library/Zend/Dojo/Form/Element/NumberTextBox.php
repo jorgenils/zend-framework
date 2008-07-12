@@ -39,4 +39,135 @@ class Zend_Dojo_Form_Element_NumberTextBox extends Zend_Dojo_Form_Element_Valida
      * @var string
      */
     public $helper = 'NumberTextBox';
+
+    /**
+     * Allowed numeric type formats
+     * @var array
+     */
+    protected $_allowedTypes = array(
+        'decimal',
+        'scientific',
+        'percent',
+        'currency',
+    );
+
+    /**
+     * Set locale
+     *
+     * @param  string $locale
+     * @return Zend_Dojo_Form_Element_NumberTextBox
+     */
+    public function setLocale($locale)
+    {
+        $this->setDijitParam('locale', (string) $locale);
+        return $this;
+    }
+
+    /**
+     * Retrieve locale
+     *
+     * @return string|null
+     */
+    public function getLocale()
+    {
+        return $this->getDijitParam('locale');
+    }
+
+    /**
+     * Set numeric format pattern
+     *
+     * @param  string $pattern
+     * @return Zend_Dojo_Form_Element_NumberTextBox
+     */
+    public function setPattern($pattern)
+    {
+        $this->setDijitParam('pattern', (string) $pattern);
+        return $this;
+    }
+
+    /**
+     * Retrieve numeric format pattern
+     *
+     * @return string|null
+     */
+    public function getPattern()
+    {
+        return $this->getDijitParam('pattern');
+    }
+
+    /**
+     * Set numeric format type
+     *
+     * @see    $_allowedTypes
+     * @param  string $type
+     * @return Zend_Dojo_Form_Element_NumberTextBox
+     */
+    public function setType($type)
+    {
+        $type = strtolower($type);
+        if (!in_array($type, $this->_allowedTypes)) {
+            require_once 'Zend/Form/Element/Exception.php';
+            throw new Zend_Form_Element_Exception(sprintf('Invalid numeric type "%s" specified', $type));
+        }
+
+        $this->setDijitParam('type', $type);
+        return $this;
+    }
+
+    /**
+     * Retrieve type
+     *
+     * @return string|null
+     */
+    public function getType()
+    {
+        return $this->getDijitParam('type');
+    }
+
+    /**
+     * Set decimal places
+     *
+     * @param  int $places
+     * @return Zend_Dojo_Form_Element_NumberTextBox
+     */
+    public function setPlaces($places)
+    {
+        $this->setDijitParam('places', (int) $places);
+        return $this;
+    }
+
+    /**
+     * Retrieve decimal places
+     *
+     * @return int|null
+     */
+    public function getPlaces()
+    {
+        return $this->getDijitParam('places');
+    }
+
+    /**
+     * Set strict flag
+     *
+     * @param  bool $strict
+     * @return Zend_Dojo_Form_Element_NumberTextBox
+     */
+    public function setStrict($flag)
+    {
+        $this->setDijitParam('strict', (bool) $flag);
+        return $this;
+    }
+
+    /**
+     * Retrieve strict flag
+     *
+     * @return bool
+     */
+    public function getStrict()
+    {
+        if (!$this->hasDijitParam('strict')) {
+            return false;
+        }
+        return $this->getDijitParam('strict');
+    }
 }

@@ -19,20 +19,20 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_Dojo_Form_Element_ValidationTextBox */
-require_once 'Zend/Dojo/Form/Element/ValidationTextBox.php';
+/** Zend_Dojo_Form_Element_NumberTextBox */
+require_once 'Zend/Dojo/Form/Element/NumberTextBox.php';
 
 /**
  * CurrencyTextBox dijit
  * 
- * @uses       Zend_Dojo_Form_Element_ValidationTextBox
+ * @uses       Zend_Dojo_Form_Element_NumberTextBox
  * @package    Zend_Dojo
  * @subpackage Form_Element
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id: $
  */
-class Zend_Dojo_Form_Element_CurrencyTextBox extends Zend_Dojo_Form_Element_ValidationTextBox
+class Zend_Dojo_Form_Element_CurrencyTextBox extends Zend_Dojo_Form_Element_NumberTextBox
 {
     /**
      * Use CurrencyTextBox dijit view helper
@@ -44,7 +44,7 @@ class Zend_Dojo_Form_Element_CurrencyTextBox extends Zend_Dojo_Form_Element_Vali
      * Set currency
      *
      * @param  string $currency
-     * @return Zend_Dojo_Form_Element_ValidationTextBox
+     * @return Zend_Dojo_Form_Element_CurrencyTextBox
      */
     public function setCurrency($currency)
     {
@@ -60,5 +60,64 @@ class Zend_Dojo_Form_Element_CurrencyTextBox extends Zend_Dojo_Form_Element_Vali
     public function getCurrency()
     {
         return $this->getDijitParam('currency');
+    }
+
+    /**
+     * Set currency symbol
+     *
+     * Casts to string, uppercases, and trims to three characters.
+     *
+     * @param  string $symbol
+     * @return Zend_Dojo_Form_Element_CurrencyTextBox
+     */
+    public function setSymbol($symbol)
+    {
+        $symbol = strtoupper((string) $symbol);
+        $length = strlen($symbol);
+        if (3 > $length) {
+            require_once 'Zend/Form/Element/Exception.php';
+            throw new Zend_Form_Element_Exception('Invalid symbol provided; please provide ISO 4217 alphabetic currency code');
+        }
+        if (3 < $length) {
+            $symbol = substr($symbol, 0, 3);
+        }
+
+        $this->setDijitParam('symbol', $symbol);
+        return $this;
+    }
+
+    /**
+     * Retrieve symbol
+     *
+     * @return string|null
+     */
+    public function getSymbol()
+    {
+        return $this->getDijitParam('symbol');
+    }
+
+    /**
+     * Set whether currency is fractional
+     *
+     * @param  bool $fractional
+     * @return Zend_Dojo_Form_Element_CurrencyTextBox
+     */
+    public function setFractional($fractional)
+    {
+        $this->setDijitParam('fractional', (bool) $fractional);
+        return $this;
+    }
+
+    /**
+     * Get whether or not to present fractional values
+     * 
+     * @return bool
+     */
+    public function getFractional()
+    {
+        if (!$this->hasDijitParam('fractional')) {
+            return false;
+        }
+        return $this->getDijitParam('fractional');
     }
 }
