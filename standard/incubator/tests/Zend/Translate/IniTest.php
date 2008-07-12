@@ -1,11 +1,16 @@
 <?php
-
 /**
  * @category   Zend
  * @package    Zend_Translate
  * @subpackage UnitTests
  */
 
+// Call Zend_Translate_IniTest::main() if this source file is executed directly.
+if (!defined("PHPUnit_MAIN_METHOD")) {
+    define("PHPUnit_MAIN_METHOD", "Zend_Translate_IniTest::main");
+}
+
+require_once dirname(__FILE__) . '/../../TestHelper.php';
 
 /**
  * Zend_Translate_Adapter_Ini
@@ -25,6 +30,17 @@ require_once 'PHPUnit/Framework/TestCase.php';
  */
 class Zend_Translate_IniTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * Runs the test methods of this class.
+     *
+     * @return void
+     */
+    public static function main()
+    {
+        $suite  = new PHPUnit_Framework_TestSuite("Zend_Translate_IniTest");
+        $result = PHPUnit_TextUI_TestRunner::run($suite);
+    }
+
     public function testCreate()
     {
         $adapter = new Zend_Translate_Adapter_Ini(dirname(__FILE__) . '/_files/translation.ini');
@@ -126,4 +142,9 @@ class Zend_Translate_IniTest extends PHPUnit_Framework_TestCase
         $this->assertTrue( $adapter->isAvailable($locale));
         $this->assertFalse($adapter->isAvailable('sr'   ));
     }
+}
+
+// Call Zend_Translate_IniTest::main() if this source file is executed directly.
+if (PHPUnit_MAIN_METHOD == "Zend_Translate_IniTest::main") {
+    Zend_Translate_IniTest::main();
 }
