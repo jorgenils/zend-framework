@@ -29,6 +29,7 @@ if (!defined('PHPUnit_MAIN_METHOD')) {
     define('PHPUnit_MAIN_METHOD', 'Zend_Dojo_AllTests::main');
 }
 
+require_once 'Zend/Dojo/DojoTest.php';
 require_once 'Zend/Dojo/DataTest.php';
 require_once 'Zend/Dojo/Form/AllTests.php';
 require_once 'Zend/Dojo/View/AllTests.php';
@@ -51,6 +52,7 @@ class Zend_Dojo_AllTests
     {
         $suite = new PHPUnit_Framework_TestSuite('Zend Framework - Zend_Dojo');
 
+        $suite->addTestSuite('Zend_Dojo_DojoTest');
         $suite->addTestSuite('Zend_Dojo_DataTest');
         $suite->addTest(Zend_Dojo_Form_AllTests::suite());
         $suite->addTest(Zend_Dojo_View_AllTests::suite());

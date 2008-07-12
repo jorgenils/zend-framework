@@ -1,5 +1,5 @@
 <?php
-// Call Zend_Dojo_FormTest::main() if this source file is executed directly.
+// Call Zend_Dojo_Form_FormTest::main() if this source file is executed directly.
 if (!defined("PHPUnit_MAIN_METHOD")) {
     define("PHPUnit_MAIN_METHOD", "Zend_Dojo_Form_FormTest::main");
 }
@@ -24,7 +24,7 @@ class Zend_Dojo_Form_FormTest extends PHPUnit_Framework_TestCase
      */
     public static function main()
     {
-        $suite  = new PHPUnit_Framework_TestSuite("Zend_Dojo_FormTest");
+        $suite  = new PHPUnit_Framework_TestSuite("Zend_Dojo_Form_FormTest");
         $result = PHPUnit_TextUI_TestRunner::run($suite);
     }
 
@@ -104,7 +104,7 @@ class Zend_Dojo_Form_FormTest extends PHPUnit_Framework_TestCase
     }
 }
 
-// Call Zend_Dojo_FormTest::main() if this source file is executed directly.
+// Call Zend_Dojo_Form_FormTest::main() if this source file is executed directly.
 if (PHPUnit_MAIN_METHOD == "Zend_Dojo_Form_FormTest::main") {
     Zend_Dojo_Form_FormTest::main();
 }
