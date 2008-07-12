@@ -180,11 +180,11 @@ abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Dijit
             unset($params['container']);
         }
 
-        if (array_key_exists('list', $params)) {
-            $listParams = $params['list'];
-            unset($params['list']);
+        if (array_key_exists('labels', $params)) {
+            $labelsParams = $params['labels'];
+            unset($params['labels']);
         } else {
-            $listParams = $params;
+            $labelsParams = $params;
         }
 
         if (null === $containerParams) {
@@ -197,11 +197,11 @@ abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Dijit
             unset($attribs['container']);
         }
 
-        if (array_key_exists('list', $attribs)) {
-            $listAttribs = $attribs['list'];
-            unset($attribs['list']);
+        if (array_key_exists('labels', $attribs)) {
+            $labelsAttribs = $attribs['labels'];
+            unset($attribs['labels']);
         } else {
-            $listAttribs = $attribs;
+            $labelsAttribs = $attribs;
         }
 
         if (null === $containerAttribs) {
@@ -209,9 +209,9 @@ abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Dijit
         }
 
         $containerParams['container'] = $position;
-        $listParams['container']      = $position;
+        $labelsParams['container']    = $position;
 
-        $labelList = $this->_prepareLabelsList($id, $listParams, $listAttribs, $labels);
+        $labelList = $this->_prepareLabelsList($id, $labelsParams, $labelsAttribs, $labels);
 
         return $this->_createLayoutContainer($id, $labelList, $containerParams, $containerAttribs, $dijit);
     }
@@ -231,12 +231,6 @@ abstract class Zend_Dojo_View_Helper_Slider extends Zend_Dojo_View_Helper_Dijit
         $dijit = 'dijit.form.' . ucfirst($this->_sliderType) . 'RuleLabels';
         $attribs = $this->_prepareDijit($attribs, $params, 'layout', $dijit);
 
-        $content = '<ol' . $this->_htmlAttribs($attribs) . '>';
-        foreach ($labels as $label) {
-            $content .= '<li>' . $label . '</li>';
-        }
-        $content .= '</ol>';
-
-        return $content;
+        return $this->view->htmlList($labels, true, $attribs);
     }
 }

@@ -654,7 +654,7 @@ echo $view->dateTextBox(
                             </para></listitem>
 
                             <listitem><para>
-                                <emphasis>list</emphasis> (optional):
+                                <emphasis>labels</emphasis> (optional):
                                 array of parameters and attributes for the
                                 labels list container.
                             </para></listitem>
@@ -663,7 +663,10 @@ echo $view->dateTextBox(
 
                     <listitem><para>
                         <emphasis>attribs</emphasis> (optional): HTML
-                        attributes to use with the rules/labels.
+                        attributes to use with the rules/labels. This should
+                        follow the <code>params</code> option format and be an
+                        associative array with the keys 'container' and
+                        'labels'.
                     </para></listitem>
                 </itemizedlist>
 
@@ -692,7 +695,7 @@ echo $view->horizontalSlider(
                 'container' => array(
                     'style' => 'height:1.2em; font-size=75%;color:gray;',
                 ),
-                'list' => array(
+                'labels' => array(
                     'style' => 'height:1em; font-size=75%;color:gray;',
                 ),
             ),
@@ -708,7 +711,7 @@ echo $view->horizontalSlider(
                 'container' => array(
                     'style' => 'height:1.2em; font-size=75%;color:gray;',
                 ),
-                'list' => array(
+                'labels' => array(
                     'style' => 'height:1em; font-size=75%;color:gray;',
                 ),
             ),

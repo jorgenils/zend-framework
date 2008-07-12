@@ -117,7 +117,7 @@ class Zend_Dojo_View_Helper_HorizontalSliderTest extends PHPUnit_Framework_TestC
                         'container' => array(
                             'style' => 'height:1.2em; font-size=75%;color:gray;',
                         ),
-                        'list' => array(
+                        'labels' => array(
                             'style' => 'height:1em; font-size=75%;color:gray;',
                         ),
                     ),
@@ -130,7 +130,7 @@ class Zend_Dojo_View_Helper_HorizontalSliderTest extends PHPUnit_Framework_TestC
                         '100%',
                     ),
                     'attribs' => array(
-                        'list' => array(
+                        'labels' => array(
                             'style' => 'height:1em; font-size=75%;color:gray;',
                         ),
                     ),
@@ -148,7 +148,7 @@ class Zend_Dojo_View_Helper_HorizontalSliderTest extends PHPUnit_Framework_TestC
                         'container' => array(
                             'style' => 'height:1.2em; font-size=75%;color:gray;',
                         ),
-                        'list' => array(
+                        'labels' => array(
                             'style' => 'height:1em; font-size=75%;color:gray;',
                         ),
                     ),
@@ -161,7 +161,7 @@ class Zend_Dojo_View_Helper_HorizontalSliderTest extends PHPUnit_Framework_TestC
                         '100%',
                     ),
                     'attribs' => array(
-                        'list' => array(
+                        'labels' => array(
                             'style' => 'height:1em; font-size=75%;color:gray;',
                         ),
                     ),
@@ -245,7 +245,7 @@ class Zend_Dojo_View_Helper_HorizontalSliderTest extends PHPUnit_Framework_TestC
                     ),
                     'params' => array(
                         'required' => true,
-                        'list' => array(
+                        'labels' => array(
                             'minimum' => 5,
                         )
                     ),

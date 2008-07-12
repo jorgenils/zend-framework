@@ -116,7 +116,7 @@ class Zend_Dojo_View_Helper_VerticalSliderTest extends PHPUnit_Framework_TestCas
                         'container' => array(
                             'style' => 'height:1.2em; font-size=75%;color:gray;',
                         ),
-                        'list' => array(
+                        'labels' => array(
                             'style' => 'height:1em; font-size=75%;color:gray;',
                         ),
                     ),
@@ -129,7 +129,7 @@ class Zend_Dojo_View_Helper_VerticalSliderTest extends PHPUnit_Framework_TestCas
                         '100%',
                     ),
                     'attribs' => array(
-                        'list' => array(
+                        'labels' => array(
                             'style' => 'height:1em; font-size=75%;color:gray;',
                         ),
                     ),
@@ -147,7 +147,7 @@ class Zend_Dojo_View_Helper_VerticalSliderTest extends PHPUnit_Framework_TestCas
                         'container' => array(
                             'style' => 'height:1.2em; font-size=75%;color:gray;',
                         ),
-                        'list' => array(
+                        'labels' => array(
                             'style' => 'height:1em; font-size=75%;color:gray;',
                         ),
                     ),
@@ -160,7 +160,7 @@ class Zend_Dojo_View_Helper_VerticalSliderTest extends PHPUnit_Framework_TestCas
                         '100%',
                     ),
                     'attribs' => array(
-                        'list' => array(
+                        'labels' => array(
                             'style' => 'height:1em; font-size=75%;color:gray;',
                         ),
                     ),
