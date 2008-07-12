@@ -82,3 +82,4 @@ class Zend_Controller_Action_Helper_Acl extends Zend_Controller_Action_Helper_Ab
         $this->_aclPlugin->denyAccess();
     }
 }
+
