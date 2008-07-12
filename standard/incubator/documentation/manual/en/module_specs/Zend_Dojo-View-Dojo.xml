@@ -149,7 +149,7 @@ $this->dojo()->enable()
         </para>
 
         <example id="zend.dojo.view.dojo.declarative.usage">
-            <title>Specifying Declarative and Programmatic Usage</title>
+            <title>Specifying Declarative and Programmatic Dojo Usage</title>
 
             <para>
                 To specify declarative usage, simply call the static
