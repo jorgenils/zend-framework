@@ -48,6 +48,14 @@
                         <code>$id</code> will be used for its name.
                 </para></listitem>
             </itemizedlist>
+
+            <para>
+                If you pass no arguments to a dijit layout view helper, the
+                helper itself will be returned. This allows you to capture
+                content, which is often an easier way to pass content to the
+                layout container. Examples of this functionality will be shown
+                later in this section.
+            </para>
         </listitem>
 
         <listitem>
@@ -150,9 +158,13 @@ $view->addPrefixPath('Zend/Dojo/View/Helper', 'Zend_Dojo_View_Helper');
         </para>
 
         <para>
-            The following dijit layout elements are available. All have the
-            signature <code>string ($id, $content = '', array $params =
-                array(), array $attribs = array())</code>.
+            All dijit layout elements have the
+            signature <code>string ($id = null, $content = '', array $params =
+                array(), array $attribs = array())</code>. In all caess, if you
+            pass no arguments, the helper object itself will be returned. This
+            gives you access to the <code>captureStart()</code> and
+            <code>captureEnd()</code> methods, which allow you to capture
+            content instead of passing it to the layout container.
         </para>
 
         <itemizedlist>
@@ -305,47 +317,80 @@ $view->addPrefixPath('Zend/Dojo/View/Helper', 'Zend_Dojo_View_Helper');
             </listitem>
         </itemizedlist>
 
+        <para>
+            The following capture methods are available for all layout
+            containers:
+        </para>
+
+        <itemizedlist>
+            <listitem>
+                <para>
+                    <code>captureStart($id, array $params = array(), array $attribs = array())</code>: 
+                    begin capturing content to include in a container.
+                    <code>$params</code> refers to the dijit params to use with
+                    the container, while <code>$attribs</code> refer to any
+                    general HTML attributes to use.
+                </para>
+
+                <para>
+                    Containers may be nested when capturing, <emphasis>so long
+                    as no ids are duplicated</emphasis>.
+                </para>
+            </listitem>
+
+            <listitem>
+                <para>
+                    <code>captureEnd($id)</code>: 
+                    finish capturing content to include in a container.
+                    <code>$id</code> should refer to an id previously used with
+                    a <code>captureStart()</code> call. Returns a string
+                    representing the container and its contents, just as if
+                    you'd simply passed content to the helper itself.
+                </para>
+            </listitem>
+        </itemizedlist>
+
         <example id="zend.dojo.view.dijit.layout.borderexample">
             <title>BorderContainer layout dijit example</title>
 
             <para>
-                BorderContainers are especially useful for achieving complex
+                BorderContainers, particularly when coupled with the ability to
+                capture content, are especially useful for achieving complex
                 layout effects.
             </para>
 
             <programlisting role="php"><![CDATA[
-$menuPane   = $view->contentPane(
+$view->borderContainer()->captureStart('masterLayout', array('design' => 'headline'));
+
+echo $view->contentPane(
     'menuPane',
     'This is the menu pane',
     array('region' => 'top'),
     array('style' => 'background-color: darkblue;')
 );
-$navPane    = $view->contentPane(
+
+echo  $view->contentPane(
     'navPane',
     'This is the navigation pane',
     array('region' => 'left'),
     array('style' => 'width: 200px; background-color: lightblue;')
 );
-$mainPane   = $view->contentPane(
+
+echo $view->contentPane(
     'mainPane',
     'This is the main content pane area',
     array('region' => 'center'),
     array('style' => 'background-color: white;')
 );
-$statusPane = $view->contentPane(
+
+echo $view->contentPane(
     'statusPane',
     'Status area',
     array('region' => 'bottom'),
     array('style' => 'background-color: lightgray;')
 );
 
-echo $view->borderContainer(
-    'masterLayout',
-    $menuPane . $navPane . $mainPane . $statusPane,
-    array(
-        'design' => 'headline',
-    )
-);
+echo $view->borderContainer()->captureEnd('masterLayout');
 ]]></programlisting>
         </example>
     </sect3>

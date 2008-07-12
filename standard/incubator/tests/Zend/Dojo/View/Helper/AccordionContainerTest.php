@@ -119,6 +119,50 @@ class Zend_Dojo_View_Helper_AccordionContainerTest extends PHPUnit_Framework_Tes
         $this->assertNotRegexp('/<div[^>]*(dojoType="dijit.layout.AccordionContainer")/', $html);
         $this->assertNotNull($this->view->dojo()->getDijit('container'));
     }
+
+    public function testShouldAllowCapturingNestedContent()
+    {
+        $this->helper->captureStart('foo', array(), array('style' => 'height: 200px; width: 100px;'));
+        $this->view->accordionPane()->captureStart('bar', array('title' => 'Captured Pane'));
+        echo "Captured content started\n";
+        $this->view->accordionPane()->captureStart('baz', array('title' => 'Nested Pane'));
+        echo 'Nested Content';
+        echo $this->view->accordionPane()->captureEnd('baz');
+        echo "Captured content ended\n";
+        echo $this->view->accordionPane()->captureEnd('bar');
+        $html = $this->helper->captureEnd('foo');
+        $this->assertRegexp('/<div[^>]*(id="bar")/', $html);
+        $this->assertRegexp('/<div[^>]*(id="baz")/', $html);
+        $this->assertRegexp('/<div[^>]*(id="foo")/', $html);
+        $this->assertEquals(2, substr_count($html, 'dijit.layout.AccordionPane'));
+        $this->assertEquals(1, substr_count($html, 'dijit.layout.AccordionContainer'));
+        $this->assertContains('started', $html);
+        $this->assertContains('ended', $html);
+        $this->assertContains('Nested Content', $html);
+    }
+
+    /**
+     * @expectedException Zend_Dojo_View_Exception
+     */
+    public function testCapturingShouldRaiseErrorWhenDuplicateIdDiscovered()
+    {
+        $this->helper->captureStart('foo', array(), array('style' => 'height: 200px; width: 100px;'));
+        $this->view->accordionPane()->captureStart('bar', array('title' => 'Captured Pane'));
+        $this->view->accordionPane()->captureStart('bar', array('title' => 'Captured Pane'));
+        echo 'Captured Content';
+        echo $this->view->accordionPane()->captureEnd('bar');
+        echo $this->view->accordionPane()->captureEnd('bar');
+        $html = $this->helper->captureEnd('foo');
+    }
+
+    /**
+     * @expectedException Zend_Dojo_View_Exception
+     */
+    public function testCapturingShouldRaiseErrorWhenNonexistentIdPassedToEnd()
+    {
+        $this->helper->captureStart('foo', array(), array('style' => 'height: 200px; width: 100px;'));
+        $html = $this->helper->captureEnd('bar');
+    }
 }
 
 // Call Zend_Dojo_View_Helper_AccordionContainerTest::main() if this source file is executed directly.
