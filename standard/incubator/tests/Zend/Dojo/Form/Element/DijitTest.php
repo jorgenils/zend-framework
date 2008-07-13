@@ -137,6 +137,15 @@ class Zend_Dojo_Form_Element_DijitTest extends PHPUnit_Framework_TestCase
         $html = $this->element->render();
         $this->assertContains('dojoType="dijit.form.TextBox"', $html);
     }
+
+    public function testElementShouldDojoEnableViewObject()
+    {
+        $this->element->setView(new Zend_View);
+        $view = $this->element->getView();
+        $loader = $view->getPluginLoader('helper');
+        $paths = $loader->getPaths('Zend_Dojo_View_Helper');
+        $this->assertTrue(is_array($paths));
+    }
 }
 
 // Call Zend_Dojo_Form_Element_DijitTest::main() if this source file is executed directly.

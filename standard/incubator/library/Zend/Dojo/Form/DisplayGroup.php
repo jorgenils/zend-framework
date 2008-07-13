@@ -35,12 +35,6 @@ require_once 'Zend/Form/DisplayGroup.php';
 class Zend_Dojo_Form_DisplayGroup extends Zend_Form_DisplayGroup
 {
     /**
-     * Has the dojo view helper path been registered?
-     * @var bool
-     */
-    protected $_dojoViewPathRegistered = false;
-
-    /**
      * Constructor
      * 
      * @param  string $name
@@ -55,19 +49,20 @@ class Zend_Dojo_Form_DisplayGroup extends Zend_Form_DisplayGroup
     }
 
     /**
-     * Get view 
+     * Set the view object
+     *
+     * Ensures that the view object has the dojo view helper path set.
      * 
-     * @return Zend_View_Interface
+     * @param  Zend_View_Interface $view 
+     * @return Zend_Dojo_Form_Element_Dijit
      */
-    public function getView()
+    public function setView(Zend_View_Interface $view = null)
     {
-        $view = parent::getView();
-        if (!$this->_dojoViewPathRegistered) {
+        if (null !== $view) {
             if (false === $view->getPluginLoader('helper')->getPaths('Zend_Dojo_View_Helper')) {
                 $view->addHelperPath('Zend/Dojo/View/Helper', 'Zend_Dojo_View_Helper');
             }
-            $this->_dojoViewPathRegistered = true;
         }
-        return $view;
+        return parent::setView($view);
     }
 }

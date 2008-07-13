@@ -1,5 +1,73 @@
 <sect2 id="zend.dojo.form.elements">
     <title>Dijit-Specific Form Elements</title>
+
+    <para>
+        Each form dijit for which a view helper is provided has a corresponding
+        <code>Zend_Form</code> element. All of them have the following methods
+        available for manipulating dijit parameters:
+    </para>
+
+    <itemizedlist>
+        <listitem><para>
+                <code>setDijitParam($key, $value)</code>: set a single dijit
+                parameter. If the dijit parameter already exists, it will be
+                overwritten.
+        </para></listitem>
+
+        <listitem><para>
+                <code>setDijitParams(array $params)</code>: set several dijit
+                parameters at once. Any passed parameters matching those
+                already present will overwrite.
+        </para></listitem>
+
+        <listitem><para>
+                <code>hasDijitParam($key)</code>: whether or not a given dijit
+                parameter is defined and present.
+        </para></listitem>
+
+        <listitem><para>
+                <code>getDijitParam($key)</code>: retrieve the given dijit
+                parameter. If not available, a null value is returned.
+        </para></listitem>
+
+        <listitem><para>
+                <code>getDijitParams()</code>: retrieve all dijit parameters.
+        </para></listitem>
+
+        <listitem><para>
+                <code>removeDijitParam($key)</code>: remove the given dijit
+                parameter. 
+        </para></listitem>
+
+        <listitem><para>
+                <code>clearDijitParams()</code>: clear all currently defined
+                dijit parameters. 
+        </para></listitem>
+    </itemizedlist>
+
+    <para>
+        Dijit parameters are stored in the <code>dijitParams</code> public
+        property. Thus, you can dijit-enable an existing form element simply by
+        setting this property on the element; you simply will not have the
+        above accessors to facilitate manipulating the parameters.
+    </para>
+
+    <para>
+        Additionally, dijit-specific elements implement a different list of
+        decorators, corresponding to the following:
+    </para>
+
+    <programlisting role="php"><![CDATA[
+$element->addDecorator('DijitElement')
+        ->addDecorator('Errors')
+        ->addDecorator('HtmlTag', array('tag' => 'dd'))
+        ->addDecorator('Label', array('tag' => 'dt'));
+]]></programlisting>
+
+    <para>
+        In effect, the DijitElement decorator is used in place of the standard
+        ViewHelper decorator.
+    </para>
 </sect2>
 <!--
 vim:se ts=4 sw=4 et:
