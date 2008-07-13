@@ -29,15 +29,6 @@
  */
 class Zend_File_Transfer
 {
-    const ERR_INI_SIZE   = 1;
-    const ERR_FORM_SIZE  = 2;
-    const ERR_PARTITIAL  = 3;
-    const ERR_NO_FILE    = 4;
-    const ERR_NO_TMP_DIR = 6;
-    const ERR_CANT_WRITE = 7;
-    const ERR_EXTENSION  = 8;
-    const ERR_ATTACK     = 100;
-
     /**
      * Creates a file processing handler
      *

@@ -26,9 +26,9 @@
 require_once dirname(__FILE__) . '/../../../TestHelper.php';
 
 /**
- * @see Zend_Validate_File_Size
+ * @see Zend_Validate_File_Count
  */
-require_once 'Zend/Validate/File/Size.php';
+require_once 'Zend/Validate/File/Count.php';
 
 /**
  * @category   Zend
@@ -37,7 +37,7 @@ require_once 'Zend/Validate/File/Size.php';
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Validate_File_SizeTest extends PHPUnit_Framework_TestCase
+class Zend_Validate_File_CountTest extends PHPUnit_Framework_TestCase
 {
     /**
      * Ensures that the validator follows expected behavior
@@ -47,23 +47,25 @@ class Zend_Validate_File_SizeTest extends PHPUnit_Framework_TestCase
     public function testBasic()
     {
         $valuesExpected = array(
-            array(0, 10000, true),
-            array(0, '10 MB', true),
-            array(0, '10MB', true),
-            array(0, '10  MB', true),
-            array(10000, 0, true),
-            array(0, 500, false),
-            array(500, 0, false)
+            array(5, null, true, true, true, true),
+            array(0, 3, true, true, true, false),
+            array(2, 3, false, true, true, false),
         );
 
         foreach ($valuesExpected as $element) {
-            $validator = new Zend_Validate_File_Size($element[0], $element[1]);
+            $validator = new Zend_Validate_File_Count($element[0], $element[1]);
             $this->assertEquals($element[2], $validator->isValid(dirname(__FILE__) . '/_files/testsize.mo'));
+            $this->assertEquals($element[3], $validator->isValid(dirname(__FILE__) . '/_files/testsize2.mo'));
+            $this->assertEquals($element[4], $validator->isValid(dirname(__FILE__) . '/_files/testsize3.mo'));
+            $this->assertEquals($element[5], $validator->isValid(dirname(__FILE__) . '/_files/testsize4.mo'));
         }
 
         foreach ($valuesExpected as $element) {
-            $validator = new Zend_Validate_File_Size(array($element[0], $element[1]));
+            $validator = new Zend_Validate_File_Count(array($element[0], $element[1]));
             $this->assertEquals($element[2], $validator->isValid(dirname(__FILE__) . '/_files/testsize.mo'));
+            $this->assertEquals($element[3], $validator->isValid(dirname(__FILE__) . '/_files/testsize2.mo'));
+            $this->assertEquals($element[4], $validator->isValid(dirname(__FILE__) . '/_files/testsize3.mo'));
+            $this->assertEquals($element[5], $validator->isValid(dirname(__FILE__) . '/_files/testsize4.mo'));
         }
     }
 
@@ -74,21 +76,21 @@ class Zend_Validate_File_SizeTest extends PHPUnit_Framework_TestCase
      */
     public function testGetMin()
     {
-        $validator = new Zend_Validate_File_Size(1, 100);
-        $this->assertEquals('1B', $validator->getMin());
+        $validator = new Zend_Validate_File_Count(1, 5);
+        $this->assertEquals(1, $validator->getMin());
 
         try {
-            $validator = new Zend_Validate_File_Size(100, 1);
+            $validator = new Zend_Validate_File_Count(5, 1);
             $this->fail("Missing exception");
         } catch (Zend_Validate_Exception $e) {
             $this->assertContains("greater than or equal", $e->getMessage());
         }
 
-        $validator = new Zend_Validate_File_Size(array(1, 100));
-        $this->assertEquals('1B', $validator->getMin());
+        $validator = new Zend_Validate_File_Count(array(1, 5));
+        $this->assertEquals(1, $validator->getMin());
 
         try {
-            $validator = new Zend_Validate_File_Size(array(100, 1));
+            $validator = new Zend_Validate_File_Count(array(5, 1));
             $this->fail("Missing exception");
         } catch (Zend_Validate_Exception $e) {
             $this->assertContains("greater than or equal", $e->getMessage());
@@ -102,9 +104,9 @@ class Zend_Validate_File_SizeTest extends PHPUnit_Framework_TestCase
      */
     public function testSetMin()
     {
-        $validator = new Zend_Validate_File_Size(1000, 10000);
+        $validator = new Zend_Validate_File_Count(1000, 10000);
         $validator->setMin(100);
-        $this->assertEquals('100B', $validator->getMin());
+        $this->assertEquals(100, $validator->getMin());
 
         try {
             $validator->setMin(20000);
@@ -121,28 +123,25 @@ class Zend_Validate_File_SizeTest extends PHPUnit_Framework_TestCase
      */
     public function testGetMax()
     {
-        $validator = new Zend_Validate_File_Size(1, 100);
-        $this->assertEquals('100B', $validator->getMax());
+        $validator = new Zend_Validate_File_Count(1, 100);
+        $this->assertEquals(100, $validator->getMax());
 
         try {
-            $validator = new Zend_Validate_File_Size(100, 1);
+            $validator = new Zend_Validate_File_Count(5, 1);
             $this->fail("Missing exception");
         } catch (Zend_Validate_Exception $e) {
             $this->assertContains("greater than or equal", $e->getMessage());
         }
 
-        $validator = new Zend_Validate_File_Size(array(1, 100000));
-        $this->assertEquals('97.66kB', $validator->getMax());
+        $validator = new Zend_Validate_File_Count(array(1, 50));
+        $this->assertEquals(50, $validator->getMax());
 
         try {
-            $validator = new Zend_Validate_File_Size(array(100, 1));
+            $validator = new Zend_Validate_File_Count(array(50, 1));
             $this->fail("Missing exception");
         } catch (Zend_Validate_Exception $e) {
             $this->assertContains("greater than or equal", $e->getMessage());
         }
-
-        $validator = new Zend_Validate_File_Size(2000);
-        $this->assertEquals('2000', $validator->getMax(false));
     }
 
     /**
@@ -152,11 +151,11 @@ class Zend_Validate_File_SizeTest extends PHPUnit_Framework_TestCase
      */
     public function testSetMax()
     {
-        $validator = new Zend_Validate_File_Size(1000, 10000);
+        $validator = new Zend_Validate_File_Count(1000, 10000);
         $validator->setMax(1000000);
-        $this->assertEquals('976.56kB', $validator->getMax());
+        $this->assertEquals(1000000, $validator->getMax());
 
         $validator->setMin(100);
-        $this->assertEquals('976.56kB', $validator->getMax());
+        $this->assertEquals(1000000, $validator->getMax());
     }
 }

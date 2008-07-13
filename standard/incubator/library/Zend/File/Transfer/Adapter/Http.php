@@ -20,7 +20,6 @@
  */
 
 require_once 'Zend/File/Transfer/Adapter/Abstract.php';
-require_once 'Zend/File/Transfer/Exception.php';
 
 /**
  * File transfer adapter class for the HTTP protocol
@@ -37,7 +36,28 @@ class Zend_File_Transfer_Adapter_Http extends Zend_File_Transfer_Adapter_Abstrac
      */
     public function __construct()
     {
-        $this->_files = $_FILES;
+        $this->_files = $this->_prepareFiles($_FILES);
+        $this->addValidators("Upload", $this->_files);
+    }
+
+    /**
+     * Sets a validator for the class, erasing all previous set
+     *
+     * @param  string|array $validator Validator to set
+     * @param  string|array $options   Options to set for this validator
+     * @param  string|array $files     Files to limit this validator to
+     * @return Zend_File_Transfer_Adapter
+     */
+    public function setValidators($validator, $options = null, $files = null)
+    {
+        $this->_validators = null;
+        foreach($this->_files as $file => $content) {
+            $this->_files[$file]['validators'] = array();
+        }
+        $this->addValidators("Upload", $this->_files);
+        $this->addValidators($validator, $options, $files);
+
+        return $this;
     }
 
     /**
@@ -47,6 +67,7 @@ class Zend_File_Transfer_Adapter_Http extends Zend_File_Transfer_Adapter_Abstrac
      */
     public function send($options = null)
     {
+        require_once 'Zend/File/Transfer/Exception.php';
         throw new Zend_File_Transfer_Exception('Method not implemented');
     }
 
@@ -56,18 +77,25 @@ class Zend_File_Transfer_Adapter_Http extends Zend_File_Transfer_Adapter_Abstrac
      * @todo Check if file exists otherwise existing will be overwritten
      * @todo Add validations
      * @todo Add filters
-     * @param string|array $options Options for the file(s) to receive
+     * @param string|array $files (Optional) Files to receive
      */
-    public function receive($options = null)
+    public function receive($files = null)
     {
-        $this->isValid();
-        foreach($this->_files as $file => $content) {
+        if ($this->isValid() === false) {
+            require_once 'Zend/File/Transfer/Exception.php';
+            throw new Zend_File_Transfer_Exception('Validation failed');
+        }
+
+        $check = $this->_getFiles($files);
+        foreach($check as $file => $content) {
             $directory = "";
             if (isset($content['destination']) === true) {
                 $directory = $content['destination'] . DIRECTORY_SEPARATOR;
             }
-            
+
+            // Should never go here as it's tested by the upload validator
             if (move_uploaded_file($content['tmp_name'], ($directory . $content['name'])) === false) {
+                require_once 'Zend/File/Transfer/Exception.php';
                 throw new Zend_File_Transfer_Exception("'$file' was illegal uploaded... possible attack", 100);
             }
         }
@@ -80,71 +108,23 @@ class Zend_File_Transfer_Adapter_Http extends Zend_File_Transfer_Adapter_Abstrac
      */
     public function isSent($file = null)
     {
+        require_once 'Zend/File/Transfer/Exception.php';
         throw new Zend_File_Transfer_Exception('Method not implemented');
     }
 
     /**
      * Checks if the file was already received
      *
-     * @param string|array $file Files to check
+     * @param string|array $files (Optional) Files to check
      */
-    public function isReceived($file = null)
+    public function isReceived($files = null)
     {
-        throw new Zend_File_Transfer_Exception('Method not implemented');
-    }
-
-    /**
-     * Checks if the files are valid
-     *
-     * @param string|array $file Files to check
-     */
-    public function isValid($file = null)
-    {
-        if ($file !== null) {
-            throw new Zend_File_Transfer_Exception('Method not implemented');
+        $validate = new Zend_Validate_File_Upload();
+        if ($validate->isValid($files) === false) {
+            return false;
         }
 
-        foreach ($this->_files as $file => $content) {
-            if ($content['error'] > 0) {
-                switch ($content['error']) {
-                    case 1:
-                        throw new Zend_File_Transfer_Exception("'$file' exceeds the servers size definition", 1);
-                        break;
-
-                    case 2:
-                        throw new Zend_File_Transfer_Exception("'$file' exceeds the HTML form size definition", 2);
-                        break;
-
-                    case 3:
-                        throw new Zend_File_Transfer_Exception("'$file' was only uploaded partially", 3);
-                        break;
-
-                    case 4:
-                        throw new Zend_File_Transfer_Exception("'$file' was not uploaded", 4);
-                        break;
-
-                    case 6:
-                        throw new Zend_File_Transfer_Exception("'$file' could not be stored... missing temporary folder", 6);
-                        break;
-
-                    case 7:
-                        throw new Zend_File_Transfer_Exception("'$file' could not be stored... error writing to disk", 7);
-                        break;
-
-                    case 8:
-                        throw new Zend_File_Transfer_Exception("'$file' upload stopped by extension", 8);
-                        break;
-
-                    default:
-                        throw new Zend_File_Transfer_Exception("'$file' unknown upload error", $content['error']);
-                        break;
-                }
-            }
-
-            if (is_uploaded_file($content['tmp_name']) === false) {
-                throw new Zend_File_Transfer_Exception("'$file' was illegal uploaded... possible attack", 100);
-            }
-        }
+        return true;
     }
 
     /**
@@ -154,6 +134,31 @@ class Zend_File_Transfer_Adapter_Http extends Zend_File_Transfer_Adapter_Abstrac
      */
     public function getProgress()
     {
+        require_once 'Zend/File/Transfer/Exception.php';
         throw new Zend_File_Transfer_Exception('Method not implemented');
+    }
+
+    /**
+     * Prepare the $_FILES array to match the internal syntax of one file per entry
+     *
+     * @param  array $files
+     * @return array
+     */
+    private function _prepareFiles(array $files = array())
+    {
+        $result = array();
+        foreach($files as $form => $content) {
+            if (is_array($content['name'])) {
+                foreach($content as $param => $file) {
+                    foreach ($file as $number => $target) {
+                        $result[$form . "__" . $number][$param] = $target;
+                    }
+                }
+            } else {
+                $result[$form] = $content;
+            }
+        }
+
+        return $result;
     }
 }

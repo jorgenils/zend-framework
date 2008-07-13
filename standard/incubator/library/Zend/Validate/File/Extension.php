@@ -35,15 +35,22 @@ require_once 'Zend/Validate/Abstract.php';
 class Zend_Validate_File_Extension extends Zend_Validate_Abstract
 {
     const FALSE_EXTENSION = 'fileExtensionFalse';
-    const NOT_READABLE    = 'fileNotReadable';
+    const NOT_FOUND       = 'fileExtensionNotFound';
 
     /**
      * @var array
      */
     protected $_messageTemplates = array(
         self::FALSE_EXTENSION => "The file '%value%' has a false extension",
-        self::NOT_READABLE    => "The file '%value%' can not be read"
+        self::NOT_FOUND       => "The file '%value%' was not found"
     );
+
+    /**
+     * Internal list of extensions
+     *
+     * @var array
+     */
+    private $_extension = array();
 
     /**
      * @var array
@@ -87,7 +94,7 @@ class Zend_Validate_File_Extension extends Zend_Validate_Abstract
      */
     public function setExtension($extension)
     {
-        $this->_extension = null;
+        $this->_extension = array();
         $this->addExtension($extension);
         return $this;
     }
@@ -104,7 +111,10 @@ class Zend_Validate_File_Extension extends Zend_Validate_Abstract
             $extension = explode(',', $extension);
         }
 
-        $this->_extension += $extension;
+        foreach($extension as $content) {
+            $this->_extension[] = trim($content);
+        }
+
         return $this;
     }
 
@@ -117,11 +127,11 @@ class Zend_Validate_File_Extension extends Zend_Validate_Abstract
      * @param  string $value
      * @return boolean
      */
-    public function isValid($value)
+    public function isValid($value, $file = null)
     {
         // Is file readable ?
         if (@is_readable($value) === false) {
-            $this->_error(self::NOT_READABLE);
+            $this->_error(self::NOT_FOUND);
             return false;
         }
 

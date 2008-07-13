@@ -34,46 +34,68 @@ abstract class Zend_File_Transfer_Adapter_Abstract
      *
      * @var array
      */
-    protected $_validator = array();
+    protected $_validators = array();
 
+    /**
+     * Intern list of messages
+     *
+     * @var array
+     */
+    protected $_messages = array();
     /**
      * Intern list of filters
      *
      * @var array
      */
-    protected $_filter = array();
+    protected $_filters = array();
 
     /**
      * Intern list of files
+     * This array looks like this:
+     *     array(form => array( - Form is the name within the form or, if not set the filename
+     *         name,            - Original name of this file
+     *         type,            - Mime type of this file
+     *         size,            - Filesize in bytes
+     *         tmp_name,        - Internally temporary filename for uploaded files
+     *         error,           - Error which has occured
+     *         destination,     - New destination for this file
+     *         validators,      - Set validator names for this file
+     *         files            - Set file names for this file
+     *     ))
      *
      * @var array
      */
     protected $_files = array();
 
     /**
-     * Intern list of types
+     * Returns all set validators
      *
-     * @var array
-     */
-    protected $_types = array();
-
-    /**
-     * Returns all set validators with their options
-     *
-     * @param  string $validator Returns the defined validator
+     * @param  string|array $files (Optional) Returns the validator for this files
      * @return null|array List of set validators
      */
-    public function getValidator($validator = null)
+    public function getValidators($files = null)
     {
-        if ($validator === null) {
-            return $this->_validator;
+        if ($files === null) {
+            return $this->_validators;
         }
 
-        if (isset($this->_validator[$validator])) {
-            return $this->_validator[$validator];
+        if (is_array($files) === false) {
+            $files = array($files);
         }
 
-        return null;
+        foreach($files as $file) {
+            if (isset($this->_files[$file]) === false) {
+                throw new Zend_File_Transfer_Exception('Unknown file');
+            }
+
+            $validators += $this->_files[$file]['validators'];
+        }
+        $validators = array_unique($validators);
+
+        foreach($validators as $validator) {
+            $result[] = $this->_validators[$validator];
+        }
+        return $result;
     }
 
     /**
@@ -84,10 +106,14 @@ abstract class Zend_File_Transfer_Adapter_Abstract
      * @param  string|array $files     Files to limit this validator to
      * @return Zend_File_Transfer_Adapter
      */
-    public function setValidator($validator, $options = null, $files = null)
+    public function setValidators($validator, $options = null, $files = null)
     {
-        $this->_validator = null;
-        $this->addValidator($validator, $options, $files);
+        $this->_validators = null;
+        foreach($this->_files as $file => $content) {
+            $this->_files[$file]['validators'] = array();
+        }
+        $this->addValidators($validator, $options, $files);
+
         return $this;
     }
 
@@ -99,28 +125,75 @@ abstract class Zend_File_Transfer_Adapter_Abstract
      * @param string|array $files     Files to limit this validator to
      * @return Zend_File_Transfer_Adapter
      */
-    public function addValidator($validator, $options = null, $files = null)
+    public function addValidators($validator, $options = null, $files = null)
     {
+        if (is_array($validator) === false) {
+            $validator = array($validator => $options);
+        }
+
+        require_once 'Zend/Loader.php';
         foreach ($validator as $class => $options) {
-            switch(strtolower($class)) {
-                case 'size':
-                    $class = 'Zend_Validate_File_Size';
-                    break;
-
-                case 'extension':
-                    $class = 'Zend_Validate_File_Extension';
-                    break;
-
-                default:
-                    break;
+            if (Zend_Loader::isReadable("Zend/Validate/File/" . ucfirst(strtolower($class)) . ".php")) {
+                $class = "Zend_Validate_File_" . ucfirst(strtolower($class));
             }
 
-            require_once 'Zend/Loader.php';
             Zend_Loader::loadClass($class);
-            $this->_validator[] = new $class($options);
+            $this->_validators[] = new $class($options);
+
+            if ($files === null) {
+                $files = array_keys($this->_files);
+            } else {
+                if (is_array($files) === false) {
+                    $files = array($files);
+                }
+            }
+
+            foreach($files as $file) {
+                $this->_files[$file]['validators'][] = $class;
+            }
         }
 
         return $this;
+    }
+
+    /**
+     * Checks if the files are valid
+     *
+     * @param  string|array $files Files to check
+     * @return boolean True if all checks are valid
+     */
+    public function isValid($files = null)
+    {
+        $check           = $this->_getFiles($files);
+        $this->_messages = array();
+        foreach ($check as $file => $content) {
+            $uploaderror = false;
+            foreach ($content['validators'] as $valid => $class) {
+                if (($this->_validators[$valid]->isValid($content['tmp_name'], $content['name']) === false) and
+                    ($uploaderror === false)) {
+                    $this->_messages += $this->_validators[$valid]->getMessages();
+                }
+                if (($valid === 'Zend_Validator_File_Upload') and (count($this->_messages) > 0)) {
+                    $uploaderror = true;
+                }
+            }
+        }
+
+        if (count($this->_messages) > 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns found validation messages
+     *
+     * @return array
+     */
+    public function getMessages()
+    {
+        return $this->_messages;
     }
 
     /**
@@ -230,6 +303,51 @@ abstract class Zend_File_Transfer_Adapter_Abstract
         return $this;
     }
 
+    /**
+     * Returns found files based on internal file array and given files
+     *
+     * @param string|array $files (Optional) Files to return
+     * @throws Zend_File_Transfer_Exception On false filename
+     * @return array Found files
+     */
+    protected function _getFiles($files = null)
+    {
+        $check = null;
+
+        if (is_string($files) === true) {
+            $files = array($files);
+        }
+
+        if (is_array($files) === true) {
+            foreach($files as $find) {
+                $found = null;
+                foreach($this->_files as $file => $content) {
+                    if ($content['name'] === $find) {
+                        $found = $file;
+                        break;
+                    }
+
+                    if ($file === $find) {
+                        $found = $file;
+                        break;
+                    }
+                }
+
+                if ($found === null) {
+                    throw new Zend_File_Transfer_Exception("'$file' not found");
+                }
+
+                $check[$found] = $this->_files[$found];
+            }
+        }
+
+        if ($files === null) {
+            $check = $this->_files;
+        }
+
+        return $check;
+    }
+
     abstract public function send($options = null);
 
     abstract public function receive($options = null);
@@ -237,8 +355,6 @@ abstract class Zend_File_Transfer_Adapter_Abstract
     abstract public function isSent($file = null);
 
     abstract public function isReceived($file = null);
-
-    abstract public function isValid($file = null);
 
     abstract public function getProgress();
 }

@@ -25,26 +25,26 @@
 require_once 'Zend/Validate/Abstract.php';
 
 /**
- * Validator for the maximum size of a file up to a max of 2GB
+ * Validator for the mime type of a file
  *
  * @category  Zend
  * @package   Zend_Validate
  * @copyright Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Validate_File_Size extends Zend_Validate_Abstract
+class Zend_Validate_File_DiskSpace extends Zend_Validate_Abstract
 {
-    const TOO_BIG   = 'fileSizeTooBig';
-    const TOO_SMALL = 'fileSizeTooSmall';
-    const NOT_FOUND = 'fileSizeNotFound';
-    
+    const TOO_BIG      = 'fileDiskSpaceTooBig';
+    const TOO_SMALL    = 'fileDiskSpaceTooSmall';
+    const NOT_READABLE = 'fileDiskSpaceNotReadable';
+
     /**
      * @var array
      */
     protected $_messageTemplates = array(
-        self::TOO_BIG   => "The file '%value%' is bigger than allowed",
-        self::TOO_SMALL => "The file '%value%' is smaller than allowed",
-        self::NOT_FOUND => "The file '%value%' could not be found"
+        self::TOO_BIG      => "The file '%value%' exceeds the allowed diskspace",
+        self::TOO_SMALL    => "All files are in sum smaller than allowed",
+        self::NOT_READABLE => "The file '%value%' can not be read"
     );
 
     /**
@@ -72,17 +72,33 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
     protected $_max;
 
     /**
+     * Internal file array
+     *
+     * @var array
+     */
+    protected $_files;
+
+    /**
+     * Internal file size counter
+     *
+     * @var integer
+     */
+    protected $_size;
+
+    /**
      * Sets validator options
      *
-     * Min limits the filesize, when used with max=null it is the maximum filesize
+     * Min limits the used diskspace for all files, when used with max=null it is the maximum filesize
      * It also accepts an array with the keys 'min' and 'max'
      *
-     * @param  integer|array $min Minimum filesize
-     * @param  integer       $max Maximum filesize
+     * @param  integer|array $min Minimum diskspace for all files
+     * @param  integer       $max Maximum diskspace for all files
      * @return void
      */
     public function __construct($min, $max = null)
     {
+        $this->_files = array();
+        $this->_size  = 0;
         if (is_array($min) === true) {
             if (isset($min['max']) === true) {
                 $max = $min['max'];
@@ -113,7 +129,7 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
     }
 
     /**
-     * Returns the minimum filesize
+     * Returns the minimum diskspace to use
      *
      * @param  boolean $unit Return the value with unit, when false the plan bytes will be returned
      * @return integer
@@ -129,27 +145,30 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
     }
 
     /**
-     * Sets the minimum filesize
+     * Sets the minimum diskspace for all files
      *
-     * @param  integer $min            The minimum filesize
+     * @param  integer $min            The minimum diskspace for all files
      * @throws Zend_Validate_Exception When min is greater than max
      * @return Zend_Validate_File_Size Provides a fluent interface
      */
     public function setMin($min)
     {
         $min = $this->_fromByteString($min);
-        if (($this->_max !== null) and ($min > $this->_max)) {
+        if ($min === null) {
+            $this->_min = null;
+        } else if (($this->_max !== null) and ($min > $this->_max)) {
             require_once 'Zend/Validate/Exception.php';
-            throw new Zend_Validate_Exception("The minimum must be less than or equal to the maximum filesize, but $min >"
-                                            . " $this->_max");
+            throw new Zend_Validate_Exception('The minimum must be less than or equal to the maximum used diskspace '
+                                             . "to use, but $min > $this->_max");
+        } else {
+            $this->_min = max(0, (integer) $min);
         }
 
-        $this->_min = max(0, (integer) $min);
         return $this;
     }
 
     /**
-     * Returns the maximum filesize
+     * Returns the maximum diskspace for all files
      *
      * @param  boolean $unit Return the value with unit, when false the plan bytes will be returned
      * @return integer|null
@@ -165,9 +184,9 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
     }
 
     /**
-     * Sets the maximum filesize
+     * Sets the maximum diskspace
      *
-     * @param  integer|null $max       The maximum filesize
+     * @param  integer|null $max       The maximum diskspace
      * @throws Zend_Validate_Exception When max is smaller than min
      * @return Zend_Validate_StringLength Provides a fluent interface
      */
@@ -178,8 +197,8 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
             $this->_max = null;
         } else if (($this->_min !== null) and ($max < $this->_min)) {
             require_once 'Zend/Validate/Exception.php';
-            throw new Zend_Validate_Exception("The maximum must be greater than or equal to the minimum filesize, but "
-                                            . "$max < $this->_min");
+            throw new Zend_Validate_Exception('The maximum must be greater than or equal to the minimum used '
+                                             . "diskspace, but $max < $this->_min");
         } else {
             $this->_max = (integer) $max;
         }
@@ -190,43 +209,52 @@ class Zend_Validate_File_Size extends Zend_Validate_Abstract
     /**
      * Defined by Zend_Validate_Interface
      *
-     * Returns true if and only if the filesize of $value is at least min and
+     * Returns true if and only if the disk usage of all files is at least min and
      * not bigger than max (when max is not null).
      *
-     * @param  string $value Real file to check for size
+     * @param  string|array $value Real file to check for size
      * @param  string $file  Filename to return when temporary files are checked
      * @return boolean
      */
     public function isValid($value, $file = null)
     {
-        // Is file readable ?
-        if (@is_readable($value) === false) {
-            if ($file !== null) {
-                $this->_value = $file;
-            }
-
-            $this->_error(self::NOT_FOUND);
-            return false;
+        if (is_string($value) === true) {
+            $value = array($value);
         }
 
-        // limited to 2GB files
-        $size = @filesize($value);
-        $this->_setValue($size);
+        foreach($value as $files) {
+            // Is file readable ?
+            if (@is_readable($files) === false) {
+                if ($file !== null) {
+                    $this->_value = $file;
+                }
 
-        if ($size < $this->_min) {
-            if ($file !== null) {
-                $this->_value = $file;
+                $this->_error(self::NOT_READABLE);
+                return false;
             }
 
+            if (isset($this->_files[$files]) === false) {
+                $this->_files[$files] = $files;
+            } else {
+                // file already counted... do not count twice
+                continue;
+            }
+
+            // limited to 2GB files
+            $size         = @filesize($files);
+            $this->_size += $size;
+            $this->_setValue($this->_size);
+            if (($this->_max !== null) and ($this->_max < $this->_size)) {
+                if ($file !== null) {
+                    $this->_value = $file;
+                }
+
+                $this->_error(self::TOO_BIG);
+            }
+        }
+
+        if (($this->_min !== null) and ($this->_size < $this->_min)) {
             $this->_error(self::TOO_SMALL);
-        }
-
-        if (($this->_max !== null) and ($this->_max < $size)) {
-            if ($file !== null) {
-                $this->_value = $file;
-            }
-
-            $this->_error(self::TOO_BIG);
         }
 
         if (count($this->_messages) > 0) {
