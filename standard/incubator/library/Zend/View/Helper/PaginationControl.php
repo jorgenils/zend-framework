@@ -32,14 +32,14 @@ class Zend_View_Helper_PaginationControl
      * 
      * @var Zend_View_Instance
      */
-    public $view;
+    public $view = null;
 
     /**
      * Default view partial
      *
      * @var string
      */
-    protected static $_defaultViewPartial;
+    protected static $_defaultViewPartial = null;
 
     /**
      * Sets the view instance.
@@ -62,6 +62,16 @@ class Zend_View_Helper_PaginationControl
     {
         self::$_defaultViewPartial = $partial;
     }
+    
+    /**
+     * Gets the default view partial
+     *
+     * @return string
+     */
+    public static function getDefaultViewPartial()
+    {
+        return self::$_defaultViewPartial;
+    }
 
     /**
      * Render the provided pages.  If no scrolling style or partial 
@@ -75,7 +85,7 @@ class Zend_View_Helper_PaginationControl
      */
     public function paginationControl(Zend_Paginator $paginator, $scrollingStyle = null, $partial = null)
     {
-        if ($partial === null) {
+        if (empty($partial)) {
             if (empty(self::$_defaultViewPartial)) {
                 /**
                  * @see Zend_View_Exception
