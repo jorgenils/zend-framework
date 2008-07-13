@@ -439,6 +439,34 @@ class Zend_Dojo_DataTest extends PHPUnit_Framework_TestCase
     {
         $this->assertTrue($this->dojoData instanceof Countable);
     }
+
+    public function testShouldAllowPopulationFromJson()
+    {
+        $data = array(
+            'identifier' => 'id',
+            'label'      => 'title',
+            'items'      => array(
+                array('id' => 1, 'title' => 'One', 'name' => 'First'),
+                array('id' => 2, 'title' => 'Two', 'name' => 'Second'),
+                array('id' => 3, 'title' => 'Three', 'name' => 'Third'),
+                array('id' => 4, 'title' => 'Four', 'name' => 'Fourth'),
+            ),
+        );
+        require_once 'Zend/Json.php';
+        $json = Zend_Json::encode($data);
+        $dojoData = new Zend_Dojo_Data();
+        $dojoData->fromJson($json);
+        $test = $dojoData->toArray();
+        $this->assertEquals($data, $test);
+    }
+
+    /**
+     * @expectedException Zend_Dojo_Exception
+     */
+    public function testFromJsonShouldThrowExceptionOnInvalidData()
+    {
+        $this->dojoData->fromJson(new stdClass);
+    }
 }
 
 class Zend_Dojo_DataTest_DataObject

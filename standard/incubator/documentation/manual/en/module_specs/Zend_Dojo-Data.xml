@@ -136,6 +136,19 @@ $data->addItems($someMoreItems);
 $data->setLabel('name');
 ]]></programlisting>
         </example>
+
+        <para>
+            Finally, you can also load a <code>Zend_Dojo_Data</code> item from a
+            dojo.data JSON array, using the <code>fromJson()</code> method.
+        </para>
+
+        <example id="zend.dojo.data.usage.label">
+            <title>Populating Zend_Dojo_Data from JSON</title>
+
+            <programlisting role="php"><![CDATA[
+$data->fromJson($json);
+]]></programlisting>
+        </example>
     </sect2>
 
     <sect2 id="zend.dojo.data.advanced">

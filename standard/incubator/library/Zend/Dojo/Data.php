@@ -264,6 +264,45 @@ class Zend_Dojo_Data implements ArrayAccess,Iterator,Countable
     }
 
     /**
+     * Load object from array
+     * 
+     * @param  array $data 
+     * @return Zend_Dojo_Data
+     */
+    public function fromArray(array $data)
+    {
+        if (array_key_exists('identifier', $data)) {
+            $this->setIdentifier($data['identifier']);
+        }
+        if (array_key_exists('label', $data)) {
+            $this->setLabel($data['label']);
+        }
+        if (array_key_exists('items', $data) && is_array($data['items'])) {
+            $this->setItems($data['items']);
+        } else {
+            $this->clearItems();
+        }
+        return $this;
+    }
+
+    /**
+     * Load object from JSON
+     * 
+     * @param  string $json 
+     * @return Zend_Dojo_Data
+     */
+    public function fromJson($json)
+    {
+        if (!is_string($json)) {
+            require_once 'Zend/Dojo/Exception.php';
+            throw new Zend_Dojo_Exception('fromJson() expects JSON input');
+        }
+        require_once 'Zend/Json.php';
+        $data = Zend_Json::decode($json);
+        return $this->fromArray($data);
+    }
+
+    /**
      * Seralize entire data structure, including identifier and label, to array
      * 
      * @return array
