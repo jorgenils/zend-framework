@@ -68,6 +68,273 @@ $element->addDecorator('DijitElement')
         In effect, the DijitElement decorator is used in place of the standard
         ViewHelper decorator.
     </para>
+
+    <para>
+        Finally, the base Dijit element ensures that the Dojo view helper path
+        is set on the view.
+    </para>
+
+    <para>
+        A variant on DijitElement, DijitMulti, provides the functionality of
+        the <code>Multi</code> abstract form element, allowing the developer to
+        specify 'multiOptions' -- typically select options or radio options.
+    </para>
+
+    <para>
+        The following dijit elements are shipped in the standard Zend
+        Framework distribution.
+    </para>
+
+    <sect3 id="zend.dojo.form.elements.checkBox">
+        <title>CheckBox</title>
+
+        <para>
+            While not deriving from <link
+                linkend="zend.form.standardElements.checkbox">the standard
+                Checkbox element</link>, it does implement the same
+            functionality. This means that the following methods are exposed:
+        </para>
+
+        <itemizedlist>
+            <listitem><para>
+                <code>setCheckedValue($value)</code>: set the value to use when
+                the element is checked.
+            </para></listitem>
+
+            <listitem><para>
+                <code>getCheckedValue()</code>: get the value of the item to
+                use when checked.
+            </para></listitem>
+
+            <listitem><para>
+                <code>setUncheckedValue($value)</code>: set the value of the
+                item to use when it is unchecked.
+            </para></listitem>
+
+            <listitem><para>
+                <code>getUncheckedValue()</code>: get the value of the item to
+                use when it is unchecked.
+            </para></listitem>
+
+            <listitem><para>
+                <code>setChecked($flag)</code>: mark the element as checked or
+                unchecked.
+            </para></listitem>
+
+            <listitem><para>
+                <code>isChecked()</code>: determine if the element is currently
+                checked.
+            </para></listitem>
+        </itemizedlist>
+
+        <example id="zend.dojo.form.elements.checkBox.example">
+            <title>Example CheckBox dijit element usage</title>
+
+            <programlisting role="php"><![CDATA[
+$form->addElement(
+    'CheckBox',
+    'foo',
+    array(
+        'label'          => 'A check box',
+        'checkedValue'   => 'foo',
+        'uncheckedValue' => 'bar',
+        'checked'        => true,
+    )
+);
+]]></programlisting>
+        </example>
+    </sect3>
+
+    <sect3 id="zend.dojo.form.elements.comboBox">
+        <title>ComboBox</title>
+
+        <para>
+            As noted in the ComboBox <link
+                linkend="zend.dojo.view.dijit.form">dijit view helper
+                documentation</link>, ComboBoxes are a hybrid between select
+            and text input, allowing for autocompletion and the ability to
+            specify an alternate to the options provided.
+        </para>
+
+        <para>
+            The ComboBox form element provides accessors and mutators for
+            examining and setting the select options as well as the ComboBox
+            dojo.data datastore (if used). It extends from DijitMulti, which
+            allows you to specify select options via the
+            <code>setMultiOptions()</code> and <code>setMultiOption()</code>
+            methods. In addition, the following methods are available:
+        </para>
+
+        <itemizedlist>
+            <listitem><para>
+                <code>getStoreInfo()</code>: get all datastore information
+                currently set. Returns an empty array if no data is currently
+                set.
+            </para></listitem>
+
+            <listitem><para>
+                <code>setStoreId($identifier)</code>: set the store identifier
+                variable (usually referred to by the attribute 'jsId' in Dojo).
+                This should be a valid javascript variable name.
+            </para></listitem>
+
+            <listitem><para>
+                <code>getStoreId()</code>: retrieve the store identifier
+                variable name.
+            </para></listitem>
+
+            <listitem><para>
+                <code>setStoreType($dojoType)</code>: set the datastore class
+                to use; e.g., "dojo.data.ItemFileReadStore".
+            </para></listitem>
+
+            <listitem><para>
+                <code>getStoreType()</code>: get the dojo datastore class to
+                use.
+            </para></listitem>
+
+            <listitem><para>
+                <code>setStoreParams(array $params)</code>: set any parameters
+                used to configure the datastore object. As an example,
+                dojo.data.ItemFileReadStore datastore would expect a 'url'
+                parameter pointing to a location that would return the
+                dojo.data object.
+            </para></listitem>
+
+            <listitem><para>
+                <code>getStoreParams()</code>: get any datastore parameters
+                currently set; if none, an empty array is returned.
+            </para></listitem>
+
+            <listitem><para>
+                <code>setAutocomplete($flag)</code>: indicate whether or not
+                the selected item will be used when the user leaves the
+                element.
+            </para></listitem>
+
+            <listitem><para>
+                <code>getAutocomplete()</code>: get the value of the
+                autocomplete flag.
+            </para></listitem>
+        </itemizedlist>
+
+        <example id="zend.dojo.form.elements.comboBox.selectExample">
+            <title>ComboBox dijit element usage as select input</title>
+
+            <programlisting role="php"><![CDATA[
+$form->addElement(
+    'ComboBox', 
+    'foo', 
+    array(
+        'label'        => 'ComboBox (select)',
+        'value'        => 'blue',
+        'autocomplete' => false,
+        'multiOptions' => array(
+            'red'    => 'Rouge',
+            'blue'   => 'Bleu',
+            'white'  => 'Blanc',
+            'orange' => 'Orange',
+            'black'  => 'Noir',
+            'green'  => 'Vert',
+        ),
+    )
+);
+]]></programlisting>
+        </example>
+
+        <example id="zend.dojo.form.elements.comboBox.datastoreExample">
+            <title>ComboBox dijit element usage with datastore</title>
+
+            <programlisting role="php"><![CDATA[
+$form->addElement(
+    'ComboBox', 
+    'foo', 
+    array(
+        'label'       => 'ComboBox (datastore)',
+        'storeId'     => 'stateStore',
+        'storeType'   => 'dojo.data.ItemFileReadStore',
+        'storeParams' => array(
+            'url' => '/js/states.txt',
+        ),
+        'dijitParams' => array(
+            'searchAttr' => 'name',
+        ),
+    )
+);
+]]></programlisting>
+        </example>
+    </sect3>
+
+    <sect3 id="zend.dojo.form.elements.currencyTextBox">
+        <title>CurrencyTextBox</title>
+
+        <para>
+            The CurrencyTextBox is primarily for supporting currency input. The
+            currency may be localized, and can support both fractional and
+            non-fractional values.
+        </para>
+
+        <para>
+            Internally, CurrencyTextBox derives from <link
+                linkend="zend.dojo.form.elements.numberTextBox">NumberTextBox</link>,
+            <link
+                linkend="zend.dojo.form.elements.validationTextBox">ValidationTextBox</link>,
+            and <link linkend="zend.dojo.form.elements.textBox">TextBox</link>;
+            all methods available to those classes are available. In addition,
+            the following dijit parameter methods can be used:
+        </para>
+
+        <itemizedlist>
+            <listitem><para>
+                <code>setCurrency($currency)</code>: set the currency type to
+                use; should follow the <ulink
+                    url="http://en.wikipedia.org/wiki/ISO_4217">ISO-4217</ulink>
+                specification.
+            </para></listitem>
+
+            <listitem><para>
+                <code>getCurrency()</code>: retrieve the current currency type.
+            </para></listitem>
+
+            <listitem><para>
+                <code>setSymbol($symbol)</code>: set the 3-letter <ulink
+                    url="http://en.wikipedia.org/wiki/ISO_4217">ISO-4217</ulink>
+                currency symbol to use.
+            </para></listitem>
+
+            <listitem><para>
+                <code>getSymbol()</code>: get the current currency symbol.
+            </para></listitem>
+
+            <listitem><para>
+                <code>setFractional($flag)</code>: set whether or not the
+                currency should allow for fractional values.
+            </para></listitem>
+
+            <listitem><para>
+                <code>getFractional()</code>: retrieve the status of the
+                fractional flag.
+            </para></listitem>
+        </itemizedlist>
+
+        <example id="zend.dojo.form.elements.currencyTextBox.example">
+            <title>Example CurrencyTextBox dijit element usage</title>
+
+            <programlisting role="php"><![CDATA[
+$form->addElement(
+    'CurrencyTextBox', 
+    'foo', 
+    array(
+        'label'          => 'Currency:',
+        'required'       => true,
+        'currency'       => 'USD',
+        'invalidMessage' => 'Invalid amount. Include dollar sign, commas, and cents.',
+        'fractional'     => false,
+    )
+);
+]]></programlisting>
+        </example>
+    </sect3>
 </sect2>
 <!--
 vim:se ts=4 sw=4 et:

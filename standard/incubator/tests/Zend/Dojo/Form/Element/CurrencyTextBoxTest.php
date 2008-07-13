@@ -122,13 +122,13 @@ class Zend_Dojo_Form_Element_CurrencyTextBoxTest extends PHPUnit_Framework_TestC
         $this->assertEquals('USD', $this->element->dijitParams['currency']);
     }
 
-    public function testFractionalAccessorsShouldProxyToDijitParams()
+    public function testFractionalAccessorsShouldProxyToConstraints()
     {
         $this->assertFalse($this->element->getFractional());
-        $this->assertFalse(array_key_exists('fractional', $this->element->dijitParams));
+        $this->assertFalse(array_key_exists('constraints', $this->element->dijitParams));
         $this->element->setFractional(true);
         $this->assertTrue($this->element->getFractional());
-        $this->assertTrue($this->element->dijitParams['fractional']);
+        $this->assertEquals('true', $this->element->dijitParams['constraints']['fractional']);
     }
 
     public function testSymbolAccessorsShouldProxyToDijitParams()

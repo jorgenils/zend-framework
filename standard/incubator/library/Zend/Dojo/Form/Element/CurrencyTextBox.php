@@ -99,12 +99,14 @@ class Zend_Dojo_Form_Element_CurrencyTextBox extends Zend_Dojo_Form_Element_Numb
     /**
      * Set whether currency is fractional
      *
-     * @param  bool $fractional
+     * @param  bool $flag
      * @return Zend_Dojo_Form_Element_CurrencyTextBox
      */
-    public function setFractional($fractional)
+    public function setFractional($flag)
     {
-        $this->setDijitParam('fractional', (bool) $fractional);
+        $constraints = $this->getDijitParam('constraints');
+        $constraints['fractional'] = ((bool) $flag) ? 'true' : 'false';
+        $this->setConstraints($constraints);
         return $this;
     }
 
@@ -115,9 +117,13 @@ class Zend_Dojo_Form_Element_CurrencyTextBox extends Zend_Dojo_Form_Element_Numb
      */
     public function getFractional()
     {
-        if (!$this->hasDijitParam('fractional')) {
+        if (!$this->hasDijitParam('constraints')) {
             return false;
         }
-        return $this->getDijitParam('fractional');
+        $constraints = $this->getDijitParam('constraints');
+        if (!array_key_exists('fractional', $constraints)) {
+            return false;
+        }
+        return ('true' == $constraints['fractional']);
     }
 }
