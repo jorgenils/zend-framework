@@ -113,22 +113,24 @@ class Zend_Dojo_Form_Element_TimeTextBoxTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->element instanceof Zend_Dojo_Form_Element_DateTextBox);
     }
 
-    public function testTimePatternAccessorsShouldProxyToDijitParams()
+    public function testTimePatternAccessorsShouldProxyToConstraints()
     {
         $this->assertNull($this->element->getTimePattern());
-        $this->assertFalse(array_key_exists('timePattern', $this->element->dijitParams));
+        $this->assertFalse($this->element->hasConstraint('timePattern'));
         $this->element->setTimePattern('h:mm a');
         $this->assertEquals('h:mm a', $this->element->getTimePattern());
-        $this->assertEquals('h:mm a', $this->element->dijitParams['timePattern']);
+        $this->assertTrue($this->element->hasConstraint('timePattern'));
+        $this->assertEquals('h:mm a', $this->element->dijitParams['constraints']['timePattern']);
     }
 
-    public function testClickableIncrementAccessorsShouldProxyToDijitParams()
+    public function testClickableIncrementAccessorsShouldProxyToConstraints()
     {
         $this->assertNull($this->element->getClickableIncrement());
-        $this->assertFalse(array_key_exists('clickableIncrement', $this->element->dijitParams));
+        $this->assertFalse($this->element->hasConstraint('clickableIncrement'));
         $this->element->setClickableIncrement('T00:15:00');
         $this->assertEquals('T00:15:00', $this->element->getClickableIncrement());
-        $this->assertEquals('T00:15:00', $this->element->dijitParams['clickableIncrement']);
+        $this->assertTrue($this->element->hasConstraint('clickableIncrement'));
+        $this->assertEquals('T00:15:00', $this->element->dijitParams['constraints']['clickableIncrement']);
     }
 
     /**
@@ -142,10 +144,11 @@ class Zend_Dojo_Form_Element_TimeTextBoxTest extends PHPUnit_Framework_TestCase
     public function testVisibleIncrementAccessorsShouldProxyToDijitParams()
     {
         $this->assertNull($this->element->getVisibleIncrement());
-        $this->assertFalse(array_key_exists('visibleIncrement', $this->element->dijitParams));
+        $this->assertFalse($this->element->hasConstraint('visibleIncrement'));
         $this->element->setVisibleIncrement('T00:15:00');
         $this->assertEquals('T00:15:00', $this->element->getVisibleIncrement());
-        $this->assertEquals('T00:15:00', $this->element->dijitParams['visibleIncrement']);
+        $this->assertTrue($this->element->hasConstraint('visibleIncrement'));
+        $this->assertEquals('T00:15:00', $this->element->dijitParams['constraints']['visibleIncrement']);
     }
 
     /**
@@ -159,10 +162,11 @@ class Zend_Dojo_Form_Element_TimeTextBoxTest extends PHPUnit_Framework_TestCase
     public function testVisibleRangeAccessorsShouldProxyToDijitParams()
     {
         $this->assertNull($this->element->getVisibleRange());
-        $this->assertFalse(array_key_exists('visibleRange', $this->element->dijitParams));
+        $this->assertFalse($this->element->hasConstraint('visibleRange'));
         $this->element->setVisibleRange('T00:15:00');
         $this->assertEquals('T00:15:00', $this->element->getVisibleRange());
-        $this->assertEquals('T00:15:00', $this->element->dijitParams['visibleRange']);
+        $this->assertTrue($this->element->hasConstraint('visibleRange'));
+        $this->assertEquals('T00:15:00', $this->element->dijitParams['constraints']['visibleRange']);
     }
 
     /**

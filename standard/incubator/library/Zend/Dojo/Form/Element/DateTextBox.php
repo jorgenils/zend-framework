@@ -68,7 +68,7 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
      */
     public function setAmPm($flag)
     {
-        $this->setDijitParam('am,pm', (bool) $flag);
+        $this->setConstraint('am,pm', (bool) $flag);
         return $this;
     }
 
@@ -79,10 +79,10 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
      */
     public function getAmPm()
     {
-        if (!$this->hasDijitParam('am,pm')) {
+        if (!$this->hasConstraint('am,pm')) {
             return false;
         }
-        return $this->getDijitParam('am,pm');
+        return ('true' ==$this->getConstraint('am,pm'));
     }
 
     /**
@@ -93,7 +93,7 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
      */
     public function setStrict($flag)
     {
-        $this->setDijitParam('strict', (bool) $flag);
+        $this->setConstraint('strict', (bool) $flag);
         return $this;
     }
 
@@ -104,10 +104,10 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
      */
     public function getStrict()
     {
-        if (!$this->hasDijitParam('strict')) {
+        if (!$this->hasConstraint('strict')) {
             return false;
         }
-        return $this->getDijitParam('strict');
+        return ('true' == $this->getConstraint('strict'));
     }
 
     /**
@@ -118,7 +118,7 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
      */
     public function setLocale($locale)
     {
-        $this->setDijitParam('locale', (string) $locale);
+        $this->setConstraint('locale', (string) $locale);
         return $this;
     }
 
@@ -129,7 +129,7 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
      */
     public function getLocale()
     {
-        return $this->getDijitParam('locale');
+        return $this->getConstraint('locale');
     }
 
     /**
@@ -140,7 +140,7 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
      */
     public function setDatePattern($pattern)
     {
-        $this->setDijitParam('datePattern', (string) $pattern);
+        $this->setConstraint('datePattern', (string) $pattern);
         return $this;
     }
 
@@ -151,7 +151,7 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
      */
     public function getDatePattern()
     {
-        return $this->getDijitParam('datePattern');
+        return $this->getConstraint('datePattern');
     }
 
     /**
@@ -169,7 +169,7 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
             throw new Zend_Form_Element_Exception(sprintf('Invalid formatLength "%s" specified', $formatLength));
         }
 
-        $this->setDijitParam('formatLength', $formatLength);
+        $this->setConstraint('formatLength', $formatLength);
         return $this;
     }
 
@@ -180,7 +180,7 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
      */
     public function getFormatLength()
     {
-        return $this->getDijitParam('formatLength');
+        return $this->getConstraint('formatLength');
     }
 
     /**
@@ -198,7 +198,7 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
             throw new Zend_Form_Element_Exception(sprintf('Invalid Selector "%s" specified', $selector));
         }
 
-        $this->setDijitParam('selector', $selector);
+        $this->setConstraint('selector', $selector);
         return $this;
     }
 
@@ -209,6 +209,6 @@ class Zend_Dojo_Form_Element_DateTextBox extends Zend_Dojo_Form_Element_Validati
      */
     public function getSelector()
     {
-        return $this->getDijitParam('selector');
+        return $this->getConstraint('selector');
     }
 }

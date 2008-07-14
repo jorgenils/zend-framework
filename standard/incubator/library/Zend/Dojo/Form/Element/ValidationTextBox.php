@@ -107,6 +107,21 @@ class Zend_Dojo_Form_Element_ValidationTextBox extends Zend_Dojo_Form_Element_Te
     }
 
     /**
+     * Set an individual constraint
+     * 
+     * @param  string $key 
+     * @param  mixed $value 
+     * @return Zend_Dojo_Form_Element_ValidationTextBox
+     */
+    public function setConstraint($key, $value)
+    {
+        $constraints = $this->getConstraints();
+        $constraints[(string) $key] = $value;
+        $this->setConstraints($constraints);
+        return $this;
+    }
+
+    /**
      * Set validation constraints
      *
      * Refer to Dojo dijit.form.ValidationTextBox documentation for valid 
@@ -117,8 +132,36 @@ class Zend_Dojo_Form_Element_ValidationTextBox extends Zend_Dojo_Form_Element_Te
      */
     public function setConstraints(array $constraints)
     {
+        array_walk_recursive($constraints, array($this, '_castBoolToString'));
         $this->setDijitParam('constraints', $constraints);
         return $this;
+    }
+
+    /**
+     * Is the given constraint set?
+     * 
+     * @param  string $key 
+     * @return bool
+     */
+    public function hasConstraint($key)
+    {
+        $constraints = $this->getConstraints();
+        return array_key_exists((string)$key, $constraints);
+    }
+
+    /**
+     * Get an individual constraint
+     * 
+     * @param  string $key 
+     * @return mixed
+     */
+    public function getConstraint($key)
+    {
+        $key = (string) $key;
+        if (!$this->hasConstraint($key)) {
+            return null;
+        }
+        return $this->dijitParams['constraints'][$key];
     }
 
     /**
@@ -132,5 +175,44 @@ class Zend_Dojo_Form_Element_ValidationTextBox extends Zend_Dojo_Form_Element_Te
             return $this->getDijitParam('constraints');
         }
         return array();
+    }
+
+    /**
+     * Remove a single constraint
+     * 
+     * @param  string $key 
+     * @return Zend_Dojo_Form_Element_ValidationTextBox
+     */
+    public function removeConstraint($key)
+    {
+        $key = (string) $key;
+        if ($this->hasConstraint($key)) {
+            unset($this->dijitParams['constraints'][$key]);
+        }
+        return $this;
+    }
+
+    /**
+     * Clear all constraints
+     * 
+     * @return Zend_Dojo_Form_Element_ValidationTextBox
+     */
+    public function clearConstraints()
+    {
+        return $this->removeDijitParam('constraints');
+    }
+
+    /**
+     * Cast a boolean value to a string
+     * 
+     * @param  mixed $item 
+     * @param  string $key 
+     * @return void
+     */
+    protected function _castBoolToString(&$item, $key)
+    {
+        if (is_bool($item)) {
+            $item = ($item) ? 'true' : 'false';
+        }
     }
 }

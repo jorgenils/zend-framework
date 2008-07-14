@@ -116,10 +116,10 @@ class Zend_Dojo_Form_Element_CurrencyTextBoxTest extends PHPUnit_Framework_TestC
     public function testCurrencyAccessorsShouldProxyToDijitParams()
     {
         $this->assertNull($this->element->getCurrency());
-        $this->assertFalse(array_key_exists('currency', $this->element->dijitParams));
+        $this->assertNull($this->element->getDijitParam('currency'));
         $this->element->setCurrency('USD');
         $this->assertEquals('USD', $this->element->getCurrency());
-        $this->assertEquals('USD', $this->element->dijitParams['currency']);
+        $this->assertEquals('USD', $this->element->getDijitParam('currency'));
     }
 
     public function testFractionalAccessorsShouldProxyToConstraints()
@@ -131,20 +131,20 @@ class Zend_Dojo_Form_Element_CurrencyTextBoxTest extends PHPUnit_Framework_TestC
         $this->assertEquals('true', $this->element->dijitParams['constraints']['fractional']);
     }
 
-    public function testSymbolAccessorsShouldProxyToDijitParams()
+    public function testSymbolAccessorsShouldProxyToConstraints()
     {
         $this->assertNull($this->element->getSymbol());
-        $this->assertFalse(array_key_exists('symbol', $this->element->dijitParams));
+        $this->assertFalse($this->element->hasConstraint('symbol'));
         $this->element->setSymbol('USD');
         $this->assertEquals('USD', $this->element->getSymbol());
-        $this->assertEquals('USD', $this->element->dijitParams['symbol']);
+        $this->assertEquals('USD', $this->element->getConstraint('symbol'));
     }
 
     public function testSymbolMutatorShouldCastToStringAndUppercaseAndLimitTo3Chars()
     {
         $this->element->setSymbol('usdollar');
         $this->assertEquals('USD', $this->element->getSymbol());
-        $this->assertEquals('USD', $this->element->dijitParams['symbol']);
+        $this->assertEquals('USD', $this->element->getConstraint('symbol'));
     }
 
     /**

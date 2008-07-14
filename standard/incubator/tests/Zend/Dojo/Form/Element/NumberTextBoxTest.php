@@ -108,31 +108,34 @@ class Zend_Dojo_Form_Element_NumberTextBoxTest extends PHPUnit_Framework_TestCas
         return $element;
     }
 
-    public function testLocaleAccessorsShouldProxyToDijitParams()
+    public function testLocaleAccessorsShouldProxyToConstraints()
     {
         $this->assertNull($this->element->getLocale());
-        $this->assertFalse(array_key_exists('locale', $this->element->dijitParams));
+        $this->assertNull($this->element->getConstraint('locale'));
         $this->element->setLocale('en-US');
         $this->assertEquals('en-US', $this->element->getLocale());
-        $this->assertEquals('en-US', $this->element->dijitParams['locale']);
+        $this->assertTrue($this->element->hasConstraint('locale'));
+        $this->assertEquals('en-US', $this->element->dijitParams['constraints']['locale']);
     }
 
-    public function testPatternAccessorsShouldProxyToDijitParams()
+    public function testPatternAccessorsShouldProxyToConstraints()
     {
         $this->assertNull($this->element->getPattern());
-        $this->assertFalse(array_key_exists('pattern', $this->element->dijitParams));
+        $this->assertFalse($this->element->hasConstraint('pattern'));
         $this->element->setPattern('###0.#####');
         $this->assertEquals('###0.#####', $this->element->getPattern());
-        $this->assertEquals('###0.#####', $this->element->dijitParams['pattern']);
+        $this->assertTrue($this->element->hasConstraint('pattern'));
+        $this->assertEquals('###0.#####', $this->element->dijitParams['constraints']['pattern']);
     }
 
-    public function testTypeAccessorsShouldProxyToDijitParams()
+    public function testTypeAccessorsShouldProxyToConstraints()
     {
         $this->assertNull($this->element->getType());
-        $this->assertFalse(array_key_exists('type', $this->element->dijitParams));
+        $this->assertFalse($this->element->hasConstraint('type'));
         $this->element->setType('percent');
         $this->assertEquals('percent', $this->element->getType());
-        $this->assertEquals('percent', $this->element->dijitParams['type']);
+        $this->assertTrue($this->element->hasConstraint('type'));
+        $this->assertEquals('percent', $this->element->dijitParams['constraints']['type']);
     }
 
     /**
@@ -143,22 +146,24 @@ class Zend_Dojo_Form_Element_NumberTextBoxTest extends PHPUnit_Framework_TestCas
         $this->element->setType('foobar');
     }
 
-    public function testPlacesAccessorsShouldProxyToDijitParams()
+    public function testPlacesAccessorsShouldProxyToConstraints()
     {
         $this->assertNull($this->element->getPlaces());
-        $this->assertFalse(array_key_exists('places', $this->element->dijitParams));
+        $this->assertFalse($this->element->hasConstraint('places'));
         $this->element->setPlaces(3);
         $this->assertEquals(3, $this->element->getPlaces());
-        $this->assertEquals(3, $this->element->dijitParams['places']);
+        $this->assertTrue($this->element->hasConstraint('places'));
+        $this->assertEquals(3, $this->element->dijitParams['constraints']['places']);
     }
 
-    public function testStrictAccessorsShouldProxyToDijitParams()
+    public function testStrictAccessorsShouldProxyToConstraints()
     {
         $this->assertFalse($this->element->getStrict());
-        $this->assertFalse(array_key_exists('strict', $this->element->dijitParams));
+        $this->assertFalse($this->element->hasConstraint('strict'));
         $this->element->setStrict(true);
         $this->assertTrue($this->element->getStrict());
-        $this->assertTrue($this->element->dijitParams['strict']);
+        $this->assertTrue($this->element->hasConstraint('strict'));
+        $this->assertEquals('true', $this->element->dijitParams['constraints']['strict']);
     }
 
     public function testShouldRenderNumberTextBoxDijit()

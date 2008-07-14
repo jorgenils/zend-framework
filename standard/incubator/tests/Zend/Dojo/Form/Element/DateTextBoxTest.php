@@ -108,42 +108,50 @@ class Zend_Dojo_Form_Element_DateTextBoxTest extends PHPUnit_Framework_TestCase
         return $element;
     }
 
-    public function testAmPmAccessorsShouldProxyToDijitParams()
+    public function testAmPmAccessorsShouldProxyToConstraints()
     {
         $this->assertFalse($this->element->getAmPm());
-        $this->assertFalse(array_key_exists('am,pm', $this->element->dijitParams));
+        $constraints = $this->element->getConstraints();
+        $this->assertFalse(array_key_exists('am,pm', $constraints));
         $this->element->setAmPm(true);
         $this->assertTrue($this->element->getAmPm());
-        $this->assertTrue(array_key_exists('am,pm', $this->element->dijitParams));
-        $this->assertTrue($this->element->dijitParams['am,pm']);
+        $constraints = $this->element->getConstraints();
+        $this->assertTrue(array_key_exists('am,pm', $constraints));
+        $this->assertEquals('true', $this->element->dijitParams['constraints']['am,pm']);
     }
 
-    public function testStrictAccessorsShouldProxyToDijitParams()
+    public function testStrictAccessorsShouldProxyToConstraints()
     {
         $this->assertFalse($this->element->getStrict());
-        $this->assertFalse(array_key_exists('strict', $this->element->dijitParams));
+        $constraints = $this->element->getConstraints();
+        $this->assertFalse(array_key_exists('strict', $constraints));
         $this->element->setStrict(true);
         $this->assertTrue($this->element->getStrict());
-        $this->assertTrue(array_key_exists('strict', $this->element->dijitParams));
-        $this->assertTrue($this->element->dijitParams['strict']);
+        $constraints = $this->element->getConstraints();
+        $this->assertTrue(array_key_exists('strict', $constraints));
+        $this->assertEquals('true', $this->element->dijitParams['constraints']['strict']);
     }
 
-    public function testLocaleAccessorsShouldProxyToDijitParams()
+    public function testLocaleAccessorsShouldProxyToConstraints()
     {
         $this->assertNull($this->element->getLocale());
-        $this->assertFalse(array_key_exists('locale', $this->element->dijitParams));
+        $constraints = $this->element->getConstraints();
+        $this->assertFalse(array_key_exists('locale', $constraints));
         $this->element->setLocale('en-US');
         $this->assertEquals('en-US', $this->element->getLocale());
-        $this->assertEquals('en-US', $this->element->dijitParams['locale']);
+        $constraints = $this->element->getConstraints();
+        $this->assertEquals('en-US', $this->element->dijitParams['constraints']['locale']);
     }
 
-    public function testFormatLengthAccessorsShouldProxyToDijitParams()
+    public function testFormatLengthAccessorsShouldProxyToConstraints()
     {
         $this->assertNull($this->element->getFormatLength());
-        $this->assertFalse(array_key_exists('formatLength', $this->element->dijitParams));
+        $constraints = $this->element->getConstraints();
+        $this->assertFalse(array_key_exists('formatLength', $constraints));
         $this->element->setFormatLength('long');
         $this->assertEquals('long', $this->element->getFormatLength());
-        $this->assertEquals('long', $this->element->dijitParams['formatLength']);
+        $constraints = $this->element->getConstraints();
+        $this->assertEquals('long', $this->element->dijitParams['constraints']['formatLength']);
     }
 
     /**
@@ -154,13 +162,15 @@ class Zend_Dojo_Form_Element_DateTextBoxTest extends PHPUnit_Framework_TestCase
         $this->element->setFormatLength('foobar');
     }
 
-    public function testSelectorAccessorsShouldProxyToDijitParams()
+    public function testSelectorAccessorsShouldProxyToConstraints()
     {
         $this->assertNull($this->element->getSelector());
-        $this->assertFalse(array_key_exists('selector', $this->element->dijitParams));
+        $constraints = $this->element->getConstraints();
+        $this->assertFalse(array_key_exists('selector', $constraints));
         $this->element->setSelector('time');
         $this->assertEquals('time', $this->element->getSelector());
-        $this->assertEquals('time', $this->element->dijitParams['selector']);
+        $constraints = $this->element->getConstraints();
+        $this->assertEquals('time', $this->element->dijitParams['constraints']['selector']);
     }
 
     /**
@@ -171,13 +181,13 @@ class Zend_Dojo_Form_Element_DateTextBoxTest extends PHPUnit_Framework_TestCase
         $this->element->setSelector('foobar');
     }
 
-    public function testDatePatternAccessorsShouldProxyToDijitParams()
+    public function testDatePatternAccessorsShouldProxyToConstraints()
     {
         $this->assertNull($this->element->getDatePattern());
-        $this->assertFalse(array_key_exists('datePattern', $this->element->dijitParams));
+        $this->assertFalse($this->element->hasConstraint('datePattern'));
         $this->element->setDatePattern('EEE, MMM d, Y');
         $this->assertEquals('EEE, MMM d, Y', $this->element->getDatePattern());
-        $this->assertEquals('EEE, MMM d, Y', $this->element->dijitParams['datePattern']);
+        $this->assertEquals('EEE, MMM d, Y', $this->element->dijitParams['constraints']['datePattern']);
     }
 
     public function testShouldRenderDateTextBoxDijit()

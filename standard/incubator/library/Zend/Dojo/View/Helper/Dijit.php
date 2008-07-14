@@ -200,8 +200,8 @@ abstract class Zend_Dojo_View_Helper_Dijit extends Zend_View_Helper_HtmlElement
             require_once 'Zend/Json.php';
             $params['constraints'] = Zend_Json::encode($params['constraints']);
         }
-        if (array_key_exists('constraints', $params)) {
-            $params['constraints'] = str_replace('"', '', $params['constraints']);
+        if (array_key_exists('constraints', $params) && $this->_useDeclarative()) {
+            $params['constraints'] = str_replace('"', "'", $params['constraints']);
         }
 
         $dijit = (null === $dijit) ? $this->_dijit : $dijit;
@@ -227,7 +227,7 @@ abstract class Zend_Dojo_View_Helper_Dijit extends Zend_View_Helper_HtmlElement
     {
         $params['dojoType'] = $dijit;
 
-        array_walk_recursive($params, array($this, '_stringifyBoolean'));
+        array_walk_recursive($params, array($this, '_castBoolToString'));
 
         $this->dojo->setDijit($id, $params);
     }
@@ -239,7 +239,7 @@ abstract class Zend_Dojo_View_Helper_Dijit extends Zend_View_Helper_HtmlElement
      * @param  string $key 
      * @return void
      */
-    protected function _stringifyBoolean(&$item, $key)
+    protected function _castBoolToString(&$item, $key)
     {
         if (!is_bool($item)) {
             return;

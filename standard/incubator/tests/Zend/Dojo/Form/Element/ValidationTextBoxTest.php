@@ -147,6 +147,31 @@ class Zend_Dojo_Form_Element_ValidationTextBoxTest extends PHPUnit_Framework_Tes
         $this->assertSame($constraints, $this->element->dijitParams['constraints']);
     }
 
+    public function testShouldAllowSettingRetrievingAndRemovingInvididualConstraints()
+    {
+        $constraints = $this->element->getConstraints();
+        $this->assertTrue(empty($constraints));
+        $this->assertFalse($this->element->hasDijitParam('constraints'));
+
+        $this->element->setConstraint('foo', 'bar');
+        $this->assertTrue($this->element->hasConstraint('foo'));
+        $this->assertEquals('bar', $this->element->getConstraint('foo'));
+        $this->assertTrue($this->element->hasDijitParam('constraints'));
+        $this->assertEquals('bar', $this->element->dijitParams['constraints']['foo']);
+
+        $this->element->removeConstraint('foo');
+        $this->assertFalse($this->element->hasConstraint('foo'));
+        $this->assertTrue($this->element->hasDijitParam('constraints'));
+        $this->assertTrue(empty($this->element->dijitParams['constraints']));
+    }
+
+    public function testShouldAllowClearingConstraints()
+    {
+        $this->testConstraintsAccessorsShouldProxyToDijitParams();
+        $this->element->clearConstraints();
+        $this->assertFalse($this->element->hasDijitParam('constraints'));
+    }
+
     public function testShouldRenderValidationTextBoxDijit()
     {
         $html = $this->element->render();

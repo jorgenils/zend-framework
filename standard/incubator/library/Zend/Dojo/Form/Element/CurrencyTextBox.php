@@ -82,7 +82,7 @@ class Zend_Dojo_Form_Element_CurrencyTextBox extends Zend_Dojo_Form_Element_Numb
             $symbol = substr($symbol, 0, 3);
         }
 
-        $this->setDijitParam('symbol', $symbol);
+        $this->setConstraint('symbol', $symbol);
         return $this;
     }
 
@@ -93,7 +93,7 @@ class Zend_Dojo_Form_Element_CurrencyTextBox extends Zend_Dojo_Form_Element_Numb
      */
     public function getSymbol()
     {
-        return $this->getDijitParam('symbol');
+        return $this->getConstraint('symbol');
     }
 
     /**
@@ -104,9 +104,7 @@ class Zend_Dojo_Form_Element_CurrencyTextBox extends Zend_Dojo_Form_Element_Numb
      */
     public function setFractional($flag)
     {
-        $constraints = $this->getDijitParam('constraints');
-        $constraints['fractional'] = ((bool) $flag) ? 'true' : 'false';
-        $this->setConstraints($constraints);
+        $this->setConstraint('fractional', (bool) $flag);
         return $this;
     }
 
@@ -117,13 +115,6 @@ class Zend_Dojo_Form_Element_CurrencyTextBox extends Zend_Dojo_Form_Element_Numb
      */
     public function getFractional()
     {
-        if (!$this->hasDijitParam('constraints')) {
-            return false;
-        }
-        $constraints = $this->getDijitParam('constraints');
-        if (!array_key_exists('fractional', $constraints)) {
-            return false;
-        }
-        return ('true' == $constraints['fractional']);
+        return ('true' == $this->getConstraint('fractional'));
     }
 }
