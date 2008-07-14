@@ -41,8 +41,8 @@ class ZendL_Controller_Tool_ControllerFileContext extends ZendL_Tool_Project_Str
         $codeGenFile = new ZendL_Tool_CodeGenerator_Php_File(array(
             'classes' => array(
                 new ZendL_Tool_CodeGenerator_Php_Class(array(
-                    'className' => $className,
-                    'extendedClassName' => 'Zend_Controller_Action',
+                    'name' => $className,
+                    'extendedClass' => 'Zend_Controller_Action',
                     'methods' => array(
                         new ZendL_Tool_CodeGenerator_Php_Method(array(
                             'name' => 'init',
@@ -59,13 +59,24 @@ class ZendL_Controller_Tool_ControllerFileContext extends ZendL_Tool_Project_Str
             
         if ($className == 'ErrorController') {
             $classes = $codeGenFile->getClasses();
-            $classes[0]->addMethod(new ZendL_Tool_CodeGenerator_Php_Method(array(
+            $classes['ErrorController']->setMethod(new ZendL_Tool_CodeGenerator_Php_Method(array(
                 'name' => 'errorAction',
                 'body' => '        // some errorAction stuff here' 
                 )));
         }
         
-        return $codeGenFile->toString();
+        return $codeGenFile->generate();
+    }
+    
+    public function addAction($actionName)
+    {
+        require_once $this->getPath();
+        $codeGenFile = ZendL_Tool_CodeGenerator_Php_File::fromReflection(new ZendL_Reflection_File($this->getPath()));
+        $codeGenFileClasses = $codeGenFile->getClasses();
+        $class = array_shift($codeGenFileClasses);
+        $class->setMethod(array('name' => $actionName . 'Action', 'body' => '        // action body here'));
+        
+        file_put_contents($this->getPath(), $codeGenFile->generate());
     }
     
 }

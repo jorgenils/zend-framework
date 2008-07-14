@@ -131,7 +131,7 @@ class ZendL_Tool_Rpc_Endpoint_Cli_GetoptParser
             $getoptOptions[$optionConfig] = ($cliActionableMethodReferenceData['description'] != '') ? $cliActionableMethodReferenceData['description'] : 'No description available.';
         }
         
-        $getoptParser = new Zend_Console_Getopt($getoptOptions, $this->_workingArguments, array('parseAll' => false));
+        $getoptParser = new ZendL_Console_Getopt($getoptOptions, $this->_workingArguments, array('parseAll' => false));
         $getoptParser->parse();
         foreach ($getoptParser->getOptions() as $option) {
             $value = $getoptParser->getOption($option);

@@ -127,7 +127,7 @@ require_once 'Zend/Console/Getopt/Exception.php';
  * @todo: Feature request to implement callbacks.
  *        e.g. if -a is specified, run function 'handleOptionA'().
  */
-class Zend_Console_Getopt
+class ZendL_Console_Getopt
 {
 
     /**

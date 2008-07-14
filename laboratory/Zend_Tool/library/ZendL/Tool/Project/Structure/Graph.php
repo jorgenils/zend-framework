@@ -83,31 +83,23 @@ class ZendL_Tool_Project_Structure_Graph
         foreach ($searchNodeIterator as $currentNode) {
             if (strtolower($currentNode->getContext()->getName()) == strtolower($searchContextName)) {
                 
-                /*
+                /* @todo this needs to be reworked b/c parameters are not persisted. */
+                
                 if ($searchContextParams) {
-                    $contextParams = $subProjectContext->getParameters();
-                    
-                    $foundKeysSearch = array_intersect_key($searchContextParams, $contextParams);
-                    $foundKeysOrig   = array_intersect_key($contextParams, $searchContextParams);
-                    
-                    // a search key was missing in the contextParams
-                    if ($foundKeysSearch !== $searchContextParams) {
-                        continue;
-                    }
                     
                     foreach ($searchContextParams as $searchContextParamName => $searchContextParamValue) {
-                        if ($contextParams[$searchContextParamName] !== $searchContextParamValue) {
+                        $searchContextParamGetterName = 'get' . $searchContextParamName;
+                        if (!method_exists($currentNode->getContext(), $searchContextParamGetterName) ||
+                            $currentNode->getContext()->{$searchContextParamGetterName}() != $searchContextParamValue) 
+                        {
                             continue 2;
                         }
                     }
                     
-                    return $subProjectContext;
+                    return $currentNode;
                 } else {
-                    return $subProjectContext;                    
+                    return $currentNode;                    
                 }
-                */
-
-                return $currentNode; 
 
             }
         }

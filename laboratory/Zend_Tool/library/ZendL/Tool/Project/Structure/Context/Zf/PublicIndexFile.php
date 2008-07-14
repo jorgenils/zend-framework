@@ -15,7 +15,7 @@ class ZendL_Tool_Project_Structure_Context_Zf_PublicIndexFile extends ZendL_Tool
         $codeGenerator = new ZendL_Tool_CodeGenerator_Php_File(array(
             'body' => 'include \'../bootstrap.php\';'
             ));
-        return $codeGenerator->toString();
+        return $codeGenerator->generate();
     }
     
 }

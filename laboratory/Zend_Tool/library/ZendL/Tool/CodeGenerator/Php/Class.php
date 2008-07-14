@@ -202,7 +202,7 @@ class ZendL_Tool_CodeGenerator_Php_Class extends ZendL_Tool_CodeGenerator_Php_Ab
     
     public function isSourceDirty()
     {
-        if ($this->getDocblock()->isSourceDirty()) {
+        if (($docblock = $this->getDocblock()) && $docblock->isSourceDirty()) {
             return true;
         }
         
