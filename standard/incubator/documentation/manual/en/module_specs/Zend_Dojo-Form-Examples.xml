@@ -153,6 +153,13 @@ class My_Form_Test extends Zend_Dojo_Form
                 )
             )
             ->addElement(
+                'Button', 
+                'dijitButton', 
+                array(
+                    'label' => 'Button',
+                )
+            )
+            ->addElement(
                 'CheckBox', 
                 'checkbox', 
                 array(

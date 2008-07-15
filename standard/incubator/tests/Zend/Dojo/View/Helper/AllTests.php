@@ -33,6 +33,7 @@ require_once 'Zend/Dojo/View/Helper/DojoTest.php';
 require_once 'Zend/Dojo/View/Helper/AccordionContainerTest.php';
 require_once 'Zend/Dojo/View/Helper/AccordionPaneTest.php';
 require_once 'Zend/Dojo/View/Helper/BorderContainerTest.php';
+require_once 'Zend/Dojo/View/Helper/ButtonTest.php';
 require_once 'Zend/Dojo/View/Helper/CheckBoxTest.php';
 require_once 'Zend/Dojo/View/Helper/ComboBoxTest.php';
 require_once 'Zend/Dojo/View/Helper/ContentPaneTest.php';
@@ -75,6 +76,7 @@ class Zend_Dojo_View_Helper_AllTests
         $suite->addTestSuite('Zend_Dojo_View_Helper_AccordionContainerTest');
         $suite->addTestSuite('Zend_Dojo_View_Helper_AccordionPaneTest');
         $suite->addTestSuite('Zend_Dojo_View_Helper_BorderContainerTest');
+        $suite->addTestSuite('Zend_Dojo_View_Helper_ButtonTest');
         $suite->addTestSuite('Zend_Dojo_View_Helper_CheckBoxTest');
         $suite->addTestSuite('Zend_Dojo_View_Helper_ComboBoxTest');
         $suite->addTestSuite('Zend_Dojo_View_Helper_ContentPaneTest');

@@ -20,15 +20,15 @@
  * @version    $Id$
  */
 
-// Call Zend_Dojo_View_Helper_NumberSpinnerTest::main() if this source file is executed directly.
+// Call Zend_Dojo_View_Helper_ButtonTest::main() if this source file is executed directly.
 if (!defined("PHPUnit_MAIN_METHOD")) {
-    define("PHPUnit_MAIN_METHOD", "Zend_Dojo_View_Helper_NumberSpinnerTest::main");
+    define("PHPUnit_MAIN_METHOD", "Zend_Dojo_View_Helper_ButtonTest::main");
 }
 
 require_once dirname(__FILE__) . '/../../../../TestHelper.php';
 
-/** Zend_Dojo_View_Helper_NumberSpinner */
-require_once 'Zend/Dojo/View/Helper/NumberSpinner.php';
+/** Zend_Dojo_View_Helper_Button */
+require_once 'Zend/Dojo/View/Helper/Button.php';
 
 /** Zend_View */
 require_once 'Zend/View.php';
@@ -40,14 +40,14 @@ require_once 'Zend/Registry.php';
 require_once 'Zend/Dojo/View/Helper/Dojo.php';
 
 /**
- * Test class for Zend_Dojo_View_Helper_NumberSpinner.
+ * Test class for Zend_Dojo_View_Helper_Button.
  *
  * @package    Zend_Dojo
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2008 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Dojo_View_Helper_NumberSpinnerTest extends PHPUnit_Framework_TestCase 
+class Zend_Dojo_View_Helper_ButtonTest extends PHPUnit_Framework_TestCase 
 {
     /**
      * Runs the test methods of this class.
@@ -56,7 +56,7 @@ class Zend_Dojo_View_Helper_NumberSpinnerTest extends PHPUnit_Framework_TestCase
      */
     public static function main()
     {
-        $suite  = new PHPUnit_Framework_TestSuite("Zend_Dojo_View_Helper_NumberSpinnerTest");
+        $suite  = new PHPUnit_Framework_TestSuite("Zend_Dojo_View_Helper_ButtonTest");
         $result = PHPUnit_TextUI_TestRunner::run($suite);
     }
 
@@ -72,7 +72,7 @@ class Zend_Dojo_View_Helper_NumberSpinnerTest extends PHPUnit_Framework_TestCase
         Zend_Dojo_View_Helper_Dojo::setUseDeclarative();
 
         $this->view   = $this->getView();
-        $this->helper = new Zend_Dojo_View_Helper_NumberSpinner();
+        $this->helper = new Zend_Dojo_View_Helper_Button();
         $this->helper->setView($this->view);
     }
 
@@ -96,68 +96,34 @@ class Zend_Dojo_View_Helper_NumberSpinnerTest extends PHPUnit_Framework_TestCase
 
     public function getElement()
     {
-        return $this->helper->numberSpinner(
+        return $this->helper->button(
             'elementId', 
-            '5', 
+            'foo', 
+            array(),
+            array(),
             array(
-                'smallDelta' => '10', 
-                'min' => 9, 
-                'max' => 1550, 
-                'places' => 0,
-                'required'    => true, 
-            ),
-            array()
+                'checked'   => 'foo',
+                'unChecked' => 'bar',
+            )
         );
     }
 
     public function testShouldAllowDeclarativeDijitCreation()
     {
         $html = $this->getElement();
-        $this->assertRegexp('/<input[^>]*(dojoType="dijit.form.NumberSpinner")/', $html, $html);
+        $this->assertRegexp('/<button[^>]*(dojoType="dijit.form.Button")/', $html, $html);
     }
 
     public function testShouldAllowProgrammaticDijitCreation()
     {
         Zend_Dojo_View_Helper_Dojo::setUseProgrammatic();
         $html = $this->getElement();
-        $this->assertNotRegexp('/<input[^>]*(dojoType="dijit.form.NumberSpinner")/', $html);
+        $this->assertNotRegexp('/<button[^>]*(dojoType="dijit.form.Button")/', $html);
         $this->assertNotNull($this->view->dojo()->getDijit('elementId'));
-    }
-
-    public function testShouldCreateTextInput()
-    {
-        $html = $this->getElement();
-        $this->assertRegexp('/<input[^>]*(type="text")/', $html);
-    }
-
-    public function testShouldJsonEncodeConstraints()
-    {
-        $html = $this->getElement();
-        if (!preg_match('/constraints="(.*?)(" )/', $html, $m)) {
-            $this->fail('Did not serialize constraints');
-        }
-        $constraints = str_replace("'", '"', $m[1]);
-        $constraints = Zend_Json::decode($constraints);
-        $this->assertTrue(is_array($constraints), var_export($m[1], 1));
-        $this->assertTrue(array_key_exists('min', $constraints));
-        $this->assertTrue(array_key_exists('max', $constraints));
-        $this->assertTrue(array_key_exists('places', $constraints));
-    }
-
-    public function testInvalidConstraintsShouldBeStrippedPriorToRendering()
-    {
-        $html = $this->helper->numberSpinner(
-            'foo', 
-            5, 
-            array (
-                'constraints' => 'bogus',
-            )
-        );
-        $this->assertNotContains('constraints="', $html);
     }
 }
 
-// Call Zend_Dojo_View_Helper_NumberSpinnerTest::main() if this source file is executed directly.
-if (PHPUnit_MAIN_METHOD == "Zend_Dojo_View_Helper_NumberSpinnerTest::main") {
-    Zend_Dojo_View_Helper_NumberSpinnerTest::main();
+// Call Zend_Dojo_View_Helper_ButtonTest::main() if this source file is executed directly.
+if (PHPUnit_MAIN_METHOD == "Zend_Dojo_View_Helper_ButtonTest::main") {
+    Zend_Dojo_View_Helper_ButtonTest::main();
 }

@@ -416,8 +416,23 @@ echo $view->borderContainer()->captureEnd('masterLayout');
         <itemizedlist>
             <listitem>
                 <para>
+                    <emphasis>Button</emphasis>: dijit.form.Button. Display a
+                    form button.
+                </para>
+
+                <programlisting role="php"><![CDATA[
+<?= $view->button(
+    'foo', 
+    'Show Me!', 
+    array('iconClass' => 'myButtons'),
+); ?>
+]]></programlisting>
+            </listitem>
+
+            <listitem>
+                <para>
                     <emphasis>CheckBox</emphasis>:
-                    dijit.layout.CheckBox. Display a checkbox. Accepts an
+                    dijit.form.CheckBox. Display a checkbox. Accepts an
                     optional fifth argument, the array
                     <code>$checkedOptions</code>, which may contain either:
                 </para>

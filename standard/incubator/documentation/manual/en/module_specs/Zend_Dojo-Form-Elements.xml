@@ -85,6 +85,53 @@ $element->addDecorator('DijitElement')
         Framework distribution.
     </para>
 
+    <sect3 id="zend.dojo.form.elements.button">
+        <title>Button</title>
+
+        <para>
+            While not deriving from <link
+                linkend="zend.form.standardElements.submit">the standard Submit
+                element</link>, it does implement the same functionality, and
+            can be used as a drop-in replacement for the standard <link
+                linkend="zend.form.standardElements.button">Button
+                element</link>. The following functionality is exposed:
+        </para>
+
+        <itemizedlist>
+            <listitem><para>
+                <code>getLabel()</code> will utilize the element name as the
+                button label if no name is provided. Additionally, it will
+                translate the name if a translation adapter with a matching
+                translation message is available.
+            </para></listitem>
+
+            <listitem><para>
+                <code>isChecked()</code> determines if the value submitted
+                matches the label; if so, it returns true. This is useful for
+                determining which button was used when a form was submitted.
+            </para></listitem>
+        </itemizedlist>
+
+        <para>
+            Additionally, only the decorators <code>DijitElement</code> and
+            <code>DtDdWrapper</code> are utilized for Button elements.
+        </para>
+
+        <example id="zend.dojo.form.elements.button.example">
+            <title>Example Button dijit element usage</title>
+
+            <programlisting role="php"><![CDATA[
+$form->addElement(
+    'Button',
+    'foo',
+    array(
+        'label' => 'Button Label',
+    )
+);
+]]></programlisting>
+        </example>
+    </sect3>
+
     <sect3 id="zend.dojo.form.elements.checkBox">
         <title>CheckBox</title>
 

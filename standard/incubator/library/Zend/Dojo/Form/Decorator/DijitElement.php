@@ -49,6 +49,17 @@ class Zend_Dojo_Form_Decorator_DijitElement extends Zend_Form_Decorator_ViewHelp
     protected $_attribs;
 
     /**
+     * Element types that represent buttons
+     * @var array
+     */
+    protected $_buttonTypes = array(
+        'Zend_Dojo_Form_Element_Button',
+        'Zend_Form_Element_Button',
+        'Zend_Form_Element_Reset',
+        'Zend_Form_Element_Submit',
+    );
+
+    /**
      * Element types passing extra options
      * @var array
      */
