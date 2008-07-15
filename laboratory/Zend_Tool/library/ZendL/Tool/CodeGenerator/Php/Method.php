@@ -71,19 +71,21 @@ class ZendL_Tool_CodeGenerator_Php_Method extends ZendL_Tool_CodeGenerator_Php_M
     public function setParameter($parameter)
     {
         if (is_array($parameter)) {
-            $parameter = new ZendL_Tool_CodeGenerator_Php_Method($method);
+            $parameter = new ZendL_Tool_CodeGenerator_Php_Parameter($method);
             $parameterName = $parameter->getName();
-        } elseif ($parameter instanceof ZendL_Tool_CodeGenerator_Php_Method) {
-            $parameterName = $method->getName();
+        } elseif ($parameter instanceof ZendL_Tool_CodeGenerator_Php_Parameter) {
+            $parameterName = $parameter->getName();
         } else {
             require_once 'ZendL/Tool/CodeGenerator/Php/Exception.php';
-            throw new ZendL_Tool_CodeGenerator_Php_Exception('setMethod() expects either an array of method options or an instance of ZendL_Tool_CodeGenerator_Php_Method');
+            throw new ZendL_Tool_CodeGenerator_Php_Exception('setParameter() expects either an array of method options or an instance of ZendL_Tool_CodeGenerator_Php_Parameter');
         }
         
-        if (isset($this->_parameters[$methodName])) {
+        /*
+        if (isset($this->_parameters[$parameterName])) {
             require_once 'ZendL/Tool/CodeGenerator/Php/Exception.php';
             throw new ZendL_Tool_CodeGenerator_Php_Exception('A method by name ' . $parameterName . ' already exists in this class.');
         }
+        */
         
         $this->_parameters[$parameterName] = $parameter;
         return $this;

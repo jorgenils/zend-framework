@@ -42,7 +42,7 @@ class ZendL_Controller_Tool_ControllerFileContext extends ZendL_Tool_Project_Str
             'classes' => array(
                 new ZendL_Tool_CodeGenerator_Php_Class(array(
                     'name' => $className,
-                    'extendedClass' => 'Zend_Controller_Action',
+                    //'extendedClass' => 'Zend_Controller_Action',
                     'methods' => array(
                         new ZendL_Tool_CodeGenerator_Php_Method(array(
                             'name' => 'init',

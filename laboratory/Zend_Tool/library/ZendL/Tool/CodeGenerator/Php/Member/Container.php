@@ -11,6 +11,7 @@ class ZendL_Tool_CodeGenerator_Php_Member_Container extends ArrayObject
     public function __construct($type = self::TYPE_PROPERTY)
     {
         $this->_type = $type;
+        parent::__construct(array(), self::ARRAY_AS_PROPS);
     }
     
 }

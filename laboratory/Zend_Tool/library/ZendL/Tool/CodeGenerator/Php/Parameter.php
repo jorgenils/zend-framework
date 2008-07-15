@@ -10,6 +10,11 @@ class ZendL_Tool_CodeGenerator_Php_Parameter extends ZendL_Tool_CodeGenerator_Ph
     protected $_defaultValue = null;
     protected $_position = null;
     
+    public static function fromReflection(ZendL_Reflection_Parameter $reflectionParameter)
+    {
+        return new self();
+    }
+    
     public function setType($type)
     {
         $this->_type = $type;

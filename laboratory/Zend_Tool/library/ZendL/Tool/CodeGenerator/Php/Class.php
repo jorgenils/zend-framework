@@ -53,13 +53,17 @@ class ZendL_Tool_CodeGenerator_Php_Class extends ZendL_Tool_CodeGenerator_Php_Ab
         
         $properties = array();
         foreach ($reflectionClass->getProperties() as $reflectionProperty) {
-            $properties[] = ZendL_Tool_CodeGenerator_Php_Property::fromReflection($reflectionProperty);
+            if ($reflectionProperty->getDeclaringClass()->getName() == $class->getName()) {
+                $properties[] = ZendL_Tool_CodeGenerator_Php_Property::fromReflection($reflectionProperty);
+            }
         }
         $class->setProperties($properties);
         
         $methods = array();
         foreach ($reflectionClass->getMethods() as $reflectionMethod) {
-            $methods[] = ZendL_Tool_CodeGenerator_Php_Method::fromReflection($reflectionMethod);
+            if ($reflectionMethod->getDeclaringClass()->getName() == $class->getName()) {
+                $methods[] = ZendL_Tool_CodeGenerator_Php_Method::fromReflection($reflectionMethod);
+            }
         }
         $class->setMethods($methods);
         
