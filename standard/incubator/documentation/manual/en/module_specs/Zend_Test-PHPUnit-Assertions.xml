@@ -8,7 +8,7 @@
         assertions to make testing your MVC apps and controllers simpler.
     </para>
 
-    <sect3 id="zend.test.phpunit.assertions.select">
+    <sect3 id="zend.test.phpunit.assertions.query">
         <title>CSS Selector Assertions</title>
 
         <para>
@@ -23,24 +23,24 @@
         <para>
             This functionality is provided via <link
                 linkend="zend.dom.query">Zend_Dom_Query</link>, and integrated
-            into a set of 'Select' assertions. Each of these assertions takes
+            into a set of 'Query' assertions. Each of these assertions takes
             as their first argument a CSS selector, with optionally additional
             arguments and/or an error message, based on the assertion type. You
             can find the rules for writing the CSS selectors in the <link
                 linkend="zend.dom.query.operation">Zend_Dom_Query theory of
-                operation chapter</link>.  Select assertions include:
+                operation chapter</link>.  Query assertions include:
         </para>
 
         <itemizedlist>
             <listitem><para>
-                <code>assertSelect($path, $message = '')</code>: assert that
+                <code>assertQuery($path, $message = '')</code>: assert that
                 one or more DOM elements matching the given CSS selector are
                 present. If a <code>$message</code> is present, it will be
                 prepended to any failed assertion message.
             </para></listitem>
 
             <listitem><para>
-                <code>assertSelectContentContains($path, $match, $message =
+                <code>assertQueryContentContains($path, $match, $message =
                     '')</code>: assert that one or more DOM elements matching
                 the given CSS selector are present, and that at least one
                 contains the content provided in <code>$match</code>. If a
@@ -49,7 +49,7 @@
             </para></listitem>
 
             <listitem><para>
-                <code>assertSelectContentRegex($path, $pattern, $message =
+                <code>assertQueryContentRegex($path, $pattern, $message =
                     '')</code>: assert that one or more DOM elements matching
                 the given CSS selector are present, and that at least one
                 matches the regular expression provided in
@@ -58,7 +58,7 @@
             </para></listitem>
 
             <listitem><para>
-                <code>assertSelectContentCount($path, $count, $message =
+                <code>assertQueryContentCount($path, $count, $message =
                     '')</code>: assert that there are exactly
                 <code>$count</code> DOM elements matching the given CSS
                 selector present. If a <code>$message</code> is present, it
@@ -66,34 +66,34 @@
             </para></listitem>
 
             <listitem><para>
-                <code>assertSelectContentCountMin($path, $count, $message =
+                <code>assertQueryContentCountMin($path, $count, $message =
                     '')</code>: assert that there are at least
                 <code>$count</code> DOM elements matching the given CSS
                 selector present. If a <code>$message</code> is present, it
                 will be prepended to any failed assertion message.
                 <emphasis>Note:</emphasis> specifying a value of 1 for
                 <code>$count</code> is the same as simply using
-                <code>assertSelect()</code>.
+                <code>assertQuery()</code>.
             </para></listitem>
 
             <listitem><para>
-                <code>assertSelectContentCountMax($path, $count, $message =
+                <code>assertQueryContentCountMax($path, $count, $message =
                     '')</code>: assert that there are no more than
                 <code>$count</code> DOM elements matching the given CSS
                 selector present. If a <code>$message</code> is present, it
                 will be prepended to any failed assertion message.
                 <emphasis>Note:</emphasis> specifying a value of 1 for
                 <code>$count</code> is the same as simply using
-                <code>assertSelect()</code>.
+                <code>assertQuery()</code>.
             </para></listitem>
         </itemizedlist>
 
         <para>
             Additionally, each of the above has a 'Not' variant that provides a
-            negative assertion: <code>assertNotSelect()</code>,
-            <code>assertNotSelectContentContains()</code>,
-            <code>assertNotSelectContentRegex()</code>, and
-            <code>assertNotSelectContentCount()</code>. (Note that the min and
+            negative assertion: <code>assertNotQuery()</code>,
+            <code>assertNotQueryContentContains()</code>,
+            <code>assertNotQueryContentRegex()</code>, and
+            <code>assertNotQueryContentCount()</code>. (Note that the min and
             max counts do not have these variants, for what should be obvious
             reasons.)
         </para>
@@ -105,7 +105,7 @@
         <para>
             Some developers are more familiar with XPath than with CSS
             selectors, and thus XPath variants of all the <link
-                linkend="zend.test.phpunit.assertions.select">Select
+                linkend="zend.test.phpunit.assertions.query">Query
                 assertions</link> are also provided. These are:
         </para>
 

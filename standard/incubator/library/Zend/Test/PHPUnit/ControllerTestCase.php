@@ -205,7 +205,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      * @param  string $message
      * @return void
      */
-    public function assertSelect($path, $message = '')
+    public function assertQuery($path, $message = '')
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
@@ -222,7 +222,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      * @param  string $message
      * @return void
      */
-    public function assertNotSelect($path, $message = '')
+    public function assertNotQuery($path, $message = '')
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
@@ -240,7 +240,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      * @param  string $message
      * @return void
      */
-    public function assertSelectContentContains($path, $match, $message = '')
+    public function assertQueryContentContains($path, $match, $message = '')
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
@@ -258,7 +258,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      * @param  string $message
      * @return void
      */
-    public function assertNotSelectContentContains($path, $match, $message = '')
+    public function assertNotQueryContentContains($path, $match, $message = '')
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
@@ -276,7 +276,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      * @param  string $message
      * @return void
      */
-    public function assertSelectContentRegex($path, $pattern, $message = '')
+    public function assertQueryContentRegex($path, $pattern, $message = '')
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
@@ -294,7 +294,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      * @param  string $message
      * @return void
      */
-    public function assertNotSelectContentRegex($path, $pattern, $message = '')
+    public function assertNotQueryContentRegex($path, $pattern, $message = '')
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
@@ -312,7 +312,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      * @param  string $message
      * @return void
      */
-    public function assertSelectCount($path, $count, $message = '')
+    public function assertQueryCount($path, $count, $message = '')
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
@@ -330,7 +330,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      * @param  string $message
      * @return void
      */
-    public function assertNotSelectCount($path, $count, $message = '')
+    public function assertNotQueryCount($path, $count, $message = '')
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
@@ -348,7 +348,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      * @param  string $message
      * @return void
      */
-    public function assertSelectCountMin($path, $count, $message = '')
+    public function assertQueryCountMin($path, $count, $message = '')
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);
@@ -366,7 +366,7 @@ class Zend_Test_PHPUnit_ControllerTestCase extends PHPUnit_Framework_TestCase
      * @param  string $message
      * @return void
      */
-    public function assertSelectCountMax($path, $count, $message = '')
+    public function assertQueryCountMax($path, $count, $message = '')
     {
         require_once 'Zend/Test/PHPUnit/Constraint/DomQuery.php';
         $constraint = new Zend_Test_PHPUnit_Constraint_DomQuery($path);

@@ -254,75 +254,75 @@ class Zend_Test_PHPUnit_ControllerTestCaseTest extends PHPUnit_Framework_TestCas
         $this->assertContains('FooController::barAction', $content, $content);
     }
 
-    public function testAssertSelectShouldDoNothingForValidResponseContent()
+    public function testAssertQueryShouldDoNothingForValidResponseContent()
     {
         $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
         $this->testCase->dispatch('/foo/baz');
-        $this->testCase->assertSelect('div#foo legend.bar');
-        $this->testCase->assertSelect('div#foo legend.baz');
-        $this->testCase->assertSelect('div#foo legend.bat');
-        $this->testCase->assertNotSelect('div#foo legend.bogus');
-        $this->testCase->assertSelectContentContains('legend.bat', 'La di da');
-        $this->testCase->assertNotSelectContentContains('legend.bat', 'La do da');
-        $this->testCase->assertSelectContentRegex('legend.bat', '/d[a|i]/i');
-        $this->testCase->assertNotSelectContentRegex('legend.bat', '/d[o|e]/i');
-        $this->testCase->assertSelectCountMin('div#foo legend.bar', 2);
-        $this->testCase->assertSelectCount('div#foo legend.bar', 2);
-        $this->testCase->assertSelectCountMin('div#foo legend.bar', 2);
-        $this->testCase->assertSelectCountMax('div#foo legend.bar', 2);
+        $this->testCase->assertQuery('div#foo legend.bar');
+        $this->testCase->assertQuery('div#foo legend.baz');
+        $this->testCase->assertQuery('div#foo legend.bat');
+        $this->testCase->assertNotQuery('div#foo legend.bogus');
+        $this->testCase->assertQueryContentContains('legend.bat', 'La di da');
+        $this->testCase->assertNotQueryContentContains('legend.bat', 'La do da');
+        $this->testCase->assertQueryContentRegex('legend.bat', '/d[a|i]/i');
+        $this->testCase->assertNotQueryContentRegex('legend.bat', '/d[o|e]/i');
+        $this->testCase->assertQueryCountMin('div#foo legend.bar', 2);
+        $this->testCase->assertQueryCount('div#foo legend.bar', 2);
+        $this->testCase->assertQueryCountMin('div#foo legend.bar', 2);
+        $this->testCase->assertQueryCountMax('div#foo legend.bar', 2);
     }
 
-    public function testAssertSelectShouldThrowExceptionsForInValidResponseContent()
+    public function testAssertQueryShouldThrowExceptionsForInValidResponseContent()
     {
         $this->testCase->getFrontController()->setControllerDirectory(dirname(__FILE__) . '/_files/application/controllers');
         $this->testCase->dispatch('/foo/baz');
         try {
-            $this->testCase->assertNotSelect('div#foo legend.bar');
+            $this->testCase->assertNotQuery('div#foo legend.bar');
             $this->fail('Invalid assertions should throw exceptions');
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
         }
         try {
-            $this->testCase->assertSelect('div#foo legend.bogus');
+            $this->testCase->assertQuery('div#foo legend.bogus');
             $this->fail('Invalid assertions should throw exceptions');
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
         }
         try {
-            $this->testCase->assertNotSelectContentContains('legend.bat', 'La di da');
+            $this->testCase->assertNotQueryContentContains('legend.bat', 'La di da');
             $this->fail('Invalid assertions should throw exceptions');
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
         }
         try {
-            $this->testCase->assertSelectContentContains('legend.bat', 'La do da');
+            $this->testCase->assertQueryContentContains('legend.bat', 'La do da');
             $this->fail('Invalid assertions should throw exceptions');
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
         }
         try {
-            $this->testCase->assertNotSelectContentRegex('legend.bat', '/d[a|i]/i');
+            $this->testCase->assertNotQueryContentRegex('legend.bat', '/d[a|i]/i');
             $this->fail('Invalid assertions should throw exceptions');
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
         }
         try {
-            $this->testCase->assertSelectContentRegex('legend.bat', '/d[o|e]/i');
+            $this->testCase->assertQueryContentRegex('legend.bat', '/d[o|e]/i');
             $this->fail('Invalid assertions should throw exceptions');
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
         }
         try {
-            $this->testCase->assertSelectCountMin('div#foo legend.bar', 3);
+            $this->testCase->assertQueryCountMin('div#foo legend.bar', 3);
             $this->fail('Invalid assertions should throw exceptions');
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
         }
         try {
-            $this->testCase->assertSelectCount('div#foo legend.bar', 1);
+            $this->testCase->assertQueryCount('div#foo legend.bar', 1);
             $this->fail('Invalid assertions should throw exceptions');
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
         }
         try {
-            $this->testCase->assertSelectCountMin('div#foo legend.bar', 3);
+            $this->testCase->assertQueryCountMin('div#foo legend.bar', 3);
             $this->fail('Invalid assertions should throw exceptions');
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
         }
         try {
-            $this->testCase->assertSelectCountMax('div#foo legend.bar', 1);
+            $this->testCase->assertQueryCountMax('div#foo legend.bar', 1);
             $this->fail('Invalid assertions should throw exceptions');
         } catch (Zend_Test_PHPUnit_Constraint_Exception $e) {
         }

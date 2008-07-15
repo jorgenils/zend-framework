@@ -62,7 +62,7 @@ class UserControllerTest extends Zend_Test_PHPUnit_ControllerTestCase
     {
         $this->dispatch('/user');
         $this->assertAction('index');
-        $this->assertSelectCount('form#loginForm', 1);
+        $this->assertQueryCount('form#loginForm', 1);
     }
 
     public function testValidLoginShouldGoToProfilePage()
@@ -84,8 +84,8 @@ class UserControllerTest extends Zend_Test_PHPUnit_ControllerTestCase
         $this->assertController('user');
         $this->assertAction('view');
         $this->assertNotRedirect();
-        $this->assertSelect('dl');
-        $this->assertSelectContentContains('h2', 'User: foobar');
+        $this->assertQuery('dl');
+        $this->assertQueryContentContains('h2', 'User: foobar');
     }
 }
 ]]></programlisting>

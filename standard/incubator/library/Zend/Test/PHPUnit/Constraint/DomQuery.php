@@ -19,12 +19,12 @@ class Zend_Test_PHPUnit_Constraint_DomQuery extends PHPUnit_Framework_Constraint
     /**#@+
      * @const string Assertion type constants
      */
-    const ASSERT_SELECT           = 'assertSelect';
-    const ASSERT_CONTENT_CONTAINS = 'assertSelectContentContains';
-    const ASSERT_CONTENT_REGEX    = 'assertSelectContentRegex';
-    const ASSERT_CONTENT_COUNT    = 'assertSelectCount';
-    const ASSERT_CONTENT_COUNT_MIN= 'assertSelectCountMin';
-    const ASSERT_CONTENT_COUNT_MAX= 'assertSelectCountMax';
+    const ASSERT_QUERY            = 'assertQuery';
+    const ASSERT_CONTENT_CONTAINS = 'assertQueryContentContains';
+    const ASSERT_CONTENT_REGEX    = 'assertQueryContentRegex';
+    const ASSERT_CONTENT_COUNT    = 'assertQueryCount';
+    const ASSERT_CONTENT_COUNT_MIN= 'assertQueryCountMin';
+    const ASSERT_CONTENT_COUNT_MAX= 'assertQueryCountMax';
     /**#@-*/
 
     /**
@@ -38,7 +38,7 @@ class Zend_Test_PHPUnit_Constraint_DomQuery extends PHPUnit_Framework_Constraint
      * @var array
      */
     protected $_assertTypes       = array(
-        self::ASSERT_SELECT,
+        self::ASSERT_QUERY,
         self::ASSERT_CONTENT_CONTAINS,
         self::ASSERT_CONTENT_REGEX,
         self::ASSERT_CONTENT_COUNT,
@@ -120,7 +120,7 @@ class Zend_Test_PHPUnit_Constraint_DomQuery extends PHPUnit_Framework_Constraint
 
         if (strstr($assertType, 'Xpath')) {
             $this->setUseXpath(true);
-            $assertType = str_replace('Xpath', 'Select', $assertType);
+            $assertType = str_replace('Xpath', 'Query', $assertType);
         }
 
         if (!in_array($assertType, $this->_assertTypes)) {
@@ -164,7 +164,7 @@ class Zend_Test_PHPUnit_Constraint_DomQuery extends PHPUnit_Framework_Constraint
                 }
                 $this->_content = $content = $argv[2];
                 return $this->_countContent($result, $content, $assertType);
-            case self::ASSERT_SELECT:
+            case self::ASSERT_QUERY:
             default:
                 if ($this->_negate) {
                     return (0 == count($result));
@@ -217,7 +217,7 @@ class Zend_Test_PHPUnit_Constraint_DomQuery extends PHPUnit_Framework_Constraint
                 $failure = 'Failed asserting node DENOTED BY %s OCCURS AT MOST %i times';
                 $failure = sprintf($failure, $other, $this->_content);
                 break;
-            case self::ASSERT_SELECT:
+            case self::ASSERT_QUERY:
             default:
                 $failure = 'Failed asserting node DENOTED BY %s EXISTS';
                 if ($this->_negate) {
