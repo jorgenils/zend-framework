@@ -19,8 +19,8 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** @see Zend_Http_Client */
-require_once 'Zend/Http/Client.php';
+/** @see Zend_Service_Abstract */
+require_once 'Zend/Service/Abstract.php';
 
 /** @see Zend_Json */
 require_once 'Zend/Json.php';
@@ -38,7 +38,7 @@ require_once 'Zend/Service/ReCaptcha/Response.php';
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
-class Zend_Service_ReCaptcha
+class Zend_Service_ReCaptcha extends Zend_Service_Abstract
 {
     /**
      * URI to the regular API
@@ -81,13 +81,6 @@ class Zend_Service_ReCaptcha
      * @var string
      */
     protected $_ip = null;
-
-    /**
-     * The HTTP client object
-     *
-     * @var Zend_Http_Client
-     */
-    protected $_httpClient = null;
 
     /**
      * Parameters for the object
@@ -197,35 +190,6 @@ class Zend_Service_ReCaptcha
     public function getIp()
     {
         return $this->_ip;
-    }
-
-    /**
-     * Set the HTTP client instance
-     *
-     * @param Zend_Http_Client $httpClient
-     * @return Zend_Service_ReCaptcha
-     */
-    public function setHttpClient(Zend_Http_Client $httpClient)
-    {
-        $this->_httpClient = $httpClient;
-
-        return $this;
-    }
-
-    /**
-     * Get an instance of the HTTP client
-     *
-     * If no client object is set a new Zend_Http_Client object will be used
-     *
-     * @return Zend_Http_Client_Abstract
-     */
-    public function getHttpClient()
-    {
-        if ($this->_httpClient === null) {
-            $this->_httpClient = new Zend_Http_Client();
-        }
-
-        return $this->_httpClient;
     }
 
     /**
