@@ -108,6 +108,16 @@ class Zend_Translate_IniTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(is_null($adapter->getOptions('nooption')));
     }
 
+    public function testClearing()
+    {
+        $adapter = new Zend_Translate_Adapter_Ini(dirname(__FILE__) . '/_files/translation.ini', 'en');
+        $this->assertEquals('Nachricht 1 (de)', $adapter->translate('Message_1'         ));
+        $this->assertEquals('Message_5',        $adapter->translate('Message_5'         ));
+        $adapter->addTranslation(dirname(__FILE__) . '/_files/translation2.ini', 'en', array('clear' => true));
+        $this->assertEquals('Message_1',        $adapter->translate('Message_1'));
+        $this->assertEquals('Nachricht 5 (de)', $adapter->translate('Message_5'));
+    }
+
     public function testLocale()
     {
         $adapter = new Zend_Translate_Adapter_Ini(dirname(__FILE__) . '/_files/translation.ini', 'en');
