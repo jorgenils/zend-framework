@@ -20,6 +20,9 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
+/** Zend_Dojo */
+require_once 'Zend/Dojo.php';
+
 /**
  * Container for  Dojo View Helper
  *
@@ -31,16 +34,6 @@
  */
 class Zend_Dojo_View_Helper_Dojo_Container
 { 
-    /**
-     *  @const string Base path to CDN
-     */
-    const CDN_BASE = 'http://o.aolcdn.com/dojo/';
-
-    /**
-     * @const string Local path to dojo (following versio string)
-     */
-    const CDN_DOJO_PATH = '/dojo/dojo.xd.js';
-
     /**
      * @var Zend_View_Interface
      */
@@ -57,6 +50,24 @@ class Zend_Dojo_View_Helper_Dojo_Container
      * @var string
      */
     protected $_captureObj;
+
+    /**
+     * Base CDN url to utilize
+     * @var string
+     */
+    protected $_cdnBase = Zend_Dojo::CDN_BASE_AOL;
+
+    /**
+     * Path segment following version string of CDN path
+     * @var string
+     */
+    protected $_cdnDojoPath = Zend_Dojo::CDN_DOJO_PATH_AOL;
+
+    /**
+     * Dojo version to use from CDN
+     * @var string
+     */
+    protected $_cdnVersion = '1.1.1';
 
     /**
      * Has the dijit loader been registered?
@@ -141,12 +152,6 @@ class Zend_Dojo_View_Helper_Dojo_Container
      * @var array
      */
     protected $_stylesheets = array();
-
-    /**
-     * Dojo version to use from CDN
-     * @var string
-     */
-    protected $_version = '1.1';
 
 
     /**
@@ -300,6 +305,28 @@ class Zend_Dojo_View_Helper_Dojo_Container
         $this->_layers = array();
         return $this;
     }
+
+    /**
+     * Set CDN base path
+     * 
+     * @param  string $url 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function setCdnBase($url)
+    {
+        $this->_cdnBase = (string) $url;
+        return $this;
+    }
+
+    /**
+     * Return CDN base URL
+     * 
+     * @return string
+     */
+    public function getCdnBase()
+    {
+        return $this->_cdnBase;
+    }
  
     /**
      * Use CDN, using version specified
@@ -311,7 +338,7 @@ class Zend_Dojo_View_Helper_Dojo_Container
     {
         $this->enable();
         if (preg_match('/^[1-9]\.[0-9](\.[0-9])?$/', $version)) {
-            $this->_version = $version;
+            $this->_cdnVersion = $version;
         }
         return $this;
     }
@@ -323,10 +350,31 @@ class Zend_Dojo_View_Helper_Dojo_Container
      */
     public function getCdnVersion()
     {
-        return $this->_version;
+        return $this->_cdnVersion;
     }
 
     /**
+     * Set CDN path to dojo (relative to CDN base + version)
+     * 
+     * @param  string $path 
+     * @return Zend_Dojo_View_Helper_Dojo_Container
+     */
+    public function setCdnDojoPath($path)
+    {
+        $this->_cdnDojoPath = (string) $path;
+        return $this;
+    }
+
+    /**
+     * Get CDN path to dojo (relative to CDN base + version)
+     * 
+     * @return string
+     */
+    public function getCdnDojoPath()
+    {
+        return $this->_cdnDojoPath;
+    }
+     /**
      * Are we using the CDN?
      * 
      * @return void
@@ -823,7 +871,7 @@ EOJ;
     protected function _renderStylesheets()
     {
         if ($this->useCdn()) {
-            $base = self::CDN_BASE
+            $base = $this->getCdnBase()
                   . $this->getCdnVersion();
         } else {
             $base = $this->_getLocalRelativePath();
@@ -890,9 +938,9 @@ EOJ;
     protected function _renderDojoScriptTag()
     {
         if ($this->useCdn()) {
-            $source = self::CDN_BASE
+            $source = $this->getCdnBase()
                     . $this->getCdnVersion()
-                    . self::CDN_DOJO_PATH;
+                    . $this->getCdnDojoPath();
         } else {
             $source = $this->getLocalPath();
         }

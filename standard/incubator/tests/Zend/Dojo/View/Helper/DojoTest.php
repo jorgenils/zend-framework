@@ -33,6 +33,9 @@ require_once 'Zend/Dojo/View/Helper/Dojo.php';
 /** Zend_Dojo_View_Helper_Dojo_Container */
 require_once 'Zend/Dojo/View/Helper/Dojo/Container.php';
 
+/** Zend_Dojo */
+require_once 'Zend/Dojo.php';
+
 /** Zend_View */
 require_once 'Zend/View.php';
 
@@ -181,16 +184,40 @@ class Zend_Dojo_View_Helper_DojoTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->helper->useCdn());
     }
 
+    public function testShouldUseAolCdnByDefault()
+    {
+        $this->assertEquals(Zend_Dojo::CDN_BASE_AOL, $this->helper->getCdnBase());
+    }
+
+    public function testShouldAllowSpecifyingCdnBasePath()
+    {
+        $this->testShouldUseAolCdnByDefault();
+        $this->helper->setCdnBase(Zend_Dojo::CDN_BASE_GOOGLE);
+        $this->assertEquals(Zend_Dojo::CDN_BASE_GOOGLE, $this->helper->getCdnBase());
+    }
+
     public function testShouldUseLatestVersionWhenUsingCdnByDefault()
     {
         $this->helper->enable();
-        $this->assertEquals('1.1', $this->helper->getCdnVersion());
+        $this->assertEquals('1.1.1', $this->helper->getCdnVersion());
     }
 
     public function testShouldAllowSpecifyingDojoVersionWhenUtilizingCdn()
     {
         $this->helper->setCdnVersion('1.0');
         $this->assertEquals('1.0', $this->helper->getCdnVersion());
+    }
+
+    public function testShouldUseAolCdnDojoPathByDefault()
+    {
+        $this->assertEquals(Zend_Dojo::CDN_DOJO_PATH_AOL, $this->helper->getCdnDojoPath());
+    }
+
+    public function testShouldAllowSpecifyingCdnDojoPath()
+    {
+        $this->testShouldUseAolCdnDojoPathByDefault();
+        $this->helper->setCdnDojoPath(Zend_Dojo::CDN_DOJO_PATH_GOOGLE);
+        $this->assertEquals(Zend_Dojo::CDN_DOJO_PATH_GOOGLE, $this->helper->getCdnDojoPath());
     }
 
     public function testShouldAllowSpecifyingLocalDojoInstall()
