@@ -136,6 +136,7 @@ class Zend_Oauth_Http_Utility
     public static function urlEncode($value)
     {
         $encoded = rawurlencode($value);
-        return str_replace('%7E','~',$encoded);
+        $encoded = str_replace('%7E','~',$encoded);
+        return $encoded;
     }
 }

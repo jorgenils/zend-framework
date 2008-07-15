@@ -49,12 +49,34 @@ require_once 'Zend/Oauth/Config.php';
 class Zend_Oauth_Consumer extends Zend_Oauth
 {
 
+    /**
+     * Request Token retrieved from OAuth Provider
+     *
+     * @var Zend_Oauth_Token_Request
+     */
     protected $_requestToken = null;
 
+    /**
+     * Access token retrieved from OAuth Provider
+     *
+     * @var Zend_Oauth_Token_Access
+     */
     protected $_accessToken = null;
 
+    /**
+     * Signature method used when signing all parameters for an HTTP request
+     *
+     * @var string
+     */
     protected $_config = null;
 
+    /**
+     * Constructor; create a new object with an optional array|Zend_Config
+     * instance containing initialising options.
+     *
+     * @param array|Zend_Config $options
+     * @return void
+     */
     public function __construct($options = null)
     {
         $this->_config = new Zend_Oauth_Config;
@@ -66,6 +88,16 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         }
     }
 
+    /**
+     * Attempts to retrieve a Request Token from an OAuth Provider which is
+     * later exchanged for an authorised Access Token used to access the
+     * protected resources exposed by a web service API.
+     *
+     * @param array $customServiceParameters Non-OAuth Provider-specified parameters
+     * @param string $httpMethod
+     * @param Zend_Oauth_Http_RequestToken $request
+     * @return Zend_Oauth_Token_Request
+     */
     public function getRequestToken(array $customServiceParameters = null,
         $httpMethod = null,
         Zend_Oauth_Http_RequestToken $request = null)
@@ -84,6 +116,19 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         return $this->_requestToken;
     }
 
+    /**
+     * After a Request Token is retrieved, the user may be redirected to the
+     * OAuth Provider to authorise the application's access to their
+     * protected resources - the redirect URL being provided by this method.
+     * Once the user has authorised the application for access, they are
+     * redirected back to the application which can now exchange the previous
+     * Request Token for a fully authorised Access Token.
+     *
+     * @param array $customServiceParameters
+     * @param Zend_Oauth_Token_Request $token
+     * @param Zend_OAuth_Http_UserAuthorisation $redirect
+     * @return string
+     */
     public function getRedirectUrl(array $customServiceParameters = null,
         Zend_Oauth_Token_Request $token = null,
         Zend_Oauth_Http_UserAuthorisation $redirect = null)
@@ -99,6 +144,14 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         return $redirect->getUrl();
     }
 
+    /**
+     * Rather than retrieve a redirect URL for use, e.g. from a controller,
+     * one may perform an immediate redirect.
+     *
+     * @param array $customServiceParameters
+     * @param Zend_Oauth_Http_UserAuthorisation $request
+     * @return void
+     */
     public function redirect(array $customServiceParameters = null,
         Zend_Oauth_Http_UserAuthorisation $request = null)
     {
@@ -106,6 +159,16 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         header('Location: ' . $redirectUrl);
     }
 
+    /**
+     * Retrieve an Access Token in exchange for a previously received/authorised
+     * Request Token.
+     *
+     * @param array $queryData GET data returned in user's redirect from Provider
+     * @param Zend_Oauth_Token_Request Request Token information
+     * @param string $httpMethod
+     * @param Zend_Oauth_Http_AccessToken $request
+     * @return Zend_Oauth_Token_Access
+     */
     public function getAccessToken($queryData, Zend_Oauth_Token_Request $token,
         $httpMethod = null, Zend_Oauth_Http_AccessToken $request = null)
     {
@@ -140,16 +203,33 @@ class Zend_Oauth_Consumer extends Zend_Oauth
         return $this->_accessToken;
     }
 
+    /**
+     * Return whatever the last Request Token retrieved was while using the
+     * current Consumer instance.
+     *
+     * @return Zend_Oauth_Token_Request
+     */
     public function getLastRequestToken()
     {
         return $this->_requestToken;
     }
 
+    /**
+     * Return whatever the last Access Token retrieved was while using the
+     * current Consumer instance.
+     *
+     * @return Zend_Oauth_Token_Access
+     */
     public function getLastAccessToken()
     {
         return $this->_accessToken;
     }
 
+    /**
+     * Alias to self::getLastAccessToken()
+     *
+     * @return Zend_Oauth_Token_Access
+     */
     public function getToken() 
     {
         return $this->_accessToken;

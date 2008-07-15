@@ -37,32 +37,114 @@ require_once 'Zend/Oauth/Config/Interface.php';
 class Zend_Oauth_Config implements Zend_Oauth_Config_Interface
 {
 
+    /**
+     * Signature method used when signing all parameters for an HTTP request
+     *
+     * @var string
+     */
     protected $_signatureMethod = 'HMAC-SHA1';
 
+    /**
+     * Three request schemes are defined by OAuth, of which passing
+     * all OAuth parameters by Header is preferred. The other two are
+     * POST Body and Query String.
+     *
+     * @var string
+     */
     protected $_requestScheme = Zend_Oauth::REQUEST_SCHEME_HEADER;
 
-    protected $_version = '1.0';
-
-    protected $_callbackUrl = null;
-
-    protected $_requestTokenUrl = null;
-
-    protected $_accessTokenUrl = null;
-
-    protected $_userAuthorisationUrl = null;
-
-    protected $_consumerKey = null;
-
-    protected $_consumerSecret = null;
-
-    protected $_rsaPrivateKey = null;
-
-    protected $_rsaPublicKey = null;
-
+    /**
+     * Preferred request Method - one of GET or POST - which Zend_Oauth
+     * will enforce as standard throughout the library. Generally a default
+     * of POST works fine unless a Provider specifically requires otherwise.
+     *
+     * @var string
+     */
     protected $_requestMethod = Zend_Oauth::POST;
 
+    /**
+     * OAuth Version; at present there is only 1.0.
+     *
+     * @var string
+     */
+    protected $_version = '1.0';
+
+    /**
+     * This optional value is used to define where the user is redirected to
+     * after authorising a Request Token from an OAuth Providers website.
+     * It's optional since a Provider may ask for this to be defined in advance
+     * when registering a new application for a Consumer Key.
+     *
+     * @var string
+     */
+    protected $_callbackUrl = null;
+
+    /**
+     * The URL to which requests for a Request Token should be directed.
+     *
+     * @var string
+     */
+    protected $_requestTokenUrl = null;
+
+    /**
+     * The URL to which requests for an Access Token should be directed.
+     *
+     * @var string
+     */
+    protected $_accessTokenUrl = null;
+
+    /**
+     * The URL to which users should be redirected to authorise a Request Token.
+     *
+     * @var string
+     */
+    protected $_userAuthorisationUrl = null;
+
+    /**
+     * An OAuth application's Consumer Key.
+     *
+     * @var string
+     */
+    protected $_consumerKey = null;
+
+    /**
+     * Every Consumer Key has a Consumer Secret unless you're in RSA-land.
+     *
+     * @var string
+     */
+    protected $_consumerSecret = null;
+
+    /**
+     * If relevant, a PEM encoded RSA private key encapsulated as a
+     * Zend_Crypt_Rsa Key
+     *
+     * @var Zend_Crypt_Rsa_Key_Private
+     */
+    protected $_rsaPrivateKey = null;
+
+    /**
+     * If relevant, a PEM encoded RSA public key encapsulated as a
+     * Zend_Crypt_Rsa Key
+     *
+     * @var Zend_Crypt_Rsa_Key_Public
+     */
+    protected $_rsaPublicKey = null;
+
+    /**
+     * Generally this will nearly always be an Access Token represented as a
+     * Zend_Oauth_Token_Access object.
+     *
+     * @var Zend_Oauth_Token
+     */
     protected $_token = null;
 
+    /**
+     * Constructor; create a new object with an optional array|Zend_Config
+     * instance containing initialising options.
+     *
+     * @param array|Zend_Config $options
+     * @return void
+     */
     public function __construct($options = null)
     {
         if (!is_null($options)) {
@@ -73,6 +155,13 @@ class Zend_Oauth_Config implements Zend_Oauth_Config_Interface
         }
     }
 
+    /**
+     * Parse option array or Zend_Config instance and setup options using their
+     * relevant mutators.
+     *
+     * @param array|Zend_Config $options
+     * @return void
+     */
     public function setOptions(array $options)
     {
         foreach ($options as $key=>$value) {
@@ -120,21 +209,43 @@ class Zend_Oauth_Config implements Zend_Oauth_Config_Interface
         }
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setConsumerKey($key)
     {
         $this->_consumerKey = $key;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return string
+     */
     public function getConsumerKey()
     {
         return $this->_consumerKey;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setConsumerSecret($secret)
     {
         $this->_consumerSecret = $secret;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return string
+     */
     public function getConsumerSecret()
     {
         if (!is_null($this->_rsaPrivateKey)) {
@@ -143,16 +254,33 @@ class Zend_Oauth_Config implements Zend_Oauth_Config_Interface
         return $this->_consumerSecret;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setSignatureMethod($method)
     {
         $this->_signatureMethod = strtoupper($method);
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return string
+     */
     public function getSignatureMethod()
     {
         return $this->_signatureMethod;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setRequestScheme($scheme)
     {
         $scheme = strtolower($scheme);
@@ -176,21 +304,43 @@ class Zend_Oauth_Config implements Zend_Oauth_Config_Interface
         $this->_requestScheme = $scheme;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return string
+     */
     public function getRequestScheme()
     {
         return $this->_requestScheme;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setVersion($version)
     {
         $this->_version = $version;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return string
+     */
     public function getVersion()
     {
         return $this->_version;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setCallbackUrl($url)
     {
         if (!Zend_Uri::check($url)) {
@@ -202,21 +352,43 @@ class Zend_Oauth_Config implements Zend_Oauth_Config_Interface
         $this->_callbackUrl = $url;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return string
+     */
     public function getCallbackUrl()
     {
         return $this->_callbackUrl;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setLocalUrl($url)
     {
         $this->setCallbackUrl($url);
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return string
+     */
     public function getLocalUrl()
     {
         return $this->getCallbackUrl();
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setRequestTokenUrl($url)
     {
         if (!Zend_Uri::check($url)) {
@@ -228,11 +400,22 @@ class Zend_Oauth_Config implements Zend_Oauth_Config_Interface
         $this->_requestTokenUrl = $url;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return string
+     */
     public function getRequestTokenUrl()
     {
         return $this->_requestTokenUrl;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setAccessTokenUrl($url)
     {
         if (!Zend_Uri::check($url)) {
@@ -244,11 +427,22 @@ class Zend_Oauth_Config implements Zend_Oauth_Config_Interface
         $this->_accessTokenUrl = $url;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return string
+     */
     public function getAccessTokenUrl()
     {
         return $this->_accessTokenUrl;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setUserAuthorisationUrl($url)
     {
         if (!Zend_Uri::check($url)) {
@@ -260,11 +454,22 @@ class Zend_Oauth_Config implements Zend_Oauth_Config_Interface
         $this->_userAuthorisationUrl = $url;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return string
+     */
     public function getUserAuthorisationUrl()
     {
         return $this->_userAuthorisationUrl;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setRequestMethod($method) 
     {
         if (!in_array($method, array(Zend_Oauth::GET, Zend_Oauth::POST))) {
@@ -274,36 +479,74 @@ class Zend_Oauth_Config implements Zend_Oauth_Config_Interface
         $this->_requestMethod = $method;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return string
+     */
     public function getRequestMethod() 
     {
         return $this->_requestMethod;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param Zend_Crypt_Rsa_Key_Public
+     * @return void
+     */
     public function setRsaPublicKey(Zend_Crypt_Rsa_Key_Public $key)
     {
         $this->_rsaPublicKey = $key;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return Zend_Crypt_Rsa_Key_Public
+     */
     public function getRsaPublicKey()
     {
         return $this->_rsaPublicKey;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param Zend_Crypt_Rsa_Key_Private
+     * @return void
+     */
     public function setRsaPrivateKey(Zend_Crypt_Rsa_Key_Private $key)
     {
         $this->_rsaPrivateKey = $key;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return Zend_Crypt_Rsa_Key_Private
+     */
     public function getRsaPrivateKey()
     {
         return $this->_rsaPrivateKey;
     }
 
+    /**
+     * Generic mutator for an option value recognised in this class.
+     *
+     * @param string
+     * @return void
+     */
     public function setToken(Zend_Oauth_Token $token) 
     {
         $this->_token = $token;
     }
 
+    /**
+     * Generic accessor for an option value recognised in this class.
+     *
+     * @return Zend_Oauth_Token
+     */
     public function getToken() 
     {
         return $this->_token;

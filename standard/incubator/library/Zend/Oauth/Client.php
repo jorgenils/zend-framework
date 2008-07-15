@@ -76,6 +76,7 @@ class Zend_Oauth_Client extends Zend_Http_Client
     /**
      * Same as Zend_Http_Client::setMethod() except it also creates an
      * Oauth specific reference to the method type.
+     * Might be defunct and removed in a later iteration.
      *
      * @param string $method
      * @return Zend_Http_Client
@@ -109,6 +110,9 @@ class Zend_Oauth_Client extends Zend_Http_Client
 
     /**
      * Performs OAuth preparation on the request before sending.
+     * This primarily means taking a request, correctly encoding and signing
+     * all parameters, and applying the correct OAuth scheme to the method
+     * being used.
      *
      * @return void
      */

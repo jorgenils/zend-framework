@@ -34,16 +34,52 @@ require_once 'Zend/Uri/Http.php';
 class Zend_Oauth_Http
 {
 
+    /**
+     * Array of all custom service parameters to be sent in the HTTP request
+     * in addition to the usual OAuth parameters.
+     *
+     * @var array
+     */
     protected $_parameters = array();
 
+    /**
+     * Reference to the Zend_Oauth_Consumer instance in use.
+     *
+     * @var string
+     */
     protected $_consumer = null;
 
+    /**
+     * OAuth specifies three request methods, this holds the current preferred
+     * one which by default uses the Authorization Header approach for passing
+     * OAuth parameters, and a POST body for non-OAuth custom parameters.
+     *
+     * @var string
+     */
     protected $_preferredRequestScheme = null;
 
+    /**
+     * Request Method for the HTTP Request.
+     *
+     * @var string
+     */
     protected $_preferredRequestMethod = Zend_Oauth::POST;
 
+    /**
+     * Instance of the general Zend_Oauth_Http_Utility class.
+     *
+     * @var Zend_Oauth_Http_Utility
+     */
     protected $_httpUtility = null;
 
+    /**
+     * Constructor
+     *
+     * @param Zend_Oauth_Consumer $consumer
+     * @param array $parameters
+     * @param Zend_Oauth_Http_Utility $utility
+     * @return void
+     */
     public function __construct(Zend_Oauth_Consumer $consumer, array $parameters = null,
         Zend_Oauth_Http_Utility $utility = null)
     {
@@ -59,6 +95,12 @@ class Zend_Oauth_Http
         }
     }
 
+    /**
+     * Set a preferred HTTP request method.
+     *
+     * @param string $method
+     * @return void
+     */
     public function setMethod($method)
     {
         if (!in_array($method, array(Zend_Oauth::POST, Zend_Oauth::GET))) {
@@ -68,26 +110,58 @@ class Zend_Oauth_Http
         $this->_preferredRequestMethod = $method;
     }
 
+    /**
+     * Preferred HTTP request method accessor.
+     *
+     * @return string
+     */
     public function getMethod()
     {
         return $this->_preferredRequestMethod;
     }
 
+    /**
+     * Mutator to set an array of custom parameters for the HTTP request.
+     *
+     * @param array $customServiceParameters
+     * @return void
+     */
     public function setParameters(array $customServiceParameters)
     {
         $this->_parameters = $customServiceParameters;
     }
 
+    /**
+     * Accessor for an array of custom parameters.
+     *
+     * @return array
+     */
     public function getParameters()
     {
         return $this->_parameters;
     }
 
+    /**
+     * Return the Consumer instance in use.
+     *
+     * @return Zend_Oauth_Consumer
+     */
     public function getConsumer()
     {
         return $this->_consumer;
     }
 
+    /**
+     * Commence a request cycle where the current HTTP method and OAuth
+     * request scheme set an upper preferred HTTP request style and where
+     * failures generate a new HTTP request style further down the OAuth
+     * preference list for OAuth Request Schemes.
+     * On success, return the Request object that results for processing.
+     *
+     * @param array $params
+     * @return Zend_Http_Response
+     * @todo Remove cycling; Replace with upfront do-or-die configuration
+     */
     public function startRequestCycle(array $params)
     {
         $response = null;
@@ -105,7 +179,7 @@ class Zend_Oauth_Http
             || $status == 500 // Internal Server Error
             || $status == 400 // Bad Request
             || $status == 401 // Unauthorized
-            || empty($body)   // Missing request token
+            || empty($body)   // Missing token
             ) {
             $this->_assessRequestAttempt($response);
             $response = $this->startRequestCycle($params);
@@ -113,6 +187,14 @@ class Zend_Oauth_Http
         return $response;
     }
 
+    /**
+     * Return an instance of Zend_Http_Client configured to use the Query
+     * String scheme for an OAuth driven HTTP request.
+     *
+     * @param array $params
+     * @param string $url
+     * @return Zend_Http_Client
+     */
     public function getRequestSchemeQueryStringClient(array $params, $url)
     {
         $client = Zend_Oauth::getHttpClient();
