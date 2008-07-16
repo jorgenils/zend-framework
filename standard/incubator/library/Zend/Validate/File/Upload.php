@@ -86,10 +86,31 @@ class Zend_Validate_File_Upload extends Zend_Validate_Abstract
     /**
      * Returns the array of set files
      *
+     * @param  string $files (Optional) The file to return in detail
      * @return array
      */
-    public function getFiles()
+    public function getFiles($file = null)
     {
+        if ($file !== null) {
+            $return = array();
+            foreach ($this->_files as $name => $content) {
+                if ($name === $file) {
+                    $return[$file] = $this->_files[$name];
+                }
+
+                if ($content['name'] === $file) {
+                    $return[$name] = $this->_files[$name];
+                }
+            }
+
+            if (count($return) === 0) {
+                require_once 'Zend/Validate/Exception.php';
+                throw new Zend_Validate_Exception("The file '$file' was not found");
+            }
+
+            return $return;
+        }
+
         return $this->_files;
     }
 

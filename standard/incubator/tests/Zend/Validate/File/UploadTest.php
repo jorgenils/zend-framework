@@ -71,21 +71,45 @@ class Zend_Validate_File_UploadTest extends PHPUnit_Framework_TestCase
      */
     public function testGetFiles()
     {
-        $validator = new Zend_Validate_File_Upload(1, 100);
-        $this->assertEquals('1B', $validator->getFiles());
+        $_FILES = array(
+            'test'  => array(
+                'name'     => 'test1',
+                'type'     => 'text',
+                'size'     => 200,
+                'tmp_name' => 'tmp_test1',
+                'error'    => 0),
+            'test2' => array(
+                'name'     => 'test2',
+                'type'     => 'text2',
+                'size'     => 202,
+                'tmp_name' => 'tmp_test2',
+                'error'    => 1));
+
+        $files = array(
+            'test'  => array(
+                'name'     => 'test1',
+                'type'     => 'text',
+                'size'     => 200,
+                'tmp_name' => 'tmp_test1',
+                'error'    => 0));
+
+        $files1 = array(
+            'test2' => array(
+                'name'     => 'test2',
+                'type'     => 'text2',
+                'size'     => 202,
+                'tmp_name' => 'tmp_test2',
+                'error'    => 1));
+
+        $validator = new Zend_Validate_File_Upload();
+        $this->assertEquals($files, $validator->getFiles('test'));
+print_r($validator->getFiles('test1'));
+        $this->assertEquals($files, $validator->getFiles('test1'));
+        $this->assertEquals($files, $validator->getFiles('tmp_test1'));
+        $this->assertEquals($files1, $validator->getFiles('tmp_test2'));
 
         try {
-            $validator = new Zend_Validate_File_Upload(100, 1);
-            $this->fail("Missing exception");
-        } catch (Zend_Validate_Exception $e) {
-            $this->assertContains("greater than or equal", $e->getMessage());
-        }
-
-        $validator = new Zend_Validate_File_Upload(array(1, 100));
-        $this->assertEquals('1B', $validator->getFiles());
-
-        try {
-            $validator = new Zend_Validate_File_Upload(array(100, 1));
+            $this->assertEquals(array(), $validator->getFiles('test5'));
             $this->fail("Missing exception");
         } catch (Zend_Validate_Exception $e) {
             $this->assertContains("greater than or equal", $e->getMessage());
@@ -99,15 +123,35 @@ class Zend_Validate_File_UploadTest extends PHPUnit_Framework_TestCase
      */
     public function testSetFiles()
     {
-        $validator = new Zend_Validate_File_Upload(1000, 10000);
-        $validator->setFiles(100);
-        $this->assertEquals('100B', $validator->getFiles());
+        $files = array(
+            'test'  => array(
+                'name'     => 'test1',
+                'type'     => 'text',
+                'size'     => 200,
+                'tmp_name' => 'tmp_test1',
+                'error'    => 0),
+            'test2' => array(
+                'name'     => 'test2',
+                'type'     => 'text2',
+                'size'     => 202,
+                'tmp_name' => 'tmp_test2',
+                'error'    => 1));
 
-        try {
-            $validator->setFiles(20000);
-            $this->fail("Missing exception");
-        } catch (Zend_Validate_Exception $e) {
-            $this->assertContains("less than or equal", $e->getMessage());
-        }
+        $_FILES = array(
+            'test'  => array(
+                'name'     => 'test3',
+                'type'     => 'text3',
+                'size'     => 203,
+                'tmp_name' => 'tmp_test3',
+                'error'    => 2));
+        
+
+        $validator = new Zend_Validate_File_Upload();
+        $validator->setFiles(array());
+        $this->assertEquals($_FILES, $validator->getFiles());
+        $validator->setFiles();
+        $this->assertEquals($_FILES, $validator->getFiles());
+        $validator->setFiles($files);
+        $this->assertEquals($files, $validator->getFiles());
     }
 }
