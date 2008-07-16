@@ -31,8 +31,6 @@ if (!defined('PHPUnit_MAIN_METHOD')) {
 require_once 'Zend/Controller/Action/Helper/MultiPageFormTest.php';
 require_once 'Zend/Controller/Dispatcher/StandardTest.php';
 require_once 'Zend/Controller/FrontTest.php';
-require_once 'Zend/Controller/Request/HttpTestCaseTest.php';
-require_once 'Zend/Controller/Response/HttpTestCaseTest.php';
 
 /**
  * @category   Zend
@@ -55,8 +53,6 @@ class Zend_Controller_AllTests
         $suite->addTestSuite('Zend_Controller_Action_Helper_MultiPageFormTest');
         $suite->addTestSuite('Zend_Controller_Dispatcher_StandardTest');
         $suite->addTestSuite('Zend_Controller_FrontTest');
-        $suite->addTestSuite('Zend_Controller_Request_HttpTestCaseTest');
-        $suite->addTestSuite('Zend_Controller_Response_HttpTestCaseTest');
         
         return $suite;
     }
