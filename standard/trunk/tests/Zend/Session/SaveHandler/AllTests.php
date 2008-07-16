@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Zend Framework
  *
@@ -25,12 +24,12 @@ if (!defined('PHPUnit_MAIN_METHOD')) {
     define('PHPUnit_MAIN_METHOD', 'Zend_Session_SaveHandler_AllTests::main');
 }
 
-PHPUnit_Util_Filter::addFileToFilter(__FILE__);
-
 /**
  * Test helper
  */
 require_once dirname(__FILE__) . '/../../../TestHelper.php';
+
+PHPUnit_Util_Filter::addFileToFilter(__FILE__);
 
 /**
  * @category   Zend
