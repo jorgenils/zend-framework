@@ -30,11 +30,6 @@
         <xi:include href="module_specs/Zend_Service_Gravatar.xml" />
     </chapter>
 
-    <chapter id="zend.text">
-        <title>Zend_Text</title>
-        <xi:include href="module_specs/Zend_Text_Figlet.xml" />
-    </chapter>
-    
     <chapter id="zend.view">
         <title>Zend_Text</title>
         <xi:include href="module_specs/Zend_View_Helpers.xml" />

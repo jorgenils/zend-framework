@@ -36,7 +36,6 @@ require_once 'Zend/Db/AllTests.php';
 require_once 'Zend/PaginatorTest.php';
 require_once 'Zend/Oauth/AllTests.php';
 require_once 'Zend/Service/AllTests.php';
-require_once 'Zend/Text/AllTests.php';
 require_once 'Zend/TimeSyncTest.php';
 
 /**
@@ -88,11 +87,6 @@ class Zend_AllTests
          * Perform the tests for Zend_Service component now.
          */
         $suite->addTest(Zend_Service_AllTests::suite());
-
-        /*
-         * Perform the tests for Zend_Text component now.
-         */
-        $suite->addTest(Zend_Text_AllTests::suite());
 
         return $suite;
     }

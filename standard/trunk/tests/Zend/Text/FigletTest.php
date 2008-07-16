@@ -20,6 +20,11 @@
  * @version    $Id: XmlTest.php 9670 2008-06-11 08:51:21Z dasprid $
  */
 
+// Call Zend_Text_FigletTest::main() if this source file is executed directly.
+if (!defined("PHPUnit_MAIN_METHOD")) {
+    define("PHPUnit_MAIN_METHOD", "Zend_Text_FigletTest::main");
+}
+
 /**
  * Test helper
  */
@@ -44,6 +49,17 @@ require_once 'Zend/Config.php';
  */
 class Zend_Text_FigletTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * Runs the test methods of this class.
+     *
+     * @return void
+     */
+    public static function main()
+    {
+        $suite  = new PHPUnit_Framework_TestSuite("Zend_Text_FigletTest");
+        $result = PHPUnit_TextUI_TestRunner::run($suite);
+    }
+
     public function testStandardAlignLeft()
     {
         $figlet = new Zend_Text_Figlet();
@@ -262,4 +278,9 @@ class Zend_Text_FigletTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($compareString, $output);
     }
+}
+
+// Call Zend_Text_FigletTest::main() if this source file is executed directly.
+if (PHPUnit_MAIN_METHOD == "Zend_Text_FigletTest::main") {
+    Zend_Text_FigletTest::main();
 }
