@@ -30,6 +30,7 @@ class Zend_View_Helper_AllTests
         $suite->addTestSuite('Zend_View_Helper_HtmlObjectTest');
         $suite->addTestSuite('Zend_View_Helper_HtmlPageTest');
         $suite->addTestSuite('Zend_View_Helper_HtmlQuicktimeTest');
+        $suite->addTestSuite('Zend_View_Helper_PaginationControlTest');
         
         return $suite;
     }
